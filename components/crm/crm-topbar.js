@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
 
 import { CrmTimerChip } from "@/components/crm/crm-timer-chip";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -15,9 +14,6 @@ import { IconMenu } from "./icons";
  * @param {{ title: string; onOpenNav: () => void; className?: string }} props
  */
 export function CrmTopbar({ title, onOpenNav, className }) {
-  const { data: session, status } = useSession();
-  const email = typeof session?.user?.email === "string" ? session.user.email : null;
-
   return (
     <header
       className={cn(
@@ -32,7 +28,6 @@ export function CrmTopbar({ title, onOpenNav, className }) {
             className={cn(
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border md:hidden",
               "text-fg hover:bg-surface-muted",
-              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
             )}
             aria-label="Åbn menu"
             onClick={onOpenNav}
@@ -47,27 +42,12 @@ export function CrmTopbar({ title, onOpenNav, className }) {
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
           <CrmTimerChip />
           <ThemeToggle />
-          {status === "loading" ? (
-            <span className="h-8 w-24 animate-pulse rounded-md bg-skeleton" aria-hidden />
-          ) : null}
-          {email ? (
-            <span className="hidden max-w-[14rem] truncate font-mono text-[11px] text-fg-quiet md:inline">
-              {email}
-            </span>
-          ) : null}
           <Link
             href={routes.settings}
-            className="hidden rounded-md border border-border px-2 py-1.5 font-sans text-xs text-fg-muted hover:bg-surface-muted hover:text-fg sm:inline-block"
+            className="hidden rounded-full border border-border px-3 py-1.5 font-sans text-xs text-fg-muted hover:bg-surface-muted hover:text-fg sm:inline-block"
           >
             Indstillinger
           </Link>
-          <button
-            type="button"
-            className="rounded-md border border-transparent px-2 py-1.5 font-sans text-xs text-fg-muted hover:bg-surface-muted hover:text-fg"
-            onClick={() => void signOut({ callbackUrl: routes.home })}
-          >
-            Log ud
-          </button>
         </div>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { themeInitScriptInnerHtml } from "@/components/theme/theme-init-script";
@@ -6,10 +6,11 @@ import { site } from "@/config/site";
 
 import "./globals.css";
 
-const inter = Inter({
+const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -37,13 +38,13 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${displaySerif.variable} ${jetbrainsMono.variable}`}
-      data-theme="dark"
+      className={`${jakartaSans.variable} ${displaySerif.variable} ${jetbrainsMono.variable}`}
+      data-theme="light"
       data-density="compact"
       suppressHydrationWarning
     >
       <body
-        className={`${inter.className} flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased`}
+        className={`${jakartaSans.className} flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased`}
         suppressHydrationWarning
       >
         <script

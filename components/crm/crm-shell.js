@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 
 import { usePathname } from "next/navigation";
 
+import { routes } from "@/config/routes";
 import { getWorkspaceTitle } from "@/lib/crm/workspace-title";
 
 import { CrmSidebar } from "./crm-sidebar";
@@ -68,6 +69,18 @@ export function CrmShell({ children }) {
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setMobileOpen(false);
+  }
+
+  // Immersive routes render full-bleed: no sidebar, no top bar.
+  // Covers the AI Chat one-pager (/chat) and its demo (/chat/demo).
+  const immersive = pathname === routes.chat || pathname.startsWith(`${routes.chat}/`);
+  if (immersive) {
+    return (
+      <TimerModalProvider>
+        <div className="flex h-[100dvh] shrink-0 overflow-x-hidden overflow-y-auto bg-canvas">{children}</div>
+        <CrmTimerModal />
+      </TimerModalProvider>
+    );
   }
 
   return (

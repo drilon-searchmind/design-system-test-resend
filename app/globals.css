@@ -10,6 +10,17 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-display-serif), ui-serif, Georgia, "Times New Roman", serif;
 
+  /* Sidebar-specific tokens — used directly in crm-sidebar.js */
+  --color-sidebar-bg:          var(--ds-sidebar-bg);
+  --color-sidebar-border:      var(--ds-sidebar-border);
+  --color-sidebar-fg:          var(--ds-sidebar-fg);
+  --color-sidebar-fg-muted:    var(--ds-sidebar-fg-muted);
+  --color-sidebar-fg-quiet:    var(--ds-sidebar-fg-quiet);
+  --color-sidebar-active-bg:   var(--ds-sidebar-active-bg);
+  --color-sidebar-active-fg:   var(--ds-sidebar-active-fg);
+  --color-sidebar-hover-bg:    var(--ds-sidebar-hover-bg);
+  --color-sidebar-section:     var(--ds-sidebar-section);
+
   --color-canvas: var(--ds-canvas);
   --color-fg: var(--ds-fg);
   --color-fg-muted: var(--ds-fg-muted);
@@ -172,90 +183,115 @@
   --agency-dep-content: oklch(62% 0.16 85);
 
   --agency-shadow-raised: 0 1px 2px oklch(0% 0 0 / 0.35);
+
+  /* Sidebar (dark mode — sidebar is even darker) */
+  --ds-sidebar-bg:        #0a0f0f;
+  --ds-sidebar-border:    rgb(214 235 253 / 0.08);
+  --ds-sidebar-fg:        #d0d4d4;
+  --ds-sidebar-fg-muted:  #666e6e;
+  --ds-sidebar-fg-quiet:  #3a4040;
+  --ds-sidebar-active-bg: rgb(0 129 253 / 0.15);
+  --ds-sidebar-active-fg: #3b9eff;
+  --ds-sidebar-hover-bg:  rgb(255 255 255 / 0.05);
+  --ds-sidebar-section:   #3a4040;
 }
 
 [data-theme="light"] {
   color-scheme: light;
 
-  --ds-canvas: #ffffff;
-  --ds-fg: #0f0f0f;
-  --ds-fg-muted: #5e5b5a;
-  --ds-fg-soft: #b9b6b3;
-  --ds-fg-quiet: #bab6b6;
+  /* ── Main canvas & text ── */
+  --ds-canvas:   #fefbf2;
+  --ds-fg:       #1e2b2b;
+  --ds-fg-muted: #a19986;
+  --ds-fg-soft:  #8a7e6e;
+  --ds-fg-quiet: #b8ac9c;
 
-  --ds-border: rgb(41 20 2 / 0.19);
-  --ds-border-muted: rgb(41 20 2 / 0.09);
-  --ds-border-soft: rgb(41 20 2 / 0.12);
-  --ds-border-pill: rgb(41 20 2 / 0.13);
-  --ds-border-drawer-soft: rgb(41 20 2 / 0.15);
-  --ds-border-hover: rgb(41 20 2 / 0.08);
+  /* ── Borders ── */
+  --ds-border:             rgb(26 37 37 / 0.14);
+  --ds-border-muted:       rgb(26 37 37 / 0.07);
+  --ds-border-soft:        rgb(26 37 37 / 0.09);
+  --ds-border-pill:        rgb(26 37 37 / 0.12);
+  --ds-border-drawer-soft: rgb(26 37 37 / 0.11);
+  --ds-border-hover:       rgb(26 37 37 / 0.05);
 
-  --ds-surface-muted: rgb(0 0 0 / 0.04);
-  --ds-surface-muted-strong: rgb(0 0 0 / 0.07);
-  --ds-surface-active: rgb(0 0 0 / 0.06);
-  --ds-surface-glass: rgb(0 0 0 / 0.03);
-  --ds-surface-card: rgb(255 255 255 / 0.65);
-  --ds-surface-header: rgb(255 255 255 / 0.88);
+  /* ── Surfaces (main content area) ── */
+  --ds-surface-muted:        rgb(26 37 37 / 0.04);
+  --ds-surface-muted-strong: rgb(26 37 37 / 0.07);
+  --ds-surface-active:       rgb(26 37 37 / 0.06);
+  --ds-surface-glass:        rgb(26 37 37 / 0.02);
+  --ds-surface-card:         #ffffff;
+  --ds-surface-header:       rgb(254 251 242 / 0.94);
 
-  --ds-edge-inset: inset 0 1px 0 0 rgb(79 56 38 / 0.06), inset 0 -1px 0 0 rgb(79 56 38 / 0.06);
-  --ds-shadow-inset-header: rgb(79 56 38 / 0.1) 0 0 0 1px inset;
-  --ds-shadow-inset-card: rgb(79 56 38 / 0.1) 0 0 0 1px inset;
-  --ds-shadow-inset-card-strong: rgb(79 56 38 / 0.14) 0 0 0 1px inset;
-  --ds-shadow-inset-cta: rgb(79 56 38 / 0.1) 0 0 0 1px inset;
+  /* ── Shadows ── */
+  --ds-edge-inset:               inset 0 1px 0 0 rgb(26 37 37 / 0.05), inset 0 -1px 0 0 rgb(26 37 37 / 0.05);
+  --ds-shadow-inset-header:      rgb(26 37 37 / 0.08) 0 0 0 1px inset;
+  --ds-shadow-inset-card:        rgb(26 37 37 / 0.08) 0 0 0 1px inset;
+  --ds-shadow-inset-card-strong: rgb(26 37 37 / 0.12) 0 0 0 1px inset;
+  --ds-shadow-inset-cta:         rgb(26 37 37 / 0.08) 0 0 0 1px inset;
 
   --ds-cta-bg: radial-gradient(
       120% 140% at 80% -20%,
-      rgb(196 97 0 / 0.07),
+      rgb(198 237 98 / 0.22),
       transparent 52%
     ),
-    linear-gradient(#ffffff, #ffffff);
+    linear-gradient(#fefbf2, #fefbf2);
 
-  --ds-accent: #0081fd;
-  --ds-accent-warning: #005fa8;
+  /* ── Accent (lime) ── */
+  --ds-accent:         #4a7a10;
+  --ds-accent-warning: #ee6251;
 
-  --ds-solid-cta-bg: #000000;
-  --ds-solid-cta-fg: #ffffff;
-  --ds-solid-cta-hover: #2a2a2a;
+  --ds-solid-cta-bg:    #c6ed62;
+  --ds-solid-cta-fg:    #1a2525;
+  --ds-solid-cta-hover: #b5dc52;
 
-  --ds-accent-blue: #c46100;
-  --ds-accent-green: #ee0066;
-  --ds-accent-orange: #005fa8;
+  --ds-accent-blue:   #213b34;
+  --ds-accent-green:  #6a8f4d;
+  --ds-accent-orange: #ee6251;
 
-  --ds-skeleton: rgb(41 20 2 / 0.08);
+  --ds-skeleton:        rgb(26 37 37 / 0.07);
+  --ds-accent-gold:     #c5a75c;
+  --ds-danger:          #cc1030;
+  --ds-google-banner-bg: rgb(26 37 37 / 0.03);
 
-  --ds-accent-gold: #b88700;
-  --ds-danger: #cc1030;
+  /* ── Sidebar tokens (dark green rail) ── */
+  --ds-sidebar-bg:        #1a2525;
+  --ds-sidebar-border:    rgb(254 251 242 / 0.08);
+  --ds-sidebar-fg:        #eae3d1;
+  --ds-sidebar-fg-muted:  #8a9a8a;
+  --ds-sidebar-fg-quiet:  #4a5a4a;
+  --ds-sidebar-active-bg: rgb(198 237 98 / 0.14);
+  --ds-sidebar-active-fg: #c6ed62;
+  --ds-sidebar-hover-bg:  rgb(254 251 242 / 0.06);
+  --ds-sidebar-section:   #5a6a5a;
 
-  --ds-google-banner-bg: rgb(0 0 0 / 0.03);
-
-  /** DESIGN-SEARCHMINDOS.md — light near-white canvas */
-  --agency-brand: oklch(54% 0.2 272);
-  --agency-brand-hover: oklch(48% 0.22 272);
-  --agency-brand-soft: oklch(95% 0.03 272);
+  /* ── Agency OS tokens ── */
+  --agency-brand:        oklch(54% 0.2 272);
+  --agency-brand-hover:  oklch(48% 0.22 272);
+  --agency-brand-soft:   oklch(95% 0.03 272);
   --agency-brand-border: oklch(88% 0.06 272);
-  --agency-brand-fg: oklch(22% 0.06 272);
+  --agency-brand-fg:     oklch(22% 0.06 272);
 
-  --agency-ok: oklch(58% 0.14 155);
-  --agency-ok-soft: oklch(94% 0.03 155);
-  --agency-ok-border: oklch(82% 0.06 155);
+  --agency-ok:        oklch(55% 0.14 155);
+  --agency-ok-soft:   oklch(94% 0.03 155);
+  --agency-ok-border: oklch(80% 0.06 155);
 
-  --agency-warn: oklch(70% 0.15 75);
-  --agency-warn-soft: oklch(96% 0.04 75);
-  --agency-warn-border: oklch(88% 0.07 75);
+  --agency-warn:        oklch(62% 0.15 75);
+  --agency-warn-soft:   oklch(96% 0.04 75);
+  --agency-warn-border: oklch(86% 0.07 75);
 
-  --agency-bad: oklch(58% 0.19 25);
-  --agency-bad-soft: oklch(94% 0.04 25);
-  --agency-bad-border: oklch(82% 0.08 25);
+  --agency-bad:        oklch(52% 0.2 25);
+  --agency-bad-soft:   oklch(94% 0.04 25);
+  --agency-bad-border: oklch(80% 0.09 25);
 
-  --agency-dep-seo: oklch(60% 0.16 255);
-  --agency-dep-ppc: oklch(60% 0.16 320);
-  --agency-dep-social: oklch(60% 0.16 30);
-  --agency-dep-email: oklch(60% 0.16 180);
-  --agency-dep-geo: oklch(60% 0.16 135);
-  --agency-dep-creative: oklch(60% 0.16 355);
-  --agency-dep-content: oklch(60% 0.16 85);
+  --agency-dep-seo:      oklch(48% 0.16 255);
+  --agency-dep-ppc:      oklch(48% 0.16 320);
+  --agency-dep-social:   oklch(48% 0.16 30);
+  --agency-dep-email:    oklch(48% 0.16 180);
+  --agency-dep-geo:      oklch(48% 0.16 135);
+  --agency-dep-creative: oklch(48% 0.16 355);
+  --agency-dep-content:  oklch(48% 0.16 85);
 
-  --agency-shadow-raised: 0 1px 2px oklch(0% 0 0 / 0.06);
+  --agency-shadow-raised: 0 1px 3px rgb(26 37 37 / 0.1);
 }
 
 /** DESIGN §10.6 — spacious density increases dashboard `<main>` padding / stack */
@@ -392,6 +428,12 @@ html[data-density="spacious"] {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Searchmind card elevation — soft shadow på lys baggrund */
+[data-theme="light"] .rounded-2xl,
+[data-theme="light"] .rounded-xl {
+  box-shadow: 0 1px 3px rgb(26 37 37 / 0.06), 0 1px 2px rgb(26 37 37 / 0.04);
 }
 
 @layer utilities {
