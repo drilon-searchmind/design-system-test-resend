@@ -77,7 +77,7 @@
 
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /** DESIGN §10.6 — dashboard `<main>` rhythm (overridden by `[data-density="spacious"]`) */
   --ds-studio-pad-main: 1.5rem;
@@ -255,7 +255,7 @@
   --agency-dep-creative: oklch(60% 0.16 355);
   --agency-dep-content: oklch(60% 0.16 85);
 
-  --agency-shadow-raised: 0 1px 2px oklch(0% 0 0 / 0.06);
+  --agency-shadow-raised: none;
 }
 
 /** DESIGN §10.6 — spacious density increases dashboard `<main>` padding / stack */
@@ -271,6 +271,11 @@ html[data-density="spacious"] {
  */
 
 @layer base {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   :root {
     /** Display Hero (DESIGN 96px) / Hero Mobile floor (DESIGN ~76.8px) — marketing hero only */
     --type-display-hero: clamp(4.8rem, 11vw + 2rem, 6rem);
@@ -414,23 +419,23 @@ html[data-density="spacious"] {
   }
 
   .shadow-inset-header {
-    box-shadow: var(--ds-shadow-inset-header);
+    box-shadow: none;
   }
 
   .shadow-inset-card {
-    box-shadow: var(--ds-shadow-inset-card);
+    box-shadow: none;
   }
 
   .shadow-inset-card-strong {
-    box-shadow: var(--ds-shadow-inset-card-strong);
+    box-shadow: none;
   }
 
   .shadow-inset-cta {
-    box-shadow: var(--ds-shadow-inset-cta);
+    box-shadow: none;
   }
 
   .edge-inset-lines {
-    box-shadow: var(--ds-edge-inset);
+    box-shadow: none;
   }
 
   .bg-cta-panel {
@@ -438,11 +443,216 @@ html[data-density="spacious"] {
   }
 
   .shadow-agency-raised {
-    box-shadow: var(--agency-shadow-raised);
+    box-shadow: none;
   }
 
   /** DESIGN.md §3 Nav Link — ABC Favorit +0.35px tracking (apply to `<Link>` in main nav) */
   .nav-tracking {
     letter-spacing: 0.35px;
   }
+
+  /** Tally / Hallmark — Instrument Serif italic emphasis inside Geist headlines */
+  .tally-italic-accent {
+    font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--tally-accent, var(--color-accent));
+  }
+
+  .shadow-tally-card {
+    box-shadow: none;
+  }
+
+  .shadow-tally-nav {
+    box-shadow: none;
+  }
+
+  .shadow-tally-btn {
+    box-shadow: none;
+  }
+}
+
+/**
+ * DESIGN-TALLY-HALLMARK.md — marketing home / light Tally surface.
+ * Scoped via `data-surface="marketing-tally"` on the marketing layout wrapper.
+ */
+[data-surface="marketing-tally"] {
+  color-scheme: light;
+
+  --tally-paper-0: oklch(98.4% 0.005 258);
+  --tally-paper-1: oklch(96.2% 0.01 258);
+  --tally-paper-2: oklch(93% 0.015 258);
+  --tally-paper-3: oklch(89% 0.02 258);
+  --tally-ink-0: oklch(18% 0.03 258);
+  --tally-ink-1: oklch(35% 0.025 258);
+  --tally-ink-2: oklch(52% 0.018 258);
+  --tally-ink-3: oklch(70% 0.012 258);
+  --tally-accent: oklch(54% 0.22 268);
+  --tally-accent-tint: oklch(94% 0.04 268);
+  --tally-companion: oklch(82% 0.18 130);
+  --tally-success: oklch(68% 0.15 145);
+  --tally-focus: oklch(46% 0.22 268);
+
+  --tally-shadow-nav: none;
+  --tally-shadow-card: none;
+  --tally-shadow-btn: none;
+
+  --ds-canvas: var(--tally-paper-0);
+  --ds-fg: var(--tally-ink-0);
+  --ds-fg-muted: var(--tally-ink-1);
+  --ds-fg-soft: var(--tally-ink-2);
+  --ds-fg-quiet: var(--tally-ink-3);
+
+  --ds-border: color-mix(in oklch, var(--tally-ink-0) 14%, transparent);
+  --ds-border-muted: color-mix(in oklch, var(--tally-ink-0) 8%, transparent);
+  --ds-border-soft: color-mix(in oklch, var(--tally-ink-0) 10%, transparent);
+  --ds-border-pill: color-mix(in oklch, var(--tally-ink-0) 14%, transparent);
+  --ds-border-drawer-soft: color-mix(in oklch, var(--tally-ink-0) 12%, transparent);
+  --ds-border-hover: color-mix(in oklch, var(--tally-ink-0) 16%, transparent);
+
+  --ds-surface-muted: var(--tally-paper-2);
+  --ds-surface-muted-strong: var(--tally-paper-3);
+  --ds-surface-active: var(--tally-paper-2);
+  --ds-surface-glass: color-mix(in oklch, var(--tally-paper-0) 78%, transparent);
+  --ds-surface-card: var(--tally-paper-0);
+  --ds-surface-header: color-mix(in oklch, var(--tally-paper-0) 78%, transparent);
+
+  --ds-edge-inset: none;
+  --ds-shadow-inset-header: none;
+  --ds-shadow-inset-card: none;
+  --ds-shadow-inset-card-strong: none;
+  --ds-shadow-inset-cta: none;
+
+  --ds-cta-bg: radial-gradient(
+      1200px 600px at 12% -10%,
+      color-mix(in oklch, var(--tally-accent-tint) 70%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 88% 8%,
+      color-mix(in oklch, var(--tally-companion) 35%, transparent),
+      transparent 55%
+    ),
+    var(--tally-paper-0);
+
+  --ds-accent: var(--tally-accent);
+  --ds-solid-cta-bg: var(--tally-ink-0);
+  --ds-solid-cta-fg: var(--tally-paper-0);
+  --ds-solid-cta-hover: var(--tally-accent);
+
+  --ds-accent-blue: var(--tally-accent);
+  --ds-accent-green: var(--tally-success);
+  --ds-accent-orange: var(--tally-companion);
+
+  --ds-skeleton: color-mix(in oklch, var(--tally-ink-0) 8%, transparent);
+
+  /** Agency OS semantics on light Tally canvas (pulse / CRM) */
+  --agency-brand: oklch(54% 0.2 272);
+  --agency-brand-hover: oklch(48% 0.22 272);
+  --agency-brand-soft: oklch(95% 0.03 272);
+  --agency-brand-border: oklch(88% 0.06 272);
+  --agency-brand-fg: oklch(22% 0.06 272);
+
+  --agency-ok: oklch(58% 0.14 155);
+  --agency-ok-soft: oklch(94% 0.03 155);
+  --agency-ok-border: oklch(82% 0.06 155);
+
+  --agency-warn: oklch(70% 0.15 75);
+  --agency-warn-soft: oklch(96% 0.04 75);
+  --agency-warn-border: oklch(88% 0.07 75);
+
+  --agency-bad: oklch(58% 0.19 25);
+  --agency-bad-soft: oklch(94% 0.04 25);
+  --agency-bad-border: oklch(82% 0.08 25);
+
+  --agency-dep-seo: oklch(60% 0.16 255);
+  --agency-dep-ppc: oklch(60% 0.16 320);
+  --agency-dep-social: oklch(60% 0.16 30);
+  --agency-dep-email: oklch(60% 0.16 180);
+  --agency-dep-geo: oklch(60% 0.16 135);
+  --agency-dep-creative: oklch(60% 0.16 355);
+  --agency-dep-content: oklch(60% 0.16 85);
+
+  --agency-shadow-raised: none;
+
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+
+  background:
+    radial-gradient(
+      1200px 600px at 12% -10%,
+      color-mix(in oklch, var(--tally-accent-tint) 70%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 88% 8%,
+      color-mix(in oklch, var(--tally-companion) 35%, transparent),
+      transparent 55%
+    ),
+    var(--tally-paper-0);
+  background-attachment: fixed;
+}
+
+[data-surface="marketing-tally"] ::selection {
+  background: var(--tally-accent);
+  color: var(--tally-paper-0);
+}
+
+[data-surface="marketing-tally"] h1,
+[data-surface="marketing-tally"] h2,
+[data-surface="marketing-tally"] h3,
+[data-surface="marketing-tally"] h4,
+[data-surface="marketing-tally"] h5,
+[data-surface="marketing-tally"] h6 {
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.03em;
+}
+
+[data-surface="marketing-tally"] h2 {
+  letter-spacing: -0.02em;
+}
+
+[data-surface="marketing-tally"] h3 {
+  letter-spacing: -0.01em;
+}
+
+[data-surface="marketing-tally"] .text-display-hero {
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 10vw, 5rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+
+[data-surface="marketing-tally"] .tally-panel {
+  border-radius: 20px;
+  border: 1px solid color-mix(in oklch, var(--tally-ink-0) 14%, transparent);
+  background: var(--tally-paper-0);
+  box-shadow: none;
+}
+
+[data-surface="marketing-tally"] code,
+[data-surface="marketing-tally"] kbd,
+[data-surface="marketing-tally"] samp {
+  font-family: inherit;
+  font-variant-numeric: inherit;
+}
+
+[data-surface="marketing-tally"] pre {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+[data-surface="marketing-tally"] select,
+[data-surface="marketing-tally"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+[data-surface="marketing-tally"] textarea {
+  border-radius: 12px;
+}
+
+/** Flat UI — no decorative box shadows; preserve focus-visible rings for accessibility */
+[data-surface="marketing-tally"] *:not(:focus-visible),
+[data-surface="marketing-tally"] *:not(:focus-visible)::before,
+[data-surface="marketing-tally"] *:not(:focus-visible)::after {
+  box-shadow: none !important;
 }

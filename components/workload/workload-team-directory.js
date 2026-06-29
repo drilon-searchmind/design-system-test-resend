@@ -46,7 +46,7 @@ export function WorkloadTeamDirectory({ rows, departments }) {
   }, [q, sort, rows, deptList]);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+    <section className="tally-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:px-4">
         <div>
           <h2 className="font-sans text-sm font-semibold text-fg">Team-belægning</h2>
@@ -89,7 +89,7 @@ export function WorkloadTeamDirectory({ rows, departments }) {
           <div
             className={cn(
               "grid gap-2 border-b border-border bg-surface-muted/85 px-3 py-2",
-              "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+              "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
               GRID,
             )}
           >
@@ -140,21 +140,21 @@ export function WorkloadTeamDirectory({ rows, departments }) {
                     <div className="truncate font-sans text-[10px] text-fg-quiet">{r.member.role}</div>
                   </div>
                 </div>
-                <span className="font-mono text-[11px] font-semibold tabular-nums" style={{ color: dep?.color }}>
+                <span className="text-[11px] font-semibold tabular-nums" style={{ color: dep?.color }}>
                   {dep?.short ?? r.member.dept}
                 </span>
-                <span className="font-mono text-[11px] tabular-nums text-fg">{r.member.weeklyHours}</span>
-                <span className="font-mono text-[11px] tabular-nums text-fg">{r.openCount}</span>
-                <span className="text-center font-mono text-[11px] tabular-nums text-fg">{r.highCount}</span>
+                <span className="text-[11px] tabular-nums text-fg">{r.member.weeklyHours}</span>
+                <span className="text-[11px] tabular-nums text-fg">{r.openCount}</span>
+                <span className="text-center text-[11px] tabular-nums text-fg">{r.highCount}</span>
                 <span
                   className={cn(
-                    "text-center font-mono text-[11px] tabular-nums",
+                    "text-center text-[11px] tabular-nums",
                     r.overdueCount > 0 ? "text-agency-bad" : "text-fg-muted",
                   )}
                 >
                   {r.overdueCount}
                 </span>
-                <span className="font-mono text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
+                <span className="text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
                 <PulseUtilBar hours={r.loadIndex} budget={100} className="hidden max-w-[120px] self-center sm:block" />
               </div>
             );
@@ -164,8 +164,7 @@ export function WorkloadTeamDirectory({ rows, departments }) {
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
         <p className="font-sans text-[11px] text-fg-muted">
-          Profiler markeret som <code className="font-mono text-[10px]">isMe</code> ligger i fokus. Klik navn for
-          detaljeside for rapportmåneden.
+          Klik på navn for detaljevisning for rapportmåneden.
         </p>
         <Link href={routes.team} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
           Team-hub →

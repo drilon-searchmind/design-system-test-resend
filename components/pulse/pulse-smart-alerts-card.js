@@ -14,7 +14,7 @@ export function PulseSmartAlertsCard() {
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby="pulse-alerts-heading"
     >
       <div className="border-b border-border px-4 py-3 md:px-5">
@@ -35,7 +35,7 @@ export function PulseSmartAlertsCard() {
           </div>
           <button
             type="button"
-            className="h-[26px] shrink-0 rounded-md border border-border bg-transparent px-3 font-sans text-[11px] font-medium text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
+            className="h-[26px] shrink-0 rounded-full border border-border px-3 text-[11px] font-medium text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
           >
             Konfigurér
           </button>
@@ -64,7 +64,7 @@ export function PulseSmartAlertsCard() {
                 <div className="flex items-center gap-2">
                   {c ? (
                     <span
-                      className="flex size-[18px] shrink-0 items-center justify-center rounded border border-white/15 font-mono text-[9px] font-semibold text-white shadow-sm"
+                      className="flex size-[18px] shrink-0 items-center justify-center rounded-md border border-border text-[9px] font-semibold text-agency-brand-fg"
                       style={{
                         background: `oklch(62% 0.14 ${c.hue})`,
                       }}
@@ -76,7 +76,7 @@ export function PulseSmartAlertsCard() {
                 </div>
                 <p className="mt-0.5 font-sans text-[11.5px] leading-snug text-fg-muted">{a.body}</p>
               </div>
-              <span className="shrink-0 whitespace-nowrap font-mono text-[10.5px] text-fg-quiet">
+              <span className="shrink-0 whitespace-nowrap text-[10.5px] text-fg-quiet">
                 {a.age}
               </span>
             </>

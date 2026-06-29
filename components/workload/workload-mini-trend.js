@@ -30,7 +30,7 @@ export function WorkloadMiniTrend({ series = null }) {
 
   return (
     <section
-      className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5"
+      className="tally-panel p-4 md:p-5"
       aria-labelledby="workload-mini-trend-heading"
     >
       <div id="workload-mini-trend-heading">
@@ -92,7 +92,7 @@ export function WorkloadMiniTrend({ series = null }) {
           fill="currentColor"
           fillOpacity={0.5}
           textAnchor="end"
-          className="font-mono tabular-nums"
+          className="tabular-nums"
         >
           {Math.round(maxVal)}t
         </text>

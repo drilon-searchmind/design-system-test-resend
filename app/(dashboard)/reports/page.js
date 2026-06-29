@@ -6,7 +6,7 @@ export default function ReportsPage() {
   return (
     <WorkspacePlaceholder
       title="Rapporter"
-      description="Eksport og planlagte rapporter — starter med read-only views på Mongo-aggregates."
+      description="Eksport og planlagte rapporter — read-only views på aggregerede data."
     />
   );
 }

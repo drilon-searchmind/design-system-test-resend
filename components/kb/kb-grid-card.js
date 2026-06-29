@@ -18,13 +18,13 @@ export function KbGridCard({ article }) {
     <Link
       href={`${routes.kb}/${article.slug}`}
       className={cn(
-        "flex min-h-[120px] flex-col rounded-xl border border-border bg-surface-card p-3 shadow-inset-card",
+        "tally-panel flex min-h-[120px] flex-col p-3",
         "transition-colors hover:border-agency-brand-border hover:bg-surface-muted/60",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <span
-          className="inline-flex rounded border border-border-soft bg-surface-muted px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-fg-soft"
+          className="inline-flex rounded border border-border-soft bg-surface-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-fg-soft"
           style={
             cat
               ? {
@@ -36,7 +36,7 @@ export function KbGridCard({ article }) {
           {cat?.short ?? "—"}
         </span>
         {!article.published ? (
-          <span className="rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-warn">
+          <span className="rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-warn">
             Kladde
           </span>
         ) : (
@@ -49,7 +49,7 @@ export function KbGridCard({ article }) {
         {article.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
-            className="rounded border border-border-soft px-1.5 py-0 font-mono text-[9px] text-fg-quiet"
+            className="rounded border border-border-soft px-1.5 py-0 text-[9px] text-fg-quiet"
           >
             {tag}
           </span>
@@ -59,7 +59,7 @@ export function KbGridCard({ article }) {
         {author ? (
           <CrmAvatar label={author.avatar} hue={author.hue} className="size-[26px] shrink-0 text-[9px]" />
         ) : null}
-        <div className="min-w-0 flex-1 font-mono text-[10px] text-fg-quiet">
+        <div className="min-w-0 flex-1 text-[10px] text-fg-quiet">
           <div className="truncate">{author?.name ?? article.authorId}</div>
           <div className="tabular-nums">
             {formatIsoDateDa(article.updatedAt)} · {article.readingMinutes} min
@@ -82,7 +82,7 @@ function AudiencePill({ audience }) {
         : "border-border-soft bg-surface-muted text-fg-soft";
 
   return (
-    <span className={cn("rounded border px-1.5 py-0 font-mono text-[9px] font-semibold uppercase tabular-nums", tone)}>
+    <span className={cn("rounded border px-1.5 py-0 text-[9px] font-semibold uppercase tabular-nums", tone)}>
       {label}
     </span>
   );

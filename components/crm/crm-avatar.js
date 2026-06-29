@@ -8,7 +8,7 @@ export function CrmAvatar({ label, hue = 220, className }) {
   return (
     <span
       className={cn(
-        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border font-mono text-[11px] font-semibold tabular-nums tracking-tight",
+        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border text-[11px] font-semibold tabular-nums tracking-tight",
         className,
       )}
       style={{

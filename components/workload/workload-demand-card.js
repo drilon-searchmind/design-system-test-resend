@@ -12,10 +12,10 @@ export function WorkloadDemandCard({ demand }) {
   const maxOpen = Math.max(1, ...demand.map((r) => r.open));
 
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             Efterspørgsel fra board
           </h2>
           <p className="mt-1 max-w-xl font-sans text-[11px] leading-snug text-fg-muted">
@@ -47,7 +47,7 @@ export function WorkloadDemandCard({ demand }) {
               />
               <span className="truncate font-sans text-[12px] font-semibold text-fg">{r.dept.name}</span>
             </div>
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-fg-muted">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-fg-muted">
               <span>
                 Åbne: <span className="tabular-nums text-fg">{r.open}</span>
               </span>

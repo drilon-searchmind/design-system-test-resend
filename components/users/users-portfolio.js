@@ -72,11 +72,6 @@ export function UsersPortfolio() {
     });
   }, [load]);
 
-  const sourceFootnote =
-    dataSource === "database" ?
-      "MongoDB `User` + roster-link via `TeamMember.userId`. Ingen synkroniserede brugere oprettes i seed — kun SSO/invitationer."
-    : "Demonstrationsdata (`AGENCY_USERS` i `users-data.js`).";
-
   const mineLabelRaw = bundle?.mineLabel;
   const mineLabel =
     typeof mineLabelRaw === "string" && mineLabelRaw.trim() ? mineLabelRaw.trim() : null;
@@ -143,11 +138,6 @@ export function UsersPortfolio() {
           mfaPct={stats.mfaPct}
         />
 
-        <p className="font-sans text-[11px] text-fg-quiet">
-          Bruger med <span className="font-semibold text-agency-brand">lys baggrund</span> matcher din session mod roster (
-          <span className="font-mono">teamMemberId</span>).
-        </p>
-
         <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
           <UsersInvitesQueueCard />
           <UsersRbacCard />
@@ -161,12 +151,6 @@ export function UsersPortfolio() {
           initialStatus={initialStatus}
           initialRole={initialRole}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

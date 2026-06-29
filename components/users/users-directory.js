@@ -68,14 +68,14 @@ export function UsersDirectory({
   return (
     <section
       id="users-directory"
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:px-4">
         <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
           Brugerindeks
         </h2>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {users.length}
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-2 md:ml-auto md:max-w-[320px]">
@@ -133,7 +133,7 @@ export function UsersDirectory({
         <p className="rounded-xl border border-border-soft bg-surface-muted/40 px-4 py-4 text-center font-sans text-[13px] leading-relaxed text-fg-muted">
           {dataSource === "database" ?
             <>
-              Der er endnu ingen rækker i <span className="font-mono text-fg-soft">User</span> — typisk oprettes de automatisk
+              Der er endnu ingen rækker i <span className="text-fg-soft">User</span> — typisk oprettes de automatisk
               ved Google-login. Vi opretter ikke falske brugere i seed.
             </>
           : "Ingen brugere i listen."}
@@ -146,7 +146,7 @@ export function UsersDirectory({
           <div
             className={cn(
               "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-              "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+              "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
               GRID_LIST,
             )}
           >
@@ -196,34 +196,34 @@ export function UsersDirectory({
               >
                 <div className="min-w-0">
                   <div className="font-sans text-[13px] font-semibold text-fg">{u.name}</div>
-                  <div className="font-mono text-[10px] text-fg-quiet">{u.id}</div>
+                  <div className="text-[10px] text-fg-quiet">{u.id}</div>
                 </div>
-                <span className="truncate self-center font-mono text-[11px] text-fg-muted">{u.email}</span>
+                <span className="truncate self-center text-[11px] text-fg-muted">{u.email}</span>
                 <span className="self-center font-sans text-[12px] text-fg-muted">{agencyPlatformRoleLabel(u.platformRole)}</span>
                 <div className="self-center">
                   {u.status === "invited" ? (
-                    <span className="inline-flex rounded border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-brand">
+                    <span className="inline-flex rounded border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-brand">
                       Invitation
                     </span>
                   ) : u.status === "suspended" ? (
-                    <span className="inline-flex rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-warn">
+                    <span className="inline-flex rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-warn">
                       Susp.
                     </span>
                   ) : (
-                    <span className="inline-flex rounded border border-agency-ok-border bg-agency-ok-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-ok">
+                    <span className="inline-flex rounded border border-agency-ok-border bg-agency-ok-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-ok">
                       Aktiv
                     </span>
                   )}
                 </div>
-                <span className="self-center text-center font-mono text-[11px] tabular-nums text-fg-muted">
+                <span className="self-center text-center text-[11px] tabular-nums text-fg-muted">
                   {u.mfaEnabled ? "Ja" : "Nej"}
                 </span>
-                <span className="self-center font-mono text-[11px] tabular-nums text-fg-muted">{formatSeen(u.lastSeenAt)}</span>
+                <span className="self-center text-[11px] tabular-nums text-fg-muted">{formatSeen(u.lastSeenAt)}</span>
                 <div className="self-center">
                   {u.teamMemberId ? (
-                    <span className="font-mono text-[10px] text-fg-muted">{u.teamMemberId}</span>
+                    <span className="text-[10px] text-fg-muted">{u.teamMemberId}</span>
                   ) : (
-                    <span className="font-mono text-[10px] text-fg-quiet">—</span>
+                    <span className="text-[10px] text-fg-quiet">—</span>
                   )}
                 </div>
                 <div className="flex items-center justify-end self-center text-fg-quiet">
@@ -245,11 +245,11 @@ export function UsersDirectory({
         Rækken med <span className="font-semibold text-agency-brand">lys baggrund</span>{" "}
         {dataSource === "database" ?
           <>
-            matcher din session når <span className="font-mono">TeamMember.key</span> er knyttet til din konto.
+            matcher din session når <span className="">TeamMember.key</span> er knyttet til din konto.
           </>
         : (
           <>
-            er den samme som demo-session (<span className="font-mono">Louise / lm</span>).
+            er markeret som din profil i eksempelvisningen (<span className="">Louise / lm</span>).
           </>
         )}
       </div>

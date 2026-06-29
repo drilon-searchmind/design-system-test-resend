@@ -128,14 +128,14 @@ export function TasksDirectory({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h3 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
         </h3>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {tasks.length}
         </span>
 
@@ -192,7 +192,7 @@ export function TasksDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
             >
@@ -258,7 +258,7 @@ export function TasksDirectory({
 
                   <div className="flex min-w-0 items-center gap-2">
                     <span
-                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-white/10 font-mono text-[10.5px] font-semibold text-white"
+                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
                       style={{ background: `oklch(62% 0.14 ${row.clientHue})` }}
                     >
                       {row.clientLogo}
@@ -280,7 +280,7 @@ export function TasksDirectory({
                   </div>
 
                   <div className="hidden items-center justify-center sm:flex">
-                    <span className="font-mono text-[10px] font-semibold text-fg-muted">{depShort}</span>
+                    <span className="text-[10px] font-semibold text-fg-muted">{depShort}</span>
                   </div>
 
                   <div className="flex items-center">
@@ -294,7 +294,7 @@ export function TasksDirectory({
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <span
                       className={cn(
-                        "font-mono text-[12px] tabular-nums text-fg",
+                        "text-[12px] tabular-nums text-fg",
                         overdue && "text-agency-bad",
                         !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
                         taskIsDone(row.status) && "text-fg-muted",
@@ -305,7 +305,7 @@ export function TasksDirectory({
                     {!taskIsDone(row.status) ?
                       <span
                         className={cn(
-                          "font-mono text-[10px] tabular-nums",
+                          "text-[10px] tabular-nums",
                           overdue && "text-agency-bad",
                           !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
                           !overdue && (daysLeft === null || daysLeft > 7) && "text-fg-quiet",
@@ -317,7 +317,7 @@ export function TasksDirectory({
                           "I dag"
                         : `Om ${daysLeft} d`}
                       </span>
-                    : <span className="font-mono text-[10px] text-fg-quiet">Afsluttet</span>}
+                    : <span className="text-[10px] text-fg-quiet">Afsluttet</span>}
                   </div>
 
                   <PulseIconChevronRight className="justify-self-end text-fg-quiet" />

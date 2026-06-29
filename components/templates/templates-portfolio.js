@@ -74,11 +74,6 @@ export function TemplatesPortfolio() {
     });
   }, [load]);
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (taskTemplates, includeTest=1)."
-      : "Demo (TASK_TEMPLATES i lib/crm/static-data.js).";
-
   const handleCreateSubmit = useCallback(
     async (body) => {
       if (dataSource !== "database") return;
@@ -161,20 +156,16 @@ export function TemplatesPortfolio() {
         <div className="flex max-h-[min(92vh,920px)] flex-col">
           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
             <div className="min-w-0">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
                 Ny registrering
               </p>
               <h2 className="font-sans text-[17px] font-semibold leading-snug text-fg md:text-[18px]">Ny skabelon</h2>
-              <p className="mt-1 font-sans text-[12px] text-fg-muted">
-                Gemmes via <span className="font-mono text-[11px] text-fg-soft">POST /api/task-templates</span> med stabil
-                nøgle og valgfrit <span className="font-mono text-[11px] text-fg-soft">isTest</span>.
-              </p>
             </div>
             <button
               type="button"
               onClick={closeCreateModal}
               disabled={createSubmitting}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted font-mono text-lg leading-none text-fg-muted hover:border-agency-brand-border hover:text-fg disabled:opacity-40"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-lg leading-none text-fg-muted hover:border-agency-brand-border hover:text-fg disabled:opacity-40"
               aria-label="Luk"
             >
               ×
@@ -203,11 +194,6 @@ export function TemplatesPortfolio() {
           totalTemplates={bundle.templates.length}
         />
 
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

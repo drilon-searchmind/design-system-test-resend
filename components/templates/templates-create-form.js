@@ -72,7 +72,7 @@ export function TemplatesCreateForm({
   return (
     <div
       className={cn(
-        isModal ? "flex flex-col gap-4" : "rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5",
+        isModal ? "flex flex-col gap-4" : "tally-panel p-4 md:p-5",
       )}
       role="region"
       aria-label={isModal ? "Opret ny opgaveskabelon — formular" : "Opret skabelon"}
@@ -91,7 +91,7 @@ export function TemplatesCreateForm({
             onChange={(e) => setKey(e.target.value)}
             placeholder="fx tpl-onboarding-review"
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -176,7 +176,7 @@ export function TemplatesCreateForm({
             value={defaultDueOffsetDays}
             onChange={(e) => setDefaultDueOffsetDays(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -190,7 +190,7 @@ export function TemplatesCreateForm({
             value={suggestedHours}
             onChange={(e) => setSuggestedHours(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -216,7 +216,7 @@ export function TemplatesCreateForm({
       </label>
       <label className="flex cursor-pointer items-center gap-2 font-sans text-[12px] text-fg-muted">
         <input type="checkbox" checked={isTest} onChange={(e) => setIsTest(e.target.checked)} className="size-4" />
-        Testdata (<span className="font-mono text-[11px]">isTest</span>)
+        Testdata (<span className="text-[11px]">isTest</span>)
       </label>
 
       <div className="flex flex-wrap gap-2">

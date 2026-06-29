@@ -92,11 +92,6 @@ export function TeamPortfolio() {
     return deptParam && ids.includes(deptParam) ? deptParam : undefined;
   }, [bundle, deptParam]);
 
-  const sourceFootnote =
-    dataSource === "database" ?
-      "MongoDB — TeamMember, Department og åbne Task (`includeTest=1` i dev). Samme belægning som Workload for valgt rapportmåned."
-    : "Demonstrationsdata (`TEAM`, `TASKS`, `DEPARTMENTS`).";
-
   const mineLabelRaw = bundle?.mineLabel;
   const mineLabel =
     typeof mineLabelRaw === "string" && mineLabelRaw.trim() ? mineLabelRaw.trim() : null;
@@ -165,7 +160,7 @@ export function TeamPortfolio() {
 
         <p className="font-sans text-[11px] text-fg-quiet">
           Rækker med lyse baggrunde: <span className="font-semibold text-agency-brand">dit kort</span> (fra{" "}
-          <span className="font-mono">isMe</span>) ·{" "}
+          <span className="">isMe</span>) ·{" "}
           <span className="font-semibold text-agency-bad">rød tone</span> ved overskredne opgaver på medarbejderen.
         </p>
 
@@ -182,12 +177,6 @@ export function TeamPortfolio() {
           departments={departments}
           initialDeptId={validDept}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

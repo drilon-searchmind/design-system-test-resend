@@ -66,11 +66,6 @@ export function ContractsPortfolio() {
     });
   }, [load]);
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (inkl. testdata ved isTest via includeTest)."
-      : "Demo (`lib/crm/static-data.js`).";
-
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -122,14 +117,6 @@ export function ContractsPortfolio() {
           team={bundle.team}
           renewalReferenceIso={bundle.renewalReferenceIso}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Fornyelseskolonne bruger periodeslut <span className="font-mono text-[11px] text-fg-muted">{bundle.renewalReferenceIso}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

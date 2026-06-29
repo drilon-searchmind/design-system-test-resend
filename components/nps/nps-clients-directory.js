@@ -93,7 +93,7 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
   }, [rows, q, filter, sort]);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+    <section className="tally-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <div>
           <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
@@ -101,7 +101,7 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
           </h2>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">Aktiv + pauseret — krydslink til fuldt kundekort.</p>
         </div>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} vist
         </span>
 
@@ -171,11 +171,11 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
               </div>
               <p className="mt-2 font-sans text-[11px] text-fg-muted">{r.cadence}</p>
               <div className="mt-3 flex items-baseline gap-3">
-                <span className={cn("font-mono text-[26px] font-semibold tabular-nums leading-none", scoreToneClass(r.latest?.score ?? null))}>
+                <span className={cn("text-[26px] font-semibold tabular-nums leading-none", scoreToneClass(r.latest?.score ?? null))}>
                   {r.latest?.score ?? "—"}
                 </span>
                 {r.delta != null ? (
-                  <span className={cn("font-mono text-[12px] tabular-nums", r.delta >= 0 ? "text-agency-ok" : "text-agency-bad")}>
+                  <span className={cn("text-[12px] tabular-nums", r.delta >= 0 ? "text-agency-ok" : "text-agency-bad")}>
                     {r.delta > 0 ? "+" : ""}
                     {r.delta} vs sidst
                   </span>
@@ -186,7 +186,7 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
                   <PulseSparkline data={r.spark} height={34} />
                 </div>
               ) : (
-                <p className="mt-2 font-mono text-[10px] text-fg-quiet">For få punkter til graf</p>
+                <p className="mt-2 text-[10px] text-fg-quiet">For få punkter til graf</p>
               )}
             </article>
           ))}
@@ -196,7 +196,7 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
           <div className="min-w-[900px]">
             <div
               className={cn(
-                "grid gap-2 border-b border-border bg-surface-muted/85 px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "grid gap-2 border-b border-border bg-surface-muted/85 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
             >
@@ -234,14 +234,14 @@ export function NpsClientsDirectory({ clients, headingId = "nps-clients-director
                   >
                     {r.client.name}
                   </Link>
-                  <span className="block font-mono text-[10px] text-fg-quiet">{r.client.industry}</span>
+                  <span className="block text-[10px] text-fg-quiet">{r.client.industry}</span>
                 </div>
-                <span className={cn("font-mono text-[13px] font-semibold tabular-nums", scoreToneClass(r.latest?.score ?? null))}>
+                <span className={cn("text-[13px] font-semibold tabular-nums", scoreToneClass(r.latest?.score ?? null))}>
                   {r.latest?.score ?? "—"}
                 </span>
                 <span
                   className={cn(
-                    "font-mono text-[11px] tabular-nums",
+                    "text-[11px] tabular-nums",
                     r.delta == null ? "text-fg-quiet" : r.delta >= 0 ? "text-agency-ok" : "text-agency-bad",
                   )}
                 >

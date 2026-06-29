@@ -27,7 +27,7 @@ const GRID_LIST =
 function AudienceLabel({ audience }) {
   const t =
     audience === "client" ? "Kunde" : audience === "public" ? "Offentlig" : "Intern";
-  return <span className="font-mono text-[10px] text-fg-muted">{t}</span>;
+  return <span className="text-[10px] text-fg-muted">{t}</span>;
 }
 
 /**
@@ -82,14 +82,14 @@ export function KbDirectory({
   return (
     <section
       id="kb-directory"
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
         </h2>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {KNOWLEDGE_ARTICLES.length}
         </span>
 
@@ -115,7 +115,7 @@ export function KbDirectory({
 
       <div className="flex flex-col gap-2 border-b border-border-soft bg-surface-muted/30 px-3 py-2.5 md:px-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kategori</span>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kategori</span>
           <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
@@ -180,7 +180,7 @@ export function KbDirectory({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-1.5 font-sans text-[11px] text-fg-muted">
-              <span className="font-mono text-[9px] uppercase tracking-wider text-fg-soft">Forfatter</span>
+              <span className="text-[9px] uppercase tracking-wider text-fg-soft">Forfatter</span>
               <select
                 value={authorOnly}
                 onChange={(e) => setAuthorOnly(e.target.value)}
@@ -219,7 +219,7 @@ export function KbDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID_LIST,
               )}
             >
@@ -274,7 +274,7 @@ export function KbDirectory({
                       {row.tags.slice(0, 5).map((tag) => (
                         <span
                           key={tag}
-                          className="rounded border border-border-soft px-1.5 py-0 font-mono text-[9px] text-fg-quiet"
+                          className="rounded border border-border-soft px-1.5 py-0 text-[9px] text-fg-quiet"
                         >
                           #{tag}
                         </span>
@@ -284,7 +284,7 @@ export function KbDirectory({
 
                   <div className="flex justify-center">
                     <span
-                      className="inline-flex min-w-[40px] justify-center rounded border border-border-soft bg-surface-muted px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-fg-soft"
+                      className="inline-flex min-w-[40px] justify-center rounded border border-border-soft bg-surface-muted px-1.5 py-0.5 text-[9px] font-bold uppercase text-fg-soft"
                       style={
                         cat
                           ? {
@@ -301,11 +301,11 @@ export function KbDirectory({
 
                   <div>
                     {row.published ? (
-                      <span className="inline-flex rounded border border-agency-ok-border bg-agency-ok-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-ok">
+                      <span className="inline-flex rounded border border-agency-ok-border bg-agency-ok-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-ok">
                         Live
                       </span>
                     ) : (
-                      <span className="inline-flex rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 font-mono text-[9px] font-semibold uppercase text-agency-warn">
+                      <span className="inline-flex rounded border border-agency-warn-border bg-agency-warn-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-warn">
                         Kladde
                       </span>
                     )}
@@ -318,11 +318,11 @@ export function KbDirectory({
                     <span className="truncate font-sans text-[12px] text-fg-muted">{author?.name ?? row.authorId}</span>
                   </div>
 
-                  <div className="font-mono text-[11px] tabular-nums text-fg-muted">
+                  <div className="text-[11px] tabular-nums text-fg-muted">
                     {formatIsoDateDa(row.updatedAt)}
                   </div>
 
-                  <div className="font-mono text-[11px] tabular-nums text-fg-quiet">{row.readingMinutes} min</div>
+                  <div className="text-[11px] tabular-nums text-fg-quiet">{row.readingMinutes} min</div>
 
                   <div className="flex items-center justify-end text-fg-quiet">
                     <PulseIconChevronRight size={14} />

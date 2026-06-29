@@ -50,15 +50,15 @@ export function TaskDetailHeader({
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="truncate text-fg">{task.title}</span>
         <span className="mx-2 text-fg-quiet">/</span>
-        <span className="font-mono text-[11px] text-fg-muted">{task.id}</span>
+        <span className="text-[11px] text-fg-muted">{task.id}</span>
       </nav>
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
-              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-white/10",
-              "font-mono text-sm font-semibold text-white shadow-inset-card md:size-[60px] md:text-[15px]",
+              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
+              "text-sm font-semibold text-white md:size-[60px] md:text-[15px]",
             )}
             style={{
               background: `linear-gradient(135deg, oklch(62% 0.15 ${task.clientHue}), oklch(52% 0.18 ${task.clientHue + 28}))`,
@@ -67,13 +67,13 @@ export function TaskDetailHeader({
             {task.clientLogo}
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Opgave · {deptLabel}
             </p>
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{task.title}</h1>
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {task.clientName}
-              <span className="font-mono tabular-nums text-fg-quiet"> · Due-ref. {refIso}</span>
+              <span className="tabular-nums text-fg-quiet"> · Due-ref. {refIso}</span>
               <br />
               {subtitle}
             </p>

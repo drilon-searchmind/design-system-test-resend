@@ -6,8 +6,8 @@
  */
 export function ClientDetailContactsCard({ primaryContact, secondaryContact }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Kontakter
       </h2>
       <ul className="mt-4 space-y-5 font-sans text-sm">
@@ -16,11 +16,11 @@ export function ClientDetailContactsCard({ primaryContact, secondaryContact }) {
           <p className="mt-0.5 text-[13px] text-fg-muted">{primaryContact.title}</p>
           <a
             href={`mailto:${primaryContact.email}`}
-            className="mt-2 block font-mono text-[12px] text-agency-brand hover:underline"
+            className="mt-2 block text-[12px] text-agency-brand hover:underline"
           >
             {primaryContact.email}
           </a>
-          <p className="mt-1 font-mono text-[12px] tabular-nums text-fg-quiet">{primaryContact.phone}</p>
+          <p className="mt-1 text-[12px] tabular-nums text-fg-quiet">{primaryContact.phone}</p>
         </li>
         {secondaryContact ? (
           <li className="rounded-xl border border-border-soft bg-surface-muted/40 p-3">
@@ -28,12 +28,12 @@ export function ClientDetailContactsCard({ primaryContact, secondaryContact }) {
             <p className="mt-0.5 text-[13px] text-fg-muted">{secondaryContact.title}</p>
             <a
               href={`mailto:${secondaryContact.email}`}
-              className="mt-2 block font-mono text-[12px] text-agency-brand hover:underline"
+              className="mt-2 block text-[12px] text-agency-brand hover:underline"
             >
               {secondaryContact.email}
             </a>
             {secondaryContact.phone ? (
-              <p className="mt-1 font-mono text-[12px] tabular-nums text-fg-quiet">
+              <p className="mt-1 text-[12px] tabular-nums text-fg-quiet">
                 {secondaryContact.phone}
               </p>
             ) : null}

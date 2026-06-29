@@ -13,10 +13,7 @@ export function PulseUtilTrendChart() {
   const ch = h - pad.t - pad.b;
 
   return (
-    <section
-      className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5"
-      aria-labelledby="pulse-trend-heading"
-    >
+    <section className="tally-panel p-4 md:p-5" aria-labelledby="pulse-trend-heading">
       <div id="pulse-trend-heading">
         <PulseCardHeader
           title={`Tid fordelt — ${days} dage`}
@@ -79,7 +76,7 @@ export function PulseUtilTrendChart() {
           fill="currentColor"
           fillOpacity={0.55}
           textAnchor="end"
-          className="font-mono tabular-nums"
+          className="tabular-nums"
         >
           {Math.round(maxVal)}t
         </text>
@@ -90,7 +87,7 @@ export function PulseUtilTrendChart() {
           fill="currentColor"
           fillOpacity={0.55}
           textAnchor="end"
-          className="font-mono tabular-nums"
+          className="tabular-nums"
         >
           0
         </text>

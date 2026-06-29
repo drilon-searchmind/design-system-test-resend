@@ -42,8 +42,7 @@ export function SettingsAdminSection() {
         <div>
           <h2 className="font-sans text-base font-semibold text-fg">Stamdata</h2>
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-            Opret og vedligehold masterdata i MongoDB. Demo-data i resten af appen er uændret indtil lister
-            kobles på API&apos;et. Brug <span className="font-medium text-fg">Kun test</span> for at se
+            Opret og vedligehold masterdata i databasen. Brug <span className="font-medium text-fg">Kun test</span> for at se
             placeholder-rækker. Én test-<strong className="font-normal">opgave</strong> oprettes også (ikke i
             denne admin) med relationer til kunde, afdeling og team.
           </p>

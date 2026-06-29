@@ -1,8 +1,8 @@
 /**
- * Runs before interactive paint — theme + density match localStorage (no flash).
- * Keys must match `lib/theme/constants.js`.
+ * Runs before interactive paint — density match localStorage (no flash).
+ * Theme is always light (dark mode disabled).
  */
 
 export function themeInitScriptInnerHtml() {
-  return `(function(){try{var kt='apex-theme',tt=localStorage.getItem(kt);if(tt==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.setAttribute('data-theme','dark');var kd='apex-density',d=localStorage.getItem(kd);if(d==='spacious')document.documentElement.setAttribute('data-density','spacious');else document.documentElement.setAttribute('data-density','compact')}catch(_){document.documentElement.setAttribute('data-theme','dark');document.documentElement.setAttribute('data-density','compact')}})();`;
+  return `(function(){try{document.documentElement.setAttribute('data-theme','light');var kd='apex-density',d=localStorage.getItem(kd);if(d==='spacious')document.documentElement.setAttribute('data-density','spacious');else document.documentElement.setAttribute('data-density','compact')}catch(_){document.documentElement.setAttribute('data-theme','light');document.documentElement.setAttribute('data-density','compact')}})();`;
 }

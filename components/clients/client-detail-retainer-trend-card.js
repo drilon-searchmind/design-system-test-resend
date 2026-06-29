@@ -15,15 +15,15 @@ export function ClientDetailRetainerTrendCard({ clientId, currency, history }) {
   const reversed = [...(history ?? [])].reverse();
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Retainer-historik
       </h2>
       <p className="mt-2 max-w-md font-sans text-[11px] leading-snug text-fg-muted">
-        Mock-serie til og med april 2026 — senere månedlig rollup fra Stripe / CRM. Sidste punkt afspejler
+        Historisk serie til og med april 2026 — senere månedlig rollup fra Stripe / CRM. Sidste punkt afspejler
         nuværende retainer.
       </p>
-      <p className="mt-1 font-mono text-[10px] text-fg-quiet">
+      <p className="mt-1 text-[10px] text-fg-quiet">
         Kunde-ID {clientId} · benchmark ref. kontrakter {CONTRACT_DEMO_REF_DATE}
       </p>
 
@@ -36,7 +36,7 @@ export function ClientDetailRetainerTrendCard({ clientId, currency, history }) {
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[280px] border-collapse text-left font-sans text-[12px]">
           <thead>
-            <tr className="border-b border-border font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+            <tr className="border-b border-border text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
               <th className="py-2 pr-4 font-medium">Måned</th>
               <th className="py-2 pr-4 font-medium">Retainer</th>
               <th className="hidden py-2 font-medium sm:table-cell">Ændring</th>
@@ -48,11 +48,11 @@ export function ClientDetailRetainerTrendCard({ clientId, currency, history }) {
               const delta = newer ? row.retainer - newer.retainer : 0;
               return (
                 <tr key={row.month} className="border-b border-border-soft last:border-0">
-                  <td className="py-2 pr-4 font-mono tabular-nums text-fg-muted">{row.month}</td>
-                  <td className="py-2 pr-4 font-mono tabular-nums text-fg">
+                  <td className="py-2 pr-4 tabular-nums text-fg-muted">{row.month}</td>
+                  <td className="py-2 pr-4 tabular-nums text-fg">
                     {formatCurrencyCompact(row.retainer, row.currency ?? currency)}
                   </td>
-                  <td className="hidden py-2 font-mono text-[11px] tabular-nums sm:table-cell">
+                  <td className="hidden py-2 text-[11px] tabular-nums sm:table-cell">
                     {newer ? (
                       <span
                         className={cn(

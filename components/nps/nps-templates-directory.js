@@ -24,36 +24,30 @@ export function NpsTemplatesDirectory({ templates, headingId = "nps-templates-he
 
   if (!templates.length) {
     return (
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+      <section className="tally-panel overflow-hidden">
         <div className="border-b border-border px-3 py-3 md:px-4">
           <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
             E-mailskabeloner
           </h2>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">
-            Ingen skabeloner i denne datakilde — seed eller opret i CRM (`NpsTemplate`).
-          </p>
+          <p className="mt-1 font-sans text-[11px] text-fg-muted">Ingen skabeloner i denne visning.</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+    <section className="tally-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4">
         <div>
           <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
             E-mailskabeloner
           </h2>
           <p className="mt-1 max-w-xl font-sans text-[11px] text-fg-muted">
-            Variabler{" "}
-            <code className="font-mono text-[10px] text-fg-quiet">
-              {'{{firstName}}'}, {'{{accountManager}}'}
-            </code>{" "}
-            — sendes fra Resend-integration i produktion.
+            Variabler som {"{{firstName}}"} og {"{{accountManager}}"} — sendes fra Resend-integration i produktion.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-md border border-border bg-surface-muted px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-wide text-fg-muted">
+          <span className="rounded-md border border-border bg-surface-muted px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-fg-muted">
             {templates.length} variant{templates.length === 1 ? "" : "er"}
           </span>
           <button
@@ -86,11 +80,11 @@ export function NpsTemplatesDirectory({ templates, headingId = "nps-templates-he
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="font-sans text-[13px] font-semibold text-fg">{t.name}</span>
-                    <span className="font-mono text-[10px] text-fg-muted">{t.id}</span>
+                    <span className="text-[10px] text-fg-muted">{t.id}</span>
                   </div>
                   <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{t.subject}</p>
                   {isOpen ? (
-                    <pre className="mt-3 max-h-[240px] overflow-auto rounded-xl border border-border-soft bg-surface-muted-strong p-3 font-mono text-[11px] leading-relaxed text-fg-muted whitespace-pre-wrap shadow-inset-card">
+                    <pre className="mt-3 max-h-[240px] overflow-auto rounded-xl border border-border-soft bg-surface-muted p-3 text-[11px] leading-relaxed text-fg-muted whitespace-pre-wrap">
                       {t.body}
                     </pre>
                   ) : null}

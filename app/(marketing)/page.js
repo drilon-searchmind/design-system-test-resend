@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <main className="flex flex-1 flex-col bg-canvas">
+    <main className="flex flex-1 flex-col">
       <HeroSection />
       <IntroSection />
       <FeaturesSection />

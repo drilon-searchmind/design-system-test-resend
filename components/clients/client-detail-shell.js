@@ -79,13 +79,10 @@ export function ClientDetailShell({ clientSlug }) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
-          Demo har ingen kunde med id <span className="font-mono text-fg">{clientSlug}</span>.{" "}
+          Ingen kunde med id <span className="text-fg">{clientSlug}</span>.{" "}
           <Link href={routes.clients} className="text-agency-brand hover:underline">
             Tilbage til Kunder
           </Link>
-          {" · "}
-          Har du åbnet en slug fra databasen? Skift til{" "}
-          <span className="font-medium text-fg-muted">MongoDB under Indstillinger → Datakilde</span>.
         </p>
       </div>
     );
@@ -141,15 +138,8 @@ export function ClientDetailShell({ clientSlug }) {
           alerts={SMART_ALERTS}
           notes={notes}
           tasks={clientTasks}
-          tasksSourceLabel="mock TASKS"
           kpiTimerLabel="Timer denne md"
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Kundeprofil fra <span className="font-mono text-[11px] text-fg-muted">lib/crm/static-data.js</span> — skift
-          datakilde under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span> for live
-          MongoDB-profil.
-        </p>
       </div>
     );
   }
@@ -229,19 +219,10 @@ export function ClientDetailShell({ clientSlug }) {
           notes={Array.isArray(remote.notes) ? remote.notes : []}
           notesTeamMembers={Array.isArray(remote.team) ? remote.team : undefined}
           tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
-          tasksSourceLabel="MongoDB"
           kpiTimerLabel={
             typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Timer i perioden"
           }
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Kundeprofil fra <span className="text-fg-muted">MongoDB</span> (bilable tid i kolonnen matcher den valgte
-          måned). <span className="font-mono text-[11px] text-fg-muted">{periodLabel}</span>
-          {" · "}
-          Kontrakter under <span className="font-mono text-[11px] text-fg-muted">/contracts</span> følger den samme
-          datakilde.
-        </p>
       </div>
     );
   }

@@ -15,14 +15,14 @@ import { PulseIconChevronDown, PulseIconChevronRight } from "@/components/pulse/
 import { cn } from "@/lib/utils";
 
 const selectClass = cn(
-  "h-[26px] appearance-none rounded-md border border-border bg-surface-muted pl-2.5 pr-7",
-  "font-sans text-[11px] font-medium text-fg",
-  "outline-none transition-colors hover:border-agency-brand-border hover:bg-surface-card",
+  "h-8 appearance-none rounded-full border border-border bg-surface-muted pl-3 pr-8",
+  "text-[11px] font-medium text-fg",
+  "outline-none transition-colors hover:border-agency-brand-border hover:bg-canvas",
   "focus-visible:ring-2 focus-visible:ring-agency-brand",
 );
 
 const navBtnClass = cn(
-  "inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-md border border-border",
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border",
   "bg-surface-muted text-fg-muted transition-colors",
   "hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand",
   "disabled:pointer-events-none disabled:opacity-40",
@@ -128,7 +128,7 @@ export function ReportPeriodPicker({ year, month, onChange, className, compact =
         <button
           type="button"
           className={cn(
-            "h-[26px] rounded-md border border-transparent px-2 font-sans text-[11px] font-medium text-agency-brand",
+            "h-8 rounded-full px-3 text-[11px] font-medium text-agency-brand",
             "transition-colors hover:bg-agency-brand-soft",
           )}
           onClick={() => {

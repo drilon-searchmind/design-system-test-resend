@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Modal dialog — same pattern as timer (`showModal` + opaque card surface).
+ * Modal dialog — Tally surface (light card, flat border).
  * @param {{
  *   open: boolean;
  *   onClose: () => void;
@@ -41,8 +41,8 @@ export function CrmDialog({
       className={cn(
         "fixed left-1/2 top-1/2 z-[120] max-w-full -translate-x-1/2 -translate-y-1/2",
         maxWidthClass,
-        "max-h-[min(92vh,920px)] overflow-hidden rounded-2xl border border-border bg-surface-card p-0 shadow-xl",
-        "backdrop:bg-canvas/80 backdrop:backdrop-blur-[2px]",
+        "tally-panel max-h-[min(92vh,920px)] overflow-hidden p-0",
+        "backdrop:bg-fg/10 backdrop:backdrop-blur-[2px]",
         className,
       )}
       aria-label={ariaLabel}

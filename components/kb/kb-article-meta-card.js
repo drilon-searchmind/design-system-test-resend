@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  */
 export function KbArticleMetaCard({ article, className }) {
   return (
-    <div className={cn("rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card", className)}>
+    <div className={cn("tally-panel p-4", className)}>
       <h2 className="font-sans text-sm font-semibold text-fg">Metadata</h2>
       <dl className="mt-3 space-y-2 font-sans text-[12px] text-fg-muted">
         <div className="flex justify-between gap-2">
@@ -27,7 +27,7 @@ export function KbArticleMetaCard({ article, className }) {
           <dt className="text-fg-soft">Tags</dt>
           <dd className="mt-1 flex flex-wrap gap-1">
             {article.tags.map((tag) => (
-              <span key={tag} className="rounded border border-border-soft px-1.5 py-0 font-mono text-[10px] text-fg-quiet">
+              <span key={tag} className="rounded border border-border-soft px-1.5 py-0 text-[10px] text-fg-quiet">
                 {tag}
               </span>
             ))}

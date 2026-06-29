@@ -10,7 +10,7 @@ import { SiteNav } from "./site-nav";
 export function SiteHeader() {
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b border-border bg-surface-header backdrop-blur-md shadow-inset-header"
+      className="sticky top-0 z-50 w-full border-b border-border bg-surface-header backdrop-blur-md"
       role="banner"
     >
       <div className={cn(shellHeaderInner)}>

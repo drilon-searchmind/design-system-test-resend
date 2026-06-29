@@ -101,14 +101,14 @@ export function TimeEntriesDirectory({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {stampsHeading}
         </h2>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {rows.length} af {Math.max(rows.length, totalShown)}
         </span>
 
@@ -181,14 +181,14 @@ export function TimeEntriesDirectory({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-mono text-[11px] tabular-nums text-fg-muted">{at}</p>
-                    <p className="mt-1 font-mono text-[18px] font-semibold tabular-nums text-agency-brand">
+                    <p className="text-[11px] tabular-nums text-fg-muted">{at}</p>
+                    <p className="mt-1 text-[18px] font-semibold tabular-nums text-agency-brand">
                       {dm} <span className="text-[12px] font-medium text-fg-soft">min</span>
                     </p>
                   </div>
                   <span
                     className={cn(
-                      "rounded-md px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide",
+                      "rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
                       bill ?
                         "border border-agency-ok-border bg-agency-brand-soft text-agency-ok"
                       : "border border-border text-fg-quiet",
@@ -215,7 +215,7 @@ export function TimeEntriesDirectory({
                 : <p className="mt-1 font-sans text-[12px] text-fg-quiet">Ingen opgave linket</p>}
                 {dept ?
                   <p
-                    className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-wide text-fg"
+                    className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-fg"
                     {...(deptCss ? { style: { color: deptCss } } : {})}
                   >
                     {dept.slice(0, 4)}
@@ -226,7 +226,7 @@ export function TimeEntriesDirectory({
                 </p>
                 <Link
                   href={`${routes.time}/${encodeURIComponent(typeof row.mongoId === "string" && row.mongoId.trim() ? row.mongoId.trim() : id)}`}
-                  className="mt-2 font-mono text-[10px] text-agency-brand hover:underline"
+                  className="mt-2 text-[10px] text-agency-brand hover:underline"
                 >
                   Åbn registrering
                 </Link>
@@ -240,7 +240,7 @@ export function TimeEntriesDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
             >
@@ -296,8 +296,8 @@ export function TimeEntriesDirectory({
                     !bill && "bg-surface-muted/15",
                   )}
                 >
-                  <span className="font-mono text-[12px] tabular-nums text-fg">{at}</span>
-                  <span className="font-mono text-[12px] font-semibold tabular-nums text-agency-brand">{dm}</span>
+                  <span className="text-[12px] tabular-nums text-fg">{at}</span>
+                  <span className="text-[12px] font-semibold tabular-nums text-agency-brand">{dm}</span>
                   <div className="min-w-0">
                     {clientSlug && clientName ?
                       <Link
@@ -321,7 +321,7 @@ export function TimeEntriesDirectory({
                   <div className="flex items-center justify-center">
                     {dept ?
                       <span
-                        className="font-mono text-[10px] font-semibold text-fg"
+                        className="text-[10px] font-semibold text-fg"
                         {...(deptCss ? { style: { color: deptCss } } : {})}
                       >
                         {dept.slice(0, 4)}
@@ -332,7 +332,7 @@ export function TimeEntriesDirectory({
                   <div className="flex justify-center">
                     <Link
                       href={`${routes.time}/${encodeURIComponent(detailId)}`}
-                      className="font-mono text-[11px] text-agency-brand hover:underline"
+                      className="text-[11px] text-agency-brand hover:underline"
                     >
                       Post
                     </Link>
@@ -340,7 +340,7 @@ export function TimeEntriesDirectory({
                   <div className="flex items-center">
                     <span
                       className={cn(
-                        "inline-flex rounded-md border px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide",
+                        "inline-flex rounded-md border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
                         bill ? "border-agency-ok-border text-agency-ok" : "border-border text-fg-quiet",
                       )}
                     >

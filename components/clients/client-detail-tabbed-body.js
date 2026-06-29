@@ -66,7 +66,6 @@ export const CLIENT_DETAIL_TAB_DEFS = [
  *     priority: 'low' | 'medium' | 'high';
  *     dueDate: string;
  *   }>;
- *   tasksSourceLabel: string;
  *   kpiTimerLabel?: string;
  * }} props
  */
@@ -81,7 +80,6 @@ export function ClientDetailTabbedBody({
   notes,
   notesTeamMembers,
   tasks,
-  tasksSourceLabel,
   kpiTimerLabel = "Timer denne md",
 }) {
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
@@ -94,7 +92,7 @@ export function ClientDetailTabbedBody({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Sektion
         </p>
         <nav aria-label="Kunde-undersektioner">
@@ -171,7 +169,6 @@ export function ClientDetailTabbedBody({
                 <ClientDetailTasksCard
                   tasks={tasks}
                   clientLabel={client.name}
-                  sourceLabel={tasksSourceLabel}
                 />
               </div>
             </div>

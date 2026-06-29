@@ -31,13 +31,13 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
     <Link
       href={`${routes.contracts}/${row.id}`}
       className={cn(
-        "flex flex-col rounded-2xl border border-border bg-surface-card p-3.5 shadow-inset-card transition-all",
-        "hover:border-agency-brand-border hover:shadow-agency-raised md:p-4",
+        "tally-panel flex flex-col p-3.5 transition-all",
+        "hover:border-agency-brand-border md:p-4",
       )}
     >
       <div className="mb-2.5 flex items-start gap-2.5">
         <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/10 font-mono text-[13px] font-semibold text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-[13px] font-semibold text-white"
           style={{
             background: `linear-gradient(135deg, oklch(62% 0.15 ${row.clientHue}), oklch(52% 0.18 ${row.clientHue + 28}))`,
           }}
@@ -46,36 +46,36 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{row.clientName}</div>
-          <div className="truncate font-mono text-[11px] text-fg-quiet">{row.kind}</div>
+          <div className="truncate text-[11px] text-fg-quiet">{row.kind}</div>
         </div>
         <HealthChip health={row.health} palette="agency" compact />
       </div>
 
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <StatusChip status={row.accountStatus} palette="agency" />
-        <span className="font-mono text-[10px] tabular-nums text-fg-muted">
+        <span className="text-[10px] tabular-nums text-fg-muted">
           Opsigelse {row.noticeDays} d
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
         <div>
-          <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Beløb / md
           </div>
-          <div className="font-mono text-sm font-semibold tabular-nums text-fg">
+          <div className="text-sm font-semibold tabular-nums text-fg">
             {formatCurrencyCompact(row.monthlyValue, row.currency)}
           </div>
         </div>
         <div>
-          <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Fornyelse
           </div>
-          <div className="font-mono text-[12px] tabular-nums text-fg">{formatIsoDateDa(row.renewalAt)}</div>
+          <div className="text-[12px] tabular-nums text-fg">{formatIsoDateDa(row.renewalAt)}</div>
           {row.accountStatus === "active" ? (
             <div
               className={cn(
-                "mt-0.5 font-mono text-[10px] tabular-nums",
+                "mt-0.5 text-[10px] tabular-nums",
                 days < 0 && "text-agency-bad",
                 days >= 0 && days <= 30 && "text-agency-warn",
                 days > 30 && "text-fg-quiet",
@@ -87,7 +87,7 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         </div>
       </div>
 
-      <p className="mt-3 font-mono text-[10px] text-fg-quiet">
+      <p className="mt-3 text-[10px] text-fg-quiet">
         Start {formatIsoDateDa(row.startedAt)}
       </p>
     </Link>

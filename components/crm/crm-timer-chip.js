@@ -92,7 +92,7 @@ export function CrmTimerChip() {
   if (loading && !payload) {
     return (
       <span
-        className="inline-block h-8 w-[72px] shrink-0 animate-pulse rounded-md bg-skeleton sm:w-[108px]"
+        className="inline-block h-8 w-[72px] shrink-0 animate-pulse rounded-full bg-skeleton sm:w-[108px]"
         aria-hidden
       />
     );
@@ -105,7 +105,7 @@ export function CrmTimerChip() {
       aria-haspopup="dialog"
       aria-expanded={timerModalOpen}
       className={cn(
-        "inline-flex h-8 min-w-0 max-w-[min(140px,38vw)] shrink-0 items-center gap-1.5 rounded-md border px-1.5 font-mono text-[11px] tabular-nums sm:max-w-[240px] sm:gap-2 sm:px-2",
+        "inline-flex h-8 min-w-0 max-w-[min(140px,38vw)] shrink-0 items-center gap-1.5 rounded-full border px-2 text-[11px] tabular-nums sm:max-w-[240px] sm:gap-2 sm:px-3",
         running
           ? "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
           : "border-border bg-surface-muted text-fg-muted hover:border-agency-brand-border hover:bg-agency-brand-soft/60 hover:text-agency-brand",

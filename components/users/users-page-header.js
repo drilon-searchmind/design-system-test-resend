@@ -32,21 +32,12 @@ export function UsersPageHeader({
     <div className="flex flex-col gap-3">
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconShield size={14} className="text-agency-brand" aria-hidden />
             Adgang & invitationskø
           </p>
           <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">Brugerstyring</h1>
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-            Auth-konti og roller — i database vises kun brugere der findes i <code className="font-mono text-[11px] text-fg-quiet">User</code>{" "}
-            (typisk via Google SSO).
-            {dataSource === "database" ?
-              <>
-                {" "}
-                <span className="font-semibold text-fg">MongoDB</span>.
-              </>
-            : <> Demonstrationsliste.</>}
-            {" "}
             Din række markeres ud fra roster:{" "}
             <span className="font-semibold text-fg">{loading ? "\u2026" : displayName}</span>.
           </p>
@@ -66,7 +57,7 @@ export function UsersPageHeader({
             type="button"
             disabled
             className="inline-flex h-[26px] items-center gap-1.5 rounded-md border border-border bg-surface-muted px-3 font-sans text-[11px] font-medium text-fg-muted opacity-60"
-            title="Demo"
+            title="Kommer snart"
           >
             <PulseIconDownload size={12} /> Audit log
           </button>
@@ -83,7 +74,7 @@ export function UsersPageHeader({
       {view !== "all" ? (
         <p className="rounded-xl border border-border-soft bg-surface-muted/50 px-3 py-2.5 font-sans text-[12px] leading-snug text-fg-muted">
           <span className="font-medium text-fg">Sikkerhedsvisning</span> — policy-tjek og MFA-drift i fuld Agency OS;
-          demo viser ingen ekstra kolonner.
+          denne visning viser ingen ekstra kolonner endnu.
         </p>
       ) : null}
     </div>

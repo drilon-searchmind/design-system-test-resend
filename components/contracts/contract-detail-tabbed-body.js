@@ -44,7 +44,6 @@ export const CONTRACT_DETAIL_TAB_DEFS = [
  *     priority: 'low' | 'medium' | 'high';
  *     dueDate: string;
  *   }>;
- *   tasksSourceLabel: string;
  *   alerts: Array<{
  *     id: string;
  *     severity: string;
@@ -66,7 +65,6 @@ export function ContractDetailTabbedBody({
   retainerHistory,
   revisionEntries,
   tasks,
-  tasksSourceLabel,
   alerts,
 }) {
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
@@ -79,7 +77,7 @@ export function ContractDetailTabbedBody({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Sektion
         </p>
         <nav aria-label="Kontrakt-undersektioner">
@@ -151,7 +149,6 @@ export function ContractDetailTabbedBody({
             <ClientDetailTasksCard
               tasks={tasks}
               clientLabel={client.name}
-              sourceLabel={tasksSourceLabel}
             />
           </section>
         ) : null}

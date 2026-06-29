@@ -27,9 +27,9 @@ export function ClientDetailMetaCard({ client }) {
       : intervalKey ?? "—";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card px-4 py-3 shadow-inset-card md:px-5 md:py-4">
+    <div className="tally-panel px-4 py-3 md:px-5 md:py-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-        <dl className="flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] text-fg-muted">
+        <dl className="flex flex-wrap gap-x-8 gap-y-2 text-[11px] text-fg-muted">
           <div>
             <dt className="text-fg-soft">Start</dt>
             <dd className="mt-0.5 tabular-nums text-fg">{formatDaDate(client.startedAt)}</dd>
@@ -65,7 +65,7 @@ export function ClientDetailMetaCard({ client }) {
                   title={dep?.name ?? id}
                   className={cn(
                     "rounded-md border border-border bg-surface-muted px-2 py-0.5",
-                    "font-mono text-[10px] font-medium uppercase tracking-wide text-fg-muted",
+                    "text-[10px] font-medium uppercase tracking-wide text-fg-muted",
                   )}
                 >
                   {label}

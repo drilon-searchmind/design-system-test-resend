@@ -253,15 +253,15 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
         <div className="min-w-0">
           <Link
             href={routes.time}
-            className="font-mono text-[10px] font-semibold uppercase tracking-wide text-agency-brand hover:underline"
+            className="text-[10px] font-semibold uppercase tracking-wide text-agency-brand hover:underline"
           >
             Tilbage
           </Link>
           <h1 className="mt-1 font-sans text-[20px] font-semibold text-fg">Tidsregistrering</h1>
           <p className="mt-1 font-sans text-[12px] text-fg-muted">
-            {`${dur || "—"} min`} kl. <span className="font-mono tabular-nums text-fg">{headerAt}</span>
-            {" · "}Kilde{" "}
-            <span className="font-semibold text-fg">{db ? "database" : "demo"}</span>
+            {`${dur || "—"} min`} kl. <span className="tabular-nums text-fg">{headerAt}</span>
+            {" · "}
+            {db ? "Live data" : "Eksempelvisning"}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -312,7 +312,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           {activityEntries.map((ev, idx) =>
             ev && typeof ev === "object" ?
               <li key={typeof ev.id === "string" && ev.id.trim() ? ev.id : String(idx)} className="font-sans text-[12px] text-fg-muted">
-                <span className="font-mono tabular-nums text-fg-quiet">{typeof ev.at === "string" ? ev.at.replace("T", " ").slice(0, 16) : ""}</span>
+                <span className="tabular-nums text-fg-quiet">{typeof ev.at === "string" ? ev.at.replace("T", " ").slice(0, 16) : ""}</span>
                 {" — "}
                 <span className="font-semibold text-fg">{typeof ev.kind === "string" ? ev.kind : "Hændelse"}</span>
                 {" · "}
@@ -322,9 +322,9 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           )}
         </ul>
       : (
-        <div className="grid gap-4 rounded-2xl border border-border bg-surface-card p-4 md:grid-cols-2 md:p-5">
+        <div className="tally-panel grid gap-4 p-4 md:grid-cols-2 md:p-5">
           <label className="flex flex-col gap-1 md:col-span-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Minutter</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Minutter</span>
             <input
               disabled={!db}
               type="number"
@@ -333,7 +333,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
               value={dur}
               onChange={(ev) => setDur(ev.target.value)}
               className={cn(
-                "h-9 rounded-md border border-border bg-surface-muted px-2 font-mono text-[13px] tabular-nums",
+                "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px] tabular-nums",
                 "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
                 !db && "opacity-65",
               )}
@@ -341,7 +341,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           </label>
 
           <label className="flex flex-col gap-1 md:col-span-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Dato arbejde</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Dato arbejde</span>
             <input
               disabled={!db}
               type="date"
@@ -355,21 +355,21 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           </label>
 
           <label className="flex flex-col gap-1 md:col-span-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kl.</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kl.</span>
             <input
               disabled={!db}
               type="time"
               value={workedTime}
               onChange={(ev) => setWorkedTime(ev.target.value.slice(0, 5))}
               className={cn(
-                "h-9 rounded-md border border-border bg-surface-muted px-2 font-mono text-[13px]",
+                "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px]",
                 !db && "opacity-65",
               )}
             />
           </label>
 
           <label className="flex flex-col gap-2 md:col-span-2">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Note</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Note</span>
             <textarea
               disabled={!db}
               value={desc}
@@ -398,7 +398,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           </label>
 
           <label className="flex flex-col gap-1 md:col-span-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kunde</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kunde</span>
             <select
               disabled={!db || !billable}
               value={billable ? clientSlug : ""}
@@ -418,7 +418,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           </label>
 
           <label className="flex flex-col gap-1 md:col-span-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Afdeling</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Afdeling</span>
             <select
               disabled={!db}
               value={departmentKey}
@@ -437,7 +437,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           </label>
 
           <label className="flex flex-col gap-1 md:col-span-2">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Opgave</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Opgave</span>
             <select
               disabled={!db || !billable}
               value={taskKey}
@@ -455,7 +455,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
 
           {!db ?
             <p className="md:col-span-2 font-sans text-[12px] text-fg-muted">
-              Demo: ingen redigering. Skift til <span className="font-semibold text-fg">MongoDB</span> i datakilde.
+              Redigering er ikke tilgængelig.
             </p>
           : null}
         </div>

@@ -42,8 +42,8 @@ export function ClientDetailHeader({ client, owner, trailing }) {
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
-              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-white/10",
-              "font-mono text-sm font-semibold text-white shadow-inset-card md:size-[60px] md:text-[15px]",
+              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
+              "text-sm font-semibold text-white md:size-[60px] md:text-[15px]",
             )}
             style={{
               background: `linear-gradient(135deg, oklch(62% 0.15 ${client.hue}), oklch(52% 0.18 ${client.hue + 28}))`,
@@ -52,7 +52,7 @@ export function ClientDetailHeader({ client, owner, trailing }) {
             {client.logo}
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Kunde
             </p>
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{client.name}</h1>
@@ -72,7 +72,7 @@ export function ClientDetailHeader({ client, owner, trailing }) {
                 </>
               ) : null}
               {" · "}
-              <span className="font-mono text-[12px] tabular-nums text-fg-quiet">
+              <span className="text-[12px] tabular-nums text-fg-quiet">
                 Sidst aktiv {client.lastActivity}
               </span>
             </p>

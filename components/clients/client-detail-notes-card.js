@@ -11,14 +11,14 @@ import { cn } from "@/lib/utils";
 export function ClientDetailNotesCard({ notes, teamMembers }) {
   const roster = teamMembers?.length ? teamMembers : TEAM;
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Seneste noter
       </h2>
       <ul className="mt-4 flex flex-col gap-3 font-sans text-sm">
         {notes.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-center text-[13px] text-fg-muted">
-            Ingen noter i mock endnu — tilføj aktivitet i CRM for at se feed her.
+            Ingen noter endnu — tilføj aktivitet i CRM for at se feed her.
           </li>
         ) : (
           notes.map((n) => {
@@ -35,13 +35,13 @@ export function ClientDetailNotesCard({ notes, teamMembers }) {
                       <span className="font-sans text-[12px] font-medium text-fg">{author.name}</span>
                     </div>
                   ) : (
-                    <span className="font-mono text-[10px] uppercase text-fg-quiet">{n.who}</span>
+                    <span className="text-[10px] uppercase text-fg-quiet">{n.who}</span>
                   )}
                   <span className="text-fg-quiet">·</span>
-                  <span className="font-mono text-[10px] tabular-nums text-fg-quiet">{n.at}</span>
+                  <span className="text-[10px] tabular-nums text-fg-quiet">{n.at}</span>
                   <span
                     className={cn(
-                      "rounded-md border px-1.5 py-px font-mono text-[9px] font-semibold uppercase tracking-wide",
+                      "rounded-md border px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide",
                       n.type === "alert" &&
                         "border-agency-bad-border bg-agency-bad-soft text-agency-bad",
                       n.type === "call" && "border-agency-ok-border bg-agency-ok-soft text-agency-ok",

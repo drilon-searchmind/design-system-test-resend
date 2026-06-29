@@ -8,7 +8,7 @@ import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { IconChart } from "@/components/crm/icons";
-import { routes, workloadMemberHref } from "@/config/routes";
+import { routes } from "@/config/routes";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
@@ -125,11 +125,6 @@ export function WorkloadMemberPortfolio() {
       bundle.billableHoursMonth
     : 0;
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (`includeTest=1` viser også testposter i dev)."
-      : "Demonstrationsdata.";
-
   if (!memberKey) {
     return (
       <div className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
@@ -175,7 +170,7 @@ export function WorkloadMemberPortfolio() {
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconChart size={14} className="text-agency-brand" aria-hidden />
             Team workload
           </p>
@@ -190,14 +185,12 @@ export function WorkloadMemberPortfolio() {
               <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{member.role}</p>
               <p className="mt-1 font-sans text-[12px] text-fg-muted">
                 <span className="capitalize">{subtitle}</span>
-                {" · "}
-                {member.isMe ? <span className="font-semibold text-fg">Min profil</span> : null}
-                {member.isMe ? null : (
+                {member.isMe ? (
                   <>
-                    Profil-key:{" "}
-                    <code className="font-mono text-[11px] text-fg-soft">{memberKey}</code>
+                    {" · "}
+                    <span className="font-semibold text-fg">Min profil</span>
                   </>
-                )}
+                ) : null}
               </p>
             </div>
           </div>
@@ -212,26 +205,26 @@ export function WorkloadMemberPortfolio() {
       </header>
 
       <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card">
-          <p className="font-mono text-[10px] uppercase tracking-wide text-fg-soft">Åbne opgaver</p>
-          <p className="mt-2 font-mono text-[22px] font-semibold tabular-nums text-fg">{openStats.total}</p>
+        <div className="tally-panel p-4">
+          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Åbne opgaver</p>
+          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{openStats.total}</p>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">
             {openStats.high} høj prio · {openStats.overdue} overskridet
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card">
-          <p className="font-mono text-[10px] uppercase tracking-wide text-fg-soft">Timer (Periode)</p>
-          <p className="mt-2 font-mono text-[22px] font-semibold tabular-nums text-fg">{hoursMonth} t</p>
+        <div className="tally-panel p-4">
+          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Timer (Periode)</p>
+          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{hoursMonth} t</p>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">Alle poster i rapportmåneden</p>
         </div>
-        <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card">
-          <p className="font-mono text-[10px] uppercase tracking-wide text-fg-soft">Billable</p>
-          <p className="mt-2 font-mono text-[22px] font-semibold tabular-nums text-fg">{billableHoursMonth} t</p>
+        <div className="tally-panel p-4">
+          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Billable</p>
+          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{billableHoursMonth} t</p>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">Ud fra flaggede poster</p>
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+      <section className="tally-panel overflow-hidden">
         <div className="border-b border-border px-4 py-3">
           <h2 className="font-sans text-sm font-semibold text-fg">Åbne opgaver på dig</h2>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">Knyttet til {member.name} ({memberKey}).</p>
@@ -250,24 +243,16 @@ export function WorkloadMemberPortfolio() {
                     {t.title || t.key}
                   </Link>
                 : <span className="min-w-0 flex-1 font-sans text-[13px] font-semibold text-fg">{t.title}</span>}
-                <span className="font-mono text-[10px] text-fg-quiet">{t.clientSlug ?? ""}</span>
-                <span className="font-mono text-[10px] text-fg-muted">{t.priority}</span>
+                <span className="text-[10px] text-fg-quiet">{t.clientSlug ?? ""}</span>
+                <span className="text-[10px] text-fg-muted">{t.priority}</span>
                 {t.dueIso ? (
-                  <span className="font-mono text-[10px] text-fg-soft">Aflevering {t.dueIso.slice(0, 10)}</span>
+                  <span className="text-[10px] text-fg-soft">Aflevering {t.dueIso.slice(0, 10)}</span>
                 ) : null}
               </li>
             ))
           )}
         </ul>
       </section>
-
-      <p className="font-sans text-[12px] text-fg-quiet">
-        Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-        {" · "}
-        <Link href={workloadMemberHref(memberKey)} className="font-medium text-agency-brand hover:underline">
-          Aktuel URL til deling
-        </Link>
-      </p>
     </div>
   );
 }

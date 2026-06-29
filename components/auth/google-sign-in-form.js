@@ -37,17 +37,24 @@ export function GoogleSignInForm({ error, callbackUrl }) {
     >
       <div className="flex flex-col gap-6">
         {message ? (
-          <p className="rounded-xl border border-border bg-google-banner px-4 py-3 font-sans text-sm leading-relaxed text-accent-warning">
+          <p
+            className="rounded-2xl border border-border bg-surface-muted px-4 py-3 text-sm leading-relaxed text-fg-muted"
+            role="alert"
+          >
             {message}
           </p>
         ) : null}
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-4 py-2.5 text-sm font-semibold text-fg hover:bg-surface-muted-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-solid-cta-bg px-4 py-3.5 text-base font-medium text-solid-cta-fg transition hover:bg-solid-cta-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           onClick={handleGoogle}
         >
           Continue with Google
+          <span aria-hidden>→</span>
         </button>
+        <p className="text-center text-xs uppercase tracking-[0.08em] text-fg-soft">
+          Workspace SSO · @searchmind.dk
+        </p>
       </div>
     </AuthCard>
   );

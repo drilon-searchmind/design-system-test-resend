@@ -81,14 +81,9 @@ export function NpsPortfolio() {
     });
   }, [load]);
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB — kunder, NpsResponse, skabeloner og kampagner (`includeTest=1` i dev)."
-      : "Demonstrationsdata (`CLIENTS`, `NPS_*` fixtures).";
-
   const responseRateLabel =
     bundle && bundle.lastRoundCaptionDemo === true
-      ? "Svarfrekvens (seneste mock-runde)"
+      ? "Svarfrekvens (seneste runde)"
       : "Svarfrekvens (invitationer i rapportmåned)";
 
   const invitationsLabel =
@@ -208,12 +203,6 @@ export function NpsPortfolio() {
         <NpsClientsDirectory clients={Array.isArray(bundle.clients) ? bundle.clients : []} />
 
         <NpsTemplatesDirectory templates={Array.isArray(bundle.templates) ? bundle.templates : []} />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

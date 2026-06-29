@@ -158,12 +158,10 @@ export function TemplateDetailShell({ templateId }) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
-          Demo har ingen skabelon med nøgle <span className="font-mono text-fg">{templateId}</span>.{" "}
+          Ingen skabelon med nøgle <span className="text-fg">{templateId}</span>.{" "}
           <Link href={routes.templates} className="text-agency-brand hover:underline">
             Tilbage til Task templates
           </Link>
-          {" · "}
-          Kommer fra MongoDB? Skift til <span className="font-medium text-fg-soft">MongoDB under Indstillinger → Datakilde</span>.
         </p>
       </div>
     );
@@ -181,8 +179,7 @@ export function TemplateDetailShell({ templateId }) {
         id: `${String(w.id)}-statisk`,
         at: uAt,
         kind: "Bibliotek",
-        summary:
-          "Statisk demonstrationsdata — fuld revisionslog og redigering findes når datakilden er MongoDB.",
+        summary: "Registreret i skabelonbiblioteket.",
       });
     }
 
@@ -198,15 +195,9 @@ export function TemplateDetailShell({ templateId }) {
           templateWire={w}
           activityEntries={activityEntries}
           checklistDemoNote
-          activityFootnote="Demo viser ét syntetisk punkt — database viser `createdAt` og `updatedAt` som separate linjer."
+          activityFootnote={undefined}
           mongo={null}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">Demo (`TASK_TEMPLATES`)</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     );
   }
@@ -247,7 +238,7 @@ export function TemplateDetailShell({ templateId }) {
           templateWire={rTpl}
           activityEntries={dbActivity}
           checklistDemoNote={false}
-          activityFootnote="Bygget fra Mongo `createdAt` / `updatedAt` — udvid til fuld audit hvis nødvendigt."
+          activityFootnote={undefined}
           mongo={{
             templateRouteId: templateId,
             departments: mongoDeptRows,
@@ -258,12 +249,6 @@ export function TemplateDetailShell({ templateId }) {
             onReload: loadRemote,
           }}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">MongoDB</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     );
   }

@@ -55,7 +55,7 @@ function renderInline(text) {
       return (
         <code
           key={idx}
-          className="rounded border border-border-soft bg-surface-muted px-1 py-0.5 font-mono text-[11px] text-fg"
+          className="rounded border border-border-soft bg-surface-muted px-1 py-0.5 text-[11px] text-fg"
         >
           {inner}
         </code>

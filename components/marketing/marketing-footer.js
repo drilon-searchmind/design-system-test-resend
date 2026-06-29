@@ -11,25 +11,32 @@ export function MarketingFooter() {
   return (
     <footer
       role="contentinfo"
-      className={cn(
-        "mt-auto border-t border-border-soft py-12",
-        shellPaddingX,
-      )}
+      className={cn("mt-auto border-t border-border-muted py-12", shellPaddingX)}
     >
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 sm:flex-row sm:gap-4">
-        <p className="text-center font-sans text-[0.75rem] tracking-tight text-fg-soft sm:text-left">
-          © {year} {site.branding}
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 sm:flex-row sm:justify-between sm:gap-4">
+        <p className="max-w-md text-center text-sm leading-relaxed text-fg-muted sm:text-left">
+          {site.branding} is Searchmind&apos;s operational cockpit — SSO,
+          workspaces, settings, and integrations behind one interface.
         </p>
         <nav
-          className="flex flex-wrap items-center justify-center gap-8 font-sans text-xs text-fg-muted"
+          className="flex flex-wrap items-center justify-center gap-6 text-sm text-fg-muted"
           aria-label="Footer links"
         >
-          <Link className="transition hover:text-fg" href={routes.privacy}>
+          <Link
+            className="rounded-full px-2 py-1 transition hover:text-fg"
+            href={routes.privacy}
+          >
             Privacy
           </Link>
-          <Link className="transition hover:text-fg" href={routes.terms}>
+          <Link
+            className="rounded-full px-2 py-1 transition hover:text-fg"
+            href={routes.terms}
+          >
             Terms
           </Link>
+          <span className="text-xs text-fg-soft">
+            © {year}
+          </span>
         </nav>
       </div>
     </footer>

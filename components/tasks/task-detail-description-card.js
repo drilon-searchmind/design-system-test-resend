@@ -20,18 +20,18 @@ export function TaskDetailDescriptionCard({ task, mode = "demo" }) {
     "Leverancen dokumenteres synligt for account og kunde før lukning.",
     "Mindst ét check-in før forfaldsdato hvis estimation overstiger cirka tre mandagsdages arbejde.",
     mode === "database"
-      ? "Ændringer synces direkte mod Mongo-tasken — gem via CRM-panelet eller API."
-      : "Mindst ét check-in før forfaldsdato hvis estimation > 3 dages arbejde (stub).",
+      ? "Ændringer synces direkte mod CRM-opgaven — gem via CRM-panelet eller API."
+      : "Mindst ét check-in før forfaldsdato hvis estimation overstiger cirka tre mandagsdages arbejde.",
   ];
 
-  const titleChip = mode === "database" ? "Opgavenote (CRM)" : "Opgavespec (demo)";
+  const titleChip = mode === "database" ? "Opgavenote (CRM)" : "Opgavespec";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">{titleChip}</h2>
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">{titleChip}</h2>
       <p className="mt-3 font-sans text-[13px] leading-relaxed text-fg-muted">{hint}</p>
       <div className="mt-5 border-t border-border-soft pt-4">
-        <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Acceptlinjer</h3>
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Acceptlinjer</h3>
         <ul
           className={cn(
             "mt-3 flex list-disc flex-col gap-2 pl-[1.05rem] font-sans text-[12.5px] leading-snug text-fg-muted",

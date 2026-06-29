@@ -18,7 +18,7 @@ export function AdminColorTokenCell({ token }) {
         style={{ background: bg ?? "var(--ds-surface-muted)" }}
         aria-hidden
       />
-      <span className="truncate font-mono text-[11px] tabular-nums text-fg-muted">{label}</span>
+      <span className="truncate text-[11px] tabular-nums text-fg-muted">{label}</span>
     </span>
   );
 }

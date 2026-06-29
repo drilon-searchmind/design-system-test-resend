@@ -53,7 +53,7 @@ export function HealthChip({ health, className, palette = "apex", compact = fals
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
         styles[health] ?? styles.ok,
         className,
       )}

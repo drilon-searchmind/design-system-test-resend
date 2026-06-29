@@ -58,7 +58,7 @@ export function TeamRosterDirectory({
   return (
     <section
       id="team-roster"
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-start md:justify-between md:px-4 md:py-4">
@@ -68,7 +68,7 @@ export function TeamRosterDirectory({
           </h2>
           <p className="mt-1 font-sans text-[11px] leading-snug text-fg-muted">
             Medarbejdere med afdeling og belægning fra åbne board-opgaver — klik videre til profilkort. Brug{" "}
-            <span className="font-mono text-fg-quiet">?dept=</span> fra Workload-filter.
+            <span className="text-fg-quiet">?dept=</span> fra Workload-filter.
           </p>
         </div>
         <div className="flex w-full min-w-0 flex-col gap-2 md:max-w-none md:w-auto md:flex-1 md:flex-row md:justify-end md:gap-2">
@@ -102,7 +102,7 @@ export function TeamRosterDirectory({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 border-b border-border-soft bg-surface-muted/30 px-3 py-2 md:px-4">
-        <span className="mr-1 font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Disciplin</span>
+        <span className="mr-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Disciplin</span>
         <button
           type="button"
           onClick={() => setDept("all")}
@@ -137,7 +137,7 @@ export function TeamRosterDirectory({
           <div
             className={cn(
               "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-              "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+              "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
               GRID,
             )}
           >
@@ -182,7 +182,7 @@ export function TeamRosterDirectory({
                   <CrmAvatar label={r.member.avatar} hue={r.member.hue} className="size-8 text-[11px]" />
                   <div className="min-w-0">
                     <span className="truncate font-sans text-[13px] font-semibold text-fg">{r.member.name}</span>
-                    <div className="font-mono text-[10px] text-fg-quiet">
+                    <div className="text-[10px] text-fg-quiet">
                       {r.member.weeklyHours} h/uge
                       {r.member.isMe ? (
                         <span className="text-agency-brand"> · dig</span>
@@ -192,22 +192,22 @@ export function TeamRosterDirectory({
                 </div>
                 <span className="truncate self-center font-sans text-[12px] text-fg-muted">{r.member.role}</span>
                 <span
-                  className="self-center font-mono text-[11px] font-semibold tabular-nums"
+                  className="self-center text-[11px] font-semibold tabular-nums"
                   style={{ color: d?.color ?? "var(--fg-muted)" }}
                 >
                   {d?.short ?? r.member.dept}
                 </span>
-                <span className="self-center text-center font-mono text-[11px] tabular-nums text-fg">{r.openCount}</span>
-                <span className="self-center text-center font-mono text-[11px] tabular-nums text-fg">{r.highCount}</span>
+                <span className="self-center text-center text-[11px] tabular-nums text-fg">{r.openCount}</span>
+                <span className="self-center text-center text-[11px] tabular-nums text-fg">{r.highCount}</span>
                 <span
                   className={cn(
-                    "self-center text-center font-mono text-[11px] tabular-nums",
+                    "self-center text-center text-[11px] tabular-nums",
                     r.overdueCount > 0 ? "text-agency-bad" : "text-fg-muted",
                   )}
                 >
                   {r.overdueCount}
                 </span>
-                <span className="self-center font-mono text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
+                <span className="self-center text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
                 <PulseUtilBar
                   hours={r.loadIndex}
                   budget={100}
@@ -227,7 +227,7 @@ export function TeamRosterDirectory({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <span className="font-mono text-[10px] text-fg-soft">
+        <span className="text-[10px] text-fg-soft">
           {filtered.length} af {teamRows.length}
         </span>
         <Link href={routes.workload} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">

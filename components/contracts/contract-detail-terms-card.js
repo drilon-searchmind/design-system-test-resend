@@ -2,7 +2,7 @@ import { StatusChip } from "@/components/crm/status-chip";
 import { formatCurrency } from "@/lib/crm/format-da";
 
 function billingCadence(kind) {
-  if (kind === "Projekt") return "Miljøbaseret · afstemmes pr. sprint (mock)";
+  if (kind === "Projekt") return "Miljøbaseret · afstemmes pr. sprint";
   return "Fast månedlig fakturering ved periodestart";
 }
 
@@ -11,16 +11,16 @@ function billingCadence(kind) {
  */
 export function ContractDetailTermsCard({ contract }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[var(--ds-studio-pad-main)]">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Vilkår & fakturagrundlag
       </h2>
 
       <div className="mt-5 grid gap-8 lg:grid-cols-2">
-        <dl className="grid gap-x-8 gap-y-4 font-mono text-[11px] text-fg-muted sm:grid-cols-2">
+        <dl className="grid gap-x-8 gap-y-4 text-[11px] text-fg-muted sm:grid-cols-2">
           <div className="sm:col-span-2">
             <dt className="text-fg-soft">Kontrakt-id</dt>
-            <dd className="mt-1 font-mono text-[13px] text-fg">{contract.id}</dd>
+            <dd className="mt-1 text-[13px] text-fg">{contract.id}</dd>
           </div>
           <div>
             <dt className="text-fg-soft">Aftaletype</dt>
@@ -49,7 +49,7 @@ export function ContractDetailTermsCard({ contract }) {
             <dd className="mt-1 tabular-nums text-fg">{contract.noticeDays} kalenderdage</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-fg-soft">Faktureringsrytme (mock)</dt>
+            <dt className="text-fg-soft">Faktureringsrytme</dt>
             <dd className="mt-1 font-sans text-[13px] leading-snug text-fg-muted">{billingCadence(contract.kind)}</dd>
           </div>
           <div className="sm:col-span-2 rounded-xl border border-dashed border-border bg-surface-muted/30 p-3 font-sans text-[12px] leading-relaxed text-fg-muted">
@@ -59,8 +59,8 @@ export function ContractDetailTermsCard({ contract }) {
         </dl>
 
         <div className="rounded-xl border border-border-soft bg-surface-muted/35 p-4">
-          <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-            Dækningsnote (mock)
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            Dækningsnote
           </h3>
           <ul className="mt-3 list-inside list-disc space-y-2 font-sans text-[12px] leading-relaxed text-fg-muted">
             <li>Inkluderet: strategisk sparring, månedlig rapport-rytme, slack-kanal med tildelt AM.</li>

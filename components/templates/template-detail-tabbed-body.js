@@ -55,7 +55,7 @@ export function TemplateDetailTabbedBody({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
         <nav aria-label="Skabelon-undersektioner">
           <PulseSegmentedControl size="sm" active={resolvedTab} onChange={onTabChange} tabs={TAB_DEFS} />
         </nav>
@@ -86,21 +86,21 @@ export function TemplateDetailTabbedBody({
               ].map(({ k, v }) => (
                 <div
                   key={k}
-                  className={cn("rounded-2xl border border-border bg-surface-card px-4 py-3 shadow-inset-card")}
+                  className={cn("tally-panel px-4 py-3")}
                 >
-                  <div className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">{k}</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">{k}</div>
                   <div className="mt-1 font-sans text-[14px] font-medium tabular-nums text-fg">{v}</div>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <div className="tally-panel p-4 md:p-5">
+              <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
                 Leverance-definition
               </h3>
               <p className="mt-2 font-sans text-[13px] leading-relaxed text-fg-muted">
                 Skabelonen provisionerer standardfelter ved nye opgaver og spejler den dokumenterede struktur på listen
-                (bibliotek) samt mongo-record på CRM-fanen.
+                (bibliotek) samt CRM-post på CRM-fanen.
               </p>
             </div>
           </section>
@@ -111,13 +111,13 @@ export function TemplateDetailTabbedBody({
             <h2 id="template-tab-checklist" className="sr-only">
               Tjekliste
             </h2>
-            <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+            <div className="tally-panel p-4 md:p-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Punkter</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Punkter</p>
                 {checklistDemoNote && !checklist.length ?
                   <p className="font-sans text-[11px] text-fg-quiet">
-                    Demo-data har kun antalsfelt (
-                    <span className="font-mono tabular-nums">{String(templateWire.checklistCount ?? 0)}</span>).
+                    Kun antalsfelt registreret (
+                    <span className="tabular-nums">{String(templateWire.checklistCount ?? 0)}</span>).
                   </p>
                 : null}
               </div>
@@ -125,7 +125,7 @@ export function TemplateDetailTabbedBody({
               {!checklist.length ?
                 <p className="mt-4 font-sans text-[13px] text-fg-muted">
                   {checklistDemoNote ?
-                    `Ingen enkeltpunkter i mock — kun tæller (${String(templateWire.checklistCount ?? 0)} stk.).`
+                    `Ingen enkeltpunkter — kun tæller (${String(templateWire.checklistCount ?? 0)} stk.).`
                   : "Ingen tjekliste endnu."}
                 </p>
               : (
@@ -156,7 +156,7 @@ export function TemplateDetailTabbedBody({
                     key={e.id}
                     className="rounded-xl border border-border-soft bg-surface-muted/40 px-4 py-3 leading-snug text-fg"
                   >
-                    <span className="font-mono text-[11px] text-fg-quiet">{e.at}</span>
+                    <span className="text-[11px] text-fg-quiet">{e.at}</span>
                     <span className="mx-2 text-fg-quiet">·</span>
                     <span className="font-semibold text-fg-soft">{e.kind}</span>
                     <span className="mx-2 text-fg-quiet">—</span>
@@ -189,9 +189,8 @@ export function TemplateDetailTabbedBody({
                 onReload={mongo.onReload}
               />
             : (
-              <p className="rounded-xl border border-border bg-surface-card px-4 py-3 font-sans text-[13px] text-fg-muted shadow-inset-card">
-                CRM-redigering er kun tilgængelig når datakilden er <span className="font-medium text-fg-soft">MongoDB</span>
-                .
+              <p className="tally-panel px-4 py-3 text-[13px] text-fg-muted">
+                CRM-redigering er ikke tilgængelig i denne visning.
               </p>
             )}
           </section>

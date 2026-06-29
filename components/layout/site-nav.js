@@ -7,7 +7,6 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { routes } from "@/config/routes";
 import { shellPaddingX } from "@/config/shell";
 import { cn } from "@/lib/utils";
@@ -17,19 +16,30 @@ const primaryLinks = [
   { href: routes.terms, label: "Terms" },
 ];
 
-function NavLink({ href, label }) {
+function NavLink({ href, label, variant = "default" }) {
   const pathname = usePathname();
   const active =
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+
+  const tally = variant === "tally";
 
   return (
     <Link
       href={href}
       className={cn(
-        "nav-tracking inline-flex shrink-0 items-center justify-center rounded-full border px-2.5 py-1.5 text-xs transition md:text-sm",
-        active
-          ? "border-border bg-surface-active text-fg"
-          : "border-transparent text-fg-muted hover:border-border-hover-soft hover:bg-surface-muted hover:text-fg",
+        tally
+          ? cn(
+              "inline-flex shrink-0 items-center justify-center rounded-full px-3.5 py-2 text-sm transition",
+              active
+                ? "bg-surface-active text-fg"
+                : "text-fg-muted hover:bg-surface-muted hover:text-fg",
+            )
+          : cn(
+              "nav-tracking inline-flex shrink-0 items-center justify-center rounded-full border px-2.5 py-1.5 text-xs transition md:text-sm",
+              active
+                ? "border-border bg-surface-active text-fg"
+                : "border-transparent text-fg-muted hover:border-border-hover-soft hover:bg-surface-muted hover:text-fg",
+            ),
       )}
     >
       {label}
@@ -37,19 +47,31 @@ function NavLink({ href, label }) {
   );
 }
 
-function DrawerNavLink({ href, label, onNavigate }) {
+function DrawerNavLink({ href, label, onNavigate, variant = "default" }) {
   const pathname = usePathname();
   const active =
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+
+  const tally = variant === "tally";
 
   return (
     <Link
       href={href}
       className={cn(
-        "-mx-1 flex rounded-xl border px-4 py-3.5 text-base font-medium transition nav-tracking",
-        active
-          ? "border-border bg-surface-active text-fg"
-          : "border-transparent text-fg-muted hover:border-border-soft hover:bg-surface-muted hover:text-fg",
+        "-mx-1 flex px-4 py-3.5 text-base font-medium transition",
+        tally
+          ? cn(
+              "rounded-full",
+              active
+                ? "bg-surface-active text-fg"
+                : "text-fg-muted hover:bg-surface-muted hover:text-fg",
+            )
+          : cn(
+              "rounded-xl border nav-tracking",
+              active
+                ? "border-border bg-surface-active text-fg"
+                : "border-transparent text-fg-muted hover:border-border-soft hover:bg-surface-muted hover:text-fg",
+            ),
       )}
       onClick={onNavigate}
     >
@@ -86,7 +108,8 @@ function HamburgerIcon({ open }) {
   );
 }
 
-export function SiteNav() {
+export function SiteNav({ variant = "default" }) {
+  const tally = variant === "tally";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerCloseRef = useRef(null);
 
@@ -118,17 +141,21 @@ export function SiteNav() {
   return (
     <div className="relative flex min-w-0 flex-1 items-center justify-end">
       <nav
-        className="hidden min-w-0 flex-1 flex-row flex-nowrap items-center justify-end gap-x-3 md:flex lg:gap-x-3"
+        className={cn(
+          "hidden min-w-0 flex-1 flex-row flex-nowrap items-center justify-end md:flex",
+          tally ? "gap-x-1 lg:gap-x-2" : "gap-x-3 lg:gap-x-3",
+        )}
         aria-label="Main navigation"
       >
-        <div className="flex flex-nowrap items-center gap-2 lg:gap-3">
-          {primaryLinks.map(({ href, label }) => (
-            <NavLink key={href} href={href} label={label} />
-          ))}
-        </div>
+        {!tally ? (
+          <div className="flex flex-nowrap items-center gap-1 lg:gap-2">
+            {primaryLinks.map(({ href, label }) => (
+              <NavLink key={href} href={href} label={label} variant={variant} />
+            ))}
+          </div>
+        ) : null}
 
-        <NavDivider />
-        <ThemeToggle />
+        {!tally ? <NavDivider /> : null}
 
         {status === "loading" ? (
           <span
@@ -139,19 +166,28 @@ export function SiteNav() {
 
         {!isAuthed && status !== "loading" ? (
           <>
-            <NavDivider />
-            <NavLink href={routes.login} label="Log in" />
+            {!tally ? <NavDivider /> : null}
+            {tally ? (
+              <Link
+                href={routes.login}
+                className="inline-flex shrink-0 items-center justify-center rounded-full bg-solid-cta-bg px-3.5 py-2 text-sm font-medium text-solid-cta-fg transition hover:bg-solid-cta-hover"
+              >
+                Log in
+              </Link>
+            ) : (
+              <NavLink href={routes.login} label="Log in" variant={variant} />
+            )}
           </>
         ) : null}
 
         {isAuthed ? (
           <>
-            <NavDivider />
-            <div className="flex flex-nowrap items-center gap-2 lg:gap-3">
-              <NavLink href={routes.pulse} label="Agency OS" />
-              <NavLink href={routes.settings} label="Settings" />
+            {!tally ? <NavDivider /> : null}
+            <div className="flex flex-nowrap items-center gap-1 lg:gap-2">
+              <NavLink href={routes.pulse} label="Agency OS" variant={variant} />
+              <NavLink href={routes.settings} label="Settings" variant={variant} />
             </div>
-            <NavDivider />
+            {!tally ? <NavDivider /> : null}
             <button
               type="button"
               className="nav-tracking inline-flex shrink-0 items-center justify-center rounded-full border border-transparent px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-muted hover:text-fg"
@@ -164,7 +200,6 @@ export function SiteNav() {
       </nav>
 
       <div className="flex flex-1 items-center justify-end gap-2 md:hidden">
-        <ThemeToggle size="comfortable" />
         {status === "loading" ? (
           <span
             className="h-10 w-[7.25rem] shrink-0 animate-pulse rounded-full bg-skeleton"
@@ -240,18 +275,41 @@ export function SiteNav() {
                 )}
                 aria-label="Mobile navigation"
               >
-                {primaryLinks.map(({ href, label }) => (
-                  <DrawerNavLink key={href} href={href} label={label} onNavigate={close} />
-                ))}
+                {!tally
+                  ? primaryLinks.map(({ href, label }) => (
+                      <DrawerNavLink
+                        key={href}
+                        href={href}
+                        label={label}
+                        onNavigate={close}
+                        variant={variant}
+                      />
+                    ))
+                  : null}
 
                 {!isAuthed && status !== "loading" ? (
-                  <DrawerNavLink href={routes.login} label="Log in" onNavigate={close} />
+                  <DrawerNavLink
+                    href={routes.login}
+                    label="Log in"
+                    onNavigate={close}
+                    variant={variant}
+                  />
                 ) : null}
 
                 {isAuthed ? (
                   <>
-                    <DrawerNavLink href={routes.pulse} label="Agency OS" onNavigate={close} />
-                    <DrawerNavLink href={routes.settings} label="Settings" onNavigate={close} />
+                    <DrawerNavLink
+                      href={routes.pulse}
+                      label="Agency OS"
+                      onNavigate={close}
+                      variant={variant}
+                    />
+                    <DrawerNavLink
+                      href={routes.settings}
+                      label="Settings"
+                      onNavigate={close}
+                      variant={variant}
+                    />
                     <button
                       type="button"
                       className="-mx-1 mt-2 flex w-full rounded-xl border border-border-drawer-soft px-4 py-3.5 text-left text-base font-medium text-fg-muted hover:bg-surface-muted hover:text-fg"

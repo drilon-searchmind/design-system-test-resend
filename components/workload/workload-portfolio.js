@@ -179,11 +179,6 @@ export function WorkloadPortfolio() {
 
   const departments = useMemo(() => departmentsFromBundle(bundle), [bundle]);
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (`includeTest=1` in dev viser også testposter)."
-      : "Demonstrationsdata (`lib/crm/static-data.js` + workload-utils).";
-
   const headerPeriodMemo = normalizedPeriod;
 
   if (loading && !bundle) {
@@ -268,12 +263,6 @@ export function WorkloadPortfolio() {
         </div>
 
         <WorkloadTeamDirectory rows={teamRows} departments={departments} />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

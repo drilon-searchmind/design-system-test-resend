@@ -21,16 +21,12 @@ import { cn } from "@/lib/utils";
  */
 export function TaskDetailContextCard({ client, contract }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kunde & aftale</h2>
-      <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Opgaven er koblet til kunden. Primær aftale vises kun når CRM har en aktiv kontraktrække for kunden (
-        <span className="font-mono">contracts</span>).
-      </p>
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kunde & aftale</h2>
 
       <div className="mt-5 flex flex-col gap-5">
         <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">Kunde</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">Kunde</p>
           <Link
             href={`${routes.clients}/${client.id}`}
             className="mt-1 inline-flex font-sans text-[14px] font-semibold text-fg underline-offset-4 hover:text-agency-brand hover:underline"
@@ -42,7 +38,7 @@ export function TaskDetailContextCard({ client, contract }) {
 
         <div className={cn("border-t border-border-soft pt-5")}>
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">Primær aftale</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">Primær aftale</p>
             {contract ?
               <Link
                 href={`${routes.contracts}/${contract.id}`}
@@ -56,8 +52,8 @@ export function TaskDetailContextCard({ client, contract }) {
             <div className="mt-3 flex items-start gap-3">
               <span
                 className={cn(
-                  "flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10",
-                  "font-mono text-xs font-semibold text-white",
+                  "flex size-11 shrink-0 items-center justify-center rounded-xl border border-border",
+                  "text-xs font-semibold text-white",
                 )}
                 style={{
                   background: `linear-gradient(135deg, oklch(62% 0.15 ${contract.clientHue}), oklch(52% 0.18 ${contract.clientHue + 28}))`,
@@ -72,12 +68,12 @@ export function TaskDetailContextCard({ client, contract }) {
                 >
                   {contract.clientName}
                 </Link>
-                <p className="mt-1 font-mono text-[11px] text-fg-muted">
+                <p className="mt-1 text-[11px] text-fg-muted">
                   {contract.kind}
                   {" · "}
                   <span className="tabular-nums">{formatCurrencyCompact(contract.monthlyValue, contract.currency)}/md</span>
                 </p>
-                <p className="mt-1 font-mono text-[10px] text-fg-quiet">{contract.id}</p>
+                <p className="mt-1 text-[10px] text-fg-quiet">{contract.id}</p>
               </div>
             </div>
           : <p className="mt-3 rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-4 font-sans text-[13px] text-fg-muted">

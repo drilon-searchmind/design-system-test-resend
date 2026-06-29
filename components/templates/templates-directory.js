@@ -86,14 +86,14 @@ export function TemplatesDirectory({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h2 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
         </h2>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {total}
         </span>
 
@@ -150,7 +150,7 @@ export function TemplatesDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
             >
@@ -203,7 +203,7 @@ export function TemplatesDirectory({
                   </div>
                   <div className="flex min-w-0 items-center">
                     <span
-                      className="font-mono text-[11px] font-semibold tabular-nums"
+                      className="text-[11px] font-semibold tabular-nums"
                       style={{
                         color: typeof dep?.color === "string" && dep.color ? dep.color : undefined,
                       }}
@@ -211,11 +211,11 @@ export function TemplatesDirectory({
                       {(dep?.short ?? dep?.name ?? "").trim().slice(0, 8) || row.dept}
                     </span>
                   </div>
-                  <span className="font-mono text-[12px] tabular-nums text-fg">{row.usedCount}×</span>
+                  <span className="text-[12px] tabular-nums text-fg">{row.usedCount}×</span>
                   <div className="hidden items-center justify-center sm:flex">
                     <span
                       className={cn(
-                        "rounded-md border px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase",
+                        "rounded-md border px-1.5 py-0.5 text-[9px] font-semibold uppercase",
                         row.active ? "border-agency-brand-border text-agency-brand" : "border-border text-fg-quiet",
                       )}
                     >
@@ -228,13 +228,13 @@ export function TemplatesDirectory({
                       className="scale-95 origin-left"
                     />
                   </div>
-                  <span className="font-mono text-[12px] tabular-nums text-fg">{row.defaultDueOffsetDays} d</span>
-                  <span className="font-mono text-[12px] tabular-nums text-fg">{row.estHours} t</span>
+                  <span className="text-[12px] tabular-nums text-fg">{row.defaultDueOffsetDays} d</span>
+                  <span className="text-[12px] tabular-nums text-fg">{row.estHours} t</span>
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-mono text-[12px] tabular-nums text-fg">
+                    <span className="text-[12px] tabular-nums text-fg">
                       {formatIsoDateDa(row.updatedAt)}
                     </span>
-                    <span className="font-mono text-[10px] text-fg-quiet">{SCOPE_DA[row.scope] ?? row.scope}</span>
+                    <span className="text-[10px] text-fg-quiet">{SCOPE_DA[row.scope] ?? row.scope}</span>
                   </div>
                   <PulseIconChevronRight className="justify-self-end text-fg-quiet" aria-hidden />
                 </Link>

@@ -94,11 +94,6 @@ export function TeamMemberPortfolio() {
     }
   }, [bundle]);
 
-  const sourceFootnote =
-    dataSource === "database" ?
-      "MongoDB — TeamMember, Task m.m. (`includeTest=1` i dev)."
-    : "Demonstrationsdata (`TEAM`, `TASKS`).";
-
   const member =
     bundle && typeof bundle.member === "object" && bundle.member ?
       /** @type {{ id?: string; name?: string; role?: string; dept?: string; avatar?: string; hue?: number; weeklyHours?: number; isMe?: boolean }} */ (
@@ -219,12 +214,6 @@ export function TeamMemberPortfolio() {
           : null}
         </div>
       </div>
-
-      <p className="font-sans text-[12px] text-fg-quiet">
-        Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-        {" · "}
-        Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-      </p>
     </div>
   );
 }

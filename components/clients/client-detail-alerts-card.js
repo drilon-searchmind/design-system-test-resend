@@ -21,9 +21,9 @@ export function ClientDetailAlertsCard({ clientId, alerts, description }) {
   const rows = alerts.filter((a) => a.client === clientId);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Krydsreferencede Pulse-alerts
         </h2>
         <Link href={routes.pulse} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
@@ -33,7 +33,7 @@ export function ClientDetailAlertsCard({ clientId, alerts, description }) {
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
         {description ?? (
           <>
-            Read-only udtræk af alerts matcher på <span className="font-mono text-fg">{clientId}</span>.
+            Read-only udtræk af alerts matcher på <span className="text-fg">{clientId}</span>.
           </>
         )}
       </p>
@@ -41,7 +41,7 @@ export function ClientDetailAlertsCard({ clientId, alerts, description }) {
       <ul className="mt-4 flex flex-col gap-2 font-sans text-[13px]">
         {rows.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-5 text-[13px] text-fg-muted">
-            Denne kunde triggrer ikke nogen aktiv alert i demo — Pulse viser øvrige alarmer.
+            Denne kunde triggrer ikke nogen aktiv alert — Pulse viser øvrige alarmer.
           </li>
         ) : (
           rows.map((a) => (
@@ -55,7 +55,7 @@ export function ClientDetailAlertsCard({ clientId, alerts, description }) {
                   "border-border bg-surface-muted/35",
               )}
             >
-              <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-fg-quiet">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-fg-quiet">
                 <span className="uppercase">{a.severity}</span>
                 <span>·</span>
                 <span>{a.age}</span>

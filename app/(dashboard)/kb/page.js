@@ -50,15 +50,6 @@ export default async function KnowledgeBasePage({ searchParams }) {
         initialCategoryId={validCat}
         initialAuthorId={validAuthor}
       />
-
-      <p className="font-sans text-[12px] text-fg-quiet">
-        Artikler i <code className="font-mono text-[11px] text-fg-muted">lib/crm/knowledge-data.js</code> matcher{" "}
-        <code className="font-mono text-[11px] text-fg-muted">KnowledgeArticle</code> (slug, title, summary,{" "}
-        <code className="font-mono text-[11px] text-fg-muted">bodyMd</code>, tags, audience{" "}
-        <code className="font-mono text-[11px] text-fg-quiet">internal|client|public</code>,{" "}
-        <code className="font-mono text-[11px] text-fg-quiet">published</code>
-        ). Erstat mock med Mongo + fuld‑tekst‑søg når backend er klar.
-      </p>
     </main>
   );
 }

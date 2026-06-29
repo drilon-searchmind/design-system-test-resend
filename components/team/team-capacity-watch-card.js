@@ -13,13 +13,13 @@ export function TeamCapacityWatchCard({ teamRows }) {
   const hot = [...teamRows].sort((a, b) => b.loadIndex - a.loadIndex).slice(0, 6);
 
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Belægningswatch (fra board)
         </h2>
         <p className="max-w-md font-sans text-[11px] text-fg-muted">
-          Samme index som Workload — profiler med højest mock-belægning.
+          Samme index som Workload — profiler med højest belægning.
         </p>
       </div>
       <ul className="mt-4 flex flex-col divide-y divide-border-soft">
@@ -38,7 +38,7 @@ export function TeamCapacityWatchCard({ teamRows }) {
               </Link>
               <p className="font-sans text-[11px] text-fg-muted">{r.member.role}</p>
             </div>
-            <div className="font-mono text-[11px] tabular-nums text-fg-muted">
+            <div className="text-[11px] tabular-nums text-fg-muted">
               <span className={cn(r.loadIndex >= 88 ? "font-semibold text-agency-warn" : "text-fg")}>{r.loadIndex}%</span>
               {" · "}
               {r.openCount} åbne

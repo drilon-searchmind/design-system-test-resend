@@ -30,7 +30,7 @@ export default async function KnowledgeArticlePage({ params }) {
       <KbArticleHeader article={article} />
 
       <section className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.22fr)_minmax(260px,0.78fr)] lg:items-start">
-        <article className="min-w-0 rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[length:var(--ds-studio-pad-main)]">
+        <article className="tally-panel min-w-0 p-4 md:p-[length:var(--ds-studio-pad-main)]">
           <h2 className="sr-only">Indhold</h2>
           <KbArticleBody bodyMd={article.bodyMd} />
         </article>
@@ -39,11 +39,6 @@ export default async function KnowledgeArticlePage({ params }) {
           <KbRelatedArticles articles={related} />
         </div>
       </section>
-
-      <p className="font-sans text-[12px] text-fg-quiet">
-        Markdown i kroppen er letfortolket (overskrifter, lister, inline kode) — til rigtig wiki kan du skifte til{" "}
-        <code className="font-mono text-[11px] text-fg-muted">react-markdown</code> eller MDX efter behov.
-      </p>
     </main>
   );
 }

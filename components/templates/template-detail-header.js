@@ -49,7 +49,7 @@ export function TemplateDetailHeader({ templateRow }) {
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="truncate text-fg">{templateRow.name}</span>
         <span className="mx-2 text-fg-quiet">/</span>
-        <span className="font-mono text-[11px] text-fg-muted">{templateRow.id}</span>
+        <span className="text-[11px] text-fg-muted">{templateRow.id}</span>
       </nav>
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
@@ -57,23 +57,23 @@ export function TemplateDetailHeader({ templateRow }) {
           <span
             className={cn(
               "flex size-14 shrink-0 items-center justify-center rounded-xl border border-border bg-agency-brand-soft",
-              "font-mono text-sm font-semibold text-agency-brand shadow-inset-card md:size-[60px] md:text-[15px]",
+              "text-sm font-semibold text-agency-brand md:size-[60px] md:text-[15px]",
             )}
             aria-hidden
           >
             {templateRow.name.trim().slice(0, 2).toUpperCase() || "T"}
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Skabelon · {templateRow.deptLabel}
             </p>
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{templateRow.name}</h1>
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {SCOPE_DA[templateRow.scope] ?? templateRow.scope}
               <span className="mx-2 text-fg-quiet">·</span>
-              <span className="font-mono tabular-nums text-fg-quiet">{templateRow.usedCount} tilknyttede opgaver</span>
+              <span className="tabular-nums text-fg-quiet">{templateRow.usedCount} tilknyttede opgaver</span>
               <span className="mx-2 text-fg-quiet">·</span>
-              Sidst red. <span className="font-mono text-[11px]">{templateRow.updatedAt || "—"}</span>
+              Sidst red. <span className="text-[11px]">{templateRow.updatedAt || "—"}</span>
             </p>
             {templateRow.hint ?
               <p className="mt-2 max-w-prose whitespace-pre-wrap font-sans text-[12px] leading-relaxed text-fg-quiet">
@@ -85,7 +85,7 @@ export function TemplateDetailHeader({ templateRow }) {
               <TaskPriorityChip priority={prio} />
               <span
                 className={cn(
-                  "inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide",
+                  "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                   templateRow.active
                     ? "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
                     : "border-border bg-surface-muted text-fg-quiet",
@@ -95,7 +95,7 @@ export function TemplateDetailHeader({ templateRow }) {
               </span>
             </div>
 
-            <p className="mt-4 font-mono text-[11px] text-fg-muted">
+            <p className="mt-4 text-[11px] text-fg-muted">
               Standarddeadline (+d): <span className="tabular-nums text-fg-soft">{templateRow.defaultDueOffsetDays}</span>
               {" · "}
               Est. timer (forslag): <span className="tabular-nums text-fg-soft">{templateRow.estHours}</span>

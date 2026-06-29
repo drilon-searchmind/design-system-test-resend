@@ -5,7 +5,7 @@ import { routes } from "@/config/routes";
 
 export function KbStarterCard() {
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[length:var(--ds-studio-pad-main)]">
+    <div className="tally-panel p-4 md:p-[length:var(--ds-studio-pad-main)]">
       <div className="flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-agency-brand-border bg-agency-brand-soft text-agency-brand">
           <IconDoc size={18} aria-hidden />

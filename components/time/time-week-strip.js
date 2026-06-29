@@ -19,10 +19,10 @@ export function TimeWeekStrip({ days, dailyTargetMinutes, weekCaption }) {
   const targetHours = dailyTargetMinutes / 60;
 
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             Ugereolen
           </h2>
           <p className="mt-1 font-sans text-[11px] leading-snug text-fg-muted">
@@ -30,7 +30,7 @@ export function TimeWeekStrip({ days, dailyTargetMinutes, weekCaption }) {
             kontekst — typisk 0 i Agency OS.
           </p>
         </div>
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">{weekCaption}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">{weekCaption}</p>
       </div>
 
       <div className="mt-5 grid grid-cols-7 gap-2 overflow-x-auto pb-1">
@@ -43,18 +43,18 @@ export function TimeWeekStrip({ days, dailyTargetMinutes, weekCaption }) {
               className={cn(
                 "flex min-w-[92px] flex-col gap-2 rounded-xl border px-2.5 py-3",
                 d.isToday
-                  ? "border-agency-brand-border bg-agency-brand-soft/35 shadow-[0_0_0_1px_color-mix(in_oklch,var(--agency-brand)_22%,transparent)]"
+                  ? "border-agency-brand-border bg-agency-brand-soft/35"
                   : "border-border-soft bg-surface-muted/40",
                 weekend && "opacity-70",
               )}
             >
               <div className="flex items-baseline justify-between gap-1">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
                   {d.label}
                 </span>
-                <span className="font-mono text-[9px] tabular-nums text-fg-quiet">{formatIsoDayMonthDa(d.iso)}</span>
+                <span className="text-[9px] tabular-nums text-fg-quiet">{formatIsoDayMonthDa(d.iso)}</span>
               </div>
-              <p className="font-mono text-[14px] font-semibold tabular-nums leading-none text-fg">
+              <p className="text-[14px] font-semibold tabular-nums leading-none text-fg">
                 {formatHoursDecimalDa(d.minutes)}
               </p>
               <PulseUtilBar hours={hours} budget={targetHours} className="mt-auto" />

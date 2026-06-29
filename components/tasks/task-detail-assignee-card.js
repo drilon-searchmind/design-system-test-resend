@@ -21,10 +21,10 @@ export function TaskDetailAssigneeCard({ member, departmentsLookup }) {
   const dep = member ? deps.find((d) => d.id === member.dept) : null;
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ansvarlig</h2>
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ansvarlig</h2>
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Tilknyttet CRM-teamprofil ved <span className="font-mono">TeamMember.assigneeMemberKey → task.assigneeMemberKey</span>.
+        Tilknyttet CRM-teamprofil ved <span className="">TeamMember.assigneeMemberKey → task.assigneeMemberKey</span>.
       </p>
       {member ?
         <div className={cn("mt-4 flex items-start gap-3 border-t border-border-soft pt-4")}>
@@ -32,7 +32,7 @@ export function TaskDetailAssigneeCard({ member, departmentsLookup }) {
           <div className="min-w-0">
             <p className="font-sans text-[14px] font-semibold text-fg">{member.name}</p>
             <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{member.role}</p>
-            <p className="mt-2 font-mono text-[11px] text-fg-soft">
+            <p className="mt-2 text-[11px] text-fg-soft">
               Desk: <span style={{ color: dep?.color }}>{dep?.short ?? member.dept.toUpperCase()}</span>
             </p>
           </div>

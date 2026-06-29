@@ -40,8 +40,8 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
     <Link
       href={`${routes.tasks}/${encodeURIComponent(row.id)}`}
       className={cn(
-        "flex flex-col rounded-2xl border border-border bg-surface-card p-3.5 shadow-inset-card transition-all",
-        "hover:border-agency-brand-border hover:shadow-agency-raised md:p-4",
+        "tally-panel flex flex-col p-3.5 transition-all",
+        "hover:border-agency-brand-border md:p-4",
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -51,12 +51,12 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
             <p className="mt-1 line-clamp-2 font-sans text-[11px] leading-relaxed text-fg-quiet">{row.hint}</p>
           ) : (
             <p className="mt-1 line-clamp-2 font-sans text-[11px] italic leading-relaxed text-fg-quiet">
-              Ingen kort hint i mock — fuld beskrivelse på opgave-siden.
+              Ingen kort hint — fuld beskrivelse på opgave-siden.
             </p>
           )}
         </div>
         <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/10 font-mono text-[12px] font-semibold text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-[12px] font-semibold text-white"
           style={{ background: `oklch(62% 0.14 ${row.clientHue})` }}
         >
           {row.clientLogo}
@@ -72,7 +72,7 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
         <TaskPriorityChip priority={row.priority} />
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-soft pt-3 font-mono text-[11px] text-fg-muted">
+      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-soft pt-3 text-[11px] text-fg-muted">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Forfaldsdato</div>
           <div

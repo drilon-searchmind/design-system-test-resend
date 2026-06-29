@@ -8,14 +8,13 @@ export function KbQuickLinksCard({ className }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[length:var(--ds-studio-pad-main)]",
+        "tally-panel p-4 md:p-[length:var(--ds-studio-pad-main)]",
         className,
       )}
     >
       <h2 className="font-sans text-sm font-semibold text-fg">Hurtige kategorier</h2>
       <p className="mt-1 font-sans text-[12px] leading-snug text-fg-muted">
-        Filtrér artikellisten — query bevares i URL (<code className="font-mono text-[11px]">?cat=</code>
-        ).
+        Filtrér artikellisten efter kategori.
       </p>
       <ul className="mt-3 flex flex-col gap-2">
         {KNOWLEDGE_CATEGORIES.map((c) => (
@@ -26,7 +25,7 @@ export function KbQuickLinksCard({ className }) {
             >
               <span className="font-sans text-[12px] font-medium text-fg group-hover:text-agency-brand">{c.name}</span>
               <span
-                className="font-mono text-[10px] font-semibold text-fg-quiet"
+                className="text-[10px] font-semibold text-fg-quiet"
                 style={{ color: `oklch(0.72 0.06 ${c.deptHue})` }}
               >
                 {c.short}

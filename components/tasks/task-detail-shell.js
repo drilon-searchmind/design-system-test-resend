@@ -85,12 +85,10 @@ export function TaskDetailShell({ taskId }) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
-          Demo har ingen opgave med id <span className="font-mono text-fg">{taskId}</span>.{" "}
+          Ingen opgave med id <span className="text-fg">{taskId}</span>.{" "}
           <Link href={routes.tasks} className="text-agency-brand hover:underline">
             Tilbage til Opgaver
           </Link>
-          {" · "}
-          Åbnet en database-nøgle? Skift til <span className="font-medium text-fg-soft">MongoDB</span> under datakilde.
         </p>
       </div>
     );
@@ -123,7 +121,7 @@ export function TaskDetailShell({ taskId }) {
     if (!client || !contract) {
       return (
         <p className="font-sans text-[13px] text-fg-muted">
-          Mangler mock kunde eller kontrakt. <Link href={routes.tasks}>Tilbage</Link>
+          Mangler tilknyttet kunde eller kontrakt. <Link href={routes.tasks}>Tilbage</Link>
         </p>
       );
     }
@@ -142,7 +140,7 @@ export function TaskDetailShell({ taskId }) {
           trailing={
             <div className="flex flex-col items-end gap-1">
               <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
-              <span className="max-w-[240px] text-right font-mono text-[10px] text-fg-quiet">
+              <span className="max-w-[240px] text-right text-[10px] text-fg-quiet">
                 {periodSubtitle}
               </span>
             </div>
@@ -192,11 +190,6 @@ export function TaskDetailShell({ taskId }) {
           mongo={null}
           activityFootnote={undefined}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">Demo (`lib/crm/static-data.js`)</span> — skift til MongoDB via{" "}
-          <span className="font-medium text-fg-soft">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     );
   }
@@ -369,16 +362,8 @@ export function TaskDetailShell({ taskId }) {
             onNotice: setMongoNotice,
             onReload: loadRemote,
           }}
-          activityFootnote="Poster fra Mongo `createdAt` / `updatedAt` — udvid evt. til fuld revisionslog."
+          activityFootnote={undefined}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">MongoDB</span>
-          {" · "}
-          Bilable tidslog matcher <span className="font-mono text-[11px] text-fg-muted">{periodLabelResolved}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     );
   }

@@ -20,7 +20,7 @@ export function NpsTrendAndDistributionCard({ trend, promoters, passive, detract
 
   return (
     <section className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-stretch">
-      <div className="flex flex-col rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+      <div className="flex flex-col tally-panel p-4 md:p-5">
         <PulseCardHeader
           title="Bureau-trend (12 måneder)"
           sub="Sidste datapunkt = vægtet gennemsnit af aktive målinger — Geist Mono / tabular (Agency OS)."
@@ -28,12 +28,12 @@ export function NpsTrendAndDistributionCard({ trend, promoters, passive, detract
         <div className="mt-4 text-agency-brand">
           <PulseSparkline data={trend} height={40} className="max-w-none" />
         </div>
-        <p className="mt-3 font-mono text-[10px] text-fg-quiet">
+        <p className="mt-3 text-[10px] text-fg-quiet">
           Min {Math.min(...trend).toFixed(1)} · Max {Math.max(...trend).toFixed(1)}
         </p>
       </div>
 
-      <div className="flex flex-col rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+      <div className="flex flex-col tally-panel p-4 md:p-5">
         <PulseCardHeader
           title="Fordeling — seneste score pr. konto"
           sub="Baseret på sidste registrerede NPS for hver aktiv/pauseret konto med historik."
@@ -59,15 +59,15 @@ export function NpsTrendAndDistributionCard({ trend, promoters, passive, detract
           <ul className="flex flex-wrap gap-x-6 gap-y-2 font-sans text-[11.5px] text-fg-muted">
             <li className="inline-flex items-center gap-2">
               <span className="size-2.5 rounded-sm bg-agency-ok" /> Promoters ({promoters}/{withData}){" "}
-              <span className="font-mono tabular-nums text-fg">{formatPercent(p)}</span>
+              <span className="tabular-nums text-fg">{formatPercent(p)}</span>
             </li>
             <li className="inline-flex items-center gap-2">
               <span className="size-2.5 rounded-sm bg-agency-warn" /> Passive ({passive}/{withData}){" "}
-              <span className="font-mono tabular-nums text-fg">{formatPercent(q)}</span>
+              <span className="tabular-nums text-fg">{formatPercent(q)}</span>
             </li>
             <li className="inline-flex items-center gap-2">
               <span className="size-2.5 rounded-sm bg-agency-bad" /> Detraktorer ({detractors}/{withData}){" "}
-              <span className="font-mono tabular-nums text-fg">{formatPercent(r)}</span>
+              <span className="tabular-nums text-fg">{formatPercent(r)}</span>
             </li>
           </ul>
           {withData === 0 ? (

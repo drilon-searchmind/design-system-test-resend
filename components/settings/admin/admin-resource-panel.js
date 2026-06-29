@@ -194,7 +194,7 @@ export function AdminResourcePanel({ resourceId }) {
         </p>
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card">
+      <section className="tally-panel overflow-hidden">
         {loading ? (
           <p className="px-4 py-8 text-center font-sans text-[13px] text-fg-muted">Henter…</p>
         ) : items.length === 0 ? (
@@ -209,12 +209,12 @@ export function AdminResourcePanel({ resourceId }) {
                   {meta.listColumns.map((col) => (
                     <th
                       key={col}
-                      className="px-3 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft"
+                      className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fg-soft"
                     >
                       {fieldByName[col]?.label ?? col}
                     </th>
                   ))}
-                  <th className="w-[120px] px-3 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+                  <th className="w-[120px] px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
                     Handling
                   </th>
                 </tr>

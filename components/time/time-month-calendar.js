@@ -32,10 +32,10 @@ export function TimeMonthCalendar({
   const targetHours = dailyTargetMinutes / 60;
 
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             Månedskalender
           </h2>
           <p className="mt-1 max-w-[48ch] font-sans text-[11px] leading-snug text-fg-muted">
@@ -44,7 +44,7 @@ export function TimeMonthCalendar({
           </p>
         </div>
         <div className="text-right">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">{periodCaption}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">{periodCaption}</p>
           {periodSubtitle ? (
             <p className="mt-0.5 font-sans text-[11px] capitalize text-fg-muted">{periodSubtitle}</p>
           ) : null}
@@ -55,7 +55,7 @@ export function TimeMonthCalendar({
         {CALENDAR_WEEKDAY_HEADERS_DA_MON.map((h) => (
           <div
             key={h}
-            className="flex min-h-[26px] items-center justify-center font-mono text-[9px] font-semibold uppercase tracking-wide text-fg-quiet"
+            className="flex min-h-[26px] items-center justify-center text-[9px] font-semibold uppercase tracking-wide text-fg-quiet"
           >
             {h}
           </div>
@@ -88,12 +88,12 @@ export function TimeMonthCalendar({
                       onSelectDay(iso);
                   }}
                   className={cn(
-                    "flex min-h-[88px] min-w-0 cursor-pointer flex-col gap-1.5 rounded-lg border px-1.5 py-2 text-left outline-none ring-offset-2 ring-offset-canvas transition-[box-shadow,border-color,background-color] sm:min-h-[96px] sm:px-2 sm:py-2.5",
+                    "flex min-h-[88px] min-w-0 cursor-pointer flex-col gap-1.5 rounded-lg border px-1.5 py-2 text-left outline-none ring-offset-2 ring-offset-canvas transition-[border-color,background-color] sm:min-h-[96px] sm:px-2 sm:py-2.5",
                     "hover:border-agency-brand-border hover:bg-agency-brand-soft/20 focus-visible:ring-2 focus-visible:ring-agency-brand",
                     d.isToday
-                      ? "border-agency-brand-border bg-agency-brand-soft/35 shadow-[0_0_0_1px_color-mix(in_oklch,var(--agency-brand)_22%,transparent)]"
+                      ? "border-agency-brand-border bg-agency-brand-soft/35"
                       : "border-border-soft bg-surface-muted/35",
-                    isSelected && "shadow-[inset_0_0_0_2px_var(--agency-brand)]",
+                    isSelected && "border-2 border-agency-brand",
                     weekend && "opacity-65",
                   )}
                 >
@@ -101,11 +101,11 @@ export function TimeMonthCalendar({
                     <span className="font-sans text-[12px] font-semibold tabular-nums leading-none text-fg">
                       {d.label ?? "—"}
                     </span>
-                    <span className="hidden truncate font-mono text-[8px] tabular-nums text-fg-muted sm:inline">
+                    <span className="hidden truncate text-[8px] tabular-nums text-fg-muted sm:inline">
                       {iso ? formatIsoDayMonthDa(iso) : ""}
                     </span>
                   </div>
-                  <p className="font-mono text-[11px] font-semibold tabular-nums leading-none text-fg sm:text-[12px]">
+                  <p className="text-[11px] font-semibold tabular-nums leading-none text-fg sm:text-[12px]">
                     {formatHoursDecimalDa(mins)}
                   </p>
                   <PulseUtilBar hours={hours} budget={targetHours} className="mt-auto pointer-events-none" />

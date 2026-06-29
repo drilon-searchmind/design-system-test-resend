@@ -4,13 +4,8 @@ import { routes } from "@/config/routes";
 
 export function UsersRbacCard() {
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Roller (mock)</h2>
-      <p className="mt-2 font-sans text-[12px] leading-snug text-fg-muted">
-        Platform-roller i demo er <span className="font-mono text-[11px] text-fg-quiet">admin · lead · finance · member · readonly</span>{" "}
-        — mappes senere til <span className="font-mono text-[11px] text-fg-quiet">User.caps</span> og{" "}
-        <span className="font-mono text-[11px] text-fg-quiet">accessTier</span>.
-      </p>
+    <section className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Roller</h2>
       <ul className="mt-4 space-y-2 font-sans text-[12px] text-fg-muted">
         <li>
           <span className="font-semibold text-fg">Administrator</span> — fuld workspace + brugerprovisionering.

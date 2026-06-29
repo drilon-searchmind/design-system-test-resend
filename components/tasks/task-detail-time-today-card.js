@@ -23,21 +23,21 @@ export function TaskDetailTimeTodayCard({ taskId, entries, departments, periodLa
 
   const hint =
     sourceHint ??
-    `Filtreret fra TIME_ENTRIES_TODAY (${periodLabel}). Task-id mangler eller matcher ikke på tværs af mocks.`;
+    `Filtreret til opgaven for ${periodLabel || "perioden"}. Ingen matchende registreringer endnu.`;
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Tidslog (periode)</h2>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Tidslog (periode)</h2>
         <Link href={routes.time} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
           Åbn tid →
         </Link>
       </div>
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">{hint}</p>
-      <p className="mt-1 font-mono text-[10px] text-fg-soft">
+      <p className="mt-1 text-[10px] text-fg-soft">
         <span className="tabular-nums">{minutes} min</span> total ·{" "}
         <span className="tabular-nums">{entries.length}</span> poster ·{" "}
-        <span className="font-mono">{taskId}</span>
+        <span className="">{taskId}</span>
         {periodLabel ? <> · Udsnit: {periodLabel}</> : null}
       </p>
       {entries.length === 0 ?
@@ -55,11 +55,11 @@ export function TaskDetailTimeTodayCard({ taskId, entries, departments, periodLa
                   "bg-surface-muted/40 px-3 py-2.5 font-sans text-[12px]",
                 )}
               >
-                <span className="font-mono text-[11px] tabular-nums text-fg-soft">{e.at}</span>
-                <span className="font-mono text-[11px] tabular-nums text-agency-brand">{e.dur} m</span>
+                <span className="text-[11px] tabular-nums text-fg-soft">{e.at}</span>
+                <span className="text-[11px] tabular-nums text-agency-brand">{e.dur} m</span>
                 {dep?.short ?
                   <span
-                    className="font-mono text-[10px] font-semibold text-fg-quiet"
+                    className="text-[10px] font-semibold text-fg-quiet"
                     style={{ color: dep.color ?? undefined }}
                   >
                     {dep.short}

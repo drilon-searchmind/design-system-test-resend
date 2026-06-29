@@ -15,8 +15,8 @@ export function ClientDetailDeliveryCard({ client }) {
   const entries = Object.entries(client.allocation ?? {}).filter(([, v]) => v > 0);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[var(--ds-studio-pad-main)]">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Leverance & udnyttelse
       </h2>
 
@@ -24,12 +24,12 @@ export function ClientDetailDeliveryCard({ client }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
                 Udnyttelse denne måned
               </p>
               <p
                 className={cn(
-                  "mt-1 font-mono text-xl font-semibold tabular-nums tracking-tight text-fg",
+                  "mt-1 text-xl font-semibold tabular-nums tracking-tight text-fg",
                   util > 1 && "text-agency-bad",
                   util <= 1 && util > 0.9 && "text-agency-warn",
                   util <= 0.9 && "text-agency-ok",
@@ -38,7 +38,7 @@ export function ClientDetailDeliveryCard({ client }) {
                 {formatPercent(util)}
               </p>
             </div>
-            <p className="font-mono text-[11px] tabular-nums text-fg-muted">
+            <p className="text-[11px] tabular-nums text-fg-muted">
               {client.hoursThisMonth} / {client.hoursBudget} t
             </p>
           </div>
@@ -52,7 +52,7 @@ export function ClientDetailDeliveryCard({ client }) {
         </div>
 
         <div className="min-w-0 flex-1 lg:border-l lg:border-border lg:pl-8">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Allokering pr. disciplin
           </p>
           <PulseAllocationBar allocation={client.allocation} height={12} className="mt-3" />
@@ -70,7 +70,7 @@ export function ClientDetailDeliveryCard({ client }) {
                       />
                       <span className="truncate text-fg-muted">{d?.name ?? dept}</span>
                     </span>
-                    <span className="shrink-0 font-mono text-[11px] tabular-nums text-fg">{pct}%</span>
+                    <span className="shrink-0 text-[11px] tabular-nums text-fg">{pct}%</span>
                   </li>
                 );
               })}

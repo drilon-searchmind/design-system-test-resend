@@ -14,10 +14,7 @@ export function PulseHealthDistribution() {
   const atRisk = CLIENTS.filter((c) => c.health !== "ok").slice(0, 4);
 
   return (
-    <section
-      className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5"
-      aria-labelledby="pulse-health-heading"
-    >
+    <section className="tally-panel p-4 md:p-5" aria-labelledby="pulse-health-heading">
       <div id="pulse-health-heading">
         <PulseCardHeader
           title="Kundernes sundhed"
@@ -45,7 +42,7 @@ export function PulseHealthDistribution() {
           <span key={s.label} className="inline-flex items-center gap-2">
             <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
             {s.label}{" "}
-            <b className="font-mono tabular-nums text-fg">{s.n}</b>
+            <b className="tabular-nums text-fg">{s.n}</b>
             <span className="text-fg-quiet">({Math.round((s.n / total) * 100)}%)</span>
           </span>
         ))}
@@ -60,13 +57,13 @@ export function PulseHealthDistribution() {
             className="grid grid-cols-[28px_1fr_auto] items-center gap-3 md:grid-cols-[28px_1fr_auto_100px]"
           >
             <span
-              className="flex size-6 items-center justify-center rounded-md border border-white/10 font-mono text-[10px] font-semibold text-agency-brand-fg"
+              className="flex size-6 items-center justify-center rounded-lg border border-border text-[10px] font-semibold text-agency-brand-fg"
               style={{ background: `oklch(62% 0.14 ${c.hue})` }}
             >
               {c.logo}
             </span>
             <span className="truncate font-sans text-[12.5px] text-fg">{c.name}</span>
-            <span className="font-mono text-[11.5px] tabular-nums text-fg-muted">
+            <span className="text-[11.5px] tabular-nums text-fg-muted">
               {c.hoursThisMonth}/{c.hoursBudget}t
             </span>
             <div className="col-span-full md:col-span-1 md:col-start-4">

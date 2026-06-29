@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
  */
 export function NpsInsightsCard({ alerts }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Signals fra Pulse
         </h2>
         <Link href={routes.pulse} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
@@ -23,7 +23,7 @@ export function NpsInsightsCard({ alerts }) {
 
       {alerts.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-6 text-center text-[13px] text-fg-muted">
-          Ingen NPS-flag i mock — aktiver flere integrationsregler eller tilføj `npsDrop` alerts.
+          Ingen NPS-flag lige nu — aktiver flere integrationsregler eller tilføj `npsDrop` alerts.
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -38,7 +38,7 @@ export function NpsInsightsCard({ alerts }) {
                 {a.title}
               </p>
               <p className="mt-1 font-sans text-[11px] leading-snug text-fg-muted">{a.body}</p>
-              <span className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wide text-fg-quiet">
+              <span className="mt-2 inline-block text-[10px] uppercase tracking-wide text-fg-quiet">
                 {a.type} · {a.age}
               </span>
             </li>

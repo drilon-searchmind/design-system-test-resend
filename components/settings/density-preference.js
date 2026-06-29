@@ -10,7 +10,7 @@ export function DensityPreference() {
   const density = useDensity();
 
   return (
-    <div className="max-w-lg rounded-2xl border border-border bg-surface-card p-6 shadow-inset-card">
+    <div className="max-w-lg tally-panel p-6">
       <h2 className="font-sans text-base font-semibold text-fg">Layout density</h2>
       <p className="mt-2 font-sans text-sm text-fg-muted">
         Searchmind Agency OS uses compact spacing by default. Spacious increases padding on

@@ -81,13 +81,10 @@ export function ContractDetailShell({ contractId }) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
-          Demo har ingen kontrakt med id <span className="font-mono text-fg">{contractId}</span>.{" "}
+          Ingen kontrakt med id <span className="text-fg">{contractId}</span>.{" "}
           <Link href={routes.contracts} className="text-agency-brand hover:underline">
             Tilbage til Kontrakter
           </Link>
-          {" · "}
-          Har du åbnet en nøgle fra databasen? Skift til{" "}
-          <span className="font-medium text-fg-muted">MongoDB under Indstillinger → Datakilde</span>.
         </p>
       </div>
     );
@@ -98,7 +95,7 @@ export function ContractDetailShell({ contractId }) {
     if (!client) {
       return (
         <p className="font-sans text-[13px] text-fg-muted">
-          Mangler tilknyttet kunde i mock. <Link href={routes.contracts}>Tilbage</Link>
+          Mangler tilknyttet kunde. <Link href={routes.contracts}>Tilbage</Link>
         </p>
       );
     }
@@ -156,15 +153,8 @@ export function ContractDetailShell({ contractId }) {
           retainerHistory={retainerHist}
           revisionEntries={revisions}
           tasks={clientTasks}
-          tasksSourceLabel="mock TASKS"
           alerts={SMART_ALERTS}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">Demo (`lib/crm/static-data.js`)</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span> for MongoDB.
-        </p>
       </div>
     );
   }
@@ -248,16 +238,8 @@ export function ContractDetailShell({ contractId }) {
           retainerHistory={Array.isArray(remote.retainerHistory) ? remote.retainerHistory : []}
           revisionEntries={Array.isArray(remote.revisions) ? remote.revisions : []}
           tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
-          tasksSourceLabel="MongoDB"
           alerts={Array.isArray(remote.alerts) ? remote.alerts : []}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">MongoDB</span> — bilable timer og KPI i overblik matcher{" "}
-          <span className="font-mono text-[11px] text-fg-muted">{periodLabel}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     );
   }

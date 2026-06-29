@@ -44,7 +44,7 @@ export function TemplateGridCard({ row, departments }) {
     <Link href={href} className={cn("block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent")}>
       <article
         className={cn(
-          "flex h-full flex-col rounded-2xl border border-border bg-surface-card p-3.5 shadow-inset-card transition-colors hover:bg-surface-muted/40 hover:border-agency-brand-border",
+          "tally-panel flex h-full flex-col p-3.5 transition-colors hover:border-agency-brand-border hover:bg-surface-muted/40",
           row.active ? "" : "opacity-65",
         )}
       >
@@ -55,7 +55,7 @@ export function TemplateGridCard({ row, departments }) {
           </div>
           <span
             className={cn(
-              "rounded-md border border-border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-muted",
+              "rounded-md border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted",
             )}
             style={dep?.color ? { color: dep.color } : undefined}
           >
@@ -69,7 +69,7 @@ export function TemplateGridCard({ row, departments }) {
           />
           <span
             className={cn(
-              "inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide",
+              "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
               row.active ?
                 "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
               : "border-border bg-surface-muted text-fg-quiet",
@@ -79,7 +79,7 @@ export function TemplateGridCard({ row, departments }) {
           </span>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-soft pt-3 font-mono text-[11px] text-fg-muted">
+        <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-soft pt-3 text-[11px] text-fg-muted">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Deadline (+d)</div>
             <div className="mt-0.5 tabular-nums text-fg">{row.defaultDueOffsetDays} d</div>
@@ -101,9 +101,9 @@ export function TemplateGridCard({ row, departments }) {
         <div className="mt-2 border-t border-border-soft pt-2 font-sans text-[10px] text-fg-muted">
           <span className="font-semibold text-fg-soft">Scope:</span> {SCOPE_DA[row.scope] ?? row.scope}
           <span className="mx-1.5 text-fg-quiet">·</span>
-          <span className="font-mono tabular-nums">Opd. {formatIsoDateDa(row.updatedAt)}</span>
+          <span className="tabular-nums">Opd. {formatIsoDateDa(row.updatedAt)}</span>
         </div>
-        <p className="mt-2 font-mono text-[10px] text-fg-quiet">{row.id}</p>
+        <p className="mt-2 text-[10px] text-fg-quiet">{row.id}</p>
       </article>
     </Link>
   );

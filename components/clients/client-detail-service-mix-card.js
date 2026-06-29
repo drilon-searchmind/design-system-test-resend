@@ -14,9 +14,9 @@ export function ClientDetailServiceMixCard({ client }) {
   const alloc = client.allocation ?? {};
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Aktive services & kapacitetsfordeling
         </h2>
         <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
@@ -25,13 +25,13 @@ export function ClientDetailServiceMixCard({ client }) {
       </div>
 
       <p className="mt-2 max-w-xl font-sans text-[11px] leading-snug text-fg-muted">
-        Andel ud af aftalt timebudget fordelt ud fra allokerings-matrixen på kunden ({client.hoursBudget} t/md i mock).
+        Andel ud af aftalt timebudget fordelt ud fra allokerings-matrixen på kunden ({client.hoursBudget} t/md).
       </p>
 
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[360px] border-collapse text-left text-[12px]">
           <thead>
-            <tr className="border-b border-border font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+            <tr className="border-b border-border text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
               <th className="py-2 pr-3 font-medium">Disciplin</th>
               <th className="py-2 pr-3 font-medium">Kontraktuelt aktiv</th>
               <th className="hidden py-2 pr-3 font-medium sm:table-cell">
@@ -62,12 +62,12 @@ export function ClientDetailServiceMixCard({ client }) {
                       />
                       {d.name}
                     </span>
-                    <span className="mt-0.5 block font-mono text-[10px] text-fg-muted">{d.short}</span>
+                    <span className="mt-0.5 block text-[10px] text-fg-muted">{d.short}</span>
                   </td>
                   <td className="py-2.5 pr-3">
                     <span
                       className={cn(
-                        "inline-flex rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium",
+                        "inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium",
                         isActive
                           ? "border-agency-ok-border bg-agency-ok-soft text-agency-ok"
                           : "border-border bg-surface-muted text-fg-quiet",
@@ -76,10 +76,10 @@ export function ClientDetailServiceMixCard({ client }) {
                       {isActive ? "Ja" : "Nej"}
                     </span>
                   </td>
-                  <td className="hidden py-2.5 pr-3 font-mono tabular-nums text-fg-muted sm:table-cell">
+                  <td className="hidden py-2.5 pr-3 tabular-nums text-fg-muted sm:table-cell">
                     {hoursApprox != null ? `${hoursApprox} t` : "—"}
                   </td>
-                  <td className="py-2.5 font-mono tabular-nums text-fg">
+                  <td className="py-2.5 tabular-nums text-fg">
                     {pct != null ? formatPercent((pct ?? 0) / 100) : "—"}
                   </td>
                 </tr>

@@ -90,15 +90,12 @@ export function ClientsDirectory({
   const minW = variant === "full" ? "min-w-[1040px]" : "min-w-[920px]";
 
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
-      aria-labelledby={resolvedHeadingId}
-    >
+    <section className="tally-panel overflow-hidden" aria-labelledby={resolvedHeadingId}>
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
-        <h3 id={resolvedHeadingId} className="font-sans text-sm font-semibold text-fg">
+        <h3 id={resolvedHeadingId} className="text-sm font-semibold tracking-[-0.02em] text-fg">
           {toolbarTitle}
         </h3>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {CLIENTS.length}
         </span>
 
@@ -113,8 +110,8 @@ export function ClientsDirectory({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className={cn(
-                "h-8 w-full rounded-md border border-border bg-surface-muted py-1 pl-9 pr-3",
-                "font-sans text-[13px] text-fg placeholder:text-fg-quiet",
+                "h-8 w-full rounded-full border border-border bg-surface-muted py-1 pl-9 pr-3",
+                "text-[13px] text-fg placeholder:text-fg-quiet",
                 "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
               )}
             />
@@ -155,7 +152,7 @@ export function ClientsDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 gridCols,
               )}
             >
@@ -206,7 +203,7 @@ export function ClientsDirectory({
                 >
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
-                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-white/10 font-mono text-[10.5px] font-semibold text-white"
+                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
                       style={{ background: `oklch(62% 0.14 ${c.hue})` }}
                     >
                       {c.logo}
@@ -235,14 +232,14 @@ export function ClientsDirectory({
                     </div>
                   ) : null}
 
-                  <span className="font-mono text-[12.5px] tabular-nums text-fg">
+                  <span className="text-[12.5px] tabular-nums text-fg">
                     {formatCurrencyCompact(c.retainer, c.currency)}
                   </span>
 
                   <div className="flex items-center gap-2">
                     <span
                       className={cn(
-                        "font-mono text-[12px] tabular-nums",
+                        "text-[12px] tabular-nums",
                         util > 1 ? "text-agency-bad" : "text-fg",
                       )}
                     >
@@ -253,7 +250,7 @@ export function ClientsDirectory({
 
                   <span
                     className={cn(
-                      "font-mono text-[12.5px] tabular-nums",
+                      "text-[12.5px] tabular-nums",
                       c.monthlyProfitMargin < 0 && "text-agency-bad",
                       c.monthlyProfitMargin >= 0 &&
                         c.monthlyProfitMargin < 0.15 &&
@@ -267,7 +264,7 @@ export function ClientsDirectory({
                   <PulseAllocationBar allocation={c.allocation} height={6} />
 
                   {variant === "full" ? (
-                    <span className="hidden truncate font-mono text-[11px] tabular-nums text-fg-muted sm:inline">
+                    <span className="hidden truncate text-[11px] tabular-nums text-fg-muted sm:inline">
                       {c.lastActivity}
                     </span>
                   ) : null}

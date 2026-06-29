@@ -18,7 +18,7 @@ export function KbArticleHeader({ article }) {
 
   return (
     <div className="flex flex-col gap-4 border-b border-border/70 pb-6">
-      <nav aria-label="Brødkrummer" className="flex flex-wrap items-center gap-1 font-mono text-[11px] text-fg-quiet">
+      <nav aria-label="Brødkrummer" className="flex flex-wrap items-center gap-1 text-[11px] text-fg-quiet">
         <Link href={routes.kb} className="text-fg-muted transition-colors hover:text-agency-brand">
           Knowledge base
         </Link>
@@ -39,8 +39,8 @@ export function KbArticleHeader({ article }) {
 
       {!article.published ? (
         <p className="rounded-xl border border-agency-warn-border bg-agency-warn-soft px-3 py-2.5 font-sans text-[12px] leading-snug text-agency-warn">
-          <span className="font-semibold">Kladde</span> — synlig for intern Agency OS-demo. Udskjul for eksterne
-          portals når Mongo-synk kører.
+          <span className="font-semibold">Kladde</span> — synlig internt i Agency OS. Udskjul for eksterne
+          portals når synkronisering er aktiv.
         </p>
       ) : null}
 
@@ -48,7 +48,7 @@ export function KbArticleHeader({ article }) {
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[24px]">{article.title}</h1>
           {article.featured ? (
-            <span className="rounded border border-agency-brand-border bg-agency-brand-soft px-2 py-0.5 font-mono text-[9px] font-semibold uppercase text-agency-brand">
+            <span className="rounded border border-agency-brand-border bg-agency-brand-soft px-2 py-0.5 text-[9px] font-semibold uppercase text-agency-brand">
               Udvalgt
             </span>
           ) : null}
@@ -62,12 +62,12 @@ export function KbArticleHeader({ article }) {
             <CrmAvatar label={author.avatar} hue={author.hue} className="size-9 text-[12px]" />
             <div>
               <div className="font-sans text-[12px] font-medium text-fg">{author.name}</div>
-              <div className="font-mono text-[10px] text-fg-quiet">{author.role}</div>
+              <div className="text-[10px] text-fg-quiet">{author.role}</div>
             </div>
           </div>
         ) : null}
         <div className="h-8 w-px bg-border-soft" aria-hidden />
-        <div className="font-mono text-[11px] tabular-nums text-fg-muted">
+        <div className="text-[11px] tabular-nums text-fg-muted">
           <div>Opdateret {formatIsoDateDa(article.updatedAt)}</div>
           <div className="text-fg-quiet">
             {article.readingMinutes} min ·{" "}
@@ -76,9 +76,9 @@ export function KbArticleHeader({ article }) {
             </span>
           </div>
         </div>
-        <div className="min-w-0 flex-1 font-mono text-[10px] text-fg-quiet md:text-right">
+        <div className="min-w-0 flex-1 text-[10px] text-fg-quiet md:text-right">
           <span className="text-fg-soft">slug</span>{" "}
-          <code className="rounded border border-border-soft bg-surface-muted px-1 py-0.5 text-fg-muted">{article.slug}</code>
+          <span className="rounded border border-border-soft bg-surface-muted px-1 py-0.5 text-fg-muted">{article.slug}</span>
         </div>
       </div>
     </div>

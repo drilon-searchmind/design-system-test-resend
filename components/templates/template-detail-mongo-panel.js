@@ -171,20 +171,10 @@ export function TemplateDetailMongoPanel({
   }, [onBusyChange, onNotice, router, templateRouteId]);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Mongo-record</h2>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">
-            PATCH via <span className="font-mono">/api/task-templates/</span>
-            · rute-nøgle: <span className="font-mono text-fg-soft">{templateRouteId}</span>
-            {typeof wire.mongoId === "string" && wire.mongoId ?
-              <>
-                {" "}
-                · <span className="font-mono text-[10px] text-fg-quiet">{wire.mongoId}</span>
-              </>
-            : null}
-          </p>
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Mongo-record</h2>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -247,7 +237,7 @@ export function TemplateDetailMongoPanel({
             value={key}
             onChange={(e) => setKey(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[12px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[12px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -320,7 +310,7 @@ export function TemplateDetailMongoPanel({
             value={defaultDueOffsetDays}
             onChange={(e) => setDefaultDueOffsetDays(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -334,7 +324,7 @@ export function TemplateDetailMongoPanel({
             placeholder="Tom for at unsette felt"
             onChange={(e) => setSuggestedHours(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />

@@ -64,11 +64,11 @@ export function ColorTokenField({ id, label, value, onChange, hint }) {
 
   return (
     <div className="flex flex-col gap-2 sm:col-span-2">
-      <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">{label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">{label}</span>
 
       <div className="flex flex-wrap items-stretch gap-3">
         <span
-          className="mt-1 size-10 shrink-0 rounded-lg border border-border shadow-inset-card"
+          className="mt-1 size-10 shrink-0 rounded-xl border border-border"
           style={{ background: displayColor ?? "var(--ds-surface-muted)" }}
           title={displayColor ?? undefined}
           aria-hidden
@@ -98,7 +98,7 @@ export function ColorTokenField({ id, label, value, onChange, hint }) {
           </div>
 
           {mode && mode !== CUSTOM_COLOR_TOKEN_VALUE ? (
-            <p className="font-mono text-[11px] tabular-nums text-fg-quiet">
+            <p className="text-[11px] tabular-nums text-fg-quiet">
               {PRESET_COLOR_TOKENS.find((p) => p.value === mode)?.sample ?? displayColor ?? "—"}
             </p>
           ) : null}
@@ -106,7 +106,7 @@ export function ColorTokenField({ id, label, value, onChange, hint }) {
           {mode === CUSTOM_COLOR_TOKEN_VALUE ? (
             <div className="space-y-2 rounded-lg border border-border-soft bg-surface-muted/40 p-3">
               <label className="flex flex-col gap-1.5">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
                   Eget token-navn
                 </span>
                 <input
@@ -121,7 +121,7 @@ export function ColorTokenField({ id, label, value, onChange, hint }) {
                 />
               </label>
               <label className="flex flex-col gap-1.5">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
                   Eller vælg hex-farve
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
@@ -138,14 +138,12 @@ export function ColorTokenField({ id, label, value, onChange, hint }) {
                     onChange={(e) => handleCustomHexChange(e.target.value)}
                     className={cn(
                       "h-10 min-w-[7rem] flex-1 rounded-lg border border-border bg-surface-card px-3",
-                      "font-mono text-[13px] tabular-nums text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
+                      "text-[13px] tabular-nums text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
                     )}
                   />
                 </div>
               </label>
-              <p className="font-sans text-[11px] text-fg-quiet">
-                Gemmes som token-streng — hex (<code className="font-mono">#rrggbb</code>) eller eget navn.
-              </p>
+              <p className="font-sans text-[11px] text-fg-quiet">Gemmes som token-streng — hex eller eget navn.</p>
             </div>
           ) : null}
         </div>

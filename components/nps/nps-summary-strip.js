@@ -37,7 +37,7 @@ export function NpsSummaryStrip({
   responses,
   medianHoursToRespond,
   pulseAlertCount,
-  responseRateLabel = "Svarfrekvens (seneste mock-runde)",
+  responseRateLabel = "Svarfrekvens (seneste runde)",
   invitationsLabel = "Invitationer sidste runde",
 }) {
   const delta = avgLatest != null && avgPrev != null ? avgLatest - avgPrev : null;

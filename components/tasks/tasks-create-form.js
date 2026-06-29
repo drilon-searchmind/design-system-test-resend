@@ -127,13 +127,13 @@ export function TasksCreateForm({
   return (
     <div
       className={cn(
-        isModal ? "flex flex-col gap-4" : "rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5",
+        isModal ? "flex flex-col gap-4" : "tally-panel p-4 md:p-5",
       )}
       role="region"
       aria-label={isModal ? "Opret ny opgave — formular" : "Opret opgave"}
     >
       {isModal ? null : (
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ny opgave</h2>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ny opgave</h2>
       )}
       <div className={cn("grid gap-4 sm:grid-cols-2", !isModal && "mt-4")}>
         {taskTemplatesForCreate.length > 0 ?
@@ -256,7 +256,7 @@ export function TasksCreateForm({
             value={estimateHours}
             onChange={(e) => setEstimateHours(e.target.value)}
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[13px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
@@ -301,7 +301,7 @@ export function TasksCreateForm({
             onChange={(e) => setKey(e.target.value)}
             placeholder="fx t-akme-audit"
             className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-mono text-[12px] text-fg",
+              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[12px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />

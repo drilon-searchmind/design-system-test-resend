@@ -10,17 +10,17 @@ export function PulsePageHeader() {
   const { year, month, onChange, refreshing, subtitle } = usePulsePeriod();
 
   return (
-    <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+    <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-          Overblik
+        <p className="text-xs uppercase tracking-[0.08em] text-fg-soft">
+          ◇ pulse
         </p>
-        <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">
+        <h1 className="mt-2 text-[clamp(1.75rem,3vw,2.25rem)] font-semibold leading-[1.1] tracking-[-0.03em] text-fg">
           Agency Pulse
         </h1>
         <p
           className={cn(
-            "mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted transition-opacity",
+            "mt-2 max-w-prose text-sm leading-relaxed text-fg-muted transition-opacity",
             refreshing && "opacity-60",
           )}
         >

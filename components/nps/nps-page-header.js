@@ -35,7 +35,7 @@ export function NpsPageHeader({
     <div className="flex flex-col gap-3">
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconSparkle size={14} className="text-agency-brand" aria-hidden />
             Loyalitet & kvalitet
           </p>
@@ -44,16 +44,9 @@ export function NpsPageHeader({
             <span className="capitalize">{subtitle}</span>
             {" — "}
             Bølger, skabeloner og konti-score ud fra seneste målinger (0–100 som på kundekortene).
-            {dataSource === "demo" ?
-              <> Demonstrationsdata.</>
-            : <>
-                {" "}
-                <span className="font-semibold text-fg">MongoDB</span>
-                {refreshing ?
-                  <span className="font-mono text-[11px] text-fg-quiet"> Opdaterer…</span>
-                : null}
-              </>
-            }
+            {refreshing ?
+              <span className="text-[11px] text-fg-quiet"> · Opdaterer…</span>
+            : null}
             {" "}
             Kontekst:{" "}
             <span className="font-semibold text-fg">{loading ? "\u2026" : displayName}</span>

@@ -13,9 +13,9 @@ export function KbRelatedArticles({ articles, className }) {
   if (!articles.length) return null;
 
   return (
-    <div className={cn("rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card", className)}>
+    <div className={cn("tally-panel p-4", className)}>
       <h2 className="font-sans text-sm font-semibold text-fg">Relaterede artikler</h2>
-      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme kategori eller overlappende tags — mock-rangering.</p>
+      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme kategori eller overlappende tags.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {articles.map((a) => {
           const cat = getKnowledgeCategoryById(a.categoryId);
@@ -31,7 +31,7 @@ export function KbRelatedArticles({ articles, className }) {
                   </span>
                   {cat ? (
                     <span
-                      className="shrink-0 rounded border border-border-soft px-1 font-mono text-[9px] font-bold uppercase text-fg-soft"
+                      className="shrink-0 rounded border border-border-soft px-1 text-[9px] font-bold uppercase text-fg-soft"
                       style={{ borderColor: `oklch(0.55 0.08 ${cat.deptHue} / 0.4)` }}
                     >
                       {cat.short}

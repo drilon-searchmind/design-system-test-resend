@@ -64,11 +64,6 @@ export function ClientsPortfolio() {
     });
   }, [load]);
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (inkl. testdata ved isTest) — tid i kolonnen matcher den valgte måned."
-      : "Demo (`lib/crm/static-data.js`).";
-
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -118,11 +113,6 @@ export function ClientsPortfolio() {
           hoursColumnLabel="Timer i perioden"
         />
 
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

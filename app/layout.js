@@ -1,4 +1,11 @@
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Fraunces,
+  Geist,
+  Geist_Mono,
+  Inter,
+  Instrument_Serif,
+  JetBrains_Mono,
+} from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { themeInitScriptInnerHtml } from "@/components/theme/theme-init-script";
@@ -10,6 +17,27 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+});
+
+/** Tally / Hallmark marketing — Geist + Instrument Serif italic accent */
+const geist = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-instrument-serif",
+  style: ["normal", "italic"],
+  weight: ["400"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -37,12 +65,13 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${displaySerif.variable} ${jetbrainsMono.variable}`}
-      data-theme="dark"
+      className={`${inter.variable} ${displaySerif.variable} ${jetbrainsMono.variable} ${geist.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+      data-theme="light"
       data-density="compact"
       suppressHydrationWarning
     >
       <body
+        data-surface="marketing-tally"
         className={`${inter.className} flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased`}
         suppressHydrationWarning
       >

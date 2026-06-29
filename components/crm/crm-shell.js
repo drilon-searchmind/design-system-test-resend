@@ -72,7 +72,7 @@ export function CrmShell({ children }) {
 
   return (
     <TimerModalProvider>
-      <div className="flex min-h-0 flex-1 bg-canvas">
+      <div data-surface="marketing-tally" className="flex min-h-0 flex-1">
         <CrmSidebar
           className="hidden md:flex"
           pathname={pathname}
@@ -89,11 +89,11 @@ export function CrmShell({ children }) {
           >
             <button
               type="button"
-              className="absolute inset-0 bg-canvas/80 backdrop-blur-[2px]"
+              className="absolute inset-0 bg-fg/10 backdrop-blur-[2px]"
               aria-label="Luk menu"
               onClick={() => setMobileOpen(false)}
             />
-            <div className="relative h-full w-[min(280px,88vw)] max-w-full border-r border-border bg-canvas shadow-xl">
+            <div className="relative h-full w-[min(280px,88vw)] max-w-full border-r border-border bg-canvas">
               <CrmSidebar
                 className="flex h-full w-full"
                 pathname={pathname}

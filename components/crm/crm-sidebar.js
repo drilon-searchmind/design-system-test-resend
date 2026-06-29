@@ -10,6 +10,24 @@ import { cn } from "@/lib/utils";
 import { CrmNavIcon, IconMenu, IconMenuL, IconSettings } from "./icons";
 import { useTimerModal } from "./timer-modal-context";
 
+function BrandMark({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="3" width="6" height="18" rx="1.5" fill="currentColor" />
+      <rect
+        x="11"
+        y="9"
+        width="6"
+        height="12"
+        rx="1.5"
+        fill="currentColor"
+        opacity="0.55"
+      />
+      <rect x="19" y="14" width="3" height="7" rx="1" fill="currentColor" opacity="0.3" />
+    </svg>
+  );
+}
+
 function isNavActive(pathname, href, itemId, timerModalOpen) {
   if (itemId === "timer") {
     return Boolean(timerModalOpen);
@@ -39,13 +57,12 @@ export function CrmSidebar({
   onNavigate,
 }) {
   const { open: timerModalOpen, openTimer } = useTimerModal();
-  const clientCount = CLIENTS.length;
   const w = collapsed ? 56 : 220;
 
   return (
     <aside
       className={cn(
-        "flex shrink-0 flex-col border-r border-border bg-surface-muted/30",
+        "flex shrink-0 flex-col border-r border-border bg-canvas/80",
         className,
       )}
       style={{ width: w, transition: "width 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)" }}
@@ -59,20 +76,20 @@ export function CrmSidebar({
         <Link
           href={routes.pulse}
           className={cn(
-            "flex min-w-0 items-center gap-2",
+            "flex min-w-0 items-center gap-2 text-fg",
             collapsed ? "justify-center" : "flex-1",
           )}
           onClick={onNavigate}
         >
-          <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-md bg-accent text-[13px] font-bold text-solid-cta-fg">
-            S
+          <span className="flex shrink-0 items-center justify-center">
+            <BrandMark size={collapsed ? 20 : 22} />
           </span>
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate font-sans text-[13px] font-semibold leading-tight tracking-tight text-fg">
+              <span className="block truncate text-[13px] font-semibold leading-tight tracking-tight">
                 Searchmind
               </span>
-              <span className="block truncate font-sans text-[10.5px] leading-tight text-fg-quiet">
+              <span className="block truncate text-[10px] uppercase tracking-[0.06em] text-fg-soft">
                 Agency OS
               </span>
             </span>
@@ -82,8 +99,8 @@ export function CrmSidebar({
           <button
             type="button"
             className={cn(
-              "flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-md",
-              "border border-transparent text-fg-muted hover:bg-surface-active hover:text-fg",
+              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+              "text-fg-muted hover:bg-surface-muted hover:text-fg",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
             )}
             onClick={onToggleCollapsed}
@@ -97,7 +114,7 @@ export function CrmSidebar({
       {collapsed ? (
         <button
           type="button"
-          className="mx-auto mt-2 flex h-[30px] w-[30px] items-center justify-center rounded-md text-fg-muted hover:bg-surface-active hover:text-fg"
+          className="mx-auto mt-2 flex h-8 w-8 items-center justify-center rounded-full text-fg-muted hover:bg-surface-muted hover:text-fg"
           onClick={onToggleCollapsed}
           aria-label="Vis sidebar"
         >
@@ -109,7 +126,7 @@ export function CrmSidebar({
         {CRM_NAV_GROUPS.map((group) => (
           <div key={group.id} className="py-1">
             {!collapsed ? (
-              <div className="px-2.5 pb-1 pt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+              <div className="px-2.5 pb-1 pt-2 text-[10px] uppercase tracking-[0.08em] text-fg-soft">
                 {group.label}
               </div>
             ) : null}
@@ -117,11 +134,11 @@ export function CrmSidebar({
               const href = item.href ?? "";
               const active = isNavActive(pathname, href, item.id, timerModalOpen);
               const itemClass = cn(
-                "mb-0.5 flex h-[30px] items-center gap-2.5 rounded-md border font-sans text-[13px] transition-colors",
+                "mb-0.5 flex h-8 items-center gap-2.5 rounded-xl text-[13px] transition-colors",
                 collapsed ? "justify-center px-0" : "px-2.5",
                 active
-                  ? "border-border bg-surface-active font-medium text-fg shadow-inset-card"
-                  : "border-transparent font-normal text-fg-muted hover:bg-surface-muted hover:text-fg",
+                  ? "bg-surface-active font-medium text-fg"
+                  : "font-normal text-fg-muted hover:bg-surface-muted hover:text-fg",
               );
               const iconWrap = (
                 <span
@@ -179,7 +196,7 @@ export function CrmSidebar({
           href={routes.settings}
           onClick={onNavigate}
           className={cn(
-            "flex w-full items-center gap-2 rounded-md py-1.5 text-[12px] text-fg-muted hover:bg-surface-muted hover:text-fg",
+            "flex w-full items-center gap-2 rounded-xl py-1.5 text-[12px] text-fg-muted hover:bg-surface-muted hover:text-fg",
             collapsed ? "justify-center" : "px-1",
           )}
         >

@@ -17,10 +17,9 @@ import { cn } from "@/lib/utils";
  *     dueDate: string;
  *   }>;
  *   clientLabel: string;
- *   sourceLabel?: string;
  * }} props
  */
-export function ClientDetailTasksCard({ tasks, clientLabel, sourceLabel = "mock TASKS" }) {
+export function ClientDetailTasksCard({ tasks, clientLabel }) {
   const sorted = [...tasks].sort((a, b) => {
     const ad = taskIsDone(a.status) ? 1 : 0;
     const bd = taskIsDone(b.status) ? 1 : 0;
@@ -29,9 +28,9 @@ export function ClientDetailTasksCard({ tasks, clientLabel, sourceLabel = "mock 
   });
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Åbne & kommende opgaver
         </h2>
         <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
@@ -39,16 +38,10 @@ export function ClientDetailTasksCard({ tasks, clientLabel, sourceLabel = "mock 
         </Link>
       </div>
 
-      <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Filtreret fra <span className="font-mono">{sourceLabel}</span> for{" "}
-        <span className="font-semibold text-fg">{clientLabel}</span>.
-      </p>
-
       <ul className="mt-4 flex flex-col gap-2">
         {sorted.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-[13px] text-fg-muted">
-            Ingen opgaver peger på denne kunde i demo — udvid <span className="font-mono">TASKS</span> eller opret på
-            boardet.
+            Ingen opgaver for {clientLabel}.
           </li>
         ) : (
           sorted.map((t) => {
@@ -68,7 +61,7 @@ export function ClientDetailTasksCard({ tasks, clientLabel, sourceLabel = "mock 
                   <TaskStatusChip status={t.status} />
                   <TaskPriorityChip priority={t.priority} />
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] text-fg-muted">
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-fg-muted">
                   <span className="tabular-nums">{formatIsoDateDa(t.dueDate)}</span>
                   {days !== null ? (
                     <span

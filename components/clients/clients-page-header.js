@@ -32,13 +32,13 @@ export function ClientsPageHeader({
     if (unhealthy > 0) bodyLine += ` · ${unhealthy} med sundhedsadvarsler`;
     if (overBudget > 0) bodyLine += ` · ${overBudget} over timebudget`;
   } else if (clients?.length === 0) {
-    bodyLine = "Ingen kunder i denne datakilde endnu";
+    bodyLine = "Ingen kunder endnu";
   }
 
   return (
     <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Portefølje
         </p>
         <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">Kunder</h1>

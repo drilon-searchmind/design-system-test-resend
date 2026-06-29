@@ -15,10 +15,7 @@ export function PulseProfitabilityChart() {
   const overBudgetDept = rows.find((r) => r.util > 1);
 
   return (
-    <section
-      className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5"
-      aria-labelledby="pulse-profit-heading"
-    >
+    <section className="tally-panel p-4 md:p-5" aria-labelledby="pulse-profit-heading">
       <div id="pulse-profit-heading">
         <PulseCardHeader
           title="Rentabilitet per afdeling"
@@ -42,7 +39,7 @@ export function PulseProfitabilityChart() {
               >
                 <div className="flex items-center gap-2">
                   <span
-                    className="size-2.5 shrink-0 rounded-sm ring-1 ring-white/10"
+                    className="size-2.5 shrink-0 rounded-sm ring-1 ring-border"
                     style={{ backgroundColor: deptColor }}
                   />
                   <span className="font-sans text-[12.5px] font-medium text-fg">{d?.name ?? r.dept}</span>
@@ -65,12 +62,12 @@ export function PulseProfitabilityChart() {
                       maxWidth: "100%",
                     }}
                   />
-                  <span className="pointer-events-none absolute left-2 top-1/2 max-w-[85%] -translate-y-1/2 truncate font-mono text-[11.5px] font-medium tabular-nums text-fg mix-blend-difference">
+                  <span className="pointer-events-none absolute left-2 top-1/2 max-w-[85%] -translate-y-1/2 truncate text-[11.5px] font-medium tabular-nums text-fg mix-blend-difference">
                     {formatCurrencyCompact(r.revenue)}
                   </span>
                 </div>
 
-                <span className="font-mono text-[12px] tabular-nums text-fg-muted sm:text-right">
+                <span className="text-[12px] tabular-nums text-fg-muted sm:text-right">
                   {r.hours}/{r.budget} t
                 </span>
 
@@ -80,7 +77,7 @@ export function PulseProfitabilityChart() {
 
                 <span
                   className={cn(
-                    "font-mono text-[12px] font-semibold tabular-nums sm:text-right",
+                    "text-[12px] font-semibold tabular-nums sm:text-right",
                     r.util > 1 && "text-agency-bad",
                     r.util > 0.95 && r.util <= 1 && "text-agency-warn",
                     r.util <= 0.95 && "text-agency-ok",
@@ -98,7 +95,7 @@ export function PulseProfitabilityChart() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 rounded-lg bg-surface-muted/80 px-3 py-2.5 font-sans text-[11.5px] text-fg-muted ring-1 ring-border/50 md:flex-row md:flex-wrap md:items-center md:gap-5">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl bg-surface-muted px-3 py-2.5 text-[11.5px] text-fg-muted md:flex-row md:flex-wrap md:items-center md:gap-5">
         <span className="inline-flex items-center gap-2">
           <span
             className="h-2.5 w-3 rounded-sm opacity-40"

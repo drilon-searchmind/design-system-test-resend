@@ -18,9 +18,9 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
   const hotPeople = teamRows.filter((r) => r.loadIndex >= 82).slice(0, 4);
 
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Indsigter & eskalationer
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -35,20 +35,20 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
       </div>
 
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Triage ud fra disciplin-toner og team-liste{budgetAlerts === undefined ? " — budget-alerts fra Pulse-demodata." : " — Pulse budget-alerts når databasen leverer signaler."}
+        Triage ud fra disciplin-toner og team-liste{budgetAlerts === undefined ? " — budget-alerts fra Pulse." : " — Pulse budget-alerts når der er signaler."}
       </p>
 
       <ul className="mt-4 flex flex-col gap-3">
         {hotDepts.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-4 text-[12px] text-fg-muted">
-            Ingen discipliner markeret som over-allokeret eller overforbrug i denne mock — hold øje med PPC når
+            Ingen discipliner markeret som over-allokeret eller overforbrug lige nu — hold øje med PPC når
             kunder eskalerer.
           </li>
         ) : (
           hotDepts.map((r) => (
             <li key={r.dept.id} className="rounded-xl border border-border-soft bg-surface-muted/40 px-3 py-3">
               <p className="font-sans text-[12px] font-semibold text-fg">{r.dept.name}</p>
-              <p className="mt-1 font-mono text-[11px] text-fg-muted">
+              <p className="mt-1 text-[11px] text-fg-muted">
                 {r.tone === "burn"
                   ? `Forbrug ${r.tracked} t ligger over tildelt ${r.assigned} t — afstem budget eller scope.`
                   : `Tildelt ${r.assigned} t vs. kapacitet ${r.capacity} t — kapacitetsplan eller salg skal justeres.`}
@@ -59,7 +59,7 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
 
         {hotPeople.length > 0 ? (
           <li className="rounded-xl border border-agency-warn-border/40 bg-agency-warn-soft/20 px-3 py-3">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Høj belægning</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Høj belægning</p>
             <ul className="mt-2 space-y-1.5 font-sans text-[12px] text-fg-muted">
               {hotPeople.map((r) => (
                 <li key={r.member.id}>
@@ -67,7 +67,7 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
                     {r.member.name}
                   </Link>
                   {" — "}
-                  belægning <span className="font-mono tabular-nums text-agency-warn">{r.loadIndex}%</span>
+                  belægning <span className="tabular-nums text-agency-warn">{r.loadIndex}%</span>
                   {" · "}
                   {r.openCount} åbne
                   {r.overdueCount > 0 ? (
@@ -84,7 +84,7 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
 
         {budgetAlertsResolved.length > 0 ? (
           <li className="rounded-xl border border-border-soft bg-surface-muted/30 px-3 py-3">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
               Budget-alerts (Pulse)
             </p>
             <ul className="mt-2 space-y-2">

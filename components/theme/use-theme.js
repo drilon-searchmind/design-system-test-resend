@@ -1,53 +1,39 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback } from "react";
 
 import { THEME_STORAGE_KEY } from "@/lib/theme/constants";
 
 /** @typedef {import('@/lib/theme/constants').ThemeId} ThemeId */
 
-function subscribe(onStoreChange) {
-  const root = document.documentElement;
-  const obs = new MutationObserver(() => onStoreChange());
-  obs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    obs.disconnect();
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
+const LIGHT_THEME = "light";
 
 function readThemeAttr() {
-  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  return LIGHT_THEME;
 }
 
 function getThemeSnapshot() {
-  if (typeof document === "undefined") return "dark";
-  return readThemeAttr();
+  return LIGHT_THEME;
 }
 
 function getServerSnapshot() {
-  return "dark";
+  return LIGHT_THEME;
 }
 
 export function useTheme() {
-  return useSyncExternalStore(subscribe, getThemeSnapshot, getServerSnapshot);
+  return LIGHT_THEME;
 }
 
-export function setStoredTheme(theme) {
-  /** @type {ThemeId} */
-  const resolved = theme === "light" ? "light" : "dark";
+export function setStoredTheme(_theme) {
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, resolved);
+    localStorage.setItem(THEME_STORAGE_KEY, LIGHT_THEME);
   } catch {}
-  document.documentElement.setAttribute("data-theme", resolved);
+  document.documentElement.setAttribute("data-theme", LIGHT_THEME);
 }
 
 /** @returns {() => void} */
 export function useThemeToggle() {
-  const theme = useTheme();
-
   return useCallback(() => {
-    setStoredTheme(theme === "dark" ? "light" : "dark");
-  }, [theme]);
+    setStoredTheme(LIGHT_THEME);
+  }, []);
 }

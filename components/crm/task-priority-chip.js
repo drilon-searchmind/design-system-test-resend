@@ -19,7 +19,7 @@ export function TaskPriorityChip({ priority, className }) {
   return (
     <span
       className={cn(
-        "inline-flex rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
         MAP[priority] ?? MAP.medium,
         className,
       )}

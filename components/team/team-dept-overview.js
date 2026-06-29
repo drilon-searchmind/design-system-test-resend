@@ -8,13 +8,13 @@ import { cn } from "@/lib/utils";
  */
 export function TeamDeptOverview({ snapshots }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Discipliner · roster vs. referencetloft
         </h2>
         <p className="font-sans text-[11px] text-fg-muted">
-          Σ kontrakteret uge / (månedskap. ÷ 4,33) — mock til capacity‑dialog.
+          Σ kontrakteret uge / (månedskap. ÷ 4,33) — til capacity‑dialog.
         </p>
       </div>
 
@@ -34,15 +34,15 @@ export function TeamDeptOverview({ snapshots }) {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate font-sans text-[13px] font-semibold text-fg">{dept.name}</p>
-                  <p className="font-mono text-[10px] tabular-nums text-fg-quiet">
+                  <p className="text-[10px] tabular-nums text-fg-quiet">
                     {headcount} {headcount === 1 ? "person" : "personer"}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-md border border-border-soft px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-fg-muted">
+                <span className="shrink-0 rounded-md border border-border-soft px-2 py-0.5 text-[10px] font-bold uppercase text-fg-muted">
                   {dept.short}
                 </span>
               </div>
-              <div className="font-mono text-[11px] tabular-nums text-fg-muted">
+              <div className="text-[11px] tabular-nums text-fg-muted">
                 Σ <span className="text-fg">{weeklyHours}</span>{" "}
                 <span className="text-fg-quiet">/</span>{" "}
                 <span>{approxWeeklyDeptCapacity}</span>

@@ -43,7 +43,7 @@ export function TimePageHeader({
     <div className="flex flex-col gap-3">
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconClock size={14} className="text-agency-brand" aria-hidden />
             Arbejdstid
           </p>
@@ -51,17 +51,11 @@ export function TimePageHeader({
             Tidsregistrering
           </h1>
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-            <span className="capitalize">{subtitle}</span>{" "}
-            {dataSource === "demo" ?
-              <> · Demonstrationsdata</>
-            :
-              <>
-                · <span className="font-semibold text-fg">MongoDB</span> (kun egne registreringer)
-                {refreshing ?
-                  <span className="font-mono text-[11px] text-fg-quiet"> Opdaterer…</span>
-                : null}{" "}
-              </>
-            }
+            <span className="capitalize">{subtitle}</span>
+            {refreshing ?
+              <span className="text-[11px] text-fg-quiet"> · Opdaterer…</span>
+            : null}
+            {" "}
             Navn: <span className="font-semibold text-fg">{loading ? "\u2026" : displayName}</span>
           </p>
         </div>

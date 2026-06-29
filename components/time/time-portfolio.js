@@ -321,11 +321,6 @@ export function TimePortfolio() {
     [closeCreate, dataSource, load, router],
   );
 
-  const sourceFootnote =
-    dataSource === "database"
-      ? "MongoDB (`includeTest=1` in dev viser også testposter)."
-      : "Demo (`lib/crm/static-data.js`).";
-
   const headerPeriodMemo = normalizedPeriod;
 
   if (loading && !bundle) {
@@ -406,17 +401,16 @@ export function TimePortfolio() {
         <div className="flex max-h-[min(92vh,840px)] flex-col">
           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
             <div className="min-w-0">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
                 Ny registrering
               </p>
               <h2 className="font-sans text-[17px] font-semibold leading-snug text-fg md:text-[18px]">Manuel tid</h2>
-              <p className="mt-1 font-sans text-[12px] text-fg-muted">Gemmes på din profil som tidsstemplet.</p>
             </div>
             <button
               type="button"
               onClick={closeCreate}
               disabled={createSubmitting}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted font-mono text-lg leading-none text-fg-muted hover:border-agency-brand-border hover:text-fg disabled:opacity-40"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-lg leading-none text-fg-muted hover:border-agency-brand-border hover:text-fg disabled:opacity-40"
               aria-label="Luk"
             >
               ×
@@ -473,12 +467,6 @@ export function TimePortfolio() {
             onCreated={load}
           />
         </div>
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Datakilde: <span className="text-fg-muted">{sourceFootnote}</span>
-          {" · "}
-          Skift under <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-        </p>
       </div>
     </div>
   );

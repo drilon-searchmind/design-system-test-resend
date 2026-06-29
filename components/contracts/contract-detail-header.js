@@ -55,15 +55,15 @@ export function ContractDetailHeader({
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="text-fg">{contract.clientName}</span>
         <span className="mx-2 text-fg-quiet">/</span>
-        <span className="font-mono text-[11px] text-fg-muted">{contract.id}</span>
+        <span className="text-[11px] text-fg-muted">{contract.id}</span>
       </nav>
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
-              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-white/10",
-              "font-mono text-sm font-semibold text-white shadow-inset-card md:size-[60px] md:text-[15px]",
+              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
+              "text-sm font-semibold text-white md:size-[60px] md:text-[15px]",
             )}
             style={{
               background: `linear-gradient(135deg, oklch(62% 0.15 ${contract.clientHue}), oklch(52% 0.18 ${contract.clientHue + 28}))`,
@@ -72,7 +72,7 @@ export function ContractDetailHeader({
             {contract.clientLogo}
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Aftale · {contract.kind}
             </p>
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{contract.clientName}</h1>

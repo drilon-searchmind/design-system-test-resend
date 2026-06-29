@@ -82,7 +82,7 @@ export function PulseDashboard() {
       >
         <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
           <div className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
-            <div className="h-20 flex-1 animate-pulse rounded-2xl bg-skeleton" />
+            <div className="h-20 flex-1 animate-pulse rounded-[20px] bg-skeleton" />
             <ReportPeriodPicker
               year={period.year}
               month={period.month}
@@ -91,7 +91,7 @@ export function PulseDashboard() {
           </div>
           <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-2xl bg-skeleton" />
+              <div key={i} className="h-28 animate-pulse rounded-[20px] bg-skeleton" />
             ))}
           </div>
         </div>
@@ -101,7 +101,7 @@ export function PulseDashboard() {
 
   if (error || !bundle) {
     return (
-      <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
+      <p className="rounded-xl border border-agency-bad-border bg-agency-bad-soft px-4 py-3 text-[13px] text-agency-bad">
         {error ?? "Ingen data"}
       </p>
     );
@@ -112,11 +112,6 @@ export function PulseDashboard() {
   const utilDelta = m.utilisation - m.utilisationPrev;
   const overheadDelta = m.overheadPct - m.overheadPctPrev;
   const marginDelta = m.avgMargin - m.avgMarginPrev;
-
-  const sourceLabel =
-    bundle.source === "database"
-      ? "MongoDB (inkl. testdata med isTest)"
-      : "Demo (`lib/crm/static-data.js`)";
 
   return (
     <PulsePeriodProvider
@@ -180,13 +175,6 @@ export function PulseDashboard() {
           </div>
 
           <PulseClientsPanel />
-
-          <p className="font-sans text-[12px] text-fg-quiet">
-            Datakilde: <span className="text-fg-muted">{sourceLabel}</span>
-            {" · "}
-            Skift under{" "}
-            <span className="font-medium text-fg-muted">Indstillinger → Datakilde</span>.
-          </p>
         </div>
       </PulseDataProvider>
     </PulsePeriodProvider>

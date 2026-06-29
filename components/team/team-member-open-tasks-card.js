@@ -25,14 +25,14 @@ import { cn } from "@/lib/utils";
  */
 export function TeamMemberOpenTasksCard({ tasks, dueRefIso }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <section className="tally-panel p-4 md:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-sans text-sm font-semibold text-fg">Åbne opgaver på dig</h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-fg-soft">{tasks.length} stk.</span>
+        <span className="text-[10px] uppercase tracking-[0.06em] text-fg-soft">{tasks.length} stk.</span>
       </div>
       {tasks.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border-soft bg-surface-muted/35 px-3 py-5 text-center font-sans text-[12px] text-fg-muted">
-          Ingen åbne opgaver på board — god fordybelse (mock-board).
+          Ingen åbne opgaver på board — god fordybelse.
         </p>
       ) : (
         <ul className="mt-4 flex flex-col divide-y divide-border-soft">
@@ -63,10 +63,10 @@ export function TeamMemberOpenTasksCard({ tasks, dueRefIso }) {
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-start gap-0.5 sm:items-end">
-                    <span className="truncate font-mono text-[11px] text-fg-muted">{t.clientName}</span>
+                    <span className="truncate text-[11px] text-fg-muted">{t.clientName}</span>
                     <span
                       className={cn(
-                        "font-mono text-[11px] tabular-nums",
+                        "text-[11px] tabular-nums",
                         overdue ? "font-semibold text-agency-bad" : "text-fg-quiet",
                       )}
                     >

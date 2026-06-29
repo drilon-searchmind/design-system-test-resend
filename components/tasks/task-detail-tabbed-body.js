@@ -90,7 +90,7 @@ export function TaskDetailTabbedBody({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
         <nav aria-label="Opgave-undersektioner">
           <PulseSegmentedControl size="sm" active={resolvedTab} onChange={onTabChange} tabs={TAB_DEFS} />
         </nav>
@@ -193,14 +193,13 @@ export function TaskDetailTabbedBody({
         {resolvedTab === "crm" && !mongo ?
           <section className={stack}>
             <div className="rounded-2xl border border-dashed border-border bg-surface-muted/40 p-8 text-[13px] text-fg-muted">
-              Fuldt CRM/redigér er tilgængeligt når <span className="font-medium text-fg-soft">MongoDB datakilde</span>
-              aktiv under Indstillinger.
+              CRM-redigering er ikke tilgængelig i denne visning.
             </div>
           </section>
         : null}
 
         {resolvedTab === "spor" ?
-          <TaskDetailActivityCard entries={activityEntries} footnote={activityFootnote} mongoMode={Boolean(mongo)} />
+          <TaskDetailActivityCard entries={activityEntries} footnote={activityFootnote} />
         : null}
       </div>
     </div>

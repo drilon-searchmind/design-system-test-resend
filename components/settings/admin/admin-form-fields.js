@@ -184,7 +184,7 @@ export function AdminFormFields({ fields, values, onChange, relationOptions, for
 /** @param {{ field: import('@/lib/crm/admin-resource-meta').AdminFieldDef }} props */
 function FieldLabel({ field }) {
   return (
-    <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
+    <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
       {field.label}
       {field.required ? <span className="text-agency-brand"> *</span> : null}
     </span>

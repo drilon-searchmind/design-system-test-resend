@@ -43,9 +43,9 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
         : "text-fg-quiet";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-[var(--ds-studio-pad-main)]">
+    <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Kontrakt & økonomi
         </h2>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -67,7 +67,7 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
       </div>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-2 lg:gap-10">
-        <dl className="grid gap-x-10 gap-y-4 font-mono text-[11px] text-fg-muted sm:grid-cols-2">
+        <dl className="grid gap-x-10 gap-y-4 text-[11px] text-fg-muted sm:grid-cols-2">
           <div>
             <dt className="text-fg-soft">Retainer (aftalt)</dt>
             <dd className="mt-1 text-lg tabular-nums text-fg">
@@ -91,13 +91,13 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
               ) : renewalDays < 0 ? (
                 <span>Fornyelse passeret ({Math.abs(renewalDays)} d siden vs. ref. {CONTRACT_DEMO_REF_DATE})</span>
               ) : (
-                <span>Om ca. {renewalDays} d (ref. mock-dato)</span>
+                <span>Om ca. {renewalDays} d</span>
               )}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-fg-soft">Kundenøgle (mock-id)</dt>
-            <dd className="mt-1 font-mono text-[13px] text-fg-muted">{client.id}</dd>
+            <dt className="text-fg-soft">Kundenøgle</dt>
+            <dd className="mt-1 text-[13px] text-fg-muted">{client.id}</dd>
             {contract ? (
               <dd className="mt-2 text-[11px] text-fg-soft">
                 Kontrakt <span className="tabular-nums text-fg-muted">{contract.id}</span> · Opsigelse{" "}
@@ -109,7 +109,7 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
 
         {contract ? (
           <div className="rounded-xl border border-border-soft bg-surface-muted/35 p-4">
-            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Primær aftale (afspegning)
             </h3>
             <ul className="mt-3 space-y-2 font-sans text-[13px] text-fg-muted">
@@ -118,20 +118,19 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
               </li>
               <li>
                 <span className="font-medium text-fg">Beløb / md:</span>{" "}
-                <span className="font-mono tabular-nums text-fg">
+                <span className="tabular-nums text-fg">
                   {formatCurrency(contract.monthlyValue, contract.currency)}
                 </span>
               </li>
               <li>
                 <span className="font-medium text-fg">Aftalt fornyelsesdato:</span>{" "}
-                <span className="font-mono tabular-nums">{formatIsoDateDa(contract.renewalAt)}</span>
+                <span className="tabular-nums">{formatIsoDateDa(contract.renewalAt)}</span>
               </li>
             </ul>
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-surface-muted/20 px-4 py-5 text-[13px] text-fg-muted">
-            Ingen matchet kontraktræk i mock — tilføj <code className="text-[11px]">ctr-…</code> i statisk{" "}
-            <code className="text-[11px]">CONTRACTS</code>.
+            Ingen matchet kontraktræk for denne kunde.
           </div>
         )}
       </div>

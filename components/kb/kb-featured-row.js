@@ -18,7 +18,7 @@ export function KbFeaturedRow({ articles }) {
         <h2 id="kb-featured-heading" className="font-sans text-sm font-semibold text-fg">
           Udvalgte artikler
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-fg-soft">Editor&apos;s pick</span>
+        <span className="text-[10px] uppercase tracking-[0.06em] text-fg-soft">Editor&apos;s pick</span>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         {articles.map((article) => {
@@ -30,13 +30,13 @@ export function KbFeaturedRow({ articles }) {
               key={article.slug}
               href={`${routes.kb}/${article.slug}`}
               className={cn(
-                "group flex min-h-[140px] flex-col rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card",
+                "tally-panel group flex min-h-[140px] flex-col p-4",
                 "transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft/40",
               )}
             >
               <div className="flex items-start justify-between gap-2">
                 <span
-                  className="inline-flex max-w-full items-center rounded-md border border-border-soft bg-surface-muted px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.04em] text-fg-soft"
+                  className="inline-flex max-w-full items-center rounded-md border border-border-soft bg-surface-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-fg-soft"
                   style={
                     cat
                       ? {
@@ -47,7 +47,7 @@ export function KbFeaturedRow({ articles }) {
                 >
                   {cat?.short ?? "—"}
                 </span>
-                <span className="shrink-0 font-mono text-[10px] tabular-nums text-fg-quiet">
+                <span className="shrink-0 text-[10px] tabular-nums text-fg-quiet">
                   {article.readingMinutes} min læsning
                 </span>
               </div>
@@ -55,7 +55,7 @@ export function KbFeaturedRow({ articles }) {
                 {article.title}
               </h3>
               <p className="mt-1 line-clamp-2 flex-1 font-sans text-[12px] leading-snug text-fg-muted">{article.summary}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-soft pt-3 font-mono text-[10px] text-fg-quiet">
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-soft pt-3 text-[10px] text-fg-quiet">
                 <span>{author?.name ?? article.authorId}</span>
                 <span aria-hidden>·</span>
                 <span>{formatIsoDateDa(article.updatedAt)}</span>

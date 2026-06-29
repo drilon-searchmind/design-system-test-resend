@@ -39,7 +39,7 @@ function collectInsights(client, utilRatio) {
       list.push({
         severity: "warn",
         label: tag,
-        body: "Budgettag fra mock — prioritér forecasting og kundekommunikation.",
+        body: "Budgettag — prioritér forecasting og kundekommunikation.",
       });
     }
     if (/eskaler/i.test(tag)) {
@@ -81,7 +81,7 @@ function collectInsights(client, utilRatio) {
       severity: "neutral",
       label: "Overblik",
       body:
-        "Ingen automatiske røde flag fra mock — behold rytmiske checkpoints alligevel.",
+        "Ingen automatiske røde flag — behold rytmiske checkpoints alligevel.",
     });
   }
 
@@ -97,8 +97,8 @@ export function ClientDetailInsightsCard({ client }) {
   const bullets = collectInsights(client, utilRatio);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
-      <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+    <div className="tally-panel p-4 md:p-5">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
         Signals & KPI-hints
       </h2>
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">

@@ -26,7 +26,7 @@ export function PulseDeltaChip({ value, invert = false, format, className }) {
   const prefix = pos ? "+" : neg ? "-" : "";
 
   return (
-    <span className={cn("font-mono text-[11px] font-semibold tabular-nums tracking-tight", cls, className)}>
+    <span className={cn("text-[11px] font-semibold tabular-nums tracking-tight", cls, className)}>
       {prefix}
       {fmt(Math.abs(value))}
     </span>

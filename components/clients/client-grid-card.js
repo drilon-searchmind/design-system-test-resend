@@ -21,13 +21,13 @@ export function ClientGridCard({ client, variant = "pulse" }) {
     <Link
       href={`${routes.clients}/${client.id}`}
       className={cn(
-        "flex flex-col rounded-2xl border border-border bg-surface-card p-3.5 shadow-inset-card transition-all",
-        "hover:border-agency-brand-border hover:shadow-agency-raised md:p-4",
+        "tally-panel flex flex-col p-3.5 transition-all",
+        "hover:border-agency-brand-border md:p-4",
       )}
     >
       <div className="mb-2.5 flex items-start gap-2.5">
         <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/10 font-mono text-[13px] font-semibold text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-[13px] font-semibold text-white"
           style={{
             background: `linear-gradient(135deg, oklch(62% 0.15 ${client.hue}), oklch(52% 0.18 ${client.hue + 30}))`,
           }}
@@ -44,26 +44,26 @@ export function ClientGridCard({ client, variant = "pulse" }) {
       {variant === "full" ? (
         <div className="mb-2 flex flex-wrap gap-2">
           <StatusChip status={client.status} palette="agency" />
-          <span className="font-mono text-[10px] tabular-nums text-fg-quiet">{client.lastActivity}</span>
+          <span className="text-[10px] tabular-nums text-fg-quiet">{client.lastActivity}</span>
         </div>
       ) : null}
 
       <div className="mb-2.5 grid grid-cols-2 gap-2.5">
         <div>
-          <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Retainer
           </div>
-          <div className="font-mono text-sm font-semibold tabular-nums text-fg">
+          <div className="text-sm font-semibold tabular-nums text-fg">
             {formatCurrencyCompact(client.retainer, client.currency)}
           </div>
         </div>
         <div>
-          <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Margin
           </div>
           <div
             className={cn(
-              "font-mono text-sm font-semibold tabular-nums",
+              "text-sm font-semibold tabular-nums",
               client.monthlyProfitMargin < 0 ? "text-agency-bad" : "text-agency-ok",
             )}
           >
@@ -76,7 +76,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
         <span>Timer denne md</span>
         <span
           className={cn(
-            "font-mono tabular-nums",
+            "tabular-nums",
             util > 1 ? "text-agency-bad" : "text-fg",
           )}
         >
@@ -100,7 +100,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
           <span />
         )}
         {variant === "pulse" ? (
-          <span className="font-mono text-[10.5px] text-fg-quiet">{client.lastActivity}</span>
+          <span className="text-[10.5px] text-fg-quiet">{client.lastActivity}</span>
         ) : null}
       </div>
     </Link>

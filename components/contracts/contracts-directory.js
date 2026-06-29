@@ -95,14 +95,14 @@ export function ContractsDirectory({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-inset-card"
+      className="tally-panel overflow-hidden"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h3 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
         </h3>
-        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 font-mono text-[11px] font-medium tabular-nums text-agency-brand">
+        <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {roster.length}
         </span>
 
@@ -168,7 +168,7 @@ export function ContractsDirectory({
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
             >
@@ -217,7 +217,7 @@ export function ContractsDirectory({
                 >
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
-                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-white/10 font-mono text-[10.5px] font-semibold text-white"
+                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
                       style={{ background: `oklch(62% 0.14 ${row.clientHue})` }}
                     >
                       {row.clientLogo}
@@ -226,7 +226,7 @@ export function ContractsDirectory({
                       <div className="truncate font-sans text-[13px] font-medium text-fg">
                         {row.clientName}
                       </div>
-                      <div className="truncate font-mono text-[11px] text-fg-quiet">{row.kind}</div>
+                      <div className="truncate text-[11px] text-fg-quiet">{row.kind}</div>
                     </div>
                   </div>
 
@@ -245,22 +245,22 @@ export function ContractsDirectory({
                     <StatusChip status={row.accountStatus} palette="agency" className="scale-95 origin-left" />
                   </div>
 
-                  <span className="font-mono text-[12.5px] tabular-nums text-fg">
+                  <span className="text-[12.5px] tabular-nums text-fg">
                     {formatCurrencyCompact(row.monthlyValue, row.currency)}
                   </span>
 
-                  <span className="font-mono text-[11.5px] tabular-nums text-fg-muted">
+                  <span className="text-[11.5px] tabular-nums text-fg-muted">
                     {formatIsoDateDa(row.startedAt)}
                   </span>
 
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-mono text-[12px] tabular-nums text-fg">
+                    <span className="text-[12px] tabular-nums text-fg">
                       {formatIsoDateDa(row.renewalAt)}
                     </span>
                     {row.accountStatus === "active" ? (
                       <span
                         className={cn(
-                          "font-mono text-[10px] tabular-nums",
+                          "text-[10px] tabular-nums",
                           days < 0 && "text-agency-bad",
                           days >= 0 && days <= 30 && "text-agency-warn",
                           days > 30 && "text-fg-quiet",
@@ -273,7 +273,7 @@ export function ContractsDirectory({
                             : `Om ${days} d`}
                       </span>
                     ) : (
-                      <span className="font-mono text-[10px] text-fg-quiet">—</span>
+                      <span className="text-[10px] text-fg-quiet">—</span>
                     )}
                   </div>
 

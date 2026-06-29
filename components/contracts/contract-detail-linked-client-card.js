@@ -34,9 +34,9 @@ export function ContractDetailLinkedClientCard({
       : null;
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-inset-card md:p-5">
+    <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Tilsluttet kunde
         </h2>
         <Link
@@ -50,8 +50,8 @@ export function ContractDetailLinkedClientCard({
       <div className="mt-4 flex items-start gap-3">
         <span
           className={cn(
-            "flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/10",
-            "font-mono text-sm font-semibold text-white",
+            "flex size-12 shrink-0 items-center justify-center rounded-xl border border-border",
+            "text-sm font-semibold text-white",
           )}
           style={{
             background: `linear-gradient(135deg, oklch(62% 0.15 ${contract.clientHue}), oklch(52% 0.18 ${contract.clientHue + 28}))`,
@@ -74,7 +74,7 @@ export function ContractDetailLinkedClientCard({
         </div>
       </div>
 
-      <dl className="mt-5 grid gap-3 border-t border-border-soft pt-4 font-mono text-[11px] text-fg-muted">
+      <dl className="mt-5 grid gap-3 border-t border-border-soft pt-4 text-[11px] text-fg-muted">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Account lead</dt>
           <dd className="flex min-w-0 max-w-[60%] items-center justify-end gap-2 font-sans text-[12px] text-fg">
@@ -90,7 +90,7 @@ export function ContractDetailLinkedClientCard({
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Retainer vs. kontrakt</dt>
-          <dd className="text-right font-mono text-[11px] tabular-nums">
+          <dd className="text-right text-[11px] tabular-nums">
             <span className={align ? "text-agency-ok" : "text-agency-warn"}>{align ? "✓ Stemmer" : "⚠ Tjek linjer"}</span>
             <span className="mt-1 block text-[10px] font-normal text-fg-quiet">
               Kunde CRM {formatCurrencyCompact(client.retainer, client.currency)} · Aftale{" "}
@@ -100,7 +100,7 @@ export function ContractDetailLinkedClientCard({
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Timer (md)</dt>
-          <dd className="font-mono text-[11px] tabular-nums text-fg">
+          <dd className="text-[11px] tabular-nums text-fg">
             {client.hoursThisMonth} / {client.hoursBudget} t · {formatPercent(util)}
           </dd>
         </div>
@@ -110,7 +110,7 @@ export function ContractDetailLinkedClientCard({
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Fornyelse (kunden)</dt>
-          <dd className="font-mono text-[11px] tabular-nums text-fg">
+          <dd className="text-[11px] tabular-nums text-fg">
             {formatIsoDateDa(client.renewalAt)}
             {renewalDelta != null ? (
               <span className="mt-1 block text-[10px] text-fg-quiet">

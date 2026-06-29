@@ -78,7 +78,7 @@ export function TimeEntryCreateForm({
       : null}
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Dato</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Dato</span>
         <input
           type="date"
           value={workedDate}
@@ -91,20 +91,20 @@ export function TimeEntryCreateForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kl. (valgfri)</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kl. (valgfri)</span>
         <input
           type="time"
           value={workedTime}
           onChange={(ev) => setWorkedTime(ev.target.value.slice(0, 5))}
           className={cn(
-            "h-9 rounded-md border border-border bg-surface-muted px-2 font-mono text-[13px] text-fg",
+            "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px] text-fg",
             "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
           )}
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Minutter</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Minutter</span>
         <input
           type="number"
           min={1}
@@ -113,7 +113,7 @@ export function TimeEntryCreateForm({
           onChange={(ev) => setDurationMinutes(ev.target.value)}
           placeholder="fx 45"
           className={cn(
-            "h-9 rounded-md border border-border bg-surface-muted px-2 font-mono text-[13px] text-fg tabular-nums",
+            "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px] text-fg tabular-nums",
             "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
           )}
         />
@@ -134,7 +134,7 @@ export function TimeEntryCreateForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kunde</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kunde</span>
         <select
           disabled={!billable}
           value={billable ? clientSlug : ""}
@@ -158,7 +158,7 @@ export function TimeEntryCreateForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Afdeling</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Afdeling</span>
         <select
           value={departmentKey}
           onChange={(ev) => setDepartmentKey(ev.target.value)}
@@ -182,7 +182,7 @@ export function TimeEntryCreateForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Opgave (valgfri)</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Opgave (valgfri)</span>
         <select
           value={taskKey}
           disabled={!billable}
@@ -203,7 +203,7 @@ export function TimeEntryCreateForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Note</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Note</span>
         <input
           type="text"
           value={description}
