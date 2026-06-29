@@ -45,6 +45,8 @@ export const CLIENT_DETAIL_TAB_DEFS = [
  *         renewalAt: string;
  *         accountStatus: string;
  *         noticeDays: number;
+ *         documentUrl?: string | null;
+ *         signedBy?: string | null;
  *       }
  *     | null | undefined;
  *   contractDetailHref?: string | null;

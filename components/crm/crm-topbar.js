@@ -62,7 +62,9 @@ export function CrmTopbar({ title, onOpenNav, className }) {
           <button
             type="button"
             className="rounded-full px-3 py-1.5 text-xs text-fg-muted transition hover:bg-surface-muted hover:text-fg"
-            onClick={() => void signOut({ callbackUrl: routes.home })}
+            onClick={() =>
+              void signOut({ callbackUrl: routes.home, redirect: true })
+            }
           >
             Log ud
           </button>

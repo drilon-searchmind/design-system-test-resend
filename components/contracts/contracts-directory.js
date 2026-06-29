@@ -226,7 +226,23 @@ export function ContractsDirectory({
                       <div className="truncate font-sans text-[13px] font-medium text-fg">
                         {row.clientName}
                       </div>
-                      <div className="truncate text-[11px] text-fg-quiet">{row.kind}</div>
+                      <div className="truncate text-[11px] text-fg-quiet">
+                        {row.kind}
+                        {row.documentUrl ? (
+                          <>
+                            {" · "}
+                            <a
+                              href={row.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-agency-brand hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Se kontrakt
+                            </a>
+                          </>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
 

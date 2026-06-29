@@ -22,7 +22,6 @@ export function TemplatesCreateForm({
   onCancel,
   variant = "modal",
 }) {
-  const [key, setKey] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [departmentKey, setDepartmentKey] = useState("");
@@ -38,7 +37,6 @@ export function TemplatesCreateForm({
     const dod = Number.parseInt(defaultDueOffsetDays, 10);
     /** @type {Record<string, unknown>} */
     const body = {
-      key: key.trim(),
       title: title.trim(),
       description,
       defaultPriority,
@@ -60,7 +58,6 @@ export function TemplatesCreateForm({
     departmentKey,
     description,
     isTest,
-    key,
     onSubmit,
     scope,
     suggestedHours,
@@ -84,19 +81,7 @@ export function TemplatesCreateForm({
       : null}
 
       <div className={cn("grid gap-4 sm:grid-cols-2", !isModal && "mt-4")}>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Stabil nøgle *</span>
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder="fx tpl-onboarding-review"
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          />
-        </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
+        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted sm:col-span-2">
           <span>Titel *</span>
           <input
             value={title}
@@ -223,7 +208,7 @@ export function TemplatesCreateForm({
         <button
           type="button"
           onClick={() => submit()}
-          disabled={submitting || !key.trim() || !title.trim()}
+          disabled={submitting || !title.trim()}
           className={cn(
             "rounded-md px-4 py-2 font-sans text-[13px] font-medium text-white",
             "bg-agency-brand hover:opacity-90 disabled:opacity-40",

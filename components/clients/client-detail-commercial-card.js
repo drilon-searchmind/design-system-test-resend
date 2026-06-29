@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
  *         renewalAt: string;
  *         accountStatus: string;
  *         noticeDays: number;
+ *         documentUrl?: string | null;
+ *         signedBy?: string | null;
  *       }
  *     | undefined
  *     | null;
@@ -126,6 +128,23 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
                 <span className="font-medium text-fg">Aftalt fornyelsesdato:</span>{" "}
                 <span className="tabular-nums">{formatIsoDateDa(contract.renewalAt)}</span>
               </li>
+              {contract.signedBy ? (
+                <li>
+                  <span className="font-medium text-fg">Underskrevet af:</span> {contract.signedBy}
+                </li>
+              ) : null}
+              {contract.documentUrl ? (
+                <li>
+                  <a
+                    href={contract.documentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-agency-brand hover:underline"
+                  >
+                    Se kontrakt →
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </div>
         ) : (

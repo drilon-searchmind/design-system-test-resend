@@ -16,7 +16,7 @@ export function ClientDetailKpiStrip({ client, timerLabel = "Timer denne md" }) 
       ? client.npsHistory[client.npsHistory.length - 1]?.score
       : null;
   const npsTone =
-    lastNps == null ? "brand" : lastNps >= 50 ? "ok" : lastNps >= 40 ? "warn" : "bad";
+    lastNps == null ? "brand" : lastNps >= 60 ? "ok" : lastNps >= 40 ? "warn" : "bad";
 
   return (
     <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">

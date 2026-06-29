@@ -45,7 +45,6 @@ export function TaskDetailMongoPanel({
     typeof wire.assigneeId === "string" ? wire.assigneeId : "",
   );
   const [clientSlug, setClientSlug] = useState(typeof wire.clientId === "string" ? wire.clientId : "");
-  const [key, setKey] = useState(typeof wire.id === "string" ? wire.id : taskId);
 
   const reset = useCallback(() => {
     setTitle(String(wire.title ?? ""));
@@ -56,7 +55,6 @@ export function TaskDetailMongoPanel({
     setDepartmentKey(typeof wire.dept === "string" ? wire.dept : "");
     setAssigneeMemberKey(typeof wire.assigneeId === "string" ? wire.assigneeId : "");
     setClientSlug(typeof wire.clientId === "string" ? wire.clientId : "");
-    setKey(typeof wire.id === "string" ? wire.id : taskId);
   }, [wire, taskId]);
 
   const deptOptions = useMemo(() => [{ id: "", label: "—" }, ...departments.map((d) => ({ id: d.id, label: d.name ?? d.id }))], [
@@ -86,8 +84,6 @@ export function TaskDetailMongoPanel({
       if (!assigneeMemberKey.trim()) body.assigneeMemberKey = null;
       else body.assigneeMemberKey = assigneeMemberKey.trim();
       if (clientSlug.trim()) body.clientSlug = clientSlug.trim();
-      const nextKey = key.trim();
-      if (nextKey && nextKey !== taskId) body.key = nextKey;
 
       const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, {
         method: "PATCH",
@@ -96,11 +92,6 @@ export function TaskDetailMongoPanel({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gemme");
-      const nw = data?.wire;
-      if (nw && typeof nw.id === "string" && nw.id !== taskId) {
-        router.replace(`${routes.tasks}/${encodeURIComponent(nw.id)}`);
-        return;
-      }
       await onReload();
     } catch (e) {
       onNotice?.(e instanceof Error ? e.message : "Fejl ved gem");
@@ -113,7 +104,6 @@ export function TaskDetailMongoPanel({
     departmentKey,
     dueDate,
     hint,
-    key,
     onBusyChange,
     onNotice,
     onReload,
@@ -272,17 +262,6 @@ export function TaskDetailMongoPanel({
             onChange={(e) => setDueDate(e.target.value)}
             className={cn(
               "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          />
-        </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Nøgle (kan omdøbe URL)</span>
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[12px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />

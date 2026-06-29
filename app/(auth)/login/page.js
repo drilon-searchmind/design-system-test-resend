@@ -1,4 +1,5 @@
 import { GoogleSignInForm } from "@/components/auth/google-sign-in-form";
+import { hasGoogleOAuth } from "@/auth";
 import { sanitizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 
 export const metadata = { title: "Sign in · 1337-crm by Searchmind" };
@@ -12,5 +13,11 @@ export default async function LoginPage({ searchParams }) {
     typeof rawCb === "string" ? rawCb : undefined,
   );
 
-  return <GoogleSignInForm error={error} callbackUrl={callbackUrl} />;
+  return (
+    <GoogleSignInForm
+      error={error}
+      callbackUrl={callbackUrl}
+      devAuthOnly={!hasGoogleOAuth}
+    />
+  );
 }

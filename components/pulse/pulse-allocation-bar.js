@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
  * @param {{ allocation: Record<string, number>; height?: number; className?: string }} props
  */
 export function PulseAllocationBar({ allocation, height = 10, className }) {
-  const entries = Object.entries(allocation).filter(([, v]) => v > 0);
+  /** Allocation category — not a delivery department; excluded from dept capacity charts. */
+  const entries = Object.entries(allocation).filter(([k, v]) => v > 0 && k !== "clientMgmt");
   if (entries.length === 0) return null;
 
   return (

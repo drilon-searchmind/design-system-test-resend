@@ -69,6 +69,7 @@ export function NpsTemplatesDirectory({ templates, headingId = "nps-templates-he
               <button
                 type="button"
                 onClick={() => setOpenId(isOpen ? null : t.id)}
+                aria-expanded={isOpen}
                 className={cn(
                   "flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-3.5",
                   isOpen && "bg-agency-brand-soft/15",
@@ -83,31 +84,32 @@ export function NpsTemplatesDirectory({ templates, headingId = "nps-templates-he
                     <span className="text-[10px] text-fg-muted">{t.id}</span>
                   </div>
                   <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{t.subject}</p>
-                  {isOpen ? (
-                    <pre className="mt-3 max-h-[240px] overflow-auto rounded-xl border border-border-soft bg-surface-muted p-3 text-[11px] leading-relaxed text-fg-muted whitespace-pre-wrap">
-                      {t.body}
-                    </pre>
-                  ) : null}
-                  {isOpen ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled
-                        className="rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 py-1 font-sans text-[11px] font-medium text-agency-brand opacity-70"
-                      >
-                        Send test (låst)
-                      </button>
-                      <button
-                        type="button"
-                        disabled
-                        className="rounded-md border border-border bg-surface-muted px-3 py-1 font-sans text-[11px] text-fg-muted opacity-70"
-                      >
-                        Kopiér HTML
-                      </button>
-                    </div>
-                  ) : null}
                 </div>
               </button>
+
+              {isOpen ? (
+                <div className="border-t border-border-soft bg-agency-brand-soft/10 px-3 pb-3 pt-2 md:px-4 md:pb-3.5 md:pl-11">
+                  <pre className="max-h-[240px] overflow-auto rounded-xl border border-border-soft bg-surface-muted p-3 text-[11px] leading-relaxed whitespace-pre-wrap text-fg-muted">
+                    {t.body}
+                  </pre>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled
+                      className="rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 py-1 font-sans text-[11px] font-medium text-agency-brand opacity-70"
+                    >
+                      Send test (låst)
+                    </button>
+                    <button
+                      type="button"
+                      disabled
+                      className="rounded-md border border-border bg-surface-muted px-3 py-1 font-sans text-[11px] text-fg-muted opacity-70"
+                    >
+                      Kopiér HTML
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </li>
           );
         })}

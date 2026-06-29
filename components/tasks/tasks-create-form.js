@@ -62,7 +62,6 @@ export function TasksCreateForm({
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("medium");
   const [status, setStatus] = useState("todo");
-  const [key, setKey] = useState("");
   const [estimateHours, setEstimateHours] = useState("");
 
   const applyTemplate = useCallback(
@@ -99,7 +98,6 @@ export function TasksCreateForm({
     if (dueDate.trim()) body.dueDate = dueDate.trim().slice(0, 10);
     if (departmentKey && departmentKey !== "—") body.departmentKey = departmentKey;
     if (assigneeMemberKey.trim()) body.assigneeMemberKey = assigneeMemberKey.trim();
-    if (key.trim()) body.key = key.trim();
     if (templateKey.trim()) body.templateKey = templateKey.trim();
     const ehRaw = estimateHours.trim().replace(",", ".");
     if (ehRaw !== "") {
@@ -116,7 +114,6 @@ export function TasksCreateForm({
     dueDate,
     priority,
     status,
-    key,
     templateKey,
     estimateHours,
     onSubmit,
@@ -293,18 +290,6 @@ export function TasksCreateForm({
             <option value="done">Færdig</option>
             <option value="cancelled">Afbrudt</option>
           </select>
-        </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Stabil nøgle (valgfri)</span>
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder="fx t-akme-audit"
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 text-[12px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          />
         </label>
       </div>
       {error ? (

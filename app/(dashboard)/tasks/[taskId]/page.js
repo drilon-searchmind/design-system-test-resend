@@ -15,12 +15,10 @@ export async function generateMetadata({ params }) {
 
   try {
     await connectDb();
-    /** @type {Record<string, unknown>[]} */
-    const orClause = [{ key: taskId }];
-    if (mongoose.Types.ObjectId.isValid(taskId)) {
-      orClause.push({ _id: new mongoose.Types.ObjectId(taskId) });
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      return { title: "Opgave · 1337-crm by Searchmind" };
     }
-    const tdoc = await Task.findOne({ $or: orClause }).select("title").lean();
+    const tdoc = await Task.findById(taskId).select("title").lean();
     if (tdoc && typeof tdoc.title === "string" && tdoc.title.trim()) {
       return { title: `${tdoc.title} · Opgave · 1337-crm by Searchmind` };
     }

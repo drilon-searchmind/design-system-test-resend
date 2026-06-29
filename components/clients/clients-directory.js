@@ -20,6 +20,8 @@ import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { routes } from "@/config/routes";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
+import { useDensity } from "@/components/theme/use-density";
+import { LEAD_SOURCE_LABELS, LEAD_SOURCES } from "@/lib/crm/client-utils";
 import { CLIENTS as STATIC_CLIENTS, TEAM as STATIC_TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -54,8 +56,11 @@ export function ClientsDirectory({
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("all");
+  const [leadSourceFilter, setLeadSourceFilter] = useState("all");
   const [sort, setSort] = useState("name");
   const [density, setDensity] = useState("list");
+  const layoutDensity = useDensity();
+  const showCvr = layoutDensity === "spacious";
 
   const unhealthyCount = useMemo(() => CLIENTS.filter((c) => c.health !== "ok").length, [CLIENTS]);
 
@@ -68,6 +73,12 @@ export function ClientsDirectory({
       }
       if (filter === "unhealthy" && c.health === "ok") return false;
       if (filter === "over" && c.hoursThisMonth <= c.hoursBudget) return false;
+      if (
+        leadSourceFilter !== "all" &&
+        (c.leadSource ?? "andet") !== leadSourceFilter
+      ) {
+        return false;
+      }
       return true;
     });
 
@@ -83,7 +94,7 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, sort, CLIENTS]);
+  }, [q, filter, leadSourceFilter, sort, CLIENTS]);
 
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
@@ -127,6 +138,27 @@ export function ClientsDirectory({
               { id: "over", label: "Over budget" },
             ]}
           />
+
+          <label className="flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+              Kilde
+            </span>
+            <select
+              value={leadSourceFilter}
+              onChange={(e) => setLeadSourceFilter(e.target.value)}
+              className={cn(
+                "h-8 max-w-[140px] rounded-full border border-border bg-surface-muted px-2.5",
+                "text-[12px] text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
+              )}
+            >
+              <option value="all">Alle kilder</option>
+              {LEAD_SOURCES.map((src) => (
+                <option key={src} value={src}>
+                  {LEAD_SOURCE_LABELS[src]}
+                </option>
+              ))}
+            </select>
+          </label>
 
           <PulseSegmentedControl
             size="sm"
@@ -210,7 +242,15 @@ export function ClientsDirectory({
                     </span>
                     <div className="min-w-0">
                       <div className="truncate font-sans text-[13px] font-medium text-fg">{c.name}</div>
-                      <div className="truncate font-sans text-[11px] text-fg-quiet">{c.industry}</div>
+                      <div className="truncate font-sans text-[11px] text-fg-quiet">
+                        {showCvr && c.cvr ? (
+                          <>
+                            <span className="tabular-nums">CVR {c.cvr}</span>
+                            <span className="mx-1">·</span>
+                          </>
+                        ) : null}
+                        {c.industry}
+                      </div>
                     </div>
                     <HealthChip health={c.health} palette="agency" compact />
                   </div>

@@ -70,6 +70,9 @@
   --color-agency-dep-geo: var(--agency-dep-geo);
   --color-agency-dep-creative: var(--agency-dep-creative);
   --color-agency-dep-content: var(--agency-dep-content);
+  --color-agency-dep-martech: var(--agency-dep-martech);
+  --color-agency-dep-web: var(--agency-dep-web);
+  --color-agency-dep-cro: var(--agency-dep-cro);
 
   /** JetBrains Mono (layout) — data / code (DESIGN.md §3 / §10.5 tabular mono) */
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
@@ -170,6 +173,20 @@
   --agency-dep-geo: oklch(62% 0.16 135);
   --agency-dep-creative: oklch(62% 0.16 355);
   --agency-dep-content: oklch(62% 0.16 85);
+  --agency-dep-martech: oklch(60% 0.16 290);
+  --agency-dep-web: oklch(60% 0.16 210);
+  --agency-dep-cro: oklch(60% 0.16 50);
+
+  --dep-seo: oklch(60% 0.16 255);
+  --dep-ppc: oklch(60% 0.16 320);
+  --dep-social: oklch(60% 0.16 30);
+  --dep-email: oklch(60% 0.16 180);
+  --dep-geo: oklch(60% 0.16 135);
+  --dep-creative: oklch(60% 0.16 355);
+  --dep-content: oklch(60% 0.16 85);
+  --dep-martech: oklch(60% 0.16 290);
+  --dep-web: oklch(60% 0.16 210);
+  --dep-cro: oklch(60% 0.16 50);
 
   --agency-shadow-raised: 0 1px 2px oklch(0% 0 0 / 0.35);
 }
@@ -254,6 +271,20 @@
   --agency-dep-geo: oklch(60% 0.16 135);
   --agency-dep-creative: oklch(60% 0.16 355);
   --agency-dep-content: oklch(60% 0.16 85);
+  --agency-dep-martech: oklch(60% 0.16 290);
+  --agency-dep-web: oklch(60% 0.16 210);
+  --agency-dep-cro: oklch(60% 0.16 50);
+
+  --dep-seo: oklch(60% 0.16 255);
+  --dep-ppc: oklch(60% 0.16 320);
+  --dep-social: oklch(60% 0.16 30);
+  --dep-email: oklch(60% 0.16 180);
+  --dep-geo: oklch(60% 0.16 135);
+  --dep-creative: oklch(60% 0.16 355);
+  --dep-content: oklch(60% 0.16 85);
+  --dep-martech: oklch(60% 0.16 290);
+  --dep-web: oklch(60% 0.16 210);
+  --dep-cro: oklch(60% 0.16 50);
 
   --agency-shadow-raised: none;
 }
@@ -573,6 +604,20 @@ html[data-density="spacious"] {
   --agency-dep-geo: oklch(60% 0.16 135);
   --agency-dep-creative: oklch(60% 0.16 355);
   --agency-dep-content: oklch(60% 0.16 85);
+  --agency-dep-martech: oklch(60% 0.16 290);
+  --agency-dep-web: oklch(60% 0.16 210);
+  --agency-dep-cro: oklch(60% 0.16 50);
+
+  --dep-seo: oklch(60% 0.16 255);
+  --dep-ppc: oklch(60% 0.16 320);
+  --dep-social: oklch(60% 0.16 30);
+  --dep-email: oklch(60% 0.16 180);
+  --dep-geo: oklch(60% 0.16 135);
+  --dep-creative: oklch(60% 0.16 355);
+  --dep-content: oklch(60% 0.16 85);
+  --dep-martech: oklch(60% 0.16 290);
+  --dep-web: oklch(60% 0.16 210);
+  --dep-cro: oklch(60% 0.16 50);
 
   --agency-shadow-raised: none;
 

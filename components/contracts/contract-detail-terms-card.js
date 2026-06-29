@@ -52,6 +52,27 @@ export function ContractDetailTermsCard({ contract }) {
             <dt className="text-fg-soft">Faktureringsrytme</dt>
             <dd className="mt-1 font-sans text-[13px] leading-snug text-fg-muted">{billingCadence(contract.kind)}</dd>
           </div>
+          {contract.signedBy ? (
+            <div>
+              <dt className="text-fg-soft">Underskrevet af (kunde)</dt>
+              <dd className="mt-1 font-sans text-[13px] text-fg">{contract.signedBy}</dd>
+            </div>
+          ) : null}
+          {contract.documentUrl ? (
+            <div>
+              <dt className="text-fg-soft">Kontraktdokument</dt>
+              <dd className="mt-1">
+                <a
+                  href={contract.documentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-[13px] font-medium text-agency-brand hover:underline"
+                >
+                  Se kontrakt
+                </a>
+              </dd>
+            </div>
+          ) : null}
           <div className="sm:col-span-2 rounded-xl border border-dashed border-border bg-surface-muted/30 p-3 font-sans text-[12px] leading-relaxed text-fg-muted">
             <span className="font-medium text-fg-soft">SLO & eskalering:</span> SLA efter aftale med kundeansvarlig;
             ændringsanmodninger logges i revisionsspor nedenfor — fuld PDF-arkiv kommer med Contract-dokument-store.

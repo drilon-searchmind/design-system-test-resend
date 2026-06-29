@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClickUp → Agency OS: Felt-mapping</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-card: #181c27;
+    --bg-elev: #1e2335;
+    --border: #2a3050;
+    --text: #e4e8f0;
+    --text-muted: #7b8aad;
+    --text-dim: #4a5680;
+    --brand: oklch(62% 0.19 255);
+    --brand-soft: oklch(25% 0.08 255);
+    --ok: oklch(62% 0.16 155);
+    --ok-soft: oklch(22% 0.07 155);
+    --warn: oklch(72% 0.16 75);
+    --warn-soft: oklch(26% 0.08 75);
+    --bad: oklch(60% 0.18 15);
+    --bad-soft: oklch(24% 0.08 15);
+    --neutral: #4a5680;
+    --neutral-soft: #1e2335;
+    --dep-seo: oklch(60% 0.16 255);
+    --dep-ppc: oklch(60% 0.16 320);
+    --dep-social: oklch(60% 0.16 30);
+    --dep-email: oklch(60% 0.16 180);
+    --dep-geo: oklch(60% 0.16 135);
+    --dep-creative: oklch(60% 0.16 355);
+    --dep-content: oklch(60% 0.16 85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 24px 64px;
+  }
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 32px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 13px;
+    max-width: 700px;
+  }
+  .meta-note {
+    background: var(--brand-soft);
+    border: 1px solid oklch(35% 0.1 255);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: oklch(80% 0.12 255);
+    max-width: 860px;
+  }
+  .meta-note strong { color: var(--text); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 1400px;
+    margin: 0 auto 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    background: var(--bg-elev);
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-elev); }
+  td {
+    padding: 8px 14px;
+    vertical-align: middle;
+    font-size: 12.5px;
+  }
+
+  /* ClickUp field name */
+  .felt-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+  /* ClickUp type badge */
+  .type-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  /* Mapping status chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .chip-ok    { background: var(--ok-soft);   color: var(--ok);   border: 1px solid oklch(30% 0.1 155); }
+  .chip-warn  { background: var(--warn-soft);  color: var(--warn); border: 1px solid oklch(38% 0.1 75);  }
+  .chip-bad   { background: var(--bad-soft);   color: var(--bad);  border: 1px solid oklch(34% 0.1 15);  }
+  .chip-new   { background: var(--brand-soft); color: oklch(78% 0.14 255); border: 1px solid oklch(35% 0.1 255); }
+  .chip-skip  { background: #15181f; color: var(--text-dim); border: 1px solid #1e2335; }
+
+  /* New system entity + field */
+  .entity-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+  .field-name {
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    font-size: 11.5px;
+    color: oklch(78% 0.14 255);
+  }
+  .field-note {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .note-col {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    max-width: 240px;
+  }
+
+  .cu-list-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+
+  /* Checkmark for "med over" */
+  .med-yes { color: var(--ok); font-size: 13px; }
+  .med-no  { color: var(--text-dim); font-size: 13px; }
+
+  /* Filter bar */
+  .filter-bar {
+    max-width: 1400px;
+    margin: 0 auto 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .filter-btn {
+    padding: 4px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: oklch(42% 0.12 255);
+    background: var(--brand-soft);
+    color: oklch(78% 0.14 255);
+  }
+
+  /* Summary row at top */
+  .stats-row {
+    max-width: 1400px;
+    margin: 0 auto 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .stat-ok     { color: var(--ok); }
+  .stat-warn   { color: var(--warn); }
+  .stat-bad    { color: var(--bad); }
+  .stat-brand  { color: oklch(78% 0.14 255); }
+  .stat-muted  { color: var(--text-muted); }
+
+  footer {
+    max-width: 1400px;
+    margin: 48px auto 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>ClickUp → Agency OS · Felt-mapping</h1>
+  <p>Oversigt over alle felter fra ClickUp ([ZP] CRM, [ZP] Contract Management, [ZP] Delivery) og deres kortlægning til den nye systems datamodel og demo-data.</p>
+  <div class="meta-note">
+    <strong>Kilde:</strong> ClickUp felt-inventory exporteret fra <em>ClickUp felt-inventory — CRM migrering.xlsx</em>. Det nye system er baseret på MongoDB-modellen i <code>lib/crm/static-data.js</code>, <code>users-data.js</code> og CURSOR_PROMPT.md entitetslisten. Status angiver om feltet allerede eksisterer i den nye datamodel, mangler, eller skal tilpasses.
+  </div>
+</div>
+
+<!-- Summary stats -->
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-value stat-ok">34</div><div class="stat-label">Direkte match</div></div>
+  <div class="stat-card"><div class="stat-value stat-warn">18</div><div class="stat-label">Delvist / tilpasning</div></div>
+  <div class="stat-card"><div class="stat-value stat-brand">12</div><div class="stat-label">Mangler — ny felt</div></div>
+  <div class="stat-card"><div class="stat-value stat-muted">10</div><div class="stat-label">Springes over</div></div>
+  <div class="stat-card"><div class="stat-value stat-muted">74</div><div class="stat-label">Felter i alt</div></div>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="dot" style="background:var(--ok)"></span> Direkte match — feltet findes allerede</span>
+  <span class="legend-item"><span class="dot" style="background:var(--warn)"></span> Delvist match — feltet skal tilpasses</span>
+  <span class="legend-item"><span class="dot" style="background:oklch(62% 0.18 255)"></span> Mangler — nyt felt skal tilføjes</span>
+  <span class="legend-item"><span class="dot" style="background:var(--text-dim)"></span> Springes over — ClickUp-intern / udgår</span>
+</div>
+
+<!-- ==================== ACCOUNT DASHBOARD (CLIENT) ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] CRM &mdash; Account Dashboard (master) → Client-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Virksomhedsnavn</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">name</span></td>
+          <td class="note-col">Bruges i stedet for domæne.dk som primær nøgle (CVR-navn)</td>
+        </tr>
+        <tr>
+          <td class="felt-name">CVR</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">cvr</span></td>
+          <td class="note-col">Ikke i demo-data eller datamodel — skal tilføjes</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Status</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">status</span> <span class="field-note">(active | paused | inactive)</span></td>
+          <td class="note-col">Demo-data har alle tre værdier</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Startdato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">startedAt</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Slutdato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">renewalAt</span></td>
+          <td class="note-col">Svarer til renewal / fornyelsesdato</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsigelsesdato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">terminatedAt</span></td>
+          <td class="note-col">Ingen tilsvarende felt i demo-data — skal tilføjes</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsigelsesgrund</td>
+          <td><span class="type-badge">labels</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">churnReason</span> <span class="field-note">(enum[])</span></td>
+          <td class="note-col">Ny kategori-enum for opsigelsesårsager</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsigelsesgrund - Uddybning</td>
+          <td><span class="type-badge">text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">churnNote</span></td>
+          <td class="note-col">Fritekst-uddybning af opsigelsesgrund</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Service(s)</td>
+          <td><span class="type-badge">labels</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">servicesActive</span> <span class="field-note">(string[])</span></td>
+          <td class="note-col">Kortlægges til dept-id'er: seo, ppc, social, email, geo, creative, content</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Virksomhedstype</td>
+          <td><span class="type-badge">labels</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">industry</span> + <span class="field-name">tags</span></td>
+          <td class="note-col">Demo-data bruger <code>industry</code> (string) + <code>tags</code> (string[])</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Aftale type</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">kind</span> <span class="field-note">(new | upsell | crosssell)</span></td>
+          <td class="note-col">Sidder reelt på Contract-entiteten, ikke Client</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Lead Source</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">leadSource</span></td>
+          <td class="note-col">Ikke modelleret endnu</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Sælger</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">ownerId</span> → TeamMember</td>
+          <td class="note-col">I ny system er owner Account Director — sælger kan evt. adskilles som separat felt</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead</td>
+          <td><span class="type-badge">drop_down / users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">ownerId</span> → TeamMember (user field)</td>
+          <td class="note-col">Skal konverteres fra drop_down til rigtig user-relation i nyt system</td>
+        </tr>
+        <tr>
+          <td class="felt-name">1.CP - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.ppc</span> + assignee</td>
+          <td class="note-col">CP = Client Partner. Kombineres med allokeringsmodel</td>
+        </tr>
+        <tr>
+          <td class="felt-name">2.SEO - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.seo</span> → TeamMember</td>
+          <td class="note-col">Pr. afdeling ansvarlig — ny model-nøgle foreslås</td>
+        </tr>
+        <tr>
+          <td class="felt-name">3.PPC - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.ppc</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">4.PS - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.social</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">5.Content - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.content</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">6.Creative - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.creative</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">7.EM - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.email</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">8. MarTech - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.martech</span></td>
+          <td class="note-col">MarTech ikke i nuværende dept-liste — ny afdeling?</td>
+        </tr>
+        <tr>
+          <td class="felt-name">9. Web - Ansvarlig</td>
+          <td><span class="type-badge">users</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">deptAssignees.web</span></td>
+          <td class="note-col">Web ikke i nuværende dept-liste — afklar om separat</td>
+        </tr>
+        <tr>
+          <td class="felt-name">5.Copywriter</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Dækkes af Content-ansvarlig i ny model</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Marketing - Start MRR</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">retainer</span> (startværdi)</td>
+          <td class="note-col">Ny model holder historik i RetainerHistoryEntry — startværdi er første entry</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Marketing - Opsalg MRR</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">RETAINERHISTORYENTRY</span></td>
+          <td><span class="field-name">amount</span> (delta)</td>
+          <td class="note-col">Opsamles som ændring i retainer-historik</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Marketing - MRR</td>
+          <td><span class="type-badge">formula</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">retainer</span> (beregnet)</td>
+          <td class="note-col">Beregnes server-side: start + opsalg akkumuleret</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Marketing - Opstartspris</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">SUBSCRIPTION</span></td>
+          <td><span class="field-name">price</span> (type=marketing, period=monthly)</td>
+          <td class="note-col">Engangs opstartspris — brug OneOffSale eller Subscription</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Prisregulering (3%)</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">annualAdjustmentPct</span></td>
+          <td class="note-col">Generel note: 3% prisreg. pr. år — felt til at styre dette</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Web - MRR</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">SUBSCRIPTION</span></td>
+          <td><span class="field-name">price</span> (type=web_annual)</td>
+          <td class="note-col">Web abonnement håndteres som Subscription-entitet</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Web - ARR Opstartsdato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">SUBSCRIPTION</span></td>
+          <td><span class="field-name">startedAt</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Abonnement Web (AHLE)</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">SUBSCRIPTION</span></td>
+          <td><span class="field-name">type</span> + <span class="field-name">status</span></td>
+          <td class="note-col">AHLE = Hosting/Licens/Support — sæt type=web_annual</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Abonnement (AHLE)</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">SUBSCRIPTION</span></td>
+          <td><span class="field-name">type</span> (marketing | web_annual)</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Web - Engangspris</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">price</span></td>
+          <td class="note-col">Web-projekter som engangsopgaver</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Web - Opsalg</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">price</span> (status=quote|accepted)</td>
+          <td class="note-col">Opsalg på web-ydelse — kan knyttes til Contract.kind=upsell</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Levetid (Mdr)</td>
+          <td><span class="type-badge">formula</span></td>
+          <td>—</td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">beregnet: now - startedAt</span></td>
+          <td class="note-col">Beregnes i UI fra startedAt</td>
+        </tr>
+        <tr>
+          <td class="felt-name">CLV</td>
+          <td><span class="type-badge">formula</span></td>
+          <td>—</td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">clv (beregnet)</span></td>
+          <td class="note-col">Customer Lifetime Value — Levetid × MRR</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kundenoter</td>
+          <td><span class="type-badge">text</span></td>
+          <td>x (legacy)</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td><span class="entity-name">NOTE</span></td>
+          <td><span class="field-name">body</span></td>
+          <td class="note-col">Erstattes af Note-entiteten med logbog</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Google Drive</td>
+          <td><span class="type-badge">url</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">googleDriveUrl</span></td>
+          <td class="note-col">Ekstern link-felt til kundens Drive-mappe</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kontaktperson</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col">Håndteres som separat Contact-entitet (se sektion nedenfor)</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kontrakt</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col">Relation til Contract-entitet</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsalg</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">CMS</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">cmsId</span> → CmsEntry</td>
+          <td class="note-col">Ny entitet — holder CMS-information for kunden</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Sproglag & Domæner</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">DOMAIN</span></td>
+          <td><span class="field-name">clientId, locale, domain</span></td>
+          <td class="note-col">Ny sub-entitet — kunder kan have flere domæner/sproglag</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Andre domæner</td>
+          <td><span class="type-badge">tasks</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">DOMAIN</span></td>
+          <td><span class="field-name">domain[]</span></td>
+          <td class="note-col">Del af Domain-listen — ikke separate tasks</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kundeinfo</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">ClickUp-intern — data konsolideres i Client-entiteten</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Files</td>
+          <td><span class="type-badge">attachment</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Erstattes af Google Drive URL-felt</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Budget Month / Client / PPC Support / PS Support</td>
+          <td><span class="type-badge">drop_down / users</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">ClickUp-interne filter-felter — udgår i nyt system</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== KONTAKTPERSON ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] CRM &mdash; Kontaktperson → Contact-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Virksomhedsnavn (via Client)</td>
+          <td><span class="type-badge">relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Job Title</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">title</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Email</td>
+          <td><span class="type-badge">email</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">email</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Telefonnr</td>
+          <td><span class="type-badge">phone</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">phone</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">NPS kontakt</td>
+          <td><span class="type-badge">checkbox</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">isPrimary</span></td>
+          <td class="note-col">Angiver om denne kontakt modtager NPS-mails</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Seneste kontakt</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">lastContactedAt</span></td>
+          <td class="note-col">Ny felt — kan evt. udledes fra Note-logbogen</td>
+        </tr>
+        <tr>
+          <td class="felt-name">LinkedIn</td>
+          <td><span class="type-badge">url</span></td>
+          <td>—</td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CONTACT</span></td>
+          <td><span class="field-name">linkedinUrl</span></td>
+          <td class="note-col">Valgfrit — ikke i demo-data</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead / Budget Month / Files</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Interne ClickUp-felter — udgår</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== OPSALG / CONTRACT ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] CRM &mdash; Opsalg → OneOffSale + Contract-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Client</td>
+          <td><span class="type-badge">relationship</span></td>
+          <td><span class="chip chip-new" style="font-size:10px">NEW</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col">Vigtig ny relation — marker som NEW i ClickUp</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Service(s)</td>
+          <td><span class="type-badge">labels</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">allocation</span> (dept-map)</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsalg / Nedsalg</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">kind</span> <span class="field-note">(new | upsell | crosssell)</span></td>
+          <td class="note-col">Opsalg/Nedsalg/Krydssalg/Engangs</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Værdi</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">price</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Opsalgsdato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">startedAt</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Sælger</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">ownerId</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Total</td>
+          <td><span class="type-badge">formula</span></td>
+          <td>—</td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">ONEOFFSALE</span></td>
+          <td><span class="field-name">price (beregnet)</span></td>
+          <td class="note-col">Beregnes server-side</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead / Files / Budget Month</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Interne ClickUp-felter — udgår</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== NPS ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] CRM &mdash; NPS → NpsResponse-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name"># NPS</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">NPSRESPONSE</span></td>
+          <td><span class="field-name">score</span> <span class="field-note">(0–100)</span></td>
+          <td class="note-col">ClickUp bruger 1–10 skala, ny model bruger 0–100. Konverter: score × 10</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kommentar</td>
+          <td><span class="type-badge">text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">NPSRESPONSE</span></td>
+          <td><span class="field-name">comment</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">NPSRESPONSE</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">NPSRESPONSE</span></td>
+          <td><span class="field-name">contactId</span> → Contact</td>
+          <td class="note-col">Skal pege på Contact, ikke bare navn</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Account Dashboard</td>
+          <td><span class="type-badge">list_relationship</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">ClickUp-intern relation</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Service(s) / Budget Month / Files</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Interne ClickUp-felter — udgår</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== CONTRACTS ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] Contract Management &mdash; Contracts (Kontrakt) → Contract-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Client</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Virksomhedsnavn</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">clientId.name</span> (join)</td>
+          <td class="note-col">Behøves ikke som separat felt — hentes via relation</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kontrakt type</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">kind</span> <span class="field-note">(new | upsell | crosssell)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Værdi</td>
+          <td><span class="type-badge">currency</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">value</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Job Name</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">title</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Underskrift dato</td>
+          <td><span class="type-badge">date</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">signedAt</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Underskrevet af</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">signedBy</span> (Contact name)</td>
+          <td class="note-col">Ideelt Contact-relation fremfor fritekst</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kontrakt afsender</td>
+          <td><span class="type-badge">short_text</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">ownerId</span> → TeamMember</td>
+          <td class="note-col">Vores afsender af kontrakten — brug TeamMember-relation</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Kontrakt link</td>
+          <td><span class="type-badge">url</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">documentUrl</span></td>
+          <td class="note-col">Link til PDF/DocuSign — nyt felt</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Files</td>
+          <td><span class="type-badge">attachment</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CONTRACT</span></td>
+          <td><span class="field-name">documentUrl</span></td>
+          <td class="note-col">Erstattes af URL-felt til dokumentet</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead / Year / Budget Month</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Interne ClickUp-felter — udgår</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== BUDGET MANAGER ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] Contract Management &mdash; Budget Manager → Client.allocation + RetainerHistoryEntry</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Client</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">clientId</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">2. SEO</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.seo</span> <span class="field-note">(%)</span></td>
+          <td class="note-col">Allokeringsprocent — sum skal = 100</td>
+        </tr>
+        <tr>
+          <td class="felt-name">3. PPC</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.ppc</span> <span class="field-note">(%)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">4. Paid Social</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.social</span> <span class="field-note">(%)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">5. CONTENT</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.content</span> <span class="field-note">(%)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">6. Creative Produktion</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.creative</span> <span class="field-note">(%)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">7. Email Mkt</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.email</span> <span class="field-note">(%)</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">8. Martech</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.martech</span></td>
+          <td class="note-col">MarTech ikke i nuværende dept-model — afklar</td>
+        </tr>
+        <tr>
+          <td class="felt-name">9. Web</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.web</span></td>
+          <td class="note-col">Web ikke i nuværende dept-model — afklar</td>
+        </tr>
+        <tr>
+          <td class="felt-name">10. CRO</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.cro</span></td>
+          <td class="note-col">CRO ikke i nuværende dept-model — afklar</td>
+        </tr>
+        <tr>
+          <td class="felt-name">LINK BUILDING</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.seo</span> (del af SEO)</td>
+          <td class="note-col">Link building er sub-service under SEO — slå evt. sammen</td>
+        </tr>
+        <tr>
+          <td class="felt-name">1. Creative Behandling</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.creative</span> (del af Creative)</td>
+          <td class="note-col">Sub-service under Creative</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Mgmt</td>
+          <td><span class="type-badge">number</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">allocation.clientMgmt</span></td>
+          <td class="note-col">Account management-timer som separat allokeringskategori</td>
+        </tr>
+        <tr>
+          <td class="felt-name">#0. SEO TOTAL / Total DKK</td>
+          <td><span class="type-badge">formula</span></td>
+          <td>—</td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">CLIENT</span></td>
+          <td><span class="field-name">retainer (beregnet)</span></td>
+          <td class="note-col">Beregnes server-side som summen af alle dept-allokationer × timepris</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Service(s) / Year / Budget Month / Client Lead / Ansvarlige</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Hentes via Client-relation — udgår som separate felter</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== DELIVERY ==================== -->
+<div class="section">
+  <div class="section-title">[ZP] Delivery &mdash; Delivery (alle service lines) → Task + TimeEntry-entitet</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Felt</th>
+          <th>Type (CU)</th>
+          <th>Med over?</th>
+          <th>Status</th>
+          <th>Ny entitet</th>
+          <th>Ny felt / model-path</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="felt-name">Client</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">clientId</span> → Client</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Assignee(s)</td>
+          <td><span class="type-badge">users (native)</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">assigneeId</span> → TeamMember</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Due date</td>
+          <td><span class="type-badge">date (native)</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">deadline</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Task template</td>
+          <td><span class="type-badge">relationship</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">templateId</span> → TaskTemplate</td>
+          <td class="note-col">Relationen til skabelonen bevares</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Description</td>
+          <td><span class="type-badge">text (native)</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">title + hint</span></td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Time tracked</td>
+          <td><span class="type-badge">automatic (native)</span></td>
+          <td><span class="med-yes">✓</span></td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK + TIMEENTRY</span></td>
+          <td><span class="field-name">loggedHrs</span> / <span class="field-name">durationMin</span></td>
+          <td class="note-col">Time entries er separate entiteter der aggregeres til task</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Service Line</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td>—</td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">deptId</span> → Department</td>
+          <td class="note-col"></td>
+        </tr>
+        <tr>
+          <td class="felt-name">Progress</td>
+          <td><span class="type-badge">automatic_progress</span></td>
+          <td>—</td>
+          <td><span class="chip chip-ok">Direkte match</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">loggedHrs / estimateHrs</span></td>
+          <td class="note-col">Beregnes som loggedHrs / estimateHrs i nyt system</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Delivery Role</td>
+          <td><span class="type-badge">labels</span></td>
+          <td>—</td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">deptId</span> (dept=rolle)</td>
+          <td class="note-col">Rollen udledes af afdelingen i nyt system</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Content type</td>
+          <td><span class="type-badge">labels</span></td>
+          <td>—</td>
+          <td><span class="chip chip-warn">Delvist</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">tags / checklist</span></td>
+          <td class="note-col">Kategorisering via tags på opgaven</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Freelancer / Freelancer domæne</td>
+          <td><span class="type-badge">users / short_text</span></td>
+          <td>—</td>
+          <td><span class="chip chip-new">Mangler</span></td>
+          <td><span class="entity-name">TASK</span></td>
+          <td><span class="field-name">externalAssignee</span></td>
+          <td class="note-col">Freelancer-support ikke i nuværende model</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Record Type</td>
+          <td><span class="type-badge">drop_down</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">ClickUp-intern klassifikation — udgår</td>
+        </tr>
+        <tr>
+          <td class="felt-name">Client Lead / Budget Month / Files</td>
+          <td><span class="type-badge">various</span></td>
+          <td>—</td>
+          <td><span class="chip chip-skip">Spring over</span></td>
+          <td>—</td>
+          <td>—</td>
+          <td class="note-col">Interne ClickUp-felter — udgår</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== AFDELING-SPECIFIK NOTE ==================== -->
+<div class="section">
+  <div class="section-title">Manglende afdelinger — ny dept-model vs. ClickUp</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ClickUp Service Line</th>
+          <th>Ny model (dept-id)</th>
+          <th>Status</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="felt-name">SEO</td><td><span class="field-name">seo</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 255</td></tr>
+        <tr><td class="felt-name">PPC</td><td><span class="field-name">ppc</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 320</td></tr>
+        <tr><td class="felt-name">Paid Social</td><td><span class="field-name">social</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 30</td></tr>
+        <tr><td class="felt-name">Email Mkt</td><td><span class="field-name">email</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 180</td></tr>
+        <tr><td class="felt-name">GEO</td><td><span class="field-name">geo</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 135</td></tr>
+        <tr><td class="felt-name">Creative Produktion + Creative Behandling</td><td><span class="field-name">creative</span></td><td><span class="chip chip-warn">Delvist</span></td><td class="note-col">Samles til én dept i ny model. OKLCH hue 355</td></tr>
+        <tr><td class="felt-name">Content</td><td><span class="field-name">content</span></td><td><span class="chip chip-ok">Match</span></td><td class="note-col">OKLCH hue 85</td></tr>
+        <tr><td class="felt-name">Link Building</td><td>— (sub-service af seo)</td><td><span class="chip chip-warn">Delvist</span></td><td class="note-col">Ingen separat dept — indgår i SEO-allokering</td></tr>
+        <tr><td class="felt-name">MarTech</td><td>— mangler</td><td><span class="chip chip-new">Mangler</span></td><td class="note-col">Ny afdeling? Skal afklares</td></tr>
+        <tr><td class="felt-name">Web</td><td>— mangler</td><td><span class="chip chip-new">Mangler</span></td><td class="note-col">Håndteres via Subscription (web_annual) — separat dept?</td></tr>
+        <tr><td class="felt-name">CRO</td><td>— mangler</td><td><span class="chip chip-new">Mangler</span></td><td class="note-col">Ny afdeling? Skal afklares</td></tr>
+        <tr><td class="felt-name">Client Mgmt (CP)</td><td>— mangler</td><td><span class="chip chip-new">Mangler</span></td><td class="note-col">Account management-timer — separat allokering?</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Genereret 2026-06-29 &mdash; Searchmind Agency OS · ClickUp CRM Migreringsanalyse &mdash; Ikke til kundedeling.
+</footer>
+
+</body>
+</html>

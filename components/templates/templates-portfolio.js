@@ -91,9 +91,7 @@ export function TemplatesPortfolio() {
         closeCreateModal();
         await load();
         const nextId =
-          typeof data?.wire?.id === "string" && data.wire.id ? String(data.wire.id) : typeof body?.key === "string" ?
-            body.key.trim()
-          : "";
+          typeof data?.wire?.id === "string" && data.wire.id ? String(data.wire.id) : "";
         if (nextId) {
           router.push(`/templates/${encodeURIComponent(nextId)}`);
         }

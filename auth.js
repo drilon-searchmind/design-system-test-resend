@@ -1,4 +1,14 @@
+import { cookies } from "next/headers";
+
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+
+import { isGoogleWorkspaceSsoAllowed, normalizeEmail } from "@/lib/auth/workspace-sso";
 import { ACCESS_TIERS } from "@/lib/constants/access-tiers";
+import { env } from "@/lib/env";
+
+/** When set, demo dev-session auth returns null (Log ud). */
+const DEMO_SIGNED_OUT_COOKIE = "apex-demo-signed-out";
 
 const DEV_SESSION = {
   user: {
@@ -11,18 +21,156 @@ const DEV_SESSION = {
   expires: "2099-01-01T00:00:00.000Z",
 };
 
-export async function auth() {
+export const hasGoogleOAuth = Boolean(
+  env.SSO_GOOGLE_CLIENT_ID && env.SSO_GOOGLE_CLIENT_SECRET,
+);
+
+const authSecret =
+  env.AUTH_SECRET ??
+  (hasGoogleOAuth ? undefined : "dev-auth-secret-not-for-production");
+
+async function isDemoSignedOut() {
+  const store = await cookies();
+  return store.get(DEMO_SIGNED_OUT_COOKIE)?.value === "1";
+}
+
+async function getDevSessionPayload() {
+  if (await isDemoSignedOut()) return null;
   return DEV_SESSION;
 }
 
-const jsonResponse = (body) =>
-  new Response(JSON.stringify(body), { headers: { "content-type": "application/json" } });
+async function markSignedOut() {
+  const store = await cookies();
+  store.set(DEMO_SIGNED_OUT_COOKIE, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+}
+
+async function clearSignedOut() {
+  const store = await cookies();
+  store.delete(DEMO_SIGNED_OUT_COOKIE);
+}
+
+const jsonResponse = (body, init = {}) =>
+  new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      "content-type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+
+function authRouteAction(pathname) {
+  const segments = pathname.split("/").filter(Boolean);
+  return segments[segments.length - 1] ?? "";
+}
+
+function isSignInOrCallbackPath(pathname) {
+  return pathname.includes("/signin") || pathname.includes("/callback");
+}
+
+const nextAuth = hasGoogleOAuth
+  ? NextAuth({
+      secret: authSecret,
+      trustHost: true,
+      providers: [
+        Google({
+          clientId: env.SSO_GOOGLE_CLIENT_ID,
+          clientSecret: env.SSO_GOOGLE_CLIENT_SECRET,
+        }),
+      ],
+      callbacks: {
+        async signIn({ user, account }) {
+          if (account?.provider === "google") {
+            const email = normalizeEmail(user.email);
+            if (!isGoogleWorkspaceSsoAllowed(email)) {
+              return "/login?error=forbidden_workspace";
+            }
+          }
+          await clearSignedOut();
+          return true;
+        },
+        async jwt({ token, user }) {
+          if (user) {
+            token.accessTier = ACCESS_TIERS.INTERNAL_FULL;
+          }
+          return token;
+        },
+        async session({ session, token }) {
+          if (session.user) {
+            session.user.id = token.sub ?? session.user.id;
+            session.user.accessTier =
+              /** @type {string} */ (token.accessTier) ?? ACCESS_TIERS.INTERNAL_FULL;
+          }
+          return session;
+        },
+      },
+      pages: {
+        signIn: "/login",
+        error: "/login",
+      },
+    })
+  : null;
+
+const nextHandlers = nextAuth?.handlers;
 
 export const handlers = {
-  // Return a valid session payload so next-auth's SessionProvider parses cleanly in the demo.
-  GET: () => jsonResponse(DEV_SESSION),
-  POST: () => jsonResponse({}),
+  GET: async (request) => {
+    const pathname = new URL(request.url).pathname;
+    const action = authRouteAction(pathname);
+
+    if (!hasGoogleOAuth) {
+      if (action === "signout") {
+        await markSignedOut();
+        return jsonResponse({ url: "/" });
+      }
+      return jsonResponse(await getDevSessionPayload());
+    }
+
+    return nextHandlers.GET(request);
+  },
+  POST: async (request) => {
+    const pathname = new URL(request.url).pathname;
+    const action = authRouteAction(pathname);
+
+    if (!hasGoogleOAuth) {
+      if (action === "signout") {
+        await markSignedOut();
+        return jsonResponse({ url: "/" });
+      }
+      if (isSignInOrCallbackPath(pathname)) {
+        await clearSignedOut();
+        return jsonResponse({ url: "/pulse" });
+      }
+      return jsonResponse({});
+    }
+
+    return nextHandlers.POST(request);
+  },
 };
 
-export function signIn() {}
-export function signOut() {}
+export async function auth() {
+  if (!hasGoogleOAuth) {
+    return getDevSessionPayload();
+  }
+  return nextAuth.auth();
+}
+
+export async function signIn(...args) {
+  if (!hasGoogleOAuth) {
+    await clearSignedOut();
+    return;
+  }
+  return nextAuth.signIn(...args);
+}
+
+export async function signOut(...args) {
+  await markSignedOut();
+  if (!hasGoogleOAuth) {
+    return;
+  }
+  return nextAuth.signOut(...args);
+}

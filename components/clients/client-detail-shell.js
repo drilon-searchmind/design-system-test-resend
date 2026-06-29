@@ -99,16 +99,7 @@ export function ClientDetailShell({ clientSlug }) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <ClientDetailHeader
-          client={{
-            id: demoClient.id,
-            name: demoClient.name,
-            industry: demoClient.industry,
-            logo: demoClient.logo,
-            hue: demoClient.hue,
-            status: demoClient.status,
-            health: demoClient.health,
-            lastActivity: demoClient.lastActivity,
-          }}
+          client={demoClient}
           owner={
             owner
               ? {
@@ -177,16 +168,7 @@ export function ClientDetailShell({ clientSlug }) {
         ) : null}
 
         <ClientDetailHeader
-          client={{
-            id: c.id,
-            name: c.name,
-            industry: c.industry,
-            logo: c.logo,
-            hue: c.hue,
-            status: /** @type {'active'|'paused'|'inactive'} */ (c.status),
-            health: c.health,
-            lastActivity: c.lastActivity,
-          }}
+          client={c}
           owner={
             owner
               ? {
