@@ -18,6 +18,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   routes.team,
   routes.users,
   routes.reports,
+  routes.chat,
 ];
 
 /**
