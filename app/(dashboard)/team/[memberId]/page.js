@@ -1,26 +1,31 @@
-import { Suspense } from "react";
+import { redirect, notFound } from "next/navigation";
 
-import { TeamMemberPageClient } from "@/components/team/team-member-page-client";
-import { shellMainStudio } from "@/config/shell";
-import { cn } from "@/lib/utils";
+import { memberProfileHref, routes, userAccountHref } from "@/config/routes";
+import { getTeamMemberById } from "@/lib/crm/team-utils";
+import { formatUserAccountId } from "@/lib/crm/user-account-id";
+import TeamMember from "@/lib/db/models/team-member";
+import { connectDb } from "@/lib/db/mongoose";
 
-export const metadata = { title: "Team profil · 1337-crm by Searchmind" };
+/** @param {{ params: Promise<{ memberId: string }> }} props */
+export default async function TeamMemberRedirectPage({ params }) {
+  const { memberId } = await params;
+  const key = decodeURIComponent(String(memberId ?? "").trim());
+  if (!key) notFound();
 
-function Fallback() {
-  return (
-    <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-      <div className="h-40 animate-pulse rounded-xl bg-skeleton" />
-      <div className="h-32 animate-pulse rounded-xl bg-skeleton" />
-    </div>
-  );
-}
+  try {
+    await connectDb();
+    const member = await TeamMember.findOne({ key }).select("userId").lean();
+    if (member?.userId) {
+      redirect(userAccountHref(formatUserAccountId(member.userId)));
+    }
+  } catch {
+    /* demo / cold start — fall through */
+  }
 
-export default function TeamMemberPage() {
-  return (
-    <main className={cn(shellMainStudio)}>
-      <Suspense fallback={<Fallback />}>
-        <TeamMemberPageClient />
-      </Suspense>
-    </main>
-  );
+  const demoMember = getTeamMemberById(key);
+  if (demoMember) {
+    redirect(memberProfileHref({ id: demoMember.id, userAccountId: `u-${demoMember.id}` }));
+  }
+
+  redirect(routes.team);
 }

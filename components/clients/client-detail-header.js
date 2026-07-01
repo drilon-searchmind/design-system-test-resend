@@ -103,7 +103,7 @@ export function ClientDetailHeader({ client, owner, trailing }) {
                   {" "}
                   · Account:{" "}
                   <span className="inline-flex items-center gap-1.5 text-fg">
-                    <CrmAvatar label={owner.avatar} hue={owner.hue} className="size-5 text-[9px]" />
+                    <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
                     <span>
                       {owner.name}
                       <span className="text-fg-muted"> ({owner.role})</span>

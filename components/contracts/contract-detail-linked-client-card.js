@@ -80,7 +80,7 @@ export function ContractDetailLinkedClientCard({
           <dd className="flex min-w-0 max-w-[60%] items-center justify-end gap-2 font-sans text-[12px] text-fg">
             {owner ? (
               <>
-                <CrmAvatar label={owner.avatar} hue={owner.hue} className="size-6 text-[8px]" />
+                <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-6 text-[8px]" />
                 <span className="truncate">{owner.name}</span>
               </>
             ) : (

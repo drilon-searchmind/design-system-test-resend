@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { routes } from "@/config/routes";
+import { memberProfileHref, routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,10 +25,15 @@ export function TeamCapacityWatchCard({ teamRows }) {
       <ul className="mt-4 flex flex-col divide-y divide-border-soft">
         {hot.map((r) => (
           <li key={r.member.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <CrmAvatar label={r.member.avatar} hue={r.member.hue} className="size-8 text-[11px]" />
+            <CrmAvatar
+              label={r.member.avatar}
+              src={r.member.image}
+              hue={r.member.hue}
+              className="size-8 text-[11px]"
+            />
             <div className="min-w-0 flex-1">
               <Link
-                href={`${routes.team}/${r.member.id}`}
+                href={memberProfileHref(r.member)}
                 className={cn(
                   "font-sans text-[13px] font-semibold text-fg hover:text-agency-brand",
                   r.member.isMe && "text-agency-brand",

@@ -2,7 +2,6 @@
 
 import { IconUsers } from "@/components/crm/icons";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
-import { PulseIconDownload } from "@/components/pulse/pulse-icons";
 import { TEAM } from "@/lib/crm/static-data";
 import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
@@ -57,23 +56,7 @@ export function TeamPageHeader({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-end">
-          <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            <button
-              type="button"
-              className="inline-flex h-[26px] items-center gap-1.5 rounded-md border border-border bg-surface-muted px-3 font-sans text-[11px] font-medium text-fg-muted transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand"
-            >
-              <PulseIconDownload size={12} /> Eksport
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-[26px] items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[11px] font-medium text-agency-brand transition-colors hover:bg-agency-brand/15"
-            >
-              Inviter
-            </button>
-          </div>
-          <ReportPeriodPicker year={reportPeriod.year} month={reportPeriod.month} onChange={onReportPeriodChange} />
-        </div>
+        <ReportPeriodPicker year={reportPeriod.year} month={reportPeriod.month} onChange={onReportPeriodChange} />
       </header>
     </div>
   );

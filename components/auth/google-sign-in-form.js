@@ -16,6 +16,8 @@ const KNOWN_MESSAGES = {
   OAuthCallback: "Something went wrong after Google redirected back. Try again.",
   OAuthAccountAlreadyLinked:
     "This Google account is already linked to another sign-in route.",
+  not_provisioned:
+    "Your account is not provisioned yet. Contact an admin if you should have access.",
 };
 
 /** @param {GoogleSignInFormProps} props */

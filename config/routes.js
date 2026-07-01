@@ -42,3 +42,22 @@ export function workloadMemberHref(memberKey) {
   return `${routes.workload}/${encodeURIComponent(k)}`;
 }
 
+/**
+ * @param {string} userAccountId `u-{mongoId}` or raw mongo hex
+ */
+export function userAccountHref(userAccountId) {
+  const raw = String(userAccountId ?? "").trim();
+  if (!raw) return routes.users;
+  if (raw.startsWith("u-")) return `${routes.users}/${raw}`;
+  return `${routes.users}/u-${raw}`;
+}
+
+/**
+ * @param {{ userAccountId?: string | null; id?: string }} member
+ */
+export function memberProfileHref(member) {
+  if (member?.userAccountId) return userAccountHref(member.userAccountId);
+  if (member?.id) return userAccountHref(member.id);
+  return routes.users;
+}
+

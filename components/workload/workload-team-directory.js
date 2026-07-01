@@ -129,7 +129,12 @@ export function WorkloadTeamDirectory({ rows, departments }) {
                 )}
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <CrmAvatar label={r.member.avatar} hue={r.member.hue} className="size-8 text-[11px]" />
+                  <CrmAvatar
+                    label={r.member.avatar}
+                    src={r.member.image}
+                    hue={r.member.hue}
+                    className="size-8 text-[11px]"
+                  />
                   <div className="min-w-0">
                     <Link
                       href={workloadMemberHref(r.member.id)}

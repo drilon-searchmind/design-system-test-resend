@@ -28,7 +28,7 @@ export function TaskDetailAssigneeCard({ member, departmentsLookup }) {
       </p>
       {member ?
         <div className={cn("mt-4 flex items-start gap-3 border-t border-border-soft pt-4")}>
-          <CrmAvatar label={member.avatar} hue={member.hue} className="size-12 text-[13px]" />
+          <CrmAvatar label={member.avatar} src={member.image} hue={member.hue} className="size-12 text-[13px]" />
           <div className="min-w-0">
             <p className="font-sans text-[14px] font-semibold text-fg">{member.name}</p>
             <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{member.role}</p>

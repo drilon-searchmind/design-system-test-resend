@@ -11,7 +11,7 @@ import {
 } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
-import { routes } from "@/config/routes";
+import { memberProfileHref, routes } from "@/config/routes";
 import { DEPARTMENTS as DEMO_DEPARTMENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,10 @@ export function TeamRosterDirectory({
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
     let list = teamRows.filter((r) => {
-      if (dept !== "all" && r.member.dept !== dept) return false;
+      if (dept !== "all") {
+        const keys = Array.isArray(r.member.disciplineKeys) ? r.member.disciplineKeys : [r.member.dept];
+        if (!keys.includes(dept)) return false;
+      }
       if (!ql) return true;
       const d = departments.find((x) => x.id === r.member.dept);
       const hay = `${r.member.name} ${r.member.role} ${d?.name ?? ""}`.toLowerCase();
@@ -166,10 +169,17 @@ export function TeamRosterDirectory({
 
           {filtered.map((r, i) => {
             const d = departments.find((x) => x.id === r.member.dept);
+            const extraDisciplines = Array.isArray(r.member.disciplineKeys)
+              ? r.member.disciplineKeys.filter((k) => k && k !== r.member.dept)
+              : [];
+            const deptLabel =
+              extraDisciplines.length > 0 ?
+                `${d?.short ?? r.member.dept} +${extraDisciplines.length}`
+              : (d?.short ?? r.member.dept);
             return (
               <Link
                 key={r.member.id}
-                href={`${routes.team}/${r.member.id}`}
+                href={memberProfileHref(r.member)}
                 className={cn(
                   "grid w-full gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-2.5",
                   GRID,
@@ -179,7 +189,12 @@ export function TeamRosterDirectory({
                 )}
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <CrmAvatar label={r.member.avatar} hue={r.member.hue} className="size-8 text-[11px]" />
+                  <CrmAvatar
+                    label={r.member.avatar}
+                    src={r.member.image}
+                    hue={r.member.hue}
+                    className="size-8 text-[11px]"
+                  />
                   <div className="min-w-0">
                     <span className="truncate font-sans text-[13px] font-semibold text-fg">{r.member.name}</span>
                     <div className="text-[10px] text-fg-quiet">
@@ -194,8 +209,13 @@ export function TeamRosterDirectory({
                 <span
                   className="self-center text-[11px] font-semibold tabular-nums"
                   style={{ color: d?.color ?? "var(--fg-muted)" }}
+                  title={
+                    Array.isArray(r.member.disciplineKeys) && r.member.disciplineKeys.length > 1
+                      ? r.member.disciplineKeys.join(", ")
+                      : undefined
+                  }
                 >
-                  {d?.short ?? r.member.dept}
+                  {deptLabel}
                 </span>
                 <span className="self-center text-center text-[11px] tabular-nums text-fg">{r.openCount}</span>
                 <span className="self-center text-center text-[11px] tabular-nums text-fg">{r.highCount}</span>

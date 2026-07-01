@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PulseIconChevronDown, PulseIconChevronRight, PulseIconSearch } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { routes } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { AGENCY_USERS as FALLBACK_AGENCY_USERS } from "@/lib/crm/users-data";
@@ -13,7 +14,7 @@ import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 const GRID_LIST =
-  "grid-cols-[minmax(200px,2fr)_minmax(200px,1.75fr)_minmax(118px,0.95fr)_minmax(100px,0.82fr)_minmax(72px,0.55fr)_minmax(110px,0.88fr)_minmax(88px,0.72fr)_36px]";
+  "grid-cols-[minmax(200px,2fr)_minmax(200px,1.75fr)_minmax(118px,0.95fr)_minmax(100px,0.82fr)_minmax(72px,0.55fr)_minmax(110px,0.88fr)_minmax(120px,1fr)_36px]";
 
 function formatSeen(iso) {
   if (!iso || typeof iso !== "string") return "—";
@@ -49,7 +50,7 @@ export function UsersDirectory({
     let list = users.filter((u) => {
       if (statusF !== "all" && u.status !== statusF) return false;
       if (roleF !== "all" && u.platformRole !== roleF) return false;
-      if (ql && !`${u.name} ${u.email}`.toLowerCase().includes(ql) && !u.id.toLowerCase().includes(ql)) {
+      if (ql && !`${u.name} ${u.email} ${u.departmentLabel ?? ""}`.toLowerCase().includes(ql) && !u.id.toLowerCase().includes(ql)) {
         return false;
       }
       return true;
@@ -174,6 +175,7 @@ export function UsersDirectory({
             >
               Sidst set {sort === "seen" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
             </button>
+            <span>Disciplin</span>
             <span>Roster</span>
             <span />
           </div>
@@ -194,9 +196,17 @@ export function UsersDirectory({
                   u.status === "suspended" && "bg-agency-warn-soft/10",
                 )}
               >
-                <div className="min-w-0">
-                  <div className="font-sans text-[13px] font-semibold text-fg">{u.name}</div>
-                  <div className="text-[10px] text-fg-quiet">{u.id}</div>
+                <div className="flex min-w-0 items-center gap-2">
+                  <CrmAvatar
+                    label={u.avatar ?? u.name.slice(0, 2)}
+                    src={u.image}
+                    hue={u.hue ?? 220}
+                    className="size-8 text-[11px]"
+                  />
+                  <div className="min-w-0">
+                    <div className="font-sans text-[13px] font-semibold text-fg">{u.name}</div>
+                    <div className="text-[10px] text-fg-quiet">{u.id}</div>
+                  </div>
                 </div>
                 <span className="truncate self-center text-[11px] text-fg-muted">{u.email}</span>
                 <span className="self-center font-sans text-[12px] text-fg-muted">{agencyPlatformRoleLabel(u.platformRole)}</span>
@@ -219,6 +229,13 @@ export function UsersDirectory({
                   {u.mfaEnabled ? "Ja" : "Nej"}
                 </span>
                 <span className="self-center text-[11px] tabular-nums text-fg-muted">{formatSeen(u.lastSeenAt)}</span>
+                <div className="self-center">
+                  {u.departmentLabel ? (
+                    <span className="font-sans text-[11px] text-fg-muted">{u.departmentLabel}</span>
+                  ) : (
+                    <span className="text-[10px] text-fg-quiet">—</span>
+                  )}
+                </div>
                 <div className="self-center">
                   {u.teamMemberId ? (
                     <span className="text-[10px] text-fg-muted">{u.teamMemberId}</span>

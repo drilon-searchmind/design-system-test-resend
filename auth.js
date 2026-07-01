@@ -4,7 +4,10 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { isGoogleWorkspaceSsoAllowed, normalizeEmail } from "@/lib/auth/workspace-sso";
+import { accessTierFromUserDoc, syncGoogleOAuthUser } from "@/lib/auth/sync-oauth-user";
 import { ACCESS_TIERS } from "@/lib/constants/access-tiers";
+import User from "@/lib/db/models/user";
+import { connectDb } from "@/lib/db/mongoose";
 import { env } from "@/lib/env";
 
 /** When set, demo dev-session auth returns null (Log ud). */
@@ -89,21 +92,52 @@ const nextAuth = hasGoogleOAuth
             if (!isGoogleWorkspaceSsoAllowed(email)) {
               return "/login?error=forbidden_workspace";
             }
+            await connectDb();
+            const provisioned = await User.findOne({ email }).select("_id").lean();
+            if (!provisioned) {
+              return "/login?error=not_provisioned";
+            }
           }
           await clearSignedOut();
           return true;
         },
-        async jwt({ token, user }) {
-          if (user) {
+        async jwt({ token, user, account }) {
+          if (account?.provider === "google" && user?.email && account.providerAccountId) {
+            const mongoUserId = await syncGoogleOAuthUser({
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              googleSubject: account.providerAccountId,
+            });
+            if (mongoUserId) {
+              token.userId = mongoUserId;
+              await connectDb();
+              const dbUser = await User.findById(mongoUserId).select("accessTier").lean();
+              if (dbUser) token.accessTier = accessTierFromUserDoc(dbUser);
+            }
+          }
+          if (user && !token.accessTier) {
             token.accessTier = ACCESS_TIERS.INTERNAL_FULL;
           }
           return token;
         },
         async session({ session, token }) {
           if (session.user) {
-            session.user.id = token.sub ?? session.user.id;
+            session.user.id =
+              typeof token.userId === "string" ? token.userId : (token.sub ?? session.user.id);
             session.user.accessTier =
               /** @type {string} */ (token.accessTier) ?? ACCESS_TIERS.INTERNAL_FULL;
+
+            if (typeof token.userId === "string" && token.userId) {
+              await connectDb();
+              const dbUser = await User.findById(token.userId).select("name email image accessTier").lean();
+              if (dbUser) {
+                if (dbUser.name) session.user.name = String(dbUser.name);
+                if (dbUser.email) session.user.email = String(dbUser.email);
+                session.user.image = dbUser.image ? String(dbUser.image) : null;
+                session.user.accessTier = accessTierFromUserDoc(dbUser);
+              }
+            }
           }
           return session;
         },

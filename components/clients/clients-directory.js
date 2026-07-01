@@ -173,17 +173,28 @@ export function ClientsDirectory({
       </div>
 
       {density === "cards" ? (
-        <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
+        <div
+          className={cn(
+            "grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4",
+            variant === "pulse" && "max-h-[80vh] overflow-y-auto",
+          )}
+        >
           {filtered.map((c) => (
             <ClientGridCard key={c.id} client={c} variant={variant} />
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div
+          className={cn(
+            "overflow-x-auto",
+            variant === "pulse" && "max-h-[80vh] overflow-y-auto",
+          )}
+        >
           <div className={minW}>
             <div
               className={cn(
-                "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
+                "grid gap-3 border-b border-border px-3 py-2",
+                variant === "pulse" ? "sticky top-0 z-10 bg-surface-muted" : "bg-surface-muted/90",
                 "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 gridCols,
               )}
@@ -258,7 +269,7 @@ export function ClientsDirectory({
                   <div className="flex min-w-0 items-center gap-1.5">
                     {owner ? (
                       <>
-                        <CrmAvatar label={owner.avatar} hue={owner.hue} className="size-5 text-[9px]" />
+                        <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
                         <span className="truncate font-sans text-[12px] text-fg-muted">{owner.name}</span>
                       </>
                     ) : (

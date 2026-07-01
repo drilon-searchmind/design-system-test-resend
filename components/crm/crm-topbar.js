@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 
+import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { CrmTimerChip } from "@/components/crm/crm-timer-chip";
 import { routes } from "@/config/routes";
 import { shellPaddingX } from "@/config/shell";
@@ -16,6 +17,9 @@ import { IconMenu } from "./icons";
 export function CrmTopbar({ title, onOpenNav, className }) {
   const { data: session, status } = useSession();
   const email = typeof session?.user?.email === "string" ? session.user.email : null;
+  const name = typeof session?.user?.name === "string" ? session.user.name : email ?? "Bruger";
+  const image = typeof session?.user?.image === "string" ? session.user.image : null;
+  const avatarLabel = name.slice(0, 2);
 
   return (
     <header
@@ -46,12 +50,18 @@ export function CrmTopbar({ title, onOpenNav, className }) {
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
           <CrmTimerChip />
           {status === "loading" ? (
-            <span className="h-8 w-24 animate-pulse rounded-full bg-skeleton" aria-hidden />
+            <span className="h-8 w-8 animate-pulse rounded-md bg-skeleton" aria-hidden />
+          ) : email ? (
+            <div className="hidden items-center gap-2 md:flex">
+              <CrmAvatar label={avatarLabel} src={image} className="size-8 text-[11px]" />
+              <div className="min-w-0 max-w-[14rem]">
+                <p className="truncate text-[12px] font-medium text-fg">{name}</p>
+                <p className="truncate text-[10px] text-fg-soft">{email}</p>
+              </div>
+            </div>
           ) : null}
           {email ? (
-            <span className="hidden max-w-[14rem] truncate text-[11px] text-fg-soft md:inline">
-              {email}
-            </span>
+            <CrmAvatar label={avatarLabel} src={image} className="size-8 text-[11px] md:hidden" />
           ) : null}
           <Link
             href={routes.settings}

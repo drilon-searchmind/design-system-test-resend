@@ -271,6 +271,7 @@ export function TasksDirectory({
                       <>
                         <CrmAvatar
                           label={assignee.avatar ?? assignee.name.slice(0, 2)}
+                          src={assignee.image}
                           hue={assignee.hue ?? 220}
                           className="size-5 text-[9px]"
                         />

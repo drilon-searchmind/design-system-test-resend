@@ -93,7 +93,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
       <div className="mt-2.5 flex items-center justify-between">
         {owner ? (
           <div className="flex items-center gap-1.5">
-            <CrmAvatar label={owner.avatar} hue={owner.hue} className="size-[18px] text-[9px]" />
+            <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-[18px] text-[9px]" />
             <span className="font-sans text-[11px] text-fg-muted">{owner.name.split(" ")[0]}</span>
           </div>
         ) : (

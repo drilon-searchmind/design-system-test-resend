@@ -249,7 +249,7 @@ export function ContractsDirectory({
                   <div className="flex min-w-0 items-center gap-1.5">
                     {owner ? (
                       <>
-                        <CrmAvatar label={owner.avatar} hue={owner.hue} className="size-5 text-[9px]" />
+                        <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
                         <span className="truncate font-sans text-[12px] text-fg-muted">{owner.name}</span>
                       </>
                     ) : (

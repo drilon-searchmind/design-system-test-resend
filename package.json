@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "clear-demo": "node --env-file=.env scripts/run-clear-demo.mjs",
+    "fetch-clickup-customers": "node --env-file=.env scripts/run-fetch-clickup-customers.mjs",
+    "fetch-clickup-users": "node --env-file=.env scripts/run-fetch-clickup-users.mjs",
+    "import-clickup-customers": "node --env-file=.env scripts/run-import-clickup-customers.mjs",
+    "import-clickup-users": "node --env-file=.env scripts/run-import-clickup-users.mjs",
+    "sync-member-disciplines": "node --env-file=.env scripts/run-sync-member-disciplines.mjs",
     "reset-demo": "node --env-file=.env scripts/run-reset-demo.mjs"
   },
   "dependencies": {

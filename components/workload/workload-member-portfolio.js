@@ -177,6 +177,7 @@ export function WorkloadMemberPortfolio() {
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <CrmAvatar
               label={typeof member.avatar === "string" ? member.avatar : "?"}
+              src={typeof member.image === "string" ? member.image : undefined}
               hue={typeof member.hue === "number" ? member.hue : 220}
               className="size-12 text-[13px]"
             />

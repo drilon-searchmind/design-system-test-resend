@@ -107,15 +107,18 @@ export function ClientDetailMetaCard({ client }) {
                 const memberId = client.deptAssignees?.[deptId];
                 const member = memberId ? TEAM.find((t) => t.id === memberId) : null;
                 const dep = DEPARTMENTS.find((d) => d.id === deptId);
+                const assigneeLabel = member?.name ?? memberId;
                 return (
                   <li key={deptId} className="flex items-center gap-2">
                     <span className="text-[10px] font-medium uppercase tracking-wide text-fg-quiet">
                       {dep?.short ?? deptId}
                     </span>
-                    {member ? (
+                    {assigneeLabel ? (
                       <span className="inline-flex items-center gap-1.5 font-sans text-[12px] text-fg-muted">
-                        <CrmAvatar label={member.avatar} hue={member.hue} className="size-5 text-[9px]" />
-                        {member.name}
+                        {member ? (
+                          <CrmAvatar label={member.avatar} src={member.image} hue={member.hue} className="size-5 text-[9px]" />
+                        ) : null}
+                        {assigneeLabel}
                       </span>
                     ) : (
                       <span className="text-[12px] text-fg-quiet">—</span>

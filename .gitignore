@@ -20,8 +20,8 @@
 # production
 /build
 
-# misc
-.DS_Store
+/data/clickup-export/*.csv
+/data/clickup-export/*.json
 *.pem
 
 # debug

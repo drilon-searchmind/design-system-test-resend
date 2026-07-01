@@ -29,7 +29,7 @@ export function KbContributorsCard({ className }) {
                 className="flex items-center gap-2 rounded-lg border border-transparent px-1 py-1 transition-colors hover:border-border-soft hover:bg-surface-muted/50"
               >
                 {member ? (
-                  <CrmAvatar label={member.avatar} hue={member.hue} className="size-[30px] shrink-0 text-[10px]" />
+                  <CrmAvatar label={member.avatar} src={member.image} hue={member.hue} className="size-[30px] shrink-0 text-[10px]" />
                 ) : (
                   <span className="flex size-[30px] shrink-0 items-center justify-center rounded-md border border-border text-[10px] text-fg-quiet">
                     ?
