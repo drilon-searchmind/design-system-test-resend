@@ -1,11 +1,58 @@
 "use client";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
-import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
+import {
+  IconCalendar,
+  IconClock,
+  IconLayers,
+  IconTimer,
+  IconUser,
+} from "@/components/crm/icons";
+import { formatHoursCompactDa, formatHoursDecimalDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import { DEPARTMENTS } from "@/lib/crm/static-data";
 import { taskDaysUntilDue, taskDueReferenceTodayIso, taskIsDone, taskIsOverdue } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
+
+const TONE_ICON = {
+  brand: "text-agency-brand bg-agency-brand-soft border-agency-brand-border",
+  ok: "text-agency-ok bg-agency-ok-soft border-agency-ok-border",
+  warn: "text-agency-warn bg-agency-warn-soft border-agency-warn-border",
+  bad: "text-agency-bad bg-agency-bad-soft border-agency-bad-border",
+};
+
+/**
+ * @param {{
+ *   icon: import("react").ReactNode;
+ *   label: string;
+ *   value: string;
+ *   tone?: keyof typeof TONE_ICON;
+ *   children?: import("react").ReactNode;
+ * }} props
+ */
+function TaskDetailCompactKpi({ icon, label, value, tone = "brand", children }) {
+  const toneClass = TONE_ICON[tone] ?? TONE_ICON.brand;
+
+  return (
+    <div className="tally-panel flex min-w-[9.5rem] flex-1 items-center gap-2.5 px-3 py-2.5">
+      <span
+        className={cn(
+          "flex size-7 shrink-0 items-center justify-center rounded-lg border",
+          toneClass,
+        )}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.07em] text-fg-soft">{label}</p>
+        {children ?? (
+          <p className="truncate font-sans text-[13px] font-semibold leading-tight tabular-nums text-fg">
+            {value}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /**
  * @param {{
@@ -19,6 +66,7 @@ import { cn } from "@/lib/utils";
  *   assignee?: { name: string; avatar?: string; hue?: number; image?: string } | null;
  *   departments?: Array<{ id: string; name?: string }>;
  *   dueReferenceIso?: string;
+ *   loggedMinutes?: number;
  * }} props
  */
 export function TaskDetailKpiStrip({
@@ -27,6 +75,7 @@ export function TaskDetailKpiStrip({
   assignee = null,
   departments,
   dueReferenceIso = taskDueReferenceTodayIso(),
+  loggedMinutes = 0,
 }) {
   const open = !taskIsDone(task.status);
   const overdue = taskIsOverdue(task, dueReferenceIso);
@@ -53,36 +102,67 @@ export function TaskDetailKpiStrip({
   const estimateTone =
     typeof task.estimateHours === "number" && Number.isFinite(task.estimateHours) ? "brand" : "ok";
 
+  const loggedLabel = loggedMinutes > 0 ? formatHoursDecimalDa(loggedMinutes) : "0 t";
+  const loggedTone = loggedMinutes > 0 ? "brand" : "ok";
+
   return (
-    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-5">
-      <PulseKpiCard label="Disciplin" value={disc} tone="brand" />
-      <div className="tally-panel relative overflow-hidden p-4 md:p-5">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-fg-soft">Ansvarlig</p>
-        <div className="mt-2 flex min-w-0 items-center gap-2.5">
+    <section className="flex flex-wrap gap-2">
+      <TaskDetailCompactKpi
+        icon={<IconLayers size={14} />}
+        label="Disciplin"
+        value={disc}
+        tone="brand"
+      />
+      <TaskDetailCompactKpi
+        icon={<IconUser size={14} />}
+        label="Ansvarlig"
+        value={assigneeLabel}
+        tone={assigneeName ? "brand" : "ok"}
+      >
+        <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
           {assigneeName && assignee ?
             <CrmAvatar
               label={assignee.avatar ?? assignee.name.slice(0, 2)}
               src={assignee.image}
               hue={assignee.hue ?? 220}
-              className="size-9 text-[11px]"
+              className="size-5 text-[8px]"
               alt={assignee.name}
             />
-          : assigneeName ?
-            <CrmAvatar label={assigneeLabel.slice(0, 2)} hue={220} className="size-9 text-[11px]" alt={assigneeLabel} />
           : null}
           <p
             className={cn(
-              "min-w-0 truncate text-[18px] font-semibold leading-tight tracking-tight text-fg",
+              "min-w-0 truncate font-sans text-[13px] font-semibold leading-tight text-fg",
               !assigneeName && "text-fg-muted",
             )}
           >
             {assigneeLabel}
           </p>
         </div>
-      </div>
-      <PulseKpiCard label="Deadline" value={formatIsoDateDa(task.dueDate)} tone={dueTone} />
-      <PulseKpiCard label="Estimerede timer" value={estimateLabel} tone={estimateTone} />
-      <PulseKpiCard label="Afstand til deadline" value={daysLabel} tone={dueTone} />
+      </TaskDetailCompactKpi>
+      <TaskDetailCompactKpi
+        icon={<IconCalendar size={14} />}
+        label="Deadline"
+        value={formatIsoDateDa(task.dueDate)}
+        tone={dueTone}
+      />
+      <TaskDetailCompactKpi
+        icon={<IconTimer size={14} />}
+        label="Estimeret"
+        value={estimateLabel}
+        tone={estimateTone}
+      />
+      <TaskDetailCompactKpi
+        icon={<IconClock size={14} />}
+        label="Registreret"
+        value={loggedLabel}
+        tone={loggedTone}
+      />
+      <TaskDetailCompactKpi
+        icon={<IconClock size={14} />}
+        label="Til deadline"
+        value={daysLabel}
+        tone={dueTone}
+      />
     </section>
   );
 }

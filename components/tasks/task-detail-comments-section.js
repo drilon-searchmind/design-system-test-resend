@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { TaskRichCommentEditor } from "@/components/tasks/task-rich-comment-editor";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { cn } from "@/lib/utils";
 
 /**
  * @typedef {{
@@ -31,6 +32,7 @@ import { databaseApiQuery } from "@/lib/crm/database-api-query";
  *   mode?: "demo" | "database";
  *   team?: TeamWire[];
  *   highlightCommentId?: string;
+ *   layout?: "default" | "sidebar";
  * }} props
  */
 export function TaskDetailCommentsSection({
@@ -38,6 +40,7 @@ export function TaskDetailCommentsSection({
   mode = "database",
   team = [],
   highlightCommentId = "",
+  layout = "default",
 }) {
   const [comments, setComments] = useState(/** @type {CommentWire[]} */ ([]));
   const [loading, setLoading] = useState(false);
@@ -119,58 +122,66 @@ export function TaskDetailCommentsSection({
   }));
 
   return (
-    <section id="task-comments" className="tally-panel p-4 md:p-5">
-      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kommentarer</h2>
+    <section
+      id="task-comments"
+      className={cn(
+        "tally-panel flex flex-col overflow-hidden",
+        layout === "sidebar" ? "max-h-[80vh] p-4 md:p-5" : "p-4 md:p-5",
+      )}
+    >
+      <h2 className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kommentarer</h2>
       {mode === "demo" ?
-        <p className="mt-1 font-sans text-[12px] text-fg-muted">
+        <p className="mt-1 shrink-0 font-sans text-[12px] text-fg-muted">
           Kommentarer er kun tilgængelige i database-tilstand.
         </p>
       : null}
 
-      <ul className="mt-4 flex flex-col gap-3">
-        {loading ?
-          <li className="text-[13px] text-fg-muted">Indlæser kommentarer…</li>
-        : comments.length === 0 ?
-          <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-center text-[13px] text-fg-muted">
-            Ingen kommentarer endnu — vær den første.
-          </li>
-        : comments.map((c) => {
-            const author = c.author;
-            return (
-              <li
-                key={c.id}
-                id={`comment-${c.id}`}
-                className="scroll-mt-28 rounded-xl border border-border-soft bg-surface-muted/25 p-3 transition-shadow"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  {author ?
-                    <>
-                      <CrmAvatar
-                        label={author.avatar ?? author.name.slice(0, 2)}
-                        src={author.image}
-                        hue={author.hue ?? 220}
-                        className="size-7 text-[9px]"
-                        alt={author.name}
-                      />
-                      <span className="font-sans text-[12px] font-semibold text-fg">{author.name}</span>
-                    </>
-                  : (
-                    <span className="font-sans text-[12px] font-semibold text-fg">Ukendt</span>
-                  )}
-                  <span className="text-fg-quiet">·</span>
-                  <span className="text-[10px] tabular-nums text-fg-quiet">{c.createdAt}</span>
-                </div>
-                <div
-                  className="task-comment-body mt-2 font-sans text-[13px] leading-relaxed text-fg-muted"
-                  dangerouslySetInnerHTML={{ __html: c.bodyHtml }}
-                />
-              </li>
-            );
-          })
-        }
-      </ul>
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <ul className="flex flex-col gap-3 pr-0.5">
+          {loading ?
+            <li className="text-[13px] text-fg-muted">Indlæser kommentarer…</li>
+          : comments.length === 0 ?
+            <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-center text-[13px] text-fg-muted">
+              Ingen kommentarer endnu — vær den første.
+            </li>
+          : comments.map((c) => {
+              const author = c.author;
+              return (
+                <li
+                  key={c.id}
+                  id={`comment-${c.id}`}
+                  className="scroll-mt-28 rounded-xl border border-border-soft bg-surface-muted/25 p-3 transition-shadow"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    {author ?
+                      <>
+                        <CrmAvatar
+                          label={author.avatar ?? author.name.slice(0, 2)}
+                          src={author.image}
+                          hue={author.hue ?? 220}
+                          className="size-7 text-[9px]"
+                          alt={author.name}
+                        />
+                        <span className="font-sans text-[12px] font-semibold text-fg">{author.name}</span>
+                      </>
+                    : (
+                      <span className="font-sans text-[12px] font-semibold text-fg">Ukendt</span>
+                    )}
+                    <span className="text-fg-quiet">·</span>
+                    <span className="text-[10px] tabular-nums text-fg-quiet">{c.createdAt}</span>
+                  </div>
+                  <div
+                    className="task-comment-body mt-2 font-sans text-[13px] leading-relaxed text-fg-muted"
+                    dangerouslySetInnerHTML={{ __html: c.bodyHtml }}
+                  />
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
 
-      <div className="mt-5 border-t border-border-soft pt-4">
+      <div className="mt-4 shrink-0 border-t border-border-soft pt-4">
         {mode === "database" ?
           <TaskRichCommentEditor
             key={editorKey}

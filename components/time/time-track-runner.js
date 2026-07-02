@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useDataSource } from "@/components/crm/use-data-source";
+import { useTimerModal } from "@/components/crm/timer-modal-context";
 import { PulseIconChevronDown } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { emitTimerSessionChanged } from "@/lib/crm/timer-session-events";
+import { emitTimerSessionChanged, TIMER_SESSION_CHANGED_EVENT } from "@/lib/crm/timer-session-events";
 import { CLIENTS, TASKS } from "@/lib/crm/static-data";
 import { tallyBtnBrand, tallyPanelOverflow, tallySelect } from "@/lib/ui/tally-chrome";
 import { cn } from "@/lib/utils";
@@ -75,10 +76,11 @@ const MANUAL_PRESETS = [
   { label: "2 timer", minutes: 120 },
 ];
 
-/** @typedef {{ value: string; label: string; clientSlug?: string }} TaskPick */
+/** @typedef {{ value: string; label: string; clientSlug?: string; billable?: boolean }} TaskPick */
 
 export function TimeTrackRunner() {
   const dataSource = useDataSource();
+  const { launchOptions, open: modalOpen } = useTimerModal();
   const isDb = dataSource === "database";
 
   const [trackMode, setTrackMode] = useState("timer");
@@ -102,6 +104,26 @@ export function TimeTrackRunner() {
       setTaskKey("");
     }
   }, [isDb]);
+
+  useEffect(() => {
+    if (!modalOpen || !launchOptions) return;
+    if (typeof launchOptions.clientSlug === "string" && launchOptions.clientSlug.trim()) {
+      setClientSlug(launchOptions.clientSlug.trim());
+    }
+    if (typeof launchOptions.taskKey === "string") {
+      setTaskKey(launchOptions.taskKey.trim());
+    }
+    if (launchOptions.trackMode === "manual" || launchOptions.trackMode === "timer") {
+      setTrackMode(launchOptions.trackMode);
+    }
+    if (launchOptions.trackMode === "manual") {
+      setDurationInput("");
+      setBanner(null);
+    }
+    if (typeof launchOptions.billable === "boolean") {
+      setBillable(launchOptions.billable ? "yes" : "no");
+    }
+  }, [launchOptions, modalOpen]);
 
   const refresh = useCallback(async () => {
     try {
@@ -127,8 +149,6 @@ export function TimeTrackRunner() {
           return cp[0]?.value ?? "";
         });
       }
-
-      emitTimerSessionChanged();
     } catch {
       setBanner("Netværksfejl");
     }
@@ -139,6 +159,27 @@ export function TimeTrackRunner() {
       void refresh();
     });
   }, [refresh]);
+
+  useEffect(() => {
+    const onChanged = () => {
+      void refresh();
+    };
+    window.addEventListener(TIMER_SESSION_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(TIMER_SESSION_CHANGED_EVENT, onChanged);
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    void refresh();
+  }, [modalOpen, refresh]);
+
+  useEffect(() => {
+    if (!taskKey.trim()) return;
+    const row = tasksPick.find((t) => t.value === taskKey);
+    if (row && typeof row.billable === "boolean") {
+      setBillable(row.billable ? "yes" : "no");
+    }
+  }, [taskKey, tasksPick]);
 
   useEffect(() => {
     const id = setInterval(() => setTick((x) => x + 1), 1000);
@@ -168,6 +209,8 @@ export function TimeTrackRunner() {
   const noClients = clientOptions.length === 0;
   const startBlocked = !canStartTimer || noClients;
   const manualMode = trackMode === "manual";
+  /** Timer mode locks fields while counting; manual entry stays editable. */
+  const timerFieldsLocked = running && !manualMode;
   const parsedMinutes = useMemo(() => parseDurationMinutes(durationInput), [durationInput]);
 
   async function handleStart(e) {
@@ -277,7 +320,7 @@ export function TimeTrackRunner() {
     }
   }
 
-  const formDisabled = running || busy;
+  const formDisabled = timerFieldsLocked || busy;
 
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -287,7 +330,6 @@ export function TimeTrackRunner() {
           size="sm"
           active={trackMode}
           onChange={(id) => {
-            if (running) return;
             setTrackMode(id);
             setBanner(null);
           }}
@@ -306,6 +348,11 @@ export function TimeTrackRunner() {
               <p className="font-sans text-[13px] text-fg-muted">
                 Angiv varighed uden at starte timer — fx 30 minutter eller 1 time.
               </p>
+              {running ?
+                <p className="font-sans text-[11px] text-agency-warn">
+                  En timer kører i baggrunden — du kan stadig registrere manuel tid her.
+                </p>
+              : null}
             </div>
           </div>
         : (
@@ -380,7 +427,13 @@ export function TimeTrackRunner() {
               </p>
             : null}
 
-            {isDb && canStartTimer && noClients && !running && billable === "yes" ?
+            {isDb && !canStartTimer && running && manualMode ?
+              <p className="font-sans text-[12px] text-fg-muted md:col-span-2">
+                Log ind for at gemme manuel tid.
+              </p>
+            : null}
+
+            {isDb && canStartTimer && noClients && !timerFieldsLocked && billable === "yes" ?
               <p className="font-sans text-[12px] text-fg-muted md:col-span-2">
                 Ingen kunder i databasen endnu — importér kunder før du registrerer billable tid.
               </p>
@@ -532,6 +585,11 @@ export function TimeTrackRunner() {
                   { id: "no", label: "Intern" },
                 ]}
               />
+              {taskKey.trim() ?
+                <p className="mt-2 font-sans text-[11px] text-fg-quiet">
+                  Forvalg fra opgaven — du kan stadig skifte her for denne registrering.
+                </p>
+              : null}
             </div>
 
             {manualMode && isDb ?

@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { TaskGridCard } from "@/components/tasks/task-grid-card";
+import {
+  TasksAssigneeFilter,
+  defaultTasksAssigneeSelection,
+  taskMatchesAssigneeFilter,
+} from "@/components/tasks/tasks-assignee-filter";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { TaskStatusChip } from "@/components/crm/task-status-chip";
@@ -18,6 +23,8 @@ import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-contro
 import { routes } from "@/config/routes";
 import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import {
+  TASK_STATUS_SECTION_LABELS,
+  TASK_STATUS_SECTION_ORDER,
   taskDaysUntilDue,
   taskIsDone,
   taskIsOverdue,
@@ -27,6 +34,138 @@ import { cn } from "@/lib/utils";
 
 const GRID =
   "grid-cols-[minmax(200px,2.2fr)_minmax(120px,1fr)_minmax(92px,0.92fr)_minmax(40px,0.38fr)_minmax(70px,0.68fr)_minmax(72px,0.7fr)_minmax(58px,0.55fr)_minmax(80px,0.78fr)_36px]";
+
+/**
+ * @param {{
+ *   row: {
+ *     id: string;
+ *     title: string;
+ *     hint?: string;
+ *     clientName: string;
+ *     clientLogo: string;
+ *     clientHue: number;
+ *     assigneeId: string;
+ *     dept: string;
+ *     status: string;
+ *     priority: string;
+ *     dueDate: string;
+ *     estimateHours?: number | null;
+ *   };
+ *   teamById: Record<string, { id: string; name: string; avatar?: string; hue?: number; image?: string }>;
+ *   deptById: Record<string, { id: string; name?: string; short?: string }>;
+ *   taskDueReferenceIso: string;
+ *   showBorder?: boolean;
+ * }} props
+ */
+function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder = true }) {
+  const assignee = row.assigneeId ? teamById[row.assigneeId] : null;
+  const dep = deptById[row.dept];
+  const overdue = taskIsOverdue(row, taskDueReferenceIso);
+  const daysLeft = !taskIsDone(row.status) ? taskDaysUntilDue(row.dueDate, taskDueReferenceIso) : null;
+
+  const depShort =
+    typeof dep?.short === "string" ?
+      dep.short
+    : typeof dep?.id === "string" ?
+      dep.id.slice(0, 4).toUpperCase()
+    : "—";
+
+  return (
+    <Link
+      href={`${routes.tasks}/${encodeURIComponent(row.id)}`}
+      className={cn(
+        "grid w-full gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-2.5",
+        GRID,
+        showBorder && "border-b border-border-soft",
+      )}
+    >
+      <div className="min-w-0">
+        <div className="font-sans text-[13px] font-medium leading-snug text-fg">{row.title}</div>
+        {row.hint ?
+          <div className="mt-0.5 line-clamp-1 font-sans text-[11px] text-fg-quiet">{row.hint}</div>
+        : null}
+      </div>
+
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
+          style={{ background: `oklch(62% 0.14 ${row.clientHue})` }}
+        >
+          {row.clientLogo}
+        </span>
+        <span className="truncate font-sans text-[12px] text-fg-muted">{row.clientName}</span>
+      </div>
+
+      <div className="flex min-w-0 items-center gap-1.5">
+        {assignee ?
+          <>
+            <CrmAvatar
+              label={assignee.avatar ?? assignee.name.slice(0, 2)}
+              src={assignee.image}
+              hue={assignee.hue ?? 220}
+              className="size-5 text-[9px]"
+            />
+            <span className="truncate font-sans text-[12px] text-fg-muted">{assignee.name}</span>
+          </>
+        : <span className="text-fg-quiet">—</span>}
+      </div>
+
+      <div className="hidden items-center justify-center sm:flex">
+        <span className="text-[10px] font-semibold text-fg-muted">{depShort}</span>
+      </div>
+
+      <div className="flex items-center">
+        <TaskPriorityChip
+          priority={/** @type {'high'|'medium'|'low'} */ (row.priority)}
+          className="origin-left scale-95"
+        />
+      </div>
+
+      <div className="flex items-center">
+        <TaskStatusChip status={row.status} className="origin-left scale-95" />
+      </div>
+
+      <div className="flex items-center">
+        {typeof row.estimateHours === "number" && Number.isFinite(row.estimateHours) ?
+          <span className="inline-flex min-w-[2.5rem] items-center justify-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0.5 font-sans text-[11px] font-semibold tabular-nums text-agency-brand">
+            {formatHoursCompactDa(row.estimateHours)}t
+          </span>
+        : <span className="text-[12px] text-fg-quiet">—</span>}
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span
+          className={cn(
+            "text-[12px] tabular-nums text-fg",
+            overdue && "text-agency-bad",
+            !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
+            taskIsDone(row.status) && "text-fg-muted",
+          )}
+        >
+          {formatIsoDateDa(row.dueDate)}
+        </span>
+        {!taskIsDone(row.status) ?
+          <span
+            className={cn(
+              "text-[10px] tabular-nums",
+              overdue && "text-agency-bad",
+              !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
+              !overdue && (daysLeft === null || daysLeft > 7) && "text-fg-quiet",
+            )}
+          >
+            {overdue ?
+              `${Math.abs(taskDaysUntilDue(row.dueDate, taskDueReferenceIso))} d overskredet`
+            : daysLeft === 0 ?
+              "I dag"
+            : `Om ${daysLeft} d`}
+          </span>
+        : <span className="text-[10px] text-fg-quiet">Afsluttet</span>}
+      </div>
+
+      <PulseIconChevronRight className="justify-self-end text-fg-quiet" />
+    </Link>
+  );
+}
 
 /**
  * @param {{
@@ -45,7 +184,7 @@ const GRID =
  *     estimateHours?: number | null;
  *   }>;
  *   departments: Array<{ id: string; name?: string; short?: string }>;
- *   team: Array<{ id: string; name: string; avatar?: string; hue?: number }>;
+ *   team: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   taskDueReferenceIso: string;
  *   mineAssigneeKey: string;
  *   headingId?: string;
@@ -62,7 +201,10 @@ export function TasksDirectory({
   toolbarTitle = "Alle opgaver",
 }) {
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [selectedAssignees, setSelectedAssignees] = useState(() =>
+    defaultTasksAssigneeSelection(mineAssigneeKey, team),
+  );
+  const [scopeFilter, setScopeFilter] = useState(/** @type {"all" | "open" | "overdue"} */ ("all"));
   const [sort, setSort] = useState("due");
   const [density, setDensity] = useState("list");
 
@@ -84,14 +226,15 @@ export function TasksDirectory({
     return m;
   }, [team]);
 
+  const hasUnassignedTasks = useMemo(
+    () => tasks.some((t) => !t.assigneeId?.trim()),
+    [tasks],
+  );
+
   const openCount = useMemo(() => tasks.filter((t) => !taskIsDone(t.status)).length, [tasks]);
   const overdueCount = useMemo(
     () => tasks.filter((t) => taskIsOverdue(t, taskDueReferenceIso)).length,
     [tasks, taskDueReferenceIso],
-  );
-  const mineCount = useMemo(
-    () => (mineAssigneeKey ? tasks.filter((t) => t.assigneeId === mineAssigneeKey).length : 0),
-    [tasks, mineAssigneeKey],
   );
 
   const filtered = useMemo(() => {
@@ -105,9 +248,9 @@ export function TasksDirectory({
       ) {
         return false;
       }
-      if (filter === "open" && taskIsDone(t.status)) return false;
-      if (filter === "mine" && (!mineAssigneeKey || t.assigneeId !== mineAssigneeKey)) return false;
-      if (filter === "overdue" && !taskIsOverdue(t, taskDueReferenceIso)) return false;
+      if (!taskMatchesAssigneeFilter(t.assigneeId, selectedAssignees)) return false;
+      if (scopeFilter === "open" && taskIsDone(t.status)) return false;
+      if (scopeFilter === "overdue" && !taskIsOverdue(t, taskDueReferenceIso)) return false;
       return true;
     });
 
@@ -118,20 +261,39 @@ export function TasksDirectory({
         return ad.localeCompare(bd);
       }
       if (sort === "prio")
-        return taskPriorityRank(/** @type {'high'|'medium'|'low'} */ (a.priority)) -
-          taskPriorityRank(/** @type {'high'|'medium'|'low'} */ (b.priority));
+        return (
+          taskPriorityRank(/** @type {'high'|'medium'|'low'} */ (a.priority)) -
+          taskPriorityRank(/** @type {'high'|'medium'|'low'} */ (b.priority))
+        );
       if (sort === "title") return a.title.localeCompare(b.title, "da");
       return 0;
     });
 
     return list;
-  }, [q, filter, sort, tasks, taskDueReferenceIso, mineAssigneeKey]);
+  }, [q, selectedAssignees, scopeFilter, sort, tasks, taskDueReferenceIso]);
+
+  const groupedByStatus = useMemo(() => {
+    /** @type {Map<string, typeof filtered>} */
+    const buckets = new Map();
+    for (const st of TASK_STATUS_SECTION_ORDER) {
+      buckets.set(st, []);
+    }
+    for (const t of filtered) {
+      const st =
+        TASK_STATUS_SECTION_ORDER.includes(/** @type {(typeof TASK_STATUS_SECTION_ORDER)[number]} */ (t.status)) ?
+          t.status
+        : "todo";
+      buckets.get(st)?.push(t);
+    }
+    return TASK_STATUS_SECTION_ORDER.map((status) => ({
+      status,
+      label: TASK_STATUS_SECTION_LABELS[status] ?? status,
+      tasks: buckets.get(status) ?? [],
+    })).filter((g) => g.tasks.length > 0);
+  }, [filtered]);
 
   return (
-    <section
-      className="tally-panel overflow-hidden"
-      aria-labelledby={headingId}
-    >
+    <section className="tally-panel overflow-hidden" aria-labelledby={headingId}>
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h3 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
@@ -158,17 +320,26 @@ export function TasksDirectory({
             />
           </label>
 
-          <PulseSegmentedControl
-            size="sm"
-            active={filter}
-            onChange={setFilter}
-            tabs={[
-              { id: "all", label: "Alle" },
-              { id: "open", label: "Åbne", count: openCount },
-              ...(mineAssigneeKey ? [{ id: "mine", label: "Mine", count: mineCount }] : []),
-              { id: "overdue", label: "Overskredet", count: overdueCount },
-            ]}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <TasksAssigneeFilter
+              team={team}
+              mineAssigneeKey={mineAssigneeKey}
+              selected={selectedAssignees}
+              onChange={setSelectedAssignees}
+              hasUnassignedTasks={hasUnassignedTasks}
+            />
+
+            <PulseSegmentedControl
+              size="sm"
+              active={scopeFilter}
+              onChange={(id) => setScopeFilter(/** @type {"all" | "open" | "overdue"} */ (id))}
+              tabs={[
+                { id: "all", label: "Alle status" },
+                { id: "open", label: "Åbne", count: openCount },
+                { id: "overdue", label: "Overskredet", count: overdueCount },
+              ]}
+            />
+          </div>
 
           <PulseSegmentedControl
             size="sm"
@@ -183,9 +354,24 @@ export function TasksDirectory({
       </div>
 
       {density === "cards" ?
-        <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
-          {filtered.map((row) => (
-            <TaskGridCard key={row.id} row={row} dueReferenceIso={taskDueReferenceIso} departments={departments} />
+        <div className="flex flex-col gap-6 p-3 md:p-4">
+          {groupedByStatus.map((group) => (
+            <div key={group.status}>
+              <div className="mb-3 flex items-center gap-2">
+                <TaskStatusChip status={group.status} />
+                <span className="text-[11px] tabular-nums text-fg-quiet">{group.tasks.length}</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+                {group.tasks.map((row) => (
+                  <TaskGridCard
+                    key={row.id}
+                    row={row}
+                    dueReferenceIso={taskDueReferenceIso}
+                    departments={departments}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       : <div className="overflow-x-auto">
@@ -226,115 +412,31 @@ export function TasksDirectory({
               <span />
             </div>
 
-            {filtered.map((row, i) => {
-              const assignee = row.assigneeId ? teamById[row.assigneeId] : null;
-              const dep = deptById[row.dept];
-              const overdue = taskIsOverdue(row, taskDueReferenceIso);
-              const daysLeft = !taskIsDone(row.status)
-                ? taskDaysUntilDue(row.dueDate, taskDueReferenceIso)
-                : null;
-
-              const depShort =
-                typeof dep?.short === "string" ?
-                  dep.short
-                : typeof dep?.id === "string" ?
-                  dep.id.slice(0, 4).toUpperCase()
-                : "—";
-
-              return (
-                <Link
-                  key={row.id}
-                  href={`${routes.tasks}/${encodeURIComponent(row.id)}`}
+            {groupedByStatus.map((group) => (
+              <div key={group.status}>
+                <div
                   className={cn(
-                    "grid w-full gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-2.5",
-                    GRID,
-                    i < filtered.length - 1 && "border-b border-border-soft",
+                    "flex items-center gap-2 border-b border-border bg-surface-muted/60 px-3 py-2 md:px-4",
+                    group.status === "done" && "opacity-90",
                   )}
                 >
-                  <div className="min-w-0">
-                    <div className="font-sans text-[13px] font-medium leading-snug text-fg">{row.title}</div>
-                    {row.hint ?
-                      <div className="mt-0.5 line-clamp-1 font-sans text-[11px] text-fg-quiet">{row.hint}</div>
-                    : null}
-                  </div>
-
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
-                      style={{ background: `oklch(62% 0.14 ${row.clientHue})` }}
-                    >
-                      {row.clientLogo}
-                    </span>
-                    <span className="truncate font-sans text-[12px] text-fg-muted">{row.clientName}</span>
-                  </div>
-
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    {assignee ?
-                      <>
-                        <CrmAvatar
-                          label={assignee.avatar ?? assignee.name.slice(0, 2)}
-                          src={assignee.image}
-                          hue={assignee.hue ?? 220}
-                          className="size-5 text-[9px]"
-                        />
-                        <span className="truncate font-sans text-[12px] text-fg-muted">{assignee.name}</span>
-                      </>
-                    : <span className="text-fg-quiet">—</span>}
-                  </div>
-
-                  <div className="hidden items-center justify-center sm:flex">
-                    <span className="text-[10px] font-semibold text-fg-muted">{depShort}</span>
-                  </div>
-
-                  <div className="flex items-center">
-                    <TaskPriorityChip priority={/** @type {'high'|'medium'|'low'} */ (row.priority)} className="scale-95 origin-left" />
-                  </div>
-
-                  <div className="flex items-center">
-                    <TaskStatusChip status={row.status} className="scale-95 origin-left" />
-                  </div>
-
-                  <div className="flex items-center">
-                    {typeof row.estimateHours === "number" && Number.isFinite(row.estimateHours) ?
-                      <span className="inline-flex min-w-[2.5rem] items-center justify-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0.5 font-sans text-[11px] font-semibold tabular-nums text-agency-brand">
-                        {formatHoursCompactDa(row.estimateHours)}t
-                      </span>
-                    : <span className="text-[12px] text-fg-quiet">—</span>}
-                  </div>
-
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span
-                      className={cn(
-                        "text-[12px] tabular-nums text-fg",
-                        overdue && "text-agency-bad",
-                        !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
-                        taskIsDone(row.status) && "text-fg-muted",
-                      )}
-                    >
-                      {formatIsoDateDa(row.dueDate)}
-                    </span>
-                    {!taskIsDone(row.status) ?
-                      <span
-                        className={cn(
-                          "text-[10px] tabular-nums",
-                          overdue && "text-agency-bad",
-                          !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
-                          !overdue && (daysLeft === null || daysLeft > 7) && "text-fg-quiet",
-                        )}
-                      >
-                        {overdue ?
-                          `${Math.abs(taskDaysUntilDue(row.dueDate, taskDueReferenceIso))} d overskredet`
-                        : daysLeft === 0 ?
-                          "I dag"
-                        : `Om ${daysLeft} d`}
-                      </span>
-                    : <span className="text-[10px] text-fg-quiet">Afsluttet</span>}
-                  </div>
-
-                  <PulseIconChevronRight className="justify-self-end text-fg-quiet" />
-                </Link>
-              );
-            })}
+                  <TaskStatusChip status={group.status} className="scale-95" />
+                  <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] tabular-nums text-fg-quiet">
+                    {group.tasks.length}
+                  </span>
+                </div>
+                {group.tasks.map((row, i) => (
+                  <TaskTableRow
+                    key={row.id}
+                    row={row}
+                    teamById={teamById}
+                    deptById={deptById}
+                    taskDueReferenceIso={taskDueReferenceIso}
+                    showBorder={i < group.tasks.length - 1}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       }

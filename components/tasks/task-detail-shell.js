@@ -7,8 +7,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   TASK_DETAIL_TAB_IDS,
   TaskDetailTabbedBody,
+  normalizeTaskDetailTab,
 } from "@/components/tasks/task-detail-tabbed-body";
 import { TaskDetailEditForm } from "@/components/tasks/task-detail-edit-form";
+import { TaskDetailTimerMenu } from "@/components/tasks/task-detail-timer-menu";
 import { TaskDetailCreatedBy } from "@/components/tasks/task-detail-created-by";
 import { TaskDetailHeader } from "@/components/tasks/task-detail-header";
 import { TaskDetailStatusBar } from "@/components/tasks/task-detail-status-bar";
@@ -43,10 +45,7 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
   const router = useRouter();
   const dataSource = useDataSource();
   const defaultTab = TASK_DETAIL_TAB_IDS[0];
-  const resolvedInitialTab =
-    TASK_DETAIL_TAB_IDS.includes(/** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (initialTab)) ?
-      /** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (initialTab)
-    : defaultTab;
+  const resolvedInitialTab = normalizeTaskDetailTab(initialTab || defaultTab);
   const [detailTab, setDetailTab] = useState(resolvedInitialTab);
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(false);
@@ -83,8 +82,8 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
   }, [dataSource, loadRemote]);
 
   useEffect(() => {
-    if (initialTab && TASK_DETAIL_TAB_IDS.includes(/** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (initialTab))) {
-      setDetailTab(/** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (initialTab));
+    if (initialTab) {
+      setDetailTab(normalizeTaskDetailTab(initialTab));
     }
   }, [initialTab]);
 
@@ -441,13 +440,29 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
         <TaskDetailHeader
           trailing={
             <div className="flex flex-col items-end gap-2">
-              <ClientDetailEditActions
-                editing={editing}
-                saving={saving}
-                onEdit={startEdit}
-                onSave={() => void saveEdit()}
-                onCancel={cancelEdit}
-              />
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {!editing ?
+                  <TaskDetailTimerMenu
+                    clientSlug={
+                      typeof rClient.id === "string" && rClient.id.trim()
+                        ? rClient.id.trim()
+                        : typeof rTask.clientId === "string"
+                          ? rTask.clientId.trim()
+                          : ""
+                    }
+                    taskKey={typeof rTask.id === "string" ? rTask.id : taskId}
+                    taskTitle={typeof rTask.title === "string" ? rTask.title : ""}
+                    billable={rTask.billable !== false}
+                  />
+                : null}
+                <ClientDetailEditActions
+                  editing={editing}
+                  saving={saving}
+                  onEdit={startEdit}
+                  onSave={() => void saveEdit()}
+                  onCancel={cancelEdit}
+                />
+              </div>
               {editing ?
                 <span className="text-right font-sans text-[10px] text-fg-quiet">
                   Redigerer opgave — gem eller annuller

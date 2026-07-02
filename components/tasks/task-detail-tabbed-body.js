@@ -10,15 +10,18 @@ import { TaskDetailKpiStrip } from "@/components/tasks/task-detail-kpi-strip";
 import { TaskDetailTimeTodayCard } from "@/components/tasks/task-detail-time-today-card";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
-export const TASK_DETAIL_TAB_IDS = /** @type {const} */ (["overblik", "tid", "relationer", "kommentarer", "spor"]);
+export const TASK_DETAIL_TAB_IDS = /** @type {const} */ (["overblik", "aktivitet"]);
 
 const TAB_DEFS = [
   { id: "overblik", label: "Overblik" },
-  { id: "tid", label: "Tidslog" },
-  { id: "relationer", label: "Relationer" },
-  { id: "kommentarer", label: "Kommentarer" },
-  { id: "spor", label: "Aktivitet" },
+  { id: "aktivitet", label: "Aktivitet" },
 ];
+
+/** @param {string} tab */
+export function normalizeTaskDetailTab(tab) {
+  if (tab === "aktivitet" || tab === "spor") return "aktivitet";
+  return "overblik";
+}
 
 /**
  * @param {{
@@ -35,7 +38,15 @@ const TAB_DEFS = [
  *   contractWire: Record<string, unknown> | null;
  *   dueReferenceIso: string;
  *   periodLabel?: string;
- *   timeEntries: Array<{ id: string; at: string; dur: number; desc: string; dept?: string | null }>;
+ *   timeEntries: Array<{
+ *     id: string;
+ *     at: string;
+ *     dur: number;
+ *     desc: string;
+ *     dept?: string | null;
+ *     memberKey?: string;
+ *     memberName?: string;
+ *   }>;
  *   mode?: "demo" | "database";
  *   team?: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   highlightCommentId?: string;
@@ -60,11 +71,7 @@ export function TaskDetailTabbedBody({
   team = [],
   highlightCommentId = "",
 }) {
-  /** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */
-  const resolvedTab =
-    TASK_DETAIL_TAB_IDS.includes(/** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (tab)) ?
-      /** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */ (tab)
-    : "overblik";
+  const resolvedTab = normalizeTaskDetailTab(tab);
 
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
 
@@ -89,107 +96,111 @@ export function TaskDetailTabbedBody({
       }
     : null;
 
+  const loggedMinutes = timeEntries.reduce((s, e) => s + (Number(e.dur) || 0), 0);
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
-        <nav aria-label="Opgave-undersektioner">
-          <PulseSegmentedControl size="sm" active={resolvedTab} onChange={onTabChange} tabs={TAB_DEFS} />
-        </nav>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,30%)] lg:items-start">
+      <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
+          <nav aria-label="Opgave-undersektioner">
+            <PulseSegmentedControl
+              size="sm"
+              active={resolvedTab}
+              onChange={(id) => onTabChange(id)}
+              tabs={TAB_DEFS}
+            />
+          </nav>
+        </div>
+
+        <div role="tabpanel" className="min-w-0">
+          {resolvedTab === "overblik" ?
+            <section aria-labelledby="task-tab-overview" className={stack}>
+              <h2 id="task-tab-overview" className="sr-only">
+                Overblik
+              </h2>
+              <TaskDetailKpiStrip
+                task={
+                  /** @type {{ dept: string; dueDate: string; status: string; estimateHours?: number | null }} */ (
+                    taskRow
+                  )
+                }
+                assigneeName={assigneePulse && typeof assigneePulse.name === "string" ? assigneePulse.name : null}
+                assignee={assigneeForKpi}
+                departments={mode === "database" ? departments : undefined}
+                dueReferenceIso={dueReferenceIso}
+                loggedMinutes={loggedMinutes}
+              />
+              <TaskDetailDescriptionCard
+                task={
+                  /** @type {{ hint?: string; dept: string; title: string; status: string }} */ (
+                    taskRow
+                  )
+                }
+                mode={mode}
+              />
+              <TaskDetailTimeTodayCard
+                taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
+                entries={timeEntries}
+                departments={departments}
+                periodLabel={periodLabel}
+                sourceHint="Alle registrerede timer på opgaven — med hvem der har logget."
+              />
+              <TaskDetailContextCard
+                client={
+                  /** @type {{ id: string; name: string; industry?: string }} */ (
+                    /** @type {unknown} */ (clientRow)
+                  )
+                }
+                contract={
+                  contractWire ?
+                    /** @type {{ id: string; clientId: string; clientName: string; clientLogo: string; clientHue: number; kind: string; monthlyValue: number; currency: string }} */ (
+                      /** @type {unknown} */ (contractWire)
+                    )
+                  : null
+                }
+              />
+              <TaskDetailAssigneeCard
+                member={
+                  assigneePulse && typeof assigneePulse === "object" ?
+                    /** @type {{ id: string; name: string; role: string; avatar: string; hue: number; dept: string }} */ (
+                      /** @type {unknown} */ (assigneePulse)
+                    )
+                  : null
+                }
+                departmentsLookup={mode === "database" ? departments : undefined}
+              />
+              <ClientDetailAlertsCard
+                clientId={typeof clientRow.id === "string" ? clientRow.id : ""}
+                alerts={
+                  /** @type {{ id: string; severity: string; title: string; body: string; age: string; client?: string | null }[]} */ (
+                    alerts ?? []
+                  )
+                }
+                description={
+                  mode === "database" ?
+                    "Udtræk af budget-/sundhedsalarmer på kunden i månedligt Pulse-udsnit."
+                  : undefined
+                }
+              />
+            </section>
+          : null}
+
+          {resolvedTab === "aktivitet" ?
+            <TaskDetailActivityCard entries={activityEntries} footnote={activityFootnote} />
+          : null}
+        </div>
       </div>
 
-      <div role="tabpanel" className="min-w-0">
-        {resolvedTab === "overblik" ?
-          <section aria-labelledby="task-tab-overview" className={stack}>
-            <h2 id="task-tab-overview" className="sr-only">
-              Overblik
-            </h2>
-            <TaskDetailKpiStrip
-              task={
-                /** @type {{ dept: string; dueDate: string; status: string }} */ (taskRow)
-              }
-              assigneeName={assigneePulse && typeof assigneePulse.name === "string" ? assigneePulse.name : null}
-              assignee={assigneeForKpi}
-              departments={mode === "database" ? departments : undefined}
-              dueReferenceIso={dueReferenceIso}
-            />
-          </section>
-        : null}
-
-        {resolvedTab === "tid" ?
-          <section className={stack}>
-            <TaskDetailTimeTodayCard
-              taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
-              entries={timeEntries}
-              departments={departments}
-              periodLabel={periodLabel}
-              sourceHint="Billable registreringer på opgaven i indeværende måned, filtreret til denne opgave."
-            />
-          </section>
-        : null}
-
-        {resolvedTab === "relationer" ?
-          <section className={stack}>
-            <TaskDetailContextCard
-              client={
-                /** @type {{ id: string; name: string; industry?: string }} */ (
-                  /** @type {unknown} */ (clientRow)
-                )
-              }
-              contract={
-                contractWire ?
-                  /** @type {{ id: string; clientId: string; clientName: string; clientLogo: string; clientHue: number; kind: string; monthlyValue: number; currency: string }} */ (
-                    /** @type {unknown} */ (contractWire)
-                  )
-                : null
-              }
-            />
-            <TaskDetailAssigneeCard
-              member={
-                assigneePulse && typeof assigneePulse === "object" ?
-                  /** @type {{ id: string; name: string; role: string; avatar: string; hue: number; dept: string }} */ (
-                    /** @type {unknown} */ (assigneePulse)
-                  )
-                : null
-              }
-              departmentsLookup={mode === "database" ? departments : undefined}
-            />
-            <ClientDetailAlertsCard
-              clientId={typeof clientRow.id === "string" ? clientRow.id : ""}
-              alerts={
-                /** @type {{ id: string; severity: string; title: string; body: string; age: string; client?: string | null }[]} */ (
-                  alerts ?? []
-                )
-              }
-              description={
-                mode === "database" ? "Udtræk af budget-/sundhedsalarmer på kunden i månedligt Pulse-udsnit." : undefined
-              }
-            />
-          </section>
-        : null}
-
-        {resolvedTab === "kommentarer" ?
-          <TaskDetailCommentsSection
-            taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
-            mode={mode}
-            team={team}
-            highlightCommentId={highlightCommentId}
-          />
-        : null}
-
-        {resolvedTab === "spor" ?
-          <TaskDetailActivityCard entries={activityEntries} footnote={activityFootnote} />
-        : null}
-      </div>
-
-      <TaskDetailDescriptionCard
-        task={
-          /** @type {{ hint?: string; dept: string; title: string; status: string }} */ (
-            taskRow
-          )
-        }
-        mode={mode}
-      />
+      <aside className="min-w-0 lg:sticky lg:top-4 lg:self-start">
+        <TaskDetailCommentsSection
+          taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
+          mode={mode}
+          team={team}
+          highlightCommentId={highlightCommentId}
+          layout="sidebar"
+        />
+      </aside>
     </div>
   );
 }

@@ -85,6 +85,48 @@ export function IconClock({ className, size = 15 }) {
   );
 }
 
+export function IconCalendar({ className, size = 15 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M7 4v2M17 4v2M5 8h14M6 6h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function IconLayers({ className, size = 15 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M12 3l8 4.5v4L12 16 4 11.5v-4L12 3zM4 16.5L12 21l8-4.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function IconTimer({ className, size = 15 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M12 8v4l2.5 1.5M9 2h6M12 20a8 8 0 100-16 8 8 0 000 16z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function IconUser({ className, size = 15 }) {
   return (
     <svg {...svgProps(size)} className={cn("shrink-0", className)}>

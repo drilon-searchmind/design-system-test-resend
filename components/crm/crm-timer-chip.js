@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { IconClock } from "@/components/crm/icons";
+import { stopActiveTimer } from "@/lib/crm/timer-client";
 import { TIMER_SESSION_CHANGED_EVENT } from "@/lib/crm/timer-session-events";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ export function CrmTimerChip() {
   );
   const [tick, setTick] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [stopping, setStopping] = useState(false);
   const prevModalOpen = useRef(timerModalOpen);
 
   const refresh = useCallback(async () => {
@@ -86,6 +88,20 @@ export function CrmTimerChip() {
     return () => clearInterval(id);
   }, [running, refresh]);
 
+  const handleStop = useCallback(async () => {
+    if (stopping) return;
+    setStopping(true);
+    try {
+      await stopActiveTimer();
+      setPayload({ active: null });
+    } catch {
+      /* ignore — chip refresh on next event */
+    } finally {
+      setStopping(false);
+      void refresh();
+    }
+  }, [refresh, stopping]);
+
   const secs = elapsedSeconds(startedAt);
   void tick;
 
@@ -99,32 +115,58 @@ export function CrmTimerChip() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={openTimer}
-      aria-haspopup="dialog"
-      aria-expanded={timerModalOpen}
+    <div
       className={cn(
-        "inline-flex h-8 min-w-0 max-w-[min(140px,38vw)] shrink-0 items-center gap-1.5 rounded-full border px-2 text-[11px] tabular-nums sm:max-w-[240px] sm:gap-2 sm:px-3",
-        running
-          ? "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
-          : "border-border bg-surface-muted text-fg-muted hover:border-agency-brand-border hover:bg-agency-brand-soft/60 hover:text-agency-brand",
+        "inline-flex h-8 shrink-0 items-stretch overflow-hidden rounded-full border",
+        running ?
+          "border-agency-brand-border bg-agency-brand-soft"
+        : "border-border bg-surface-muted",
       )}
-      title={running ? "Timer kører i baggrunden · åbn panelet" : "Åbn timer"}
     >
-      <IconClock size={14} className="shrink-0 opacity-90" />
-      {running ? (
-        <>
-          <span className="min-w-[48px] shrink-0 truncate text-left font-semibold sm:min-w-[52px]">
-            {formatHms(secs)}
+      <button
+        type="button"
+        onClick={openTimer}
+        aria-haspopup="dialog"
+        aria-expanded={timerModalOpen}
+        className={cn(
+          "inline-flex min-w-0 max-w-[min(140px,38vw)] items-center gap-1.5 px-2 text-[11px] tabular-nums sm:max-w-[220px] sm:gap-2 sm:pl-3 sm:pr-2",
+          running ?
+            "text-agency-brand"
+          : "text-fg-muted hover:text-agency-brand",
+        )}
+        title={running ? "Timer kører · åbn panelet" : "Åbn timer"}
+      >
+        <IconClock size={14} className="shrink-0 opacity-90" />
+        {running ?
+          <>
+            <span className="min-w-[48px] shrink-0 truncate text-left font-semibold sm:min-w-[52px]">
+              {formatHms(secs)}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[10px] font-normal opacity-90 sm:max-w-[88px]">
+              {typeof active?.clientName === "string" ? active.clientName : "—"}
+            </span>
+          </>
+        : <span className="truncate text-fg-soft">Timer</span>}
+      </button>
+
+      {running ?
+        <button
+          type="button"
+          disabled={stopping}
+          aria-label="Stop timer og gem tid"
+          title="Stop timer"
+          onClick={() => void handleStop()}
+          className={cn(
+            "inline-flex w-8 shrink-0 items-center justify-center border-l border-agency-brand-border",
+            "text-agency-brand transition-colors hover:bg-agency-brand hover:text-white",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+        >
+          <span className="text-[15px] leading-none font-light" aria-hidden>
+            ×
           </span>
-          <span className="min-w-0 flex-1 truncate text-[10px] font-normal opacity-90 sm:max-w-[100px]">
-            {typeof active.clientName === "string" ? active.clientName : "—"}
-          </span>
-        </>
-      ) : (
-        <span className="truncate text-fg-soft">Timer</span>
-      )}
-    </button>
+        </button>
+      : null}
+    </div>
   );
 }

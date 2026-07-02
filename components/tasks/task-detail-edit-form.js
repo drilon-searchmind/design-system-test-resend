@@ -1,6 +1,7 @@
 "use client";
 
 import { clientEditInputClass } from "@/components/clients/client-detail-edit-actions";
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { cn } from "@/lib/utils";
 
 /** @typedef {import('@/lib/crm/task-edit-utils').TaskEditDraft} TaskEditDraft */
@@ -112,6 +113,17 @@ export function TaskDetailEditForm({
               onChange={(e) => setField("estimateHours", e.target.value)}
               placeholder="fx 8"
               className={clientEditInputClass}
+            />
+          </Field>
+          <Field label="Tidstype" className="sm:col-span-2">
+            <PulseSegmentedControl
+              size="sm"
+              active={draft.billable}
+              onChange={(id) => setField("billable", /** @type {"yes" | "no"} */ (id))}
+              tabs={[
+                { id: "yes", label: "Fakturerbar" },
+                { id: "no", label: "Intern" },
+              ]}
             />
           </Field>
         </div>

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { cn } from "@/lib/utils";
 
 /**
@@ -62,6 +63,7 @@ export function TasksCreateForm({
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("medium");
   const [status, setStatus] = useState("todo");
+  const [billable, setBillable] = useState(/** @type {"yes" | "no"} */ ("yes"));
   const [estimateHours, setEstimateHours] = useState("");
 
   const applyTemplate = useCallback(
@@ -94,6 +96,7 @@ export function TasksCreateForm({
       clientSlug,
       priority,
       status,
+      billable: billable === "yes",
     };
     if (dueDate.trim()) body.dueDate = dueDate.trim().slice(0, 10);
     if (departmentKey && departmentKey !== "—") body.departmentKey = departmentKey;
@@ -114,6 +117,7 @@ export function TasksCreateForm({
     dueDate,
     priority,
     status,
+    billable,
     templateKey,
     estimateHours,
     onSubmit,
@@ -258,6 +262,21 @@ export function TasksCreateForm({
             )}
           />
         </label>
+        <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted sm:col-span-2">
+          <span>Tidstype</span>
+          <PulseSegmentedControl
+            size="sm"
+            active={billable}
+            onChange={(id) => setBillable(/** @type {"yes" | "no"} */ (id))}
+            tabs={[
+              { id: "yes", label: "Fakturerbar" },
+              { id: "no", label: "Intern" },
+            ]}
+          />
+          <span className="font-sans text-[11px] leading-snug text-fg-quiet">
+            Styrer standard for tidsregistrering på opgaven — kan overrides i timer.
+          </span>
+        </div>
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
           <span>Prioritet</span>
           <select

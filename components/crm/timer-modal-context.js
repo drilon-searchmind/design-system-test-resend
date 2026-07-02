@@ -2,7 +2,14 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-/** @typedef {{ open: boolean; openTimer: () => void; closeTimer: () => void }} TimerModalContextValue */
+/** @typedef {{ clientSlug?: string; taskKey?: string; trackMode?: "timer" | "manual"; billable?: boolean }} TimerLaunchOptions */
+
+/** @typedef {{
+ *   open: boolean;
+ *   launchOptions: TimerLaunchOptions | null;
+ *   openTimer: (options?: TimerLaunchOptions) => void;
+ *   closeTimer: () => void;
+ * }} TimerModalContextValue */
 
 /** @type {React.Context<TimerModalContextValue | null>} */
 const TimerModalContext = createContext(null);
@@ -13,16 +20,26 @@ const TimerModalContext = createContext(null);
  */
 export function TimerModalProvider({ children }) {
   const [open, setOpen] = useState(false);
-  const openTimer = useCallback(() => setOpen(true), []);
-  const closeTimer = useCallback(() => setOpen(false), []);
+  const [launchOptions, setLaunchOptions] = useState(/** @type {TimerLaunchOptions | null} */ (null));
+
+  const openTimer = useCallback((options /** @type {TimerLaunchOptions | void} */) => {
+    setLaunchOptions(options && typeof options === "object" ? options : null);
+    setOpen(true);
+  }, []);
+
+  const closeTimer = useCallback(() => {
+    setOpen(false);
+    setLaunchOptions(null);
+  }, []);
 
   const value = useMemo(
     () => ({
       open,
+      launchOptions,
       openTimer,
       closeTimer,
     }),
-    [open, openTimer, closeTimer],
+    [open, launchOptions, openTimer, closeTimer],
   );
 
   return <TimerModalContext.Provider value={value}>{children}</TimerModalContext.Provider>;

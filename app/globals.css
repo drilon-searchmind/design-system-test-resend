@@ -428,6 +428,22 @@ html[data-density="spacious"] {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
+
+  /** Interactive controls — pointer cursor on hover */
+  a[href]:hover,
+  button:not(:disabled):not([aria-disabled="true"]):hover,
+  input[type="button"]:not(:disabled):hover,
+  input[type="submit"]:not(:disabled):hover,
+  input[type="reset"]:not(:disabled):hover,
+  label[for]:hover,
+  select:not(:disabled):hover,
+  summary:hover,
+  [role="button"]:not([aria-disabled="true"]):hover,
+  [role="link"]:hover,
+  [role="menuitem"]:hover,
+  [role="tab"]:hover {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

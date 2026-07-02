@@ -144,7 +144,7 @@ export function ClientsDirectory({
             ]}
           />
 
-          <label className="flex items-center gap-1.5">
+          <label className={cn("flex items-center gap-1.5", variant !== "full" && "hidden")}>
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
               Kilde
             </span>
