@@ -10,9 +10,16 @@
     "clear-demo": "node --env-file=.env scripts/run-clear-demo.mjs",
     "fetch-clickup-customers": "node --env-file=.env scripts/run-fetch-clickup-customers.mjs",
     "fetch-clickup-users": "node --env-file=.env scripts/run-fetch-clickup-users.mjs",
+    "fetch-clickup-all": "node --env-file=.env scripts/run-fetch-clickup-all.mjs",
     "import-clickup-customers": "node --env-file=.env scripts/run-import-clickup-customers.mjs",
     "import-clickup-users": "node --env-file=.env scripts/run-import-clickup-users.mjs",
+    "import-clickup-customers-api": "node --env-file=.env scripts/run-import-clickup-customers-api.mjs",
+    "import-clickup-users-api": "node --env-file=.env scripts/run-import-clickup-users-api.mjs",
+    "import-clickup-all": "node --env-file=.env scripts/run-import-clickup-all.mjs",
+    "import-clickup-all-api": "node --env-file=.env scripts/run-import-clickup-all-api.mjs",
+    "clickup-migrate": "node --env-file=.env scripts/run-clickup-migrate.mjs",
     "sync-member-disciplines": "node --env-file=.env scripts/run-sync-member-disciplines.mjs",
+    "sync-member-disciplines-dry-run": "node --env-file=.env scripts/run-sync-member-disciplines.mjs -- --dry-run",
     "reset-demo": "node --env-file=.env scripts/run-reset-demo.mjs"
   },
   "dependencies": {
