@@ -21,9 +21,9 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
 
   const subHint =
     series && Array.isArray(series) && series.length > 0
-      ? "Billable vs. overhead aggregeret pr. rapportperiode/database — hurtig pres-læsning."
+      ? "Billable vs. intern aggregeret pr. rapportperiode/database — hurtig pres-læsning."
       : useDemoFallback
-        ? "Billable vs. overhead fra Pulse-fixtures — hurtig læsning af pres."
+        ? "Billable vs. intern fra Pulse-fixtures — hurtig læsning af pres."
         : "Ingen trenddata for perioden endnu.";
 
   if (data.length === 0) {
@@ -38,6 +38,12 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
   }
 
   const maxVal = Math.max(...data.flatMap((d) => [d.billable + d.overhead]), 1) * 1.08;
+
+  const w = 560;
+  const h = 140;
+  const pad = { l: 34, r: 10, t: 12, b: 16 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
 
   return (
     <section
@@ -114,7 +120,7 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
           <span className="size-2.5 rounded-sm bg-agency-brand" /> Billable
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2.5 rounded-sm bg-agency-warn" /> Overhead
+          <span className="size-2.5 rounded-sm bg-agency-warn" /> Intern
         </span>
       </div>
     </section>

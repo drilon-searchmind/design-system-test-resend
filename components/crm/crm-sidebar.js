@@ -7,7 +7,6 @@ import { CRM_NAV_GROUPS, CRM_NAV_ITEMS } from "@/lib/crm/nav-config";
 import { cn } from "@/lib/utils";
 
 import { CrmNavIcon, IconMenu, IconMenuL, IconSettings } from "./icons";
-import { useTimerModal } from "./timer-modal-context";
 
 function BrandMark({ size = 22 }) {
   return (
@@ -27,10 +26,7 @@ function BrandMark({ size = 22 }) {
   );
 }
 
-function isNavActive(pathname, href, itemId, timerModalOpen) {
-  if (itemId === "timer") {
-    return Boolean(timerModalOpen);
-  }
+function isNavActive(pathname, href, itemId) {
   if (itemId === "time") {
     return pathname === routes.time || pathname.startsWith(`${routes.time}/`);
   }
@@ -55,7 +51,6 @@ export function CrmSidebar({
   className,
   onNavigate,
 }) {
-  const { open: timerModalOpen, openTimer } = useTimerModal();
   const w = collapsed ? 56 : 220;
 
   return (
@@ -131,7 +126,7 @@ export function CrmSidebar({
             ) : null}
             {CRM_NAV_ITEMS.filter((i) => i.group === group.id).map((item) => {
               const href = item.href ?? "";
-              const active = isNavActive(pathname, href, item.id, timerModalOpen);
+              const active = isNavActive(pathname, href, item.id);
               const itemClass = cn(
                 "mb-0.5 flex h-8 items-center gap-2.5 rounded-xl text-[13px] transition-colors",
                 collapsed ? "justify-center px-0" : "px-2.5",
@@ -149,25 +144,6 @@ export function CrmSidebar({
                   <CrmNavIcon navId={item.id} size={15} />
                 </span>
               );
-              if (item.openTimerModal) {
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    title={collapsed ? item.label : undefined}
-                    aria-haspopup="dialog"
-                    aria-expanded={timerModalOpen}
-                    className={itemClass}
-                    onClick={() => {
-                      openTimer();
-                      onNavigate?.();
-                    }}
-                  >
-                    {iconWrap}
-                    {!collapsed ? <span className="truncate">{item.label}</span> : null}
-                  </button>
-                );
-              }
               return (
                 <Link
                   key={item.id}

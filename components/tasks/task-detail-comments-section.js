@@ -8,6 +8,27 @@ import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /**
+ * @param {Response} res
+ */
+async function readApiJson(res) {
+  const ct = res.headers.get("content-type") ?? "";
+  const text = await res.text();
+  if (!text.trim()) return {};
+  if (!ct.includes("application/json")) {
+    throw new Error(
+      res.ok ?
+        "Uventet svar fra serveren"
+      : `Kunne ikke hente kommentarer (${res.status})`,
+    );
+  }
+  try {
+    return /** @type {Record<string, unknown>} */ (JSON.parse(text));
+  } catch {
+    throw new Error("Ugyldigt svar fra serveren");
+  }
+}
+
+/**
  * @typedef {{
  *   id: string;
  *   name: string;
@@ -55,10 +76,10 @@ export function TaskDetailCommentsSection({
     setError(null);
     try {
       const qs = databaseApiQuery();
-      const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/comments?${qs}`, {
+      const res = await fetch(`/api/task-comments/${encodeURIComponent(taskId)}?${qs}`, {
         cache: "no-store",
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente kommentarer");
       setComments(Array.isArray(data.comments) ? data.comments : []);
     } catch (e) {
@@ -94,12 +115,12 @@ export function TaskDetailCommentsSection({
       setError(null);
       try {
         const qs = databaseApiQuery();
-        const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/comments?${qs}`, {
+        const res = await fetch(`/api/task-comments/${encodeURIComponent(taskId)}?${qs}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bodyHtml }),
         });
-        const data = await res.json();
+        const data = await readApiJson(res);
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gemme");
         setComments(Array.isArray(data.comments) ? data.comments : []);
         setEditorKey((k) => k + 1);
