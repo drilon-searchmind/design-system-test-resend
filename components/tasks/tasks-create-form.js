@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { readRichTextEditorHtml, TaskRichTextEditor } from "@/components/tasks/task-rich-text-editor";
+import { TeamMemberMultiSelect } from "@/components/tasks/team-member-multi-select";
 import { cn } from "@/lib/utils";
 
 /**
@@ -33,9 +35,10 @@ function isoDatePlusCalendarDays(offsetDays) {
 /**
  * @param {{
  *   departments: Array<{ id: string; name: string }>;
- *   team: Array<{ id: string; name: string }>;
+ *   team: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   clientsPicklist: Array<{ value: string; label: string }>;
  *   taskTemplatesForCreate?: TaskTemplatePreset[];
+ *   mineAssigneeKey?: string;
  *   submitting?: boolean;
  *   error?: string | null;
  *   onSubmit: (body: Record<string, unknown>) => void;
@@ -48,18 +51,20 @@ export function TasksCreateForm({
   team,
   clientsPicklist,
   taskTemplatesForCreate = [],
+  mineAssigneeKey = "",
   submitting,
   error,
   onSubmit,
   onCancel,
   variant = "card",
 }) {
+  const descriptionRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const [templateKey, setTemplateKey] = useState("");
   const [title, setTitle] = useState("");
   const [hint, setHint] = useState("");
   const [clientSlug, setClientSlug] = useState(clientsPicklist[0]?.value ?? "");
   const [departmentKey, setDepartmentKey] = useState("");
-  const [assigneeMemberKey, setAssigneeMemberKey] = useState("");
+  const [selectedAssignees, setSelectedAssignees] = useState(() => new Set());
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("medium");
   const [status, setStatus] = useState("todo");
@@ -74,6 +79,9 @@ export function TasksCreateForm({
       if (!tpl) return;
       setTitle(tpl.title);
       setHint(tpl.hint ?? "");
+      if (descriptionRef.current && tpl.hint) {
+        descriptionRef.current.innerHTML = tpl.hint.includes("<") ? tpl.hint : `<p>${tpl.hint}</p>`;
+      }
       setDepartmentKey(tpl.departmentKey ? tpl.departmentKey : "");
       setPriority(tpl.priority);
       if (typeof tpl.defaultDueOffsetDays === "number" && Number.isFinite(tpl.defaultDueOffsetDays)) {
@@ -89,10 +97,12 @@ export function TasksCreateForm({
   );
 
   const submit = useCallback(() => {
+    const description = readRichTextEditorHtml(descriptionRef.current);
     /** @type {Record<string, unknown>} */
     const body = {
       title: title.trim(),
       hint,
+      description,
       clientSlug,
       priority,
       status,
@@ -100,7 +110,7 @@ export function TasksCreateForm({
     };
     if (dueDate.trim()) body.dueDate = dueDate.trim().slice(0, 10);
     if (departmentKey && departmentKey !== "—") body.departmentKey = departmentKey;
-    if (assigneeMemberKey.trim()) body.assigneeMemberKey = assigneeMemberKey.trim();
+    if (selectedAssignees.size) body.assigneeMemberKeys = [...selectedAssignees];
     if (templateKey.trim()) body.templateKey = templateKey.trim();
     const ehRaw = estimateHours.trim().replace(",", ".");
     if (ehRaw !== "") {
@@ -113,7 +123,7 @@ export function TasksCreateForm({
     hint,
     clientSlug,
     departmentKey,
-    assigneeMemberKey,
+    selectedAssignees,
     dueDate,
     priority,
     status,
@@ -127,9 +137,7 @@ export function TasksCreateForm({
 
   return (
     <div
-      className={cn(
-        isModal ? "flex flex-col gap-4" : "tally-panel p-4 md:p-5",
-      )}
+      className={cn(isModal ? "flex flex-col gap-4" : "tally-panel p-4 md:p-5")}
       role="region"
       aria-label={isModal ? "Opret ny opgave — formular" : "Opret opgave"}
     >
@@ -156,8 +164,8 @@ export function TasksCreateForm({
               ))}
             </select>
             <span className="font-sans text-[11px] leading-snug text-fg-quiet">
-              Udfylder titel, hint, disciplin, prioritet, deadline og timer ud fra Task template; du kan rette alt før
-              oprettelse. Opgaven kobles til skabelonen i databasen.
+              Udfylder titel, beskrivelse, disciplin, prioritet, deadline og timer ud fra Task template; du kan rette alt
+              før oprettelse.
             </span>
           </label>
         : null}
@@ -189,17 +197,29 @@ export function TasksCreateForm({
             ))}
           </select>
         </label>
+
+        <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted sm:col-span-2">
+          <span>Beskrivelse</span>
+          <TaskRichTextEditor
+            editorRef={descriptionRef}
+            disabled={submitting}
+            placeholder="Beskriv opgaven — formatering, lister m.m."
+          />
+        </div>
+
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted sm:col-span-2">
-          <span>Hint / noter</span>
+          <span>Kort hint (valgfri)</span>
           <input
             value={hint}
             onChange={(e) => setHint(e.target.value)}
+            placeholder="Kort linje til lister og overblik"
             className={cn(
               "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
               "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
             )}
           />
         </label>
+
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
           <span>Afdeling</span>
           <select
@@ -218,24 +238,21 @@ export function TasksCreateForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
+
+        <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted">
           <span>Ansvarlig</span>
-          <select
-            value={assigneeMemberKey}
-            onChange={(e) => setAssigneeMemberKey(e.target.value)}
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          >
-            <option value="">—</option>
-            {team.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <TeamMemberMultiSelect
+            team={team}
+            selected={selectedAssignees}
+            onChange={setSelectedAssignees}
+            mineAssigneeKey={mineAssigneeKey}
+            emptyLabel="Vælg ansvarlige"
+            allSelectedLabel="Alle ansvarlige"
+            countLabel={(n) => `${n} ansvarlige`}
+            showQuickActions
+          />
+        </div>
+
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
           <span>Deadline</span>
           <input
@@ -311,11 +328,11 @@ export function TasksCreateForm({
           </select>
         </label>
       </div>
-      {error ? (
+      {error ?
         <p className="mt-3 rounded-lg border border-agency-bad-border bg-agency-bad-soft px-3 py-2 font-sans text-[12px] text-agency-bad">
           {error}
         </p>
-      ) : null}
+      : null}
       <div className="mt-5 flex flex-wrap gap-2">
         <button
           type="button"

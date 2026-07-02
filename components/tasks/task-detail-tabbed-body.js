@@ -133,7 +133,7 @@ export function TaskDetailTabbedBody({
               />
               <TaskDetailDescriptionCard
                 task={
-                  /** @type {{ hint?: string; dept: string; title: string; status: string }} */ (
+                  /** @type {{ hint?: string; description?: string; dept: string; title: string; status: string }} */ (
                     taskRow
                   )
                 }

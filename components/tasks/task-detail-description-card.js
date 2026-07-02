@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
  * @param {{
  *   task: {
  *     hint?: string | null;
+ *     description?: string | null;
  *     dept: string;
  *     title: string;
  *     status: string;
@@ -12,16 +13,31 @@ import { cn } from "@/lib/utils";
  * }} props
  */
 export function TaskDetailDescriptionCard({ task, mode = "demo" }) {
-  const hint =
-    task.hint?.trim() ||
-    "Kort beskrivelse ikke sat — fyld CRM-feltet `hint` eller brug aktivitetsloggen til nuancerede noter.";
+  const descriptionHtml = typeof task.description === "string" ? task.description.trim() : "";
+  const hint = typeof task.hint === "string" ? task.hint.trim() : "";
 
-  const titleChip = mode === "database" ? "Opgavenote (CRM)" : "Opgavespec";
+  const titleChip = mode === "database" ? "Beskrivelse" : "Opgavespec";
 
   return (
     <div className="tally-panel p-4 md:p-5">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">{titleChip}</h2>
-      <p className={cn("mt-3 font-sans text-[13px] leading-relaxed text-fg-muted")}>{hint}</p>
+      {descriptionHtml ?
+        <div
+          className="task-comment-body mt-3 font-sans text-[13px] leading-relaxed text-fg-muted"
+          dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+        />
+      : hint ?
+        <p className={cn("mt-3 font-sans text-[13px] leading-relaxed text-fg-muted")}>{hint}</p>
+      : (
+        <p className="mt-3 font-sans text-[13px] leading-relaxed text-fg-quiet">
+          Ingen beskrivelse endnu — tilføj en via redigering eller ved oprettelse.
+        </p>
+      )}
+      {descriptionHtml && hint ?
+        <p className="mt-3 border-t border-border-soft pt-3 font-sans text-[12px] leading-relaxed text-fg-quiet">
+          <span className="font-semibold text-fg-muted">Hint:</span> {hint}
+        </p>
+      : null}
     </div>
   );
 }

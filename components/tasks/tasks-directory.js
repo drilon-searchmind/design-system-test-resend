@@ -45,6 +45,7 @@ const GRID =
  *     clientLogo: string;
  *     clientHue: number;
  *     assigneeId: string;
+ *     assigneeIds?: string[];
  *     dept: string;
  *     status: string;
  *     priority: string;
@@ -58,7 +59,14 @@ const GRID =
  * }} props
  */
 function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder = true }) {
-  const assignee = row.assigneeId ? teamById[row.assigneeId] : null;
+  const assigneeKeys =
+    Array.isArray(row.assigneeIds) && row.assigneeIds.length ?
+      row.assigneeIds
+    : row.assigneeId ?
+      [row.assigneeId]
+    : [];
+  const assignees = assigneeKeys.map((id) => teamById[id]).filter(Boolean);
+  const primaryAssignee = assignees[0] ?? null;
   const dep = deptById[row.dept];
   const overdue = taskIsOverdue(row, taskDueReferenceIso);
   const daysLeft = !taskIsDone(row.status) ? taskDaysUntilDue(row.dueDate, taskDueReferenceIso) : null;
@@ -97,15 +105,23 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
       </div>
 
       <div className="flex min-w-0 items-center gap-1.5">
-        {assignee ?
+        {assignees.length > 0 ?
           <>
-            <CrmAvatar
-              label={assignee.avatar ?? assignee.name.slice(0, 2)}
-              src={assignee.image}
-              hue={assignee.hue ?? 220}
-              className="size-5 text-[9px]"
-            />
-            <span className="truncate font-sans text-[12px] text-fg-muted">{assignee.name}</span>
+            <div className="flex shrink-0 -space-x-1.5">
+              {assignees.slice(0, 3).map((a) => (
+                <CrmAvatar
+                  key={a.id}
+                  label={a.avatar ?? a.name.slice(0, 2)}
+                  src={a.image}
+                  hue={a.hue ?? 220}
+                  className="size-5 text-[9px] ring-2 ring-canvas"
+                />
+              ))}
+            </div>
+            <span className="truncate font-sans text-[12px] text-fg-muted">
+              {primaryAssignee?.name}
+              {assignees.length > 1 ? ` +${assignees.length - 1}` : ""}
+            </span>
           </>
         : <span className="text-fg-quiet">—</span>}
       </div>
@@ -177,6 +193,7 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
  *     clientLogo: string;
  *     clientHue: number;
  *     assigneeId: string;
+ *     assigneeIds?: string[];
  *     dept: string;
  *     status: string;
  *     priority: string;
@@ -227,7 +244,16 @@ export function TasksDirectory({
   }, [team]);
 
   const hasUnassignedTasks = useMemo(
-    () => tasks.some((t) => !t.assigneeId?.trim()),
+    () =>
+      tasks.some((t) => {
+        const ids =
+          Array.isArray(t.assigneeIds) && t.assigneeIds.length ?
+            t.assigneeIds
+          : t.assigneeId?.trim() ?
+            [t.assigneeId.trim()]
+          : [];
+        return ids.length === 0;
+      }),
     [tasks],
   );
 
@@ -248,7 +274,7 @@ export function TasksDirectory({
       ) {
         return false;
       }
-      if (!taskMatchesAssigneeFilter(t.assigneeId, selectedAssignees)) return false;
+      if (!taskMatchesAssigneeFilter(t, selectedAssignees)) return false;
       if (scopeFilter === "open" && taskIsDone(t.status)) return false;
       if (scopeFilter === "overdue" && !taskIsOverdue(t, taskDueReferenceIso)) return false;
       return true;

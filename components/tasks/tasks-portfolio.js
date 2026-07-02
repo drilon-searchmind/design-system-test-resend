@@ -178,7 +178,7 @@ export function TasksPortfolio() {
         open={showCreate && dataSource === "database"}
         onClose={closeCreateModal}
         ariaLabel="Ny opgave"
-        maxWidthClass="w-[min(100vw-1.5rem,560px)]"
+        maxWidthClass="w-[min(100vw-1.5rem,640px)]"
       >
         <div className="flex max-h-[min(92vh,920px)] flex-col">
           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
@@ -205,6 +205,7 @@ export function TasksPortfolio() {
               team={bundle.team}
               clientsPicklist={bundle.clientsPicklist}
               taskTemplatesForCreate={bundle.taskTemplatesForCreate ?? []}
+              mineAssigneeKey={bundle.mineAssigneeKey ?? ""}
               submitting={createSubmitting}
               error={createError}
               onSubmit={handleCreateSubmit}
