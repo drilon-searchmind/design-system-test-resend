@@ -12,6 +12,7 @@ import { TeamPageHeader } from "@/components/team/team-page-header";
 import { TeamRosterDirectory } from "@/components/team/team-roster-directory";
 import { TeamSummaryStrip } from "@/components/team/team-summary-strip";
 import { getTeamDemoBundle } from "@/lib/crm/team-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -53,9 +54,7 @@ export function TeamPortfolio() {
         );
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
         const res = await fetch(`/api/team?${qs}`, { cache: "no-store" });

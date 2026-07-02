@@ -57,7 +57,7 @@ export async function PATCH(req, ctx) {
   }
 
   try {
-    const res = await updateTaskMongo(taskId, includeTest, body);
+    const res = await updateTaskMongo(taskId, includeTest, body, authResult.session);
     if ("error" in res && res.error) {
       return NextResponse.json({ error: res.error }, { status: res.status ?? 400 });
     }

@@ -39,7 +39,7 @@ export function UsersDirectory({
   headingId = "users-directory-heading",
   dataSource = "demo",
 }) {
-  const users = usersProp ?? FALLBACK_AGENCY_USERS;
+  const users = usersProp ?? (dataSource === "demo" ? FALLBACK_AGENCY_USERS : []);
   const [q, setQ] = useState("");
   const [statusF, setStatusF] = useState(initialStatus);
   const [roleF, setRoleF] = useState(initialRole);

@@ -16,7 +16,7 @@ import {
 } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { routes } from "@/config/routes";
-import { formatIsoDateDa } from "@/lib/crm/format-da";
+import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import {
   taskDaysUntilDue,
   taskIsDone,
@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const GRID =
-  "grid-cols-[minmax(200px,2.35fr)_minmax(124px,1.05fr)_minmax(94px,0.95fr)_minmax(40px,0.4fr)_minmax(74px,0.72fr)_minmax(80px,0.78fr)_minmax(82px,0.88fr)_36px]";
+  "grid-cols-[minmax(200px,2.2fr)_minmax(120px,1fr)_minmax(92px,0.92fr)_minmax(40px,0.38fr)_minmax(70px,0.68fr)_minmax(72px,0.7fr)_minmax(58px,0.55fr)_minmax(80px,0.78fr)_36px]";
 
 /**
  * @param {{
@@ -42,6 +42,7 @@ const GRID =
  *     status: string;
  *     priority: string;
  *     dueDate: string;
+ *     estimateHours?: number | null;
  *   }>;
  *   departments: Array<{ id: string; name?: string; short?: string }>;
  *   team: Array<{ id: string; name: string; avatar?: string; hue?: number }>;
@@ -188,7 +189,7 @@ export function TasksDirectory({
           ))}
         </div>
       : <div className="overflow-x-auto">
-          <div className="min-w-[1020px]">
+          <div className="min-w-[1080px]">
             <div
               className={cn(
                 "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
@@ -214,12 +215,13 @@ export function TasksDirectory({
                 Prio {sort === "prio" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
               </button>
               <span>Status</span>
+              <span className="text-agency-brand">Est.</span>
               <button
                 type="button"
                 className="text-left font-[inherit] text-[inherit] hover:text-fg"
                 onClick={() => setSort("due")}
               >
-                Forfaldsdato {sort === "due" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
+                Deadline {sort === "due" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
               </button>
               <span />
             </div>
@@ -290,6 +292,14 @@ export function TasksDirectory({
 
                   <div className="flex items-center">
                     <TaskStatusChip status={row.status} className="scale-95 origin-left" />
+                  </div>
+
+                  <div className="flex items-center">
+                    {typeof row.estimateHours === "number" && Number.isFinite(row.estimateHours) ?
+                      <span className="inline-flex min-w-[2.5rem] items-center justify-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0.5 font-sans text-[11px] font-semibold tabular-nums text-agency-brand">
+                        {formatHoursCompactDa(row.estimateHours)}t
+                      </span>
+                    : <span className="text-[12px] text-fg-quiet">—</span>}
                   </div>
 
                   <div className="flex min-w-0 flex-col gap-0.5">

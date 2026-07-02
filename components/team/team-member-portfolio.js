@@ -11,6 +11,7 @@ import { TeamMemberKpiStrip } from "@/components/team/team-member-kpi-strip";
 import { TeamMemberOpenTasksCard } from "@/components/team/team-member-open-tasks-card";
 import { TeamMemberQuickLinksCard } from "@/components/team/team-member-quick-links-card";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
@@ -53,9 +54,7 @@ export function TeamMemberPortfolio() {
         setBundle(/** @type {Record<string, unknown>} */ (b));
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
         const res = await fetch(`/api/workload/${encodeURIComponent(memberKey)}?${qs}`, { cache: "no-store" });

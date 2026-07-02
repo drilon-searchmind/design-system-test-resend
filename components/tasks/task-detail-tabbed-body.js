@@ -3,20 +3,20 @@
 import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
 import { TaskDetailActivityCard } from "@/components/tasks/task-detail-activity-card";
 import { TaskDetailAssigneeCard } from "@/components/tasks/task-detail-assignee-card";
+import { TaskDetailCommentsSection } from "@/components/tasks/task-detail-comments-section";
 import { TaskDetailContextCard } from "@/components/tasks/task-detail-context-card";
 import { TaskDetailDescriptionCard } from "@/components/tasks/task-detail-description-card";
 import { TaskDetailKpiStrip } from "@/components/tasks/task-detail-kpi-strip";
-import { TaskDetailMongoPanel } from "@/components/tasks/task-detail-mongo-panel";
 import { TaskDetailTimeTodayCard } from "@/components/tasks/task-detail-time-today-card";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
-export const TASK_DETAIL_TAB_IDS = /** @type {const} */ (["overblik", "tid", "relationer", "crm", "spor"]);
+export const TASK_DETAIL_TAB_IDS = /** @type {const} */ (["overblik", "tid", "relationer", "kommentarer", "spor"]);
 
 const TAB_DEFS = [
   { id: "overblik", label: "Overblik" },
   { id: "tid", label: "Tidslog" },
   { id: "relationer", label: "Relationer" },
-  { id: "crm", label: "CRM" },
+  { id: "kommentarer", label: "Kommentarer" },
   { id: "spor", label: "Aktivitet" },
 ];
 
@@ -36,18 +36,9 @@ const TAB_DEFS = [
  *   dueReferenceIso: string;
  *   periodLabel?: string;
  *   timeEntries: Array<{ id: string; at: string; dur: number; desc: string; dept?: string | null }>;
- *   mongo?: {
- *     taskId: string;
- *     wire: Record<string, unknown>;
- *     departments: Array<{ id: string; name?: string }>;
- *     team: Array<{ id: string; name: string }>;
- *     clientsPicklist: Array<{ value: string; label: string }>;
- *     busy?: boolean;
- *     notice?: string | null;
- *     onBusyChange?: (b: boolean) => void;
- *     onNotice?: (s: string | null) => void;
- *     onReload: () => void | Promise<void>;
- *   };
+ *   mode?: "demo" | "database";
+ *   team?: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
+ *   highlightCommentId?: string;
  * }} props
  */
 export function TaskDetailTabbedBody({
@@ -65,7 +56,9 @@ export function TaskDetailTabbedBody({
   dueReferenceIso,
   periodLabel = "",
   timeEntries,
-  mongo = null,
+  mode = "demo",
+  team = [],
+  highlightCommentId = "",
 }) {
   /** @type {(typeof TASK_DETAIL_TAB_IDS)[number]} */
   const resolvedTab =
@@ -84,8 +77,17 @@ export function TaskDetailTabbedBody({
     body: e.summary,
   }));
 
-  const activityEntries =
-    mongo ? mergedDb : /** @type {typeof demoActivity} */ (demoActivity ?? []);
+  const activityEntries = mode === "database" ? mergedDb : /** @type {typeof demoActivity} */ (demoActivity ?? []);
+
+  const assigneeForKpi =
+    assigneePulse && typeof assigneePulse.name === "string" ?
+      {
+        name: assigneePulse.name,
+        avatar: typeof assigneePulse.avatar === "string" ? assigneePulse.avatar : undefined,
+        hue: typeof assigneePulse.hue === "number" ? assigneePulse.hue : undefined,
+        image: typeof assigneePulse.image === "string" ? assigneePulse.image : undefined,
+      }
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -102,20 +104,13 @@ export function TaskDetailTabbedBody({
             <h2 id="task-tab-overview" className="sr-only">
               Overblik
             </h2>
-            <TaskDetailDescriptionCard
-              task={
-                /** @type {{ hint?: string; dept: string; title: string; status: string }} */ (
-                  taskRow
-                )
-              }
-              mode={mongo ? "database" : "demo"}
-            />
             <TaskDetailKpiStrip
               task={
                 /** @type {{ dept: string; dueDate: string; status: string }} */ (taskRow)
               }
               assigneeName={assigneePulse && typeof assigneePulse.name === "string" ? assigneePulse.name : null}
-              departments={mongo ? departments : undefined}
+              assignee={assigneeForKpi}
+              departments={mode === "database" ? departments : undefined}
               dueReferenceIso={dueReferenceIso}
             />
           </section>
@@ -128,7 +123,7 @@ export function TaskDetailTabbedBody({
               entries={timeEntries}
               departments={departments}
               periodLabel={periodLabel}
-              sourceHint={mongo ? "Billable registreringer på kunden i valgt måned, filtreret til denne opgave." : undefined}
+              sourceHint="Billable registreringer på opgaven i indeværende måned, filtreret til denne opgave."
             />
           </section>
         : null}
@@ -157,7 +152,7 @@ export function TaskDetailTabbedBody({
                   )
                 : null
               }
-              departmentsLookup={mongo ? departments : undefined}
+              departmentsLookup={mode === "database" ? departments : undefined}
             />
             <ClientDetailAlertsCard
               clientId={typeof clientRow.id === "string" ? clientRow.id : ""}
@@ -167,41 +162,34 @@ export function TaskDetailTabbedBody({
                 )
               }
               description={
-                mongo ? "Udtræk af budget-/sundhedsalarmer på kunden i månedligt Pulse-udsnit." : undefined
+                mode === "database" ? "Udtræk af budget-/sundhedsalarmer på kunden i månedligt Pulse-udsnit." : undefined
               }
             />
           </section>
         : null}
 
-        {resolvedTab === "crm" && mongo ?
-          <section className={stack}>
-            <TaskDetailMongoPanel
-              taskId={mongo.taskId}
-              wire={mongo.wire}
-              departments={mongo.departments}
-              team={mongo.team}
-              clientsPicklist={mongo.clientsPicklist}
-              busy={mongo.busy}
-              notice={mongo.notice}
-              onBusyChange={mongo.onBusyChange}
-              onNotice={mongo.onNotice}
-              onReload={mongo.onReload}
-            />
-          </section>
-        : null}
-
-        {resolvedTab === "crm" && !mongo ?
-          <section className={stack}>
-            <div className="rounded-2xl border border-dashed border-border bg-surface-muted/40 p-8 text-[13px] text-fg-muted">
-              CRM-redigering er ikke tilgængelig i denne visning.
-            </div>
-          </section>
+        {resolvedTab === "kommentarer" ?
+          <TaskDetailCommentsSection
+            taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
+            mode={mode}
+            team={team}
+            highlightCommentId={highlightCommentId}
+          />
         : null}
 
         {resolvedTab === "spor" ?
           <TaskDetailActivityCard entries={activityEntries} footnote={activityFootnote} />
         : null}
       </div>
+
+      <TaskDetailDescriptionCard
+        task={
+          /** @type {{ hint?: string; dept: string; title: string; status: string }} */ (
+            taskRow
+          )
+        }
+        mode={mode}
+      />
     </div>
   );
 }

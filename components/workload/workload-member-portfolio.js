@@ -10,6 +10,7 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { IconChart } from "@/components/crm/icons";
 import { routes } from "@/config/routes";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -51,9 +52,7 @@ export function WorkloadMemberPortfolio() {
         setBundle(/** @type {Record<string, unknown>} */ (b));
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
         const res = await fetch(

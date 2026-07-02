@@ -16,6 +16,7 @@ export function TimeEntryCreateForm({
   departments = [],
   clientsPicklist = [],
   tasksPicklist = [],
+  defaultDepartmentKey = "",
   submitting,
   error,
   onSubmit,
@@ -27,9 +28,25 @@ export function TimeEntryCreateForm({
   const [durationMinutes, setDurationMinutes] = useState("");
   const [billable, setBillable] = useState(true);
   const [clientSlug, setClientSlug] = useState(typeof clientsPicklist[0]?.value === "string" ? clientsPicklist[0].value : "");
-  const [departmentKey, setDepartmentKey] = useState("");
+  const [departmentKey, setDepartmentKey] = useState(
+    typeof defaultDepartmentKey === "string" ? defaultDepartmentKey.trim() : "",
+  );
   const [taskKey, setTaskKey] = useState("");
   const [description, setDescription] = useState("");
+
+  const applyDepartmentForTask = useCallback(
+    (tk) => {
+      const row = tasksPicklist.find((t) => t.value === tk);
+      const fromTask = typeof row?.departmentKey === "string" ? row.departmentKey.trim() : "";
+      if (fromTask) {
+        setDepartmentKey(fromTask);
+        return;
+      }
+      const fallback = typeof defaultDepartmentKey === "string" ? defaultDepartmentKey.trim() : "";
+      if (fallback) setDepartmentKey(fallback);
+    },
+    [defaultDepartmentKey, tasksPicklist],
+  );
 
   const filteredTasks = useMemo(() => {
     const list = Array.isArray(tasksPicklist) ? tasksPicklist : [];
@@ -179,6 +196,9 @@ export function TimeEntryCreateForm({
             );
           })}
         </select>
+        <span className="font-sans text-[10.5px] leading-snug text-fg-quiet">
+          Udfyldes automatisk fra opgave eller din team-profil (discipliner) — gemmes også server-side hvis feltet står tomt.
+        </span>
       </label>
 
       <label className="flex flex-col gap-1">
@@ -186,7 +206,11 @@ export function TimeEntryCreateForm({
         <select
           value={taskKey}
           disabled={!billable}
-          onChange={(ev) => setTaskKey(ev.target.value)}
+          onChange={(ev) => {
+            const next = ev.target.value;
+            setTaskKey(next);
+            if (next) applyDepartmentForTask(next);
+          }}
           className={cn(
             "h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px] text-fg",
             "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",

@@ -7,6 +7,7 @@ import { ClientsPageHeader } from "@/components/clients/clients-page-header";
 import { ClientsSummaryStrip } from "@/components/clients/clients-summary-strip";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -34,9 +35,7 @@ export function ClientsPortfolio() {
         setBundle(getPulseDemoBundle(p));
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(p.year),
+        const qs = databaseApiQuery({ year: String(p.year),
           month: String(p.month),
         });
         const res = await fetch(`/api/pulse?${qs}`, { cache: "no-store" });

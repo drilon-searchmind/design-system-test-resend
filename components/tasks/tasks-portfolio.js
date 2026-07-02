@@ -10,6 +10,7 @@ import { TasksPageHeader } from "@/components/tasks/tasks-page-header";
 import { TasksSummaryStrip } from "@/components/tasks/tasks-summary-strip";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getTasksDemoBundle } from "@/lib/crm/tasks-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -55,9 +56,7 @@ export function TasksPortfolio() {
         setBundle(getTasksDemoBundle(p));
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(p.year),
+        const qs = databaseApiQuery({ year: String(p.year),
           month: String(p.month),
         });
         const res = await fetch(`/api/tasks?${qs}`, { cache: "no-store" });
@@ -97,7 +96,7 @@ export function TasksPortfolio() {
       setCreateSubmitting(true);
       setCreateError(null);
       try {
-        const qs = new URLSearchParams({ includeTest: "1" });
+        const qs = databaseApiQuery();
         const res = await fetch(`/api/tasks?${qs}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -107,6 +106,7 @@ export function TasksPortfolio() {
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke oprette");
         closeCreateModal();
         await load();
+        window.dispatchEvent(new Event("crm-notifications-changed"));
         if (typeof data?.wire?.id === "string" && data.wire.id) {
           router.push(`/tasks/${encodeURIComponent(data.wire.id)}`);
         }

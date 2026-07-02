@@ -701,3 +701,43 @@ html[data-density="spacious"] {
 [data-surface="marketing-tally"] *:not(:focus-visible)::after {
   box-shadow: none !important;
 }
+
+/** Task comment rich text + @mentions */
+.task-comment-body ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.35rem 0;
+}
+
+.task-comment-body ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.35rem 0;
+}
+
+.task-comment-body p {
+  margin: 0.25rem 0;
+}
+
+.task-comment-body .mention,
+.task-comment-editor .mention {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface-muted);
+  padding: 0 0.35rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--ds-accent);
+}
+
+.task-comment-editor:focus {
+  outline: none;
+}
+
+.task-comment-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--ds-fg-quiet);
+  pointer-events: none;
+}

@@ -12,7 +12,7 @@ export function TimeTrackPageHeader({ onClose = null, closeLabel = "Luk" }) {
         <div className="min-w-0 md:flex-1">
           <p className={cn(tallyEyebrow, "flex items-center gap-2")}>
             <IconClock size={14} className="text-accent" aria-hidden />
-            ◇ timer · kunde & opgave
+            ◇ timer · manuel log · kunde & opgave
           </p>
           <h1 className="mt-2 text-[clamp(1.5rem,3vw,1.75rem)] font-semibold tracking-[-0.03em] text-fg">
             Timer

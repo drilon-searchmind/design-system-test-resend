@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { TimeEntryCreateForm } from "@/components/time/time-entry-create-form";
 import { OpenTimerButton } from "@/components/time/open-timer-button";
 import { routes } from "@/config/routes";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,7 +14,8 @@ import { cn } from "@/lib/utils";
  *   dataSource?: string;
  *   departments?: Record<string, unknown>[];
  *   clientsPicklist?: Array<{ value: string; label: string }>;
- *   tasksPicklist?: Array<{ value: string; label: string; clientSlug?: string }>;
+ *   tasksPicklist?: Array<{ value: string; label: string; clientSlug?: string; departmentKey?: string }>;
+ *   defaultDepartmentKey?: string;
  *   onCreated?: () => Promise<void> | void;
  * }} props
  */
@@ -22,6 +24,7 @@ export function TimeQuickLogPanel({
   departments = [],
   clientsPicklist = [],
   tasksPicklist = [],
+  defaultDepartmentKey = "",
   onCreated,
 }) {
   const router = useRouter();
@@ -36,7 +39,7 @@ export function TimeQuickLogPanel({
       setSubmitting(true);
       setError(null);
       try {
-        const qs = new URLSearchParams({ includeTest: "1" });
+        const qs = databaseApiQuery();
         const res = await fetch(`/api/time-entries?${qs}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -88,6 +91,7 @@ export function TimeQuickLogPanel({
             departments={departments}
             clientsPicklist={clientsPicklist}
             tasksPicklist={tasksPicklist}
+            defaultDepartmentKey={defaultDepartmentKey}
             submitting={submitting}
             error={error}
             onSubmit={handleSubmit}

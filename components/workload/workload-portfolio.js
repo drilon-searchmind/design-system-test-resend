@@ -11,6 +11,7 @@ import { WorkloadPageHeader } from "@/components/workload/workload-page-header";
 import { WorkloadSummaryStrip } from "@/components/workload/workload-summary-strip";
 import { WorkloadTeamDirectory } from "@/components/workload/workload-team-directory";
 import { getWorkloadDemoBundle } from "@/lib/crm/workload-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { workloadAgencyTotals } from "@/lib/crm/workload-utils";
 import { cn } from "@/lib/utils";
@@ -77,8 +78,7 @@ export function WorkloadPortfolio() {
         );
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
+        const qs = databaseApiQuery({
           year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
@@ -171,9 +171,9 @@ export function WorkloadPortfolio() {
     : 0;
 
   const budgetAlertsProp = useMemo(() => {
-    if (!bundle || !Object.prototype.hasOwnProperty.call(bundle, "pulseBudgetAlerts")) return undefined;
+    if (!bundle || !Object.prototype.hasOwnProperty.call(bundle, "pulseBudgetAlerts")) return [];
     const a = bundle.pulseBudgetAlerts;
-    if (!Array.isArray(a)) return undefined;
+    if (!Array.isArray(a)) return [];
     return /** @type {typeof import('@/lib/crm/static-data').SMART_ALERTS} */ (a);
   }, [bundle]);
 
@@ -253,7 +253,7 @@ export function WorkloadPortfolio() {
         <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
           <div className="flex min-w-0 flex-col gap-[length:var(--ds-studio-stack)]">
             <WorkloadDemandCard demand={demandList} />
-            <WorkloadMiniTrend series={utilizationSeries} />
+            <WorkloadMiniTrend series={utilizationSeries} useDemoFallback={dataSource === "demo"} />
           </div>
           <WorkloadInsightsCard
             deptRows={deptRows}

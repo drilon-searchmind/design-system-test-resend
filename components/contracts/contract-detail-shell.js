@@ -11,6 +11,7 @@ import { ContractDetailHeader } from "@/components/contracts/contract-detail-hea
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { contractDaysUntilRenewal } from "@/lib/crm/contract-utils";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { routes } from "@/config/routes";
 import {
   formatReportPeriodSubtitle,
@@ -49,9 +50,7 @@ export function ContractDetailShell({ contractId }) {
     setError(null);
     try {
       const p = normalizeReportPeriod(period);
-      const qs = new URLSearchParams({
-        includeTest: "1",
-        year: String(p.year),
+      const qs = databaseApiQuery({ year: String(p.year),
         month: String(p.month),
       });
       const res = await fetch(`/api/contracts/${encodeURIComponent(contractId)}?${qs}`, {

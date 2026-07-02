@@ -11,6 +11,7 @@ import {
 import { TemplateDetailHeader } from "@/components/templates/template-detail-header";
 import { routes } from "@/config/routes";
 import { getTaskTemplatesDemoBundle } from "@/lib/crm/templates-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /** @typedef {{ id: string; name?: string; short?: string; color?: string }} DeptLite */
@@ -114,7 +115,7 @@ export function TemplateDetailShell({ templateId }) {
     setLoading(true);
     setError(null);
     try {
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/task-templates/${encodeURIComponent(templateId)}?${qs}`, {
         cache: "no-store",
       });

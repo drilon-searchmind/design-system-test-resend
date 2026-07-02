@@ -7,6 +7,7 @@ import { ContractsPageHeader } from "@/components/contracts/contracts-page-heade
 import { ContractsSummaryStrip } from "@/components/contracts/contracts-summary-strip";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getContractsDemoBundle } from "@/lib/crm/contracts-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -36,9 +37,7 @@ export function ContractsPortfolio() {
         setBundle(getContractsDemoBundle(p));
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(p.year),
+        const qs = databaseApiQuery({ year: String(p.year),
           month: String(p.month),
         });
         const res = await fetch(`/api/contracts?${qs}`, { cache: "no-store" });

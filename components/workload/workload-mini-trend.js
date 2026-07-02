@@ -10,23 +10,34 @@ function defaultTrendFromStatic() {
 
 /** Kompakt bureau-trendsøjle — matcher Pulse &quot;timer fordelt&quot; for workload-kontekst. */
 /**
- * @param {{ series?: TrendPt[] | null }} props
+ * @param {{ series?: TrendPt[] | null; useDemoFallback?: boolean }} props
  */
-export function WorkloadMiniTrend({ series = null }) {
-  const data = Array.isArray(series) && series.length > 0 ? series : defaultTrendFromStatic();
-  const maxVal = Math.max(...data.flatMap((d) => [d.billable + d.overhead]), 1) * 1.08;
-  const dayLabel = `${data.length} dag${data.length === 1 ? "" : "e"}`;
-
-  const w = 520;
-  const h = 130;
-  const pad = { l: 34, r: 8, t: 8, b: 18 };
-  const cw = w - pad.l - pad.r;
-  const ch = h - pad.t - pad.b;
+export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
+  const data =
+    Array.isArray(series) && series.length > 0 ? series
+    : useDemoFallback ? defaultTrendFromStatic()
+    : [];
+  const dayLabel = data.length > 0 ? `${data.length} dag${data.length === 1 ? "" : "e"}` : "ingen data";
 
   const subHint =
     series && Array.isArray(series) && series.length > 0
       ? "Billable vs. overhead aggregeret pr. rapportperiode/database — hurtig pres-læsning."
-      : "Billable vs. overhead fra Pulse-fixtures eller database — hurtig læsning af pres.";
+      : useDemoFallback
+        ? "Billable vs. overhead fra Pulse-fixtures — hurtig læsning af pres."
+        : "Ingen trenddata for perioden endnu.";
+
+  if (data.length === 0) {
+    return (
+      <section className="tally-panel p-4 md:p-5" aria-labelledby="workload-mini-trend-heading">
+        <div id="workload-mini-trend-heading">
+          <PulseCardHeader title="Bureau-rhyme" sub={subHint} />
+        </div>
+        <p className="mt-3 font-sans text-[13px] text-fg-muted">{subHint}</p>
+      </section>
+    );
+  }
+
+  const maxVal = Math.max(...data.flatMap((d) => [d.billable + d.overhead]), 1) * 1.08;
 
   return (
     <section

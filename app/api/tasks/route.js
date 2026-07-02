@@ -48,7 +48,7 @@ export async function POST(req) {
   }
 
   try {
-    const res = await createTaskMongo(body, includeTest);
+    const res = await createTaskMongo(body, includeTest, authResult.session);
     if ("error" in res && res.error) {
       return NextResponse.json({ error: res.error }, { status: res.status ?? 400 });
     }

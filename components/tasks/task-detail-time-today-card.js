@@ -23,12 +23,14 @@ export function TaskDetailTimeTodayCard({ taskId, entries, departments, periodLa
 
   const hint =
     sourceHint ??
-    `Filtreret til opgaven for ${periodLabel || "perioden"}. Ingen matchende registreringer endnu.`;
+    (periodLabel ?
+      `Filtreret til opgaven for ${periodLabel}. Ingen matchende registreringer endnu.`
+    : "Billable registreringer på opgaven i indeværende måned. Ingen poster endnu.");
 
   return (
     <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Tidslog (periode)</h2>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Tidslog</h2>
         <Link href={routes.time} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
           Åbn tid →
         </Link>

@@ -12,6 +12,7 @@ import { NpsSummaryStrip } from "@/components/nps/nps-summary-strip";
 import { NpsTemplatesDirectory } from "@/components/nps/nps-templates-directory";
 import { NpsTrendAndDistributionCard } from "@/components/nps/nps-trend-distribution-card";
 import { getNpsDemoBundle } from "@/lib/crm/nps-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -50,9 +51,7 @@ export function NpsPortfolio() {
         );
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
         const res = await fetch(`/api/nps?${qs}`, { cache: "no-store" });

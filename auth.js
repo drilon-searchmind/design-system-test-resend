@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import mongoose from "mongoose";
 
 import { isGoogleWorkspaceSsoAllowed, normalizeEmail } from "@/lib/auth/workspace-sso";
 import { accessTierFromUserDoc, syncGoogleOAuthUser } from "@/lib/auth/sync-oauth-user";
@@ -39,6 +40,28 @@ async function isDemoSignedOut() {
 
 async function getDevSessionPayload() {
   if (await isDemoSignedOut()) return null;
+
+  try {
+    await connectDb();
+    const user = await User.findOne({ email: normalizeEmail(DEV_SESSION.user.email) })
+      .select("_id name email image accessTier")
+      .lean();
+    if (user?._id) {
+      return {
+        user: {
+          id: String(user._id),
+          email: String(user.email ?? DEV_SESSION.user.email),
+          name: String(user.name ?? DEV_SESSION.user.name),
+          image: user.image ? String(user.image) : null,
+          accessTier: accessTierFromUserDoc(user),
+        },
+        expires: DEV_SESSION.expires,
+      };
+    }
+  } catch {
+    /* fall through to static dev session */
+  }
+
   return DEV_SESSION;
 }
 
@@ -123,14 +146,32 @@ const nextAuth = hasGoogleOAuth
         },
         async session({ session, token }) {
           if (session.user) {
-            session.user.id =
-              typeof token.userId === "string" ? token.userId : (token.sub ?? session.user.id);
+            let mongoUserId =
+              typeof token.userId === "string" && mongoose.Types.ObjectId.isValid(token.userId) ?
+                token.userId
+              : null;
+
+            if (!mongoUserId && session.user.email) {
+              await connectDb();
+              const byEmail = await User.findOne({ email: normalizeEmail(session.user.email) })
+                .select("_id name email image accessTier")
+                .lean();
+              if (byEmail?._id) {
+                mongoUserId = String(byEmail._id);
+                if (byEmail.name) session.user.name = String(byEmail.name);
+                if (byEmail.email) session.user.email = String(byEmail.email);
+                session.user.image = byEmail.image ? String(byEmail.image) : null;
+                session.user.accessTier = accessTierFromUserDoc(byEmail);
+              }
+            }
+
+            session.user.id = mongoUserId ?? (typeof token.sub === "string" ? token.sub : session.user.id);
             session.user.accessTier =
               /** @type {string} */ (token.accessTier) ?? ACCESS_TIERS.INTERNAL_FULL;
 
-            if (typeof token.userId === "string" && token.userId) {
+            if (mongoUserId) {
               await connectDb();
-              const dbUser = await User.findById(token.userId).select("name email image accessTier").lean();
+              const dbUser = await User.findById(mongoUserId).select("name email image accessTier").lean();
               if (dbUser) {
                 if (dbUser.name) session.user.name = String(dbUser.name);
                 if (dbUser.email) session.user.email = String(dbUser.email);

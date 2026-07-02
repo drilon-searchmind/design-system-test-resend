@@ -152,7 +152,7 @@ export function TasksCreateForm({
               ))}
             </select>
             <span className="font-sans text-[11px] leading-snug text-fg-quiet">
-              Udfylder titel, hint, disciplin, prioritet, forfald og timer ud fra Task template; du kan rette alt før
+              Udfylder titel, hint, disciplin, prioritet, deadline og timer ud fra Task template; du kan rette alt før
               oprettelse. Opgaven kobles til skabelonen i databasen.
             </span>
           </label>
@@ -233,7 +233,7 @@ export function TasksCreateForm({
           </select>
         </label>
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Forfaldsdato</span>
+          <span>Deadline</span>
           <input
             type="date"
             value={dueDate}

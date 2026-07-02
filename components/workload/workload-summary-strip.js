@@ -1,6 +1,5 @@
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
 import { formatCompactNumber, formatPercent } from "@/lib/crm/format-da";
-import { TEAM } from "@/lib/crm/static-data";
 
 /**
  * @param {{
@@ -26,7 +25,7 @@ export function WorkloadSummaryStrip({
   activeClients,
   billableHoursMonth,
   teamWeeklyHours,
-  teamMemberCount = TEAM.length,
+  teamMemberCount = 0,
 }) {
   const util = assigned > 0 ? tracked / assigned : 0;
   const sellThrough = capacity > 0 ? assigned / capacity : 0;

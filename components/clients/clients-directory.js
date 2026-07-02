@@ -15,11 +15,12 @@ import {
   PulseIconList,
   PulseIconSearch,
 } from "@/components/pulse/pulse-icons";
+import { PulseClientHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
-import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { routes } from "@/config/routes";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
+import { useDataSource } from "@/components/crm/use-data-source";
 import { useDensity } from "@/components/theme/use-density";
 import { LEAD_SOURCE_LABELS, LEAD_SOURCES } from "@/lib/crm/client-utils";
 import { CLIENTS as STATIC_CLIENTS, TEAM as STATIC_TEAM } from "@/lib/crm/static-data";
@@ -48,9 +49,13 @@ export function ClientsDirectory({
   team: teamProp,
   hoursColumnLabel,
 }) {
+  const dataSource = useDataSource();
   const pulseCtx = usePulseDataOptional();
-  const CLIENTS = clientsProp ?? pulseCtx?.clients ?? STATIC_CLIENTS;
-  const TEAM = teamProp ?? pulseCtx?.team ?? STATIC_TEAM;
+  const staticClients = dataSource === "demo" ? STATIC_CLIENTS : [];
+  const staticTeam = dataSource === "demo" ? STATIC_TEAM : [];
+  const CLIENTS = clientsProp ?? pulseCtx?.clients ?? staticClients;
+  const TEAM = teamProp ?? pulseCtx?.team ?? staticTeam;
+  const periodLabel = pulseCtx?.period?.label?.toLowerCase() ?? "denne måned";
   const resolvedHeadingId =
     headingId ?? (variant === "pulse" ? "pulse-clients-heading" : "clients-directory-heading");
 
@@ -232,7 +237,6 @@ export function ClientsDirectory({
 
             {filtered.map((c, i) => {
               const owner = TEAM.find((t) => t.id === c.owner);
-              const util = c.hoursBudget > 0 ? c.hoursThisMonth / c.hoursBudget : 0;
 
               return (
                 <Link
@@ -287,17 +291,15 @@ export function ClientsDirectory({
                     {formatCurrencyCompact(c.retainer, c.currency)}
                   </span>
 
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-[12px] tabular-nums",
-                        util > 1 ? "text-agency-bad" : "text-fg",
-                      )}
-                    >
-                      {c.hoursThisMonth}/{c.hoursBudget}t
-                    </span>
-                    <PulseUtilBar hours={c.hoursThisMonth} budget={c.hoursBudget} className="max-w-[120px] flex-1" />
-                  </div>
+                  <PulseClientHoursMetric
+                    hoursThisMonth={c.hoursThisMonth}
+                    hoursBudget={c.hoursBudget}
+                    estimatedHoursOpen={c.estimatedHoursOpen}
+                    periodLabel={periodLabel}
+                    clientName={c.name}
+                    clientHref={`${routes.clients}/${encodeURIComponent(c.id)}`}
+                    utilBarClassName="max-w-[120px]"
+                  />
 
                   <span
                     className={cn(

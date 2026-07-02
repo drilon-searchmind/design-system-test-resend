@@ -7,8 +7,9 @@ import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { PulseIconChevronDown, PulseIconSearch } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
+import { useDataSource } from "@/components/crm/use-data-source";
 import { routes, workloadMemberHref } from "@/config/routes";
-import { DEPARTMENTS } from "@/lib/crm/static-data";
+import { DEPARTMENTS as DEMO_DEPARTMENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
 const GRID =
@@ -21,8 +22,13 @@ const GRID =
  * }} props
  */
 export function WorkloadTeamDirectory({ rows, departments }) {
+  const dataSource = useDataSource();
   const deptList =
-    departments && departments.length > 0 ? departments : DEPARTMENTS.map((d) => ({ ...d, color: String(d.color) }));
+    departments && departments.length > 0 ?
+      departments
+    : dataSource === "demo" ?
+      DEMO_DEPARTMENTS.map((d) => ({ ...d, color: String(d.color) }))
+    : [];
 
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("load");

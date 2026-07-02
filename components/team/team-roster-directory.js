@@ -12,6 +12,7 @@ import {
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { memberProfileHref, routes } from "@/config/routes";
+import { useDataSource } from "@/components/crm/use-data-source";
 import { DEPARTMENTS as DEMO_DEPARTMENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,13 @@ export function TeamRosterDirectory({
   headingId = "team-roster-heading",
   initialDeptId,
 }) {
-  const departments = Array.isArray(departmentsProp) && departmentsProp.length ? departmentsProp : DEMO_DEPARTMENTS;
+  const dataSource = useDataSource();
+  const departments =
+    Array.isArray(departmentsProp) && departmentsProp.length ?
+      departmentsProp
+    : dataSource === "demo" ?
+      DEMO_DEPARTMENTS
+    : [];
   const [q, setQ] = useState("");
   const [dept, setDept] = useState(initialDeptId ?? "all");
   const [sort, setSort] = useState("load");

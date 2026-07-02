@@ -15,6 +15,7 @@ import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes } from "@/config/routes";
 import { clientToEditDraft, editDraftToPatch } from "@/lib/crm/client-edit-utils";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import {
   CLIENTS,
   CONTRACTS,
@@ -58,9 +59,7 @@ export function ClientDetailShell({ clientSlug }) {
     setError(null);
     try {
       const p = normalizeReportPeriod(period);
-      const qs = new URLSearchParams({
-        includeTest: "1",
-        year: String(p.year),
+      const qs = databaseApiQuery({ year: String(p.year),
         month: String(p.month),
       });
       const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
@@ -112,7 +111,7 @@ export function ClientDetailShell({ clientSlug }) {
     setSaving(true);
     setEditNotice(null);
     try {
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

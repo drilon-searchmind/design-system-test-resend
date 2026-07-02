@@ -13,6 +13,7 @@ import { TimeMonthCalendar } from "@/components/time/time-month-calendar";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes } from "@/config/routes";
 import { getTimeEntriesDemoBundle } from "@/lib/crm/time-entries-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatIsoWeekdayLongDa } from "@/lib/crm/format-da";
 import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { buildReportMonthCalendarCells, minutesPerUtcIsoDayFromWireEntries } from "@/lib/crm/time-utils";
@@ -137,9 +138,7 @@ export function TimePortfolio() {
         setBundle(b);
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({
-          includeTest: "1",
-          year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
         const res = await fetch(`/api/time-entries?${qs}`, { cache: "no-store" });
@@ -295,7 +294,7 @@ export function TimePortfolio() {
       setCreateSubmitting(true);
       setCreateError(null);
       try {
-        const qs = new URLSearchParams({ includeTest: "1" });
+        const qs = databaseApiQuery();
         const res = await fetch(`/api/time-entries?${qs}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -373,10 +372,12 @@ export function TimePortfolio() {
     : [];
   const tasksPick =
     bundle && Array.isArray(bundle.tasksPicklist) ?
-      /** @type {{ value: string; label: string; clientSlug?: string }[]} */ (
+      /** @type {{ value: string; label: string; clientSlug?: string; departmentKey?: string }[]} */ (
         bundle.tasksPicklist
       )
     : [];
+  const defaultDepartmentKey =
+    bundle && typeof bundle.defaultDepartmentKey === "string" ? bundle.defaultDepartmentKey : "";
 
   const openHeaderCreate = dataSource === "database" ? openCreate : undefined;
 
@@ -422,6 +423,7 @@ export function TimePortfolio() {
               departments={deptArr}
               clientsPicklist={clientsPick}
               tasksPicklist={tasksPick}
+              defaultDepartmentKey={defaultDepartmentKey}
               submitting={createSubmitting}
               error={createError}
               onSubmit={handleCreate}
@@ -464,6 +466,7 @@ export function TimePortfolio() {
             departments={deptArr}
             clientsPicklist={clientsPick}
             tasksPicklist={tasksPick}
+            defaultDepartmentKey={defaultDepartmentKey}
             onCreated={load}
           />
         </div>

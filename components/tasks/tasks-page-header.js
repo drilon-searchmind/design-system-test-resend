@@ -32,8 +32,8 @@ export function TasksPageHeader({
   loading = false,
   summary = null,
   mineLabel = null,
-  taskDueReferenceIso = "",
-  periodLabel = "",
+  taskDueReferenceIso: _taskDueReferenceIso = "",
+  periodLabel: _periodLabel = "",
   onOpenCreate,
   createModalOpen = false,
   dataSource,
@@ -46,14 +46,12 @@ export function TasksPageHeader({
   if (loading && summary == null) {
     bodyLine = "Indlæser opgaver…";
   } else if (summary != null && summary.total > 0) {
-    bodyLine = `${summary.total} opgaver i porteføljen · ${summary.openCount} åbne · ${summary.overdueCount} overskredet (${taskDueReferenceIso || "refs."})`;
+    bodyLine = `${summary.total} opgaver i porteføljen · ${summary.openCount} åbne · ${summary.overdueCount} overskredet (ref. i dag)`;
     if (mineLabel) bodyLine += ` · Mine: ${mineLabel}`;
     if (summary.highOpen > 0) bodyLine += ` · ${summary.highOpen} høj prio (åbne)`;
   } else if (summary != null && summary.total === 0) {
     bodyLine = "Ingen opgaver i den valgte måned/portefølje";
   }
-
-  const refChip = taskDueReferenceIso || periodLabel;
 
   return (
     <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
@@ -71,12 +69,8 @@ export function TasksPageHeader({
           )}
         >
           <span className="capitalize">{subtitle}</span>
-          {refChip ?
-            <>
-              {" "}
-              · Periode/forfaldsref. <span className="tabular-nums text-fg-quiet">{taskDueReferenceIso || periodLabel}</span>
-            </>
-          : null}
+          {" · Deadline-ref. "}
+          <span className="tabular-nums text-fg-quiet">i dag</span>
           {bodyLine ? <> · {bodyLine}</> : null}
         </p>
       </div>

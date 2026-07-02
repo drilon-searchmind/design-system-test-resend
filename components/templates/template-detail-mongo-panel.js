@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { routes } from "@/config/routes";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /**
@@ -82,7 +83,7 @@ export function TemplateDetailMongoPanel({
     onBusyChange?.(true);
     onNotice?.(null);
     try {
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       /** @type {Record<string, unknown>} */
       const body = {
         title: title.trim(),
@@ -151,7 +152,7 @@ export function TemplateDetailMongoPanel({
     onBusyChange?.(true);
     onNotice?.(null);
     try {
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/task-templates/${encodeURIComponent(templateRouteId)}?${qs}`, {
         method: "DELETE",
       });

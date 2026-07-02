@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { routes } from "@/config/routes";
 import { getTimeEntryDemoDetail } from "@/lib/crm/time-entries-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /** @typedef {"detaljer" | "aktivitet"} TabId */
@@ -75,7 +76,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
         return;
       }
 
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/time-entries/${encodeURIComponent(entryId)}?${qs}`, {
         cache: "no-store",
       });
@@ -155,7 +156,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
       };
       if (billable && clientSlug.trim()) body.clientSlug = clientSlug.trim();
       const targetId = mongoIdTxt || fallbackIdTxt || entryId;
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/time-entries/${encodeURIComponent(targetId)}?${qs}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -198,7 +199,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
     setBanner(null);
     try {
       const targetId = mongoIdTxt || fallbackIdTxt || entryId;
-      const qs = new URLSearchParams({ includeTest: "1" });
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/time-entries/${encodeURIComponent(targetId)}?${qs}`, {
         method: "DELETE",
       });

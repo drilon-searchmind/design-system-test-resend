@@ -19,6 +19,7 @@ import { routes } from "@/config/routes";
 import { CONTRACT_DEMO_REF_DATE, contractDaysUntilRenewal, contractNeedsRenewalSoon } from "@/lib/crm/contract-utils";
 import { formatCurrencyCompact, formatIsoDateDa } from "@/lib/crm/format-da";
 import { CONTRACTS, TEAM } from "@/lib/crm/static-data";
+import { useDataSource } from "@/components/crm/use-data-source";
 import { cn } from "@/lib/utils";
 
 const GRID =
@@ -54,8 +55,9 @@ export function ContractsDirectory({
   headingId = "contracts-directory-heading",
   toolbarTitle = "Alle kontrakter",
 }) {
-  const roster = contracts ?? CONTRACTS;
-  const memberRoster = team ?? TEAM;
+  const dataSource = useDataSource();
+  const roster = contracts ?? (dataSource === "demo" ? CONTRACTS : []);
+  const memberRoster = team ?? (dataSource === "demo" ? TEAM : []);
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("all");

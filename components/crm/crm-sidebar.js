@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { routes } from "@/config/routes";
 import { CRM_NAV_GROUPS, CRM_NAV_ITEMS } from "@/lib/crm/nav-config";
-import { CLIENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
 import { CrmNavIcon, IconMenu, IconMenuL, IconSettings } from "./icons";

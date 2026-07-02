@@ -6,7 +6,7 @@ import { StatusChip } from "@/components/crm/status-chip";
 import { PulseAllocationBar } from "@/components/pulse/pulse-allocation-bar";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { routes } from "@/config/routes";
-import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatHoursBudgetPairDa, formatHoursCompactDa, formatPercent } from "@/lib/crm/format-da";
 import { TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -80,10 +80,15 @@ export function ClientGridCard({ client, variant = "pulse" }) {
             util > 1 ? "text-agency-bad" : "text-fg",
           )}
         >
-          {client.hoursThisMonth}/{client.hoursBudget}t
+          {formatHoursBudgetPairDa(client.hoursThisMonth, client.hoursBudget)}
         </span>
       </div>
       <PulseUtilBar hours={client.hoursThisMonth} budget={client.hoursBudget} className="mt-1" />
+      {typeof client.estimatedHoursOpen === "number" && client.estimatedHoursOpen > 0 ?
+        <p className="mt-1 text-[10px] tabular-nums text-fg-quiet">
+          +{formatHoursCompactDa(client.estimatedHoursOpen)}t est. på åbne opgaver
+        </p>
+      : null}
 
       <div className="mt-2.5">
         <div className="mb-1 font-sans text-[11px] text-fg-muted">Allokering</div>

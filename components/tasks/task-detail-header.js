@@ -3,10 +3,8 @@
 import Link from "next/link";
 
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
-import { TaskStatusChip } from "@/components/crm/task-status-chip";
 import { PulseIconDownload } from "@/components/pulse/pulse-icons";
 import { routes } from "@/config/routes";
-import { TASK_DEMO_REF_DATE } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 /**
@@ -24,7 +22,6 @@ import { cn } from "@/lib/utils";
  *   deptLabel: string;
  *   subtitle: string;
  *   trailing?: import('react').ReactNode;
- *   dueReferenceIso?: string;
  *   showExport?: boolean;
  * }} props
  */
@@ -33,11 +30,8 @@ export function TaskDetailHeader({
   deptLabel,
   subtitle,
   trailing,
-  dueReferenceIso,
   showExport = true,
 }) {
-  const refIso = dueReferenceIso || TASK_DEMO_REF_DATE;
-
   return (
     <>
       <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
@@ -73,12 +67,10 @@ export function TaskDetailHeader({
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{task.title}</h1>
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {task.clientName}
-              <span className="tabular-nums text-fg-quiet"> · Due-ref. {refIso}</span>
               <br />
               {subtitle}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <TaskStatusChip status={task.status} />
               <TaskPriorityChip priority={task.priority} />
             </div>
           </div>

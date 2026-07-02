@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { TaskStatusChip } from "@/components/crm/task-status-chip";
 import { routes } from "@/config/routes";
-import { formatIsoDateDa } from "@/lib/crm/format-da";
+import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import { taskDaysUntilDue, taskIsDone, taskIsOverdue } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
  *     status: string;
  *     priority: 'high' | 'medium' | 'low';
  *     dueDate: string;
+ *     estimateHours?: number | null;
  *   };
  *   dueReferenceIso: string;
  *   departments?: Array<{ id: string; short?: string }>;
@@ -70,11 +71,16 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
       <div className="mt-3 flex flex-wrap gap-2">
         <TaskStatusChip status={row.status} />
         <TaskPriorityChip priority={row.priority} />
+        {typeof row.estimateHours === "number" && Number.isFinite(row.estimateHours) ?
+          <span className="inline-flex items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-2 py-0.5 font-sans text-[10px] font-semibold tabular-nums text-agency-brand">
+            Est. {formatHoursCompactDa(row.estimateHours)} t
+          </span>
+        : null}
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-soft pt-3 text-[11px] text-fg-muted">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Forfaldsdato</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Deadline</div>
           <div
             className={cn(
               "mt-0.5 tabular-nums text-fg",

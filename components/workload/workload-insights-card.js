@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { routes, workloadMemberHref } from "@/config/routes";
-import { SMART_ALERTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
 /**
@@ -11,9 +10,8 @@ import { cn } from "@/lib/utils";
  *   budgetAlerts?: typeof SMART_ALERTS;
  * }} props
  */
-export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
-  const budgetAlertsResolved =
-    budgetAlerts === undefined ? SMART_ALERTS.filter((a) => a.type === "overBudget") : budgetAlerts;
+export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts = [] }) {
+  const budgetAlertsResolved = budgetAlerts.filter((a) => a.type === "overBudget");
   const hotDepts = deptRows.filter((r) => r.tone === "burn" || r.tone === "sell");
   const hotPeople = teamRows.filter((r) => r.loadIndex >= 82).slice(0, 4);
 
@@ -35,7 +33,7 @@ export function WorkloadInsightsCard({ deptRows, teamRows, budgetAlerts }) {
       </div>
 
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Triage ud fra disciplin-toner og team-liste{budgetAlerts === undefined ? " — budget-alerts fra Pulse." : " — Pulse budget-alerts når der er signaler."}
+        Triage ud fra disciplin-toner og team-liste{budgetAlerts.length ? " — Pulse budget-alerts når der er signaler." : "."}
       </p>
 
       <ul className="mt-4 flex flex-col gap-3">

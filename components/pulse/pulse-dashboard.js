@@ -14,6 +14,7 @@ import { PulseProfitabilityChart } from "@/components/pulse/pulse-profitability-
 import { PulseSmartAlertsCard } from "@/components/pulse/pulse-smart-alerts-card";
 import { PulseUtilTrendChart } from "@/components/pulse/pulse-util-trend-chart";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import {
   PULSE_KPI_SPARK_MARGIN,
   PULSE_KPI_SPARK_MRR,
@@ -44,9 +45,7 @@ export function PulseDashboard() {
         setBundle(getPulseDemoBundle(p));
         return;
       }
-      const qs = new URLSearchParams({
-        includeTest: "1",
-        year: String(p.year),
+      const qs = databaseApiQuery({ year: String(p.year),
         month: String(p.month),
       });
       const res = await fetch(`/api/pulse?${qs}`, { cache: "no-store" });

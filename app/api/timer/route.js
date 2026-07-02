@@ -6,8 +6,12 @@ import { getTimerForSession, startTimer, stopTimer } from "@/lib/server/timer-co
 export async function GET() {
   const session = await auth();
   const r = await getTimerForSession(session);
-  if ("error" in r && r.error) return NextResponse.json({ error: r.error }, { status: r.status ?? 401 });
-  return NextResponse.json({ active: r.active ?? null });
+  return NextResponse.json({
+    active: r.active ?? null,
+    clientsPicklist: Array.isArray(r.clientsPicklist) ? r.clientsPicklist : [],
+    tasksPicklist: Array.isArray(r.tasksPicklist) ? r.tasksPicklist : [],
+    canStartTimer: r.canStartTimer !== false,
+  });
 }
 
 export async function POST(req) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PulseCardHeader } from "@/components/pulse/pulse-card-header";
+import { PulseDeptHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseIconTrendUp } from "@/components/pulse/pulse-icons";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { routes } from "@/config/routes";
@@ -67,9 +68,17 @@ export function PulseProfitabilityChart() {
                   </span>
                 </div>
 
-                <span className="text-[12px] tabular-nums text-fg-muted sm:text-right">
-                  {r.hours}/{r.budget} t
-                </span>
+                <PulseDeptHoursMetric
+                  hours={r.hours}
+                  budget={r.budget}
+                  revenue={r.revenue}
+                  util={r.util}
+                  estimatedHoursOpen={r.estimatedHoursOpen}
+                  periodLabel={period.label.toLowerCase()}
+                  deptName={d?.name ?? r.dept}
+                  budgetFromClients={Boolean(r.budgetFromClients)}
+                  className="text-[12px] tabular-nums text-fg-muted sm:text-right"
+                />
 
                 <div className="hidden sm:block">
                   <PulseUtilBar hours={r.hours} budget={r.budget} />

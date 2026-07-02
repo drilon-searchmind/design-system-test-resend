@@ -152,6 +152,20 @@ export function IconMenuL({ className, size = 14 }) {
   );
 }
 
+export function IconBell({ className, size = 16 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M12 4.5a4 4 0 00-4 4v2.2c0 .6-.2 1.2-.6 1.7L6 14.5h12l-1.4-2.1c-.4-.5-.6-1.1-.6-1.7V8.5a4 4 0 00-4-4zM10 17a2 2 0 004 0"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ICONS = {
   pulse: IconChart,
   clients: IconUsers,

@@ -10,6 +10,7 @@ import { TemplatesDirectory } from "@/components/templates/templates-directory";
 import { TemplatesPageHeader } from "@/components/templates/templates-page-header";
 import { TemplatesSummaryStrip } from "@/components/templates/templates-summary-strip";
 import { getTaskTemplatesDemoBundle } from "@/lib/crm/templates-demo-bundle";
+import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /** @typedef {ReturnType<typeof getTaskTemplatesDemoBundle>} TemplatesPortfolioBundle */
@@ -48,7 +49,7 @@ export function TemplatesPortfolio() {
         setBundle(getTaskTemplatesDemoBundle());
         hasLoadedRef.current = true;
       } else {
-        const qs = new URLSearchParams({ includeTest: "1" });
+        const qs = databaseApiQuery();
         const res = await fetch(`/api/task-templates?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente skabeloner");
@@ -80,7 +81,7 @@ export function TemplatesPortfolio() {
       setCreateSubmitting(true);
       setCreateError(null);
       try {
-        const qs = new URLSearchParams({ includeTest: "1" });
+        const qs = databaseApiQuery();
         const res = await fetch(`/api/task-templates?${qs}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
