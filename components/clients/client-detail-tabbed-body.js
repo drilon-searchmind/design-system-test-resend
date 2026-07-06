@@ -17,18 +17,14 @@ import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-contro
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
   "overblik",
   "okonomi",
-  "leverance",
   "kvalitet",
-  "samarbejde",
 ]);
 
 /** Danish labels aligned with SETTINGS stamdata tab pattern (`PulseSegmentedControl`). */
 export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "overblik", label: "Overblik" },
   { id: "okonomi", label: "Økonomi & aftale" },
-  { id: "leverance", label: "Leverance" },
   { id: "kvalitet", label: "Kvalitet & risiko" },
-  { id: "samarbejde", label: "Samarbejde" },
 ];
 
 /**
@@ -116,6 +112,18 @@ export function ClientDetailTabbedBody({
             </h2>
             <ClientDetailKpiStrip client={client} timerLabel={kpiTimerLabel} />
             <ClientDetailMetaCard client={client} />
+            <ClientDetailDeliveryCard client={client} />
+            <ClientDetailServiceMixCard client={client} />
+            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
+              <ClientDetailContactsCard
+                primaryContact={client.primaryContact}
+                secondaryContact={client.secondaryContact}
+              />
+              <div className={stack}>
+                <ClientDetailNotesCard notes={notes} teamMembers={notesTeamMembers} />
+                <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} />
+              </div>
+            </div>
           </section>
         ) : null}
 
@@ -133,16 +141,6 @@ export function ClientDetailTabbedBody({
           </section>
         ) : null}
 
-        {resolvedTab === "leverance" ? (
-          <section aria-labelledby="client-tab-leverance" className={stack}>
-            <h2 id="client-tab-leverance" className="sr-only">
-              Leverance
-            </h2>
-            <ClientDetailDeliveryCard client={client} />
-            <ClientDetailServiceMixCard client={client} />
-          </section>
-        ) : null}
-
         {resolvedTab === "kvalitet" ? (
           <section aria-labelledby="client-tab-kvalitet" className={stack}>
             <h2 id="client-tab-kvalitet" className="sr-only">
@@ -153,27 +151,6 @@ export function ClientDetailTabbedBody({
               <ClientDetailInsightsCard client={client} />
             </div>
             <ClientDetailAlertsCard clientId={client.id} alerts={alerts} />
-          </section>
-        ) : null}
-
-        {resolvedTab === "samarbejde" ? (
-          <section aria-labelledby="client-tab-samarbejde" className={stack}>
-            <h2 id="client-tab-samarbejde" className="sr-only">
-              Samarbejde
-            </h2>
-            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
-              <ClientDetailContactsCard
-                primaryContact={client.primaryContact}
-                secondaryContact={client.secondaryContact}
-              />
-              <div className={stack}>
-                <ClientDetailNotesCard notes={notes} teamMembers={notesTeamMembers} />
-                <ClientDetailTasksCard
-                  tasks={tasks}
-                  clientLabel={client.name}
-                />
-              </div>
-            </div>
           </section>
         ) : null}
       </div>

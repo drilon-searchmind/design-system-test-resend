@@ -56,3 +56,26 @@ export function taskMatchesAssigneeFilter(task, selected) {
   if (ids.length === 0) return selected.has(TASKS_UNASSIGNED_ASSIGNEE_KEY);
   return ids.some((id) => selected.has(id));
 }
+
+/**
+ * @param {Set<string>} selected
+ * @param {Array<{ id: string; name: string }>} team
+ * @param {string} mineAssigneeKey
+ * @param {boolean} [hasUnassignedTasks]
+ */
+export function formatTasksAssigneeFilterLabel(selected, team, mineAssigneeKey, hasUnassignedTasks = false) {
+  if (selected.size === 0) return null;
+  const allMemberKeys = new Set(team.map((t) => t.id));
+  if (hasUnassignedTasks) allMemberKeys.add(TASKS_UNASSIGNED_ASSIGNEE_KEY);
+  const isAllSelected = [...allMemberKeys].every((id) => selected.has(id));
+  if (isAllSelected) return "Alle ansvarlige";
+  if (selected.size === 1) {
+    const only = [...selected][0];
+    if (only === TASKS_UNASSIGNED_ASSIGNEE_KEY) return "Ikke tildelt";
+    const match = team.find((t) => t.id === only);
+    const name = match?.name ?? only;
+    if (only === mineAssigneeKey) return `Mine: ${name}`;
+    return name;
+  }
+  return `${selected.size} ansvarlige`;
+}

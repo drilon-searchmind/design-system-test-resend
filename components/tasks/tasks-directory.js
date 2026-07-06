@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import { TaskGridCard } from "@/components/tasks/task-grid-card";
 import {
   TasksAssigneeFilter,
-  defaultTasksAssigneeSelection,
   taskMatchesAssigneeFilter,
 } from "@/components/tasks/tasks-assignee-filter";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
@@ -204,6 +203,8 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
  *   team: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   taskDueReferenceIso: string;
  *   mineAssigneeKey: string;
+ *   selectedAssignees: Set<string>;
+ *   onSelectedAssigneesChange: (next: Set<string>) => void;
  *   headingId?: string;
  *   toolbarTitle?: string;
  * }} props
@@ -214,13 +215,12 @@ export function TasksDirectory({
   team,
   taskDueReferenceIso,
   mineAssigneeKey,
+  selectedAssignees,
+  onSelectedAssigneesChange,
   headingId = "tasks-directory-heading",
   toolbarTitle = "Alle opgaver",
 }) {
   const [q, setQ] = useState("");
-  const [selectedAssignees, setSelectedAssignees] = useState(() =>
-    defaultTasksAssigneeSelection(mineAssigneeKey, team),
-  );
   const [scopeFilter, setScopeFilter] = useState(/** @type {"all" | "open" | "overdue"} */ ("all"));
   const [sort, setSort] = useState("due");
   const [density, setDensity] = useState("list");
@@ -257,10 +257,18 @@ export function TasksDirectory({
     [tasks],
   );
 
-  const openCount = useMemo(() => tasks.filter((t) => !taskIsDone(t.status)).length, [tasks]);
+  const assigneeScopedTasks = useMemo(
+    () => tasks.filter((t) => taskMatchesAssigneeFilter(t, selectedAssignees)),
+    [tasks, selectedAssignees],
+  );
+
+  const openCount = useMemo(
+    () => assigneeScopedTasks.filter((t) => !taskIsDone(t.status)).length,
+    [assigneeScopedTasks],
+  );
   const overdueCount = useMemo(
-    () => tasks.filter((t) => taskIsOverdue(t, taskDueReferenceIso)).length,
-    [tasks, taskDueReferenceIso],
+    () => assigneeScopedTasks.filter((t) => taskIsOverdue(t, taskDueReferenceIso)).length,
+    [assigneeScopedTasks, taskDueReferenceIso],
   );
 
   const filtered = useMemo(() => {
@@ -351,7 +359,7 @@ export function TasksDirectory({
               team={team}
               mineAssigneeKey={mineAssigneeKey}
               selected={selectedAssignees}
-              onChange={setSelectedAssignees}
+              onChange={onSelectedAssigneesChange}
               hasUnassignedTasks={hasUnassignedTasks}
             />
 

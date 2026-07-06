@@ -22,7 +22,6 @@ import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { useDensity } from "@/components/theme/use-density";
-import { LEAD_SOURCE_LABELS, LEAD_SOURCES } from "@/lib/crm/client-utils";
 import { CLIENTS as STATIC_CLIENTS, TEAM as STATIC_TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +60,6 @@ export function ClientsDirectory({
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("all");
-  const [leadSourceFilter, setLeadSourceFilter] = useState("all");
   const [sort, setSort] = useState("name");
   const [density, setDensity] = useState("list");
   const layoutDensity = useDensity();
@@ -78,12 +76,6 @@ export function ClientsDirectory({
       }
       if (filter === "unhealthy" && c.health === "ok") return false;
       if (filter === "over" && c.hoursThisMonth <= c.hoursBudget) return false;
-      if (
-        leadSourceFilter !== "all" &&
-        (c.leadSource ?? "andet") !== leadSourceFilter
-      ) {
-        return false;
-      }
       return true;
     });
 
@@ -99,7 +91,7 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, leadSourceFilter, sort, CLIENTS]);
+  }, [q, filter, sort, CLIENTS]);
 
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
@@ -144,27 +136,6 @@ export function ClientsDirectory({
             ]}
           />
 
-          <label className={cn("flex items-center gap-1.5", variant !== "full" && "hidden")}>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
-              Kilde
-            </span>
-            <select
-              value={leadSourceFilter}
-              onChange={(e) => setLeadSourceFilter(e.target.value)}
-              className={cn(
-                "h-8 max-w-[140px] rounded-full border border-border bg-surface-muted px-2.5",
-                "text-[12px] text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-              )}
-            >
-              <option value="all">Alle kilder</option>
-              {LEAD_SOURCES.map((src) => (
-                <option key={src} value={src}>
-                  {LEAD_SOURCE_LABELS[src]}
-                </option>
-              ))}
-            </select>
-          </label>
-
           <PulseSegmentedControl
             size="sm"
             active={density}
@@ -178,28 +149,17 @@ export function ClientsDirectory({
       </div>
 
       {density === "cards" ? (
-        <div
-          className={cn(
-            "grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4",
-            variant === "pulse" && "max-h-[80vh] overflow-y-auto",
-          )}
-        >
+        <div className="grid max-h-[80vh] gap-3 overflow-y-auto p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
           {filtered.map((c) => (
             <ClientGridCard key={c.id} client={c} variant={variant} />
           ))}
         </div>
       ) : (
-        <div
-          className={cn(
-            "overflow-x-auto",
-            variant === "pulse" && "max-h-[80vh] overflow-y-auto",
-          )}
-        >
+        <div className="max-h-[80vh] overflow-x-auto overflow-y-auto">
           <div className={minW}>
             <div
               className={cn(
-                "grid gap-3 border-b border-border px-3 py-2",
-                variant === "pulse" ? "sticky top-0 z-10 bg-surface-muted" : "bg-surface-muted/90",
+                "sticky top-0 z-10 grid gap-3 border-b border-border bg-surface-muted px-3 py-2",
                 "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 gridCols,
               )}

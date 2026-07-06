@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
  *     highOpen: number;
  *   } | null;
  *   mineLabel?: string | null;
+ *   assigneeFilterLabel?: string | null;
  *   taskDueReferenceIso?: string;
  *   periodLabel?: string;
  *   onOpenCreate?: () => void;
@@ -31,7 +32,8 @@ export function TasksPageHeader({
   refreshing = false,
   loading = false,
   summary = null,
-  mineLabel = null,
+  mineLabel: _mineLabel = null,
+  assigneeFilterLabel = null,
   taskDueReferenceIso: _taskDueReferenceIso = "",
   periodLabel: _periodLabel = "",
   onOpenCreate,
@@ -47,7 +49,7 @@ export function TasksPageHeader({
     bodyLine = "Indlæser opgaver…";
   } else if (summary != null && summary.total > 0) {
     bodyLine = `${summary.total} opgaver i porteføljen · ${summary.openCount} åbne · ${summary.overdueCount} overskredet (ref. i dag)`;
-    if (mineLabel) bodyLine += ` · Mine: ${mineLabel}`;
+    if (assigneeFilterLabel) bodyLine += ` · ${assigneeFilterLabel}`;
     if (summary.highOpen > 0) bodyLine += ` · ${summary.highOpen} høj prio (åbne)`;
   } else if (summary != null && summary.total === 0) {
     bodyLine = "Ingen opgaver i den valgte måned/portefølje";

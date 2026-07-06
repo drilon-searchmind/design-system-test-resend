@@ -1,15 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CrmDialog } from "@/components/crm/crm-dialog";
 import { TasksCreateForm } from "@/components/tasks/tasks-create-form";
 import { TasksDirectory } from "@/components/tasks/tasks-directory";
+import {
+  defaultTasksAssigneeSelection,
+  formatTasksAssigneeFilterLabel,
+  taskMatchesAssigneeFilter,
+} from "@/components/tasks/tasks-assignee-filter";
 import { TasksPageHeader } from "@/components/tasks/tasks-page-header";
 import { TasksSummaryStrip } from "@/components/tasks/tasks-summary-strip";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getTasksDemoBundle } from "@/lib/crm/tasks-demo-bundle";
+import { computeTasksSummary } from "@/lib/crm/task-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
@@ -28,7 +34,9 @@ export function TasksPortfolio() {
   const [createFormKey, setCreateFormKey] = useState(0);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState(/** @type {string | null} */ (null));
+  const [selectedAssignees, setSelectedAssignees] = useState(/** @type {Set<string>} */ (new Set()));
   const hasLoadedRef = useRef(false);
+  const assigneeFilterInitializedRef = useRef(false);
 
   const openCreateModal = useCallback(() => {
     setCreateFormKey((n) => n + 1);
@@ -53,7 +61,14 @@ export function TasksPortfolio() {
     try {
       const p = normalizeReportPeriod(period);
       if (dataSource === "demo") {
-        setBundle(getTasksDemoBundle(p));
+        const nextBundle = getTasksDemoBundle(p);
+        setBundle(nextBundle);
+        if (!assigneeFilterInitializedRef.current) {
+          setSelectedAssignees(
+            defaultTasksAssigneeSelection(nextBundle.mineAssigneeKey ?? "", nextBundle.team),
+          );
+          assigneeFilterInitializedRef.current = true;
+        }
         hasLoadedRef.current = true;
       } else {
         const qs = databaseApiQuery({ year: String(p.year),
@@ -63,6 +78,12 @@ export function TasksPortfolio() {
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaver");
         setBundle(data);
+        if (!assigneeFilterInitializedRef.current) {
+          setSelectedAssignees(
+            defaultTasksAssigneeSelection(data.mineAssigneeKey ?? "", data.team ?? []),
+          );
+          assigneeFilterInitializedRef.current = true;
+        }
         hasLoadedRef.current = true;
       }
     } catch (e) {
@@ -76,6 +97,7 @@ export function TasksPortfolio() {
 
   useEffect(() => {
     hasLoadedRef.current = false;
+    assigneeFilterInitializedRef.current = false;
   }, [dataSource]);
 
   useEffect(() => {
@@ -83,6 +105,39 @@ export function TasksPortfolio() {
       void load();
     });
   }, [load]);
+
+  const hasUnassignedTasks = useMemo(() => {
+    if (!bundle) return false;
+    return bundle.tasks.some((t) => {
+      const ids =
+        Array.isArray(t.assigneeIds) && t.assigneeIds.length ?
+          t.assigneeIds
+        : t.assigneeId?.trim() ?
+          [t.assigneeId.trim()]
+        : [];
+      return ids.length === 0;
+    });
+  }, [bundle]);
+
+  const assigneeFilteredTasks = useMemo(() => {
+    if (!bundle) return [];
+    return bundle.tasks.filter((t) => taskMatchesAssigneeFilter(t, selectedAssignees));
+  }, [bundle, selectedAssignees]);
+
+  const filteredSummary = useMemo(() => {
+    if (!bundle) return null;
+    return computeTasksSummary(assigneeFilteredTasks, bundle.taskDueReferenceIso);
+  }, [assigneeFilteredTasks, bundle]);
+
+  const assigneeFilterLabel = useMemo(() => {
+    if (!bundle) return null;
+    return formatTasksAssigneeFilterLabel(
+      selectedAssignees,
+      bundle.team,
+      bundle.mineAssigneeKey ?? "",
+      hasUnassignedTasks,
+    );
+  }, [bundle, hasUnassignedTasks, selectedAssignees]);
 
   const mineLabel =
     bundle && bundle.tasks && bundle.team ?
@@ -165,7 +220,8 @@ export function TasksPortfolio() {
         period={period}
         onPeriodChange={handlePeriodChange}
         refreshing={refreshing}
-        summary={bundle.summary}
+        summary={filteredSummary}
+        assigneeFilterLabel={assigneeFilterLabel}
         mineLabel={mineLabel || bundle.mineAssigneeKey || null}
         onOpenCreate={dataSource === "database" ? openCreateModal : undefined}
         createModalOpen={showCreate}
@@ -217,7 +273,7 @@ export function TasksPortfolio() {
       </CrmDialog>
 
       <div className={cn("flex flex-col gap-[length:var(--ds-studio-stack)] transition-opacity", refreshing && "opacity-65")}>
-        <TasksSummaryStrip summary={bundle.summary} />
+        <TasksSummaryStrip summary={filteredSummary ?? bundle.summary} />
 
         <TasksDirectory
           tasks={bundle.tasks}
@@ -225,6 +281,8 @@ export function TasksPortfolio() {
           team={bundle.team}
           taskDueReferenceIso={bundle.taskDueReferenceIso}
           mineAssigneeKey={bundle.mineAssigneeKey}
+          selectedAssignees={selectedAssignees}
+          onSelectedAssigneesChange={setSelectedAssignees}
         />
 
       </div>
