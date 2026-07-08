@@ -119,16 +119,18 @@ export function TeamMemberMultiSelect({
       setOpen(false);
     }
 
-    function onDismiss() {
+    function onScroll(e) {
+      const target = e.target;
+      if (target instanceof Node && menuRef.current?.contains(target)) return;
       setOpen(false);
     }
 
     document.addEventListener("mousedown", onDoc);
-    window.addEventListener("scroll", onDismiss, true);
+    window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", updateMenuPosition);
     return () => {
       document.removeEventListener("mousedown", onDoc);
-      window.removeEventListener("scroll", onDismiss, true);
+      window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", updateMenuPosition);
       if (POPOVER_SUPPORTED && menuRef.current?.matches(":popover-open")) {
         menuRef.current.hidePopover();
@@ -223,7 +225,11 @@ export function TeamMemberMultiSelect({
         </div>
       : null}
 
-      <ul className="max-h-[min(50vh,320px)] overflow-y-auto" role="listbox" aria-multiselectable="true">
+      <ul
+        className="max-h-[min(50vh,320px)] overflow-y-auto overscroll-contain"
+        role="listbox"
+        aria-multiselectable="true"
+      >
         {options.map((member) => {
           const checked = selected.has(member.id);
           const isMine = member.id === mineAssigneeKey;

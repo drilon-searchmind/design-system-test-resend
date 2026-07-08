@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import { PulseIconChevronDown, PulseIconSearch } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
+import { LoadIndexFormulaHintContent } from "@/components/workload/load-index-formula-hint";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes, workloadMemberHref } from "@/config/routes";
 import { DEPARTMENTS as DEMO_DEPARTMENTS } from "@/lib/crm/static-data";
@@ -14,6 +16,31 @@ import { cn } from "@/lib/utils";
 
 const GRID =
   "grid-cols-[minmax(160px,1.4fr)_minmax(52px,0.45fr)_minmax(52px,0.45fr)_minmax(44px,0.38fr)_minmax(44px,0.38fr)_minmax(44px,0.38fr)_minmax(120px,0.95fr)_minmax(72px,0.6fr)]";
+
+const workloadHeaderHintClass =
+  "font-[inherit] text-[inherit] underline decoration-dotted decoration-border/80 underline-offset-2 hover:text-fg";
+
+/**
+ * @param {{
+ *   label: import('react').ReactNode;
+ *   title: string;
+ *   content: import('react').ReactNode;
+ *   align?: "start" | "center";
+ *   className?: string;
+ * }} props
+ */
+function WorkloadHeaderHint({ label, title, content, align = "center", className }) {
+  return (
+    <CrmHoverPopover
+      align={align}
+      title={title}
+      content={content}
+      triggerClassName={cn(workloadHeaderHintClass, className)}
+    >
+      {label}
+    </CrmHoverPopover>
+  );
+}
 
 /**
  * @param {{
@@ -111,14 +138,29 @@ export function WorkloadTeamDirectory({ rows, departments }) {
             </button>
             <span className="text-center">HP</span>
             <span className="text-center">Økr.</span>
-            <button
-              type="button"
-              className="text-left font-[inherit] text-[inherit] hover:text-fg"
-              onClick={() => setSort("load")}
-            >
-              Index {sort === "load" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
-            </button>
-            <span className="hidden sm:inline">Workload</span>
+            <span className="inline-flex items-center gap-0.5">
+              <WorkloadHeaderHint
+                align="start"
+                title="Index — belastning"
+                label="Index"
+                content={<LoadIndexFormulaHintContent />}
+              />
+              <button
+                type="button"
+                className="text-fg-soft hover:text-fg"
+                aria-label="Sortér efter belastningsindex"
+                onClick={() => setSort("load")}
+              >
+                <PulseIconChevronDown className={cn("inline", sort === "load" ? "opacity-100" : "opacity-35")} />
+              </button>
+            </span>
+            <WorkloadHeaderHint
+              align="start"
+              title="Workload"
+              className="hidden sm:inline"
+              label="Workload"
+              content={<LoadIndexFormulaHintContent includeBarNote />}
+            />
           </div>
 
           {filtered.map((r, i) => {

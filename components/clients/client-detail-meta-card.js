@@ -4,7 +4,27 @@ import { DEPARTMENTS, TEAM } from "@/lib/crm/static-data";
 import { computeClv, computeLifetimeMonths } from "@/lib/crm/client-utils";
 import { domainsForClient } from "@/lib/crm/domains-data";
 import { formatCurrency } from "@/lib/crm/format-da";
+import { resolveAssigneeToMemberKey } from "@/lib/crm/member-discipline-map";
 import { cn } from "@/lib/utils";
+
+/**
+ * @param {string | null | undefined} assigneeRaw
+ * @param {import('@/lib/crm/pulse-types').PulseTeamMember[]} team
+ * @returns {import('@/lib/crm/pulse-types').PulseTeamMember | null}
+ */
+function resolveDeptAssigneeMember(assigneeRaw, team) {
+  const raw = String(assigneeRaw ?? "").trim();
+  if (!raw) return null;
+
+  const roster = team.length > 0 ? team : TEAM;
+  const picklist = roster.map((m) => ({ key: m.id, name: m.name }));
+  const memberKey = resolveAssigneeToMemberKey(raw, picklist);
+  if (memberKey) {
+    return roster.find((m) => m.id === memberKey) ?? null;
+  }
+
+  return roster.find((m) => m.id === raw || m.name === raw) ?? null;
+}
 
 function formatDaDate(iso) {
   if (!iso || typeof iso !== "string") return "—";
@@ -22,9 +42,12 @@ const NPS_INTERVAL_DA = {
 };
 
 /**
- * @param {{ client: import('@/lib/crm/static-data').CLIENTS[number] }} props
+ * @param {{
+ *   client: import('@/lib/crm/static-data').CLIENTS[number];
+ *   team?: import('@/lib/crm/pulse-types').PulseTeamMember[];
+ * }} props
  */
-export function ClientDetailMetaCard({ client }) {
+export function ClientDetailMetaCard({ client, team = [] }) {
   const intervalKey = client.npsInterval;
   const intervalLabel =
     intervalKey && intervalKey in NPS_INTERVAL_DA
@@ -104,10 +127,11 @@ export function ClientDetailMetaCard({ client }) {
             </p>
             <ul className="mt-2 flex flex-wrap gap-3">
               {services.map((deptId) => {
-                const memberId = client.deptAssignees?.[deptId];
-                const member = memberId ? TEAM.find((t) => t.id === memberId) : null;
+                const assigneeRaw = client.deptAssignees?.[deptId];
+                const member = resolveDeptAssigneeMember(assigneeRaw, team);
                 const dep = DEPARTMENTS.find((d) => d.id === deptId);
-                const assigneeLabel = member?.name ?? memberId;
+                const assigneeLabel = member?.name ?? (assigneeRaw ? String(assigneeRaw) : null);
+                const avatarLabel = member?.avatar ?? member?.name ?? assigneeLabel ?? "?";
                 return (
                   <li key={deptId} className="flex items-center gap-2">
                     <span className="text-[10px] font-medium uppercase tracking-wide text-fg-quiet">
@@ -115,9 +139,13 @@ export function ClientDetailMetaCard({ client }) {
                     </span>
                     {assigneeLabel ? (
                       <span className="inline-flex items-center gap-1.5 font-sans text-[12px] text-fg-muted">
-                        {member ? (
-                          <CrmAvatar label={member.avatar} src={member.image} hue={member.hue} className="size-5 text-[9px]" />
-                        ) : null}
+                        <CrmAvatar
+                          label={avatarLabel}
+                          src={member?.image}
+                          hue={member?.hue ?? 220}
+                          className="size-5 text-[9px]"
+                          alt={assigneeLabel}
+                        />
                         {assigneeLabel}
                       </span>
                     ) : (

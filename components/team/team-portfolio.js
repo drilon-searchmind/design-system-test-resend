@@ -9,7 +9,7 @@ import { TeamCapacityWatchCard } from "@/components/team/team-capacity-watch-car
 import { TeamDeptOverview } from "@/components/team/team-dept-overview";
 import { TeamHubLinksCard } from "@/components/team/team-hub-links-card";
 import { TeamPageHeader } from "@/components/team/team-page-header";
-import { TeamRosterDirectory } from "@/components/team/team-roster-directory";
+import { TeamRosterDirectory, UNASSIGNED_DISCIPLINE_ID } from "@/components/team/team-roster-directory";
 import { TeamSummaryStrip } from "@/components/team/team-summary-strip";
 import { getTeamDemoBundle } from "@/lib/crm/team-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
@@ -86,9 +86,11 @@ export function TeamPortfolio() {
   const headerPeriodMemo = normalizedPeriod;
 
   const validDept = useMemo(() => {
+    if (!deptParam) return undefined;
+    if (deptParam === UNASSIGNED_DISCIPLINE_ID) return UNASSIGNED_DISCIPLINE_ID;
     if (!bundle || !Array.isArray(bundle.departments)) return undefined;
     const ids = /** @type {{ id: string }[]} */ (bundle.departments).map((d) => d.id);
-    return deptParam && ids.includes(deptParam) ? deptParam : undefined;
+    return ids.includes(deptParam) ? deptParam : undefined;
   }, [bundle, deptParam]);
 
   const mineLabelRaw = bundle?.mineLabel;
@@ -175,6 +177,9 @@ export function TeamPortfolio() {
           teamRows={teamRows}
           departments={departments}
           initialDeptId={validDept}
+          onMemberDeptUpdated={() => {
+            void load();
+          }}
         />
       </div>
     </div>

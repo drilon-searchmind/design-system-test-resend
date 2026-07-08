@@ -403,20 +403,30 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
           <>
             <p className="mt-4 text-[11px] font-medium text-fg-muted">Ansvarlige pr. disciplin</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              {draft.servicesActive.map((deptId) => (
-                <Field key={deptId} label={deptId}>
-                  <input
-                    value={draft.deptAssignees[deptId] ?? ""}
-                    onChange={(e) =>
-                      patchDraft({
-                        deptAssignees: { ...draft.deptAssignees, [deptId]: e.target.value },
-                      })
-                    }
-                    placeholder="Navn eller team-nøgle"
-                    className={clientEditInputClass}
-                  />
-                </Field>
-              ))}
+              {draft.servicesActive.map((deptId) => {
+                const dep = DEPARTMENTS.find((d) => d.id === deptId);
+                const deptLabel = dep ? `${dep.short} · ${dep.name}` : deptId;
+                return (
+                  <Field key={deptId} label={deptLabel}>
+                    <select
+                      value={draft.deptAssignees[deptId] ?? ""}
+                      onChange={(e) =>
+                        patchDraft({
+                          deptAssignees: { ...draft.deptAssignees, [deptId]: e.target.value },
+                        })
+                      }
+                      className={clientEditInputClass}
+                    >
+                      <option value="">— Ingen —</option>
+                      {team.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                );
+              })}
             </div>
           </>
         ) : null}

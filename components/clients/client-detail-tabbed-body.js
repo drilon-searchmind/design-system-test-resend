@@ -57,6 +57,7 @@ export const CLIENT_DETAIL_TAB_DEFS = [
  *   }>;
  *   notes: Array<{ id: string; who: string; at: string; type: string; body: string }>;
  *   notesTeamMembers?: import('@/lib/crm/pulse-types').PulseTeamMember[];
+ *   team?: import('@/lib/crm/pulse-types').PulseTeamMember[];
  *   tasks: Array<{
  *     id: string;
  *     title: string;
@@ -77,6 +78,7 @@ export function ClientDetailTabbedBody({
   alerts,
   notes,
   notesTeamMembers,
+  team,
   tasks,
   kpiTimerLabel = "Timer denne md",
 }) {
@@ -111,7 +113,7 @@ export function ClientDetailTabbedBody({
               Overblik
             </h2>
             <ClientDetailKpiStrip client={client} timerLabel={kpiTimerLabel} />
-            <ClientDetailMetaCard client={client} />
+            <ClientDetailMetaCard client={client} team={team ?? notesTeamMembers} />
             <ClientDetailDeliveryCard client={client} />
             <ClientDetailServiceMixCard client={client} />
             <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">

@@ -84,8 +84,17 @@ export function ClientDetailShell({ clientSlug }) {
 
   const startEdit = useCallback(() => {
     if (!remote?.client || typeof remote.client !== "object") return;
+    const teamPicklist = Array.isArray(remote.team)
+      ? remote.team.map((m) => ({
+          id: String(/** @type {{ id: string }} */ (m).id),
+          name: String(/** @type {{ name: string }} */ (m).name),
+        }))
+      : [];
     setDraft(
-      clientToEditDraft(/** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (remote.client)),
+      clientToEditDraft(
+        /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (remote.client),
+        teamPicklist,
+      ),
     );
     setEditNotice(null);
     setEditing(true);
@@ -115,7 +124,17 @@ export function ClientDetailShell({ clientSlug }) {
       const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editDraftToPatch(draft)),
+        body: JSON.stringify(
+          editDraftToPatch(
+            draft,
+            Array.isArray(remote?.team)
+              ? remote.team.map((m) => ({
+                  id: String(/** @type {{ id: string }} */ (m).id),
+                  name: String(/** @type {{ name: string }} */ (m).name),
+                }))
+              : [],
+          ),
+        ),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gemme");
@@ -134,7 +153,7 @@ export function ClientDetailShell({ clientSlug }) {
     } finally {
       setSaving(false);
     }
-  }, [clientSlug, draft, loadRemote, router]);
+  }, [clientSlug, draft, loadRemote, remote, router]);
 
   const demoClient = CLIENTS.find((c) => c.id === clientSlug);
 
@@ -191,6 +210,7 @@ export function ClientDetailShell({ clientSlug }) {
           retainerHistory={retainerHistory}
           alerts={SMART_ALERTS}
           notes={notes}
+          team={TEAM}
           tasks={clientTasks}
           kpiTimerLabel="Timer denne md"
         />
@@ -303,6 +323,7 @@ export function ClientDetailShell({ clientSlug }) {
             alerts={Array.isArray(remote.alerts) ? remote.alerts : []}
             notes={Array.isArray(remote.notes) ? remote.notes : []}
             notesTeamMembers={Array.isArray(remote.team) ? remote.team : undefined}
+            team={Array.isArray(remote.team) ? remote.team : undefined}
             tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
             kpiTimerLabel={
               typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Timer i perioden"
