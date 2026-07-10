@@ -174,6 +174,7 @@ export function TemplatesPortfolio() {
             <TemplatesCreateForm
               key={createFormKey}
               departments={bundle.departments}
+              team={bundle.team ?? []}
               submitting={createSubmitting}
               error={createError}
               onSubmit={handleCreateSubmit}

@@ -11,7 +11,7 @@ export function TeamHubLinksCard() {
       </p>
       <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { href: routes.workload, label: "Workload", hint: "Matrix & belægning" },
+          { href: routes.workload, label: "Belægning", hint: "Matrix & kapacitet" },
           { href: routes.time, label: "Tidsregistrering", hint: "Forbrug" },
           { href: routes.users, label: "Brugerstyring", hint: "Auth & roller" },
           { href: routes.kb, label: "Knowledge base", hint: "SOP / playbooks" },

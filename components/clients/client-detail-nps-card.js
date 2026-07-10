@@ -49,12 +49,13 @@ export function ClientDetailNpsCard({ client }) {
               <th className="py-2 pr-3 font-medium">Score</th>
               <th className="hidden py-2 pr-3 font-medium sm:table-cell">Sendt</th>
               <th className="py-2 font-medium">Modtaget</th>
+              <th className="hidden py-2 font-medium lg:table-cell">Kommentar</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={3} className="py-8 text-center text-[13px] text-fg-muted">
+                <td colSpan={4} className="py-8 text-center text-[13px] text-fg-muted">
                   Endnu ingen målinger registreret.
                 </td>
               </tr>
@@ -69,6 +70,13 @@ export function ClientDetailNpsCard({ client }) {
                   </td>
                   <td className="py-2.5 text-[11px] tabular-nums text-fg-muted">
                     {entry.respondedAt ? formatIsoDateDa(String(entry.respondedAt).slice(0, 10)) : "—"}
+                  </td>
+                  <td className="hidden max-w-[220px] py-2.5 text-[11px] leading-snug text-fg-muted lg:table-cell">
+                    {entry.comment ?
+                      <span className="line-clamp-2" title={entry.comment}>
+                        {entry.comment}
+                      </span>
+                    : "—"}
                   </td>
                 </tr>
               ))

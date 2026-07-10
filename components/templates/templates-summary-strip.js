@@ -21,7 +21,7 @@ export function TemplatesSummaryStrip({ summary }) {
         value={`${summary.deptCoverageNum} / ${summary.deptCoverageDen}`}
         tone={summary.deptCoverageNum >= summary.deptCoverageDen ? "ok" : "warn"}
       />
-      <PulseKpiCard label="Opgave-koblinger (Σ)" value={String(summary.totalUsage)} tone="brand" />
+      <PulseKpiCard label="Brugt i opgaver (Σ)" value={String(summary.totalUsage)} tone="brand" />
     </section>
   );
 }

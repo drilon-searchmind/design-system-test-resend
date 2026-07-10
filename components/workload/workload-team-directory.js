@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
@@ -24,17 +25,22 @@ const workloadHeaderHintClass =
  * @param {{
  *   label: import('react').ReactNode;
  *   title: string;
- *   content: import('react').ReactNode;
+ *   content?: import('react').ReactNode;
+ *   children?: import('react').ReactNode;
  *   align?: "start" | "center";
  *   className?: string;
  * }} props
  */
-function WorkloadHeaderHint({ label, title, content, align = "center", className }) {
+function WorkloadHeaderHint({ label, title, content, children, align = "center", className }) {
   return (
     <CrmHoverPopover
       align={align}
       title={title}
-      content={content}
+      content={
+        content ?? (
+          <p className="font-sans text-[12px] leading-snug text-fg-muted">{children}</p>
+        )
+      }
       triggerClassName={cn(workloadHeaderHintClass, className)}
     >
       {label}
@@ -50,6 +56,9 @@ function WorkloadHeaderHint({ label, title, content, align = "center", className
  */
 export function WorkloadTeamDirectory({ rows, departments }) {
   const dataSource = useDataSource();
+  const searchParams = useSearchParams();
+  const initialDept = searchParams.get("dept") ?? "all";
+
   const deptList =
     departments && departments.length > 0 ?
       departments
@@ -58,11 +67,13 @@ export function WorkloadTeamDirectory({ rows, departments }) {
     : [];
 
   const [q, setQ] = useState("");
+  const [dept, setDept] = useState(initialDept);
   const [sort, setSort] = useState("load");
 
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
     let list = rows.filter((r) => {
+      if (dept !== "all" && r.member.dept !== dept) return false;
       if (!ql) return true;
       const dep = deptList.find((d) => d.id === r.member.dept);
       const hay = [r.member.name, r.member.role, dep?.name, r.member.dept].filter(Boolean).join(" ").toLowerCase();
@@ -76,7 +87,7 @@ export function WorkloadTeamDirectory({ rows, departments }) {
       return 0;
     });
     return list;
-  }, [q, sort, rows, deptList]);
+  }, [q, sort, rows, deptList, dept]);
 
   return (
     <section className="tally-panel overflow-hidden">
@@ -84,7 +95,7 @@ export function WorkloadTeamDirectory({ rows, departments }) {
         <div>
           <h2 className="font-sans text-sm font-semibold text-fg">Team-belægning</h2>
           <p className="mt-1 max-w-xl font-sans text-[11px] text-fg-muted">
-            Belægningsindeks fra åbne opgaver og disciplintal. Klik på navnet for månedlig detaljevisning. Søg og sorter sker lokalt på siden.
+            Belægningsindeks fra åbne opgaver og disciplintal. Klik på navnet for månedlig detaljevisning.
           </p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-none md:flex-row md:justify-end">
@@ -110,114 +121,164 @@ export function WorkloadTeamDirectory({ rows, departments }) {
             onChange={setSort}
             tabs={[
               { id: "load", label: "Belægning" },
-              { id: "open", label: "Åbne" },
+              { id: "open", label: "Åbne opgaver" },
               { id: "name", label: "Navn" },
             ]}
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-[720px]">
-          <div
+      {deptList.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-border-soft bg-surface-muted/30 px-3 py-2 md:px-4">
+          <span className="mr-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Disciplin</span>
+          <button
+            type="button"
+            onClick={() => setDept("all")}
             className={cn(
-              "grid gap-2 border-b border-border bg-surface-muted/85 px-3 py-2",
-              "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
-              GRID,
+              "rounded-full border px-2.5 py-0.5 font-sans text-[11px] font-medium transition-colors",
+              dept === "all"
+                ? "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
+                : "border-border bg-surface-card text-fg-muted hover:text-fg",
             )}
           >
-            <span>Medarbejder</span>
-            <span>Afd.</span>
-            <span>Uge h</span>
+            Alle
+          </button>
+          {deptList.map((d) => (
             <button
+              key={d.id}
               type="button"
-              className="text-left font-[inherit] text-[inherit] hover:text-fg"
-              onClick={() => setSort("open")}
+              onClick={() => setDept(d.id)}
+              className={cn(
+                "rounded-full border px-2.5 py-0.5 font-sans text-[11px] font-medium transition-colors",
+                dept === d.id
+                  ? "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
+                  : "border-border bg-surface-card text-fg-muted hover:text-fg",
+              )}
             >
-              Åbne {sort === "open" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
+              {d.short}
             </button>
-            <span className="text-center">HP</span>
-            <span className="text-center">Økr.</span>
-            <span className="inline-flex items-center gap-0.5">
+          ))}
+        </div>
+      ) : null}
+
+      <div className="max-h-[80vh] overflow-auto">
+        <div className="overflow-x-auto">
+          <div className="min-w-[720px]">
+            <div
+              className={cn(
+                "sticky top-0 z-10 grid gap-2 border-b border-border bg-surface-muted/95 px-3 py-2 backdrop-blur-sm",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                GRID,
+              )}
+            >
+              <span>Medarbejder</span>
+              <span>Afd.</span>
+              <span>Uge h</span>
+              <span className="inline-flex items-center justify-center gap-0.5">
+                <WorkloadHeaderHint align="center" title="Åbne opgaver" className="inline-flex" label="Åbne">
+                  Antal opgaver på personen der ikke er afsluttet.
+                </WorkloadHeaderHint>
+                <button
+                  type="button"
+                  className="text-fg-soft hover:text-fg"
+                  aria-label="Sortér efter åbne opgaver"
+                  onClick={() => setSort("open")}
+                >
+                  <PulseIconChevronDown className={cn("inline", sort === "open" ? "opacity-100" : "opacity-35")} />
+                </button>
+              </span>
+              <WorkloadHeaderHint align="center" title="HP — høj prioritet" className="block text-center" label="HP">
+                Antal åbne opgaver med høj prioritet.
+              </WorkloadHeaderHint>
+              <WorkloadHeaderHint
+                align="center"
+                title="Økr. — overskredet"
+                className="block text-center"
+                label="Økr."
+              >
+                Antal åbne opgaver hvor deadline er passeret.
+              </WorkloadHeaderHint>
+              <span className="inline-flex items-center gap-0.5">
+                <WorkloadHeaderHint
+                  align="start"
+                  title="Index — belastning"
+                  label="Index"
+                  content={<LoadIndexFormulaHintContent />}
+                />
+                <button
+                  type="button"
+                  className="text-fg-soft hover:text-fg"
+                  aria-label="Sortér efter belastningsindex"
+                  onClick={() => setSort("load")}
+                >
+                  <PulseIconChevronDown className={cn("inline", sort === "load" ? "opacity-100" : "opacity-35")} />
+                </button>
+              </span>
               <WorkloadHeaderHint
                 align="start"
-                title="Index — belastning"
-                label="Index"
-                content={<LoadIndexFormulaHintContent />}
+                title="Belægning"
+                className="hidden sm:inline"
+                label="Belægning"
+                content={<LoadIndexFormulaHintContent includeBarNote />}
               />
-              <button
-                type="button"
-                className="text-fg-soft hover:text-fg"
-                aria-label="Sortér efter belastningsindex"
-                onClick={() => setSort("load")}
-              >
-                <PulseIconChevronDown className={cn("inline", sort === "load" ? "opacity-100" : "opacity-35")} />
-              </button>
-            </span>
-            <WorkloadHeaderHint
-              align="start"
-              title="Workload"
-              className="hidden sm:inline"
-              label="Workload"
-              content={<LoadIndexFormulaHintContent includeBarNote />}
-            />
-          </div>
+            </div>
 
-          {filtered.map((r, i) => {
-            const dep = deptList.find((d) => d.id === r.member.dept);
-            return (
-              <div
-                key={r.member.id}
-                className={cn(
-                  "grid gap-2 border-b border-border-soft px-3 py-2 md:px-4 md:py-2.5",
-                  GRID,
-                  i === filtered.length - 1 && "border-0",
-                  r.overdueCount > 0 && "bg-agency-bad-soft/15",
-                  r.member.isMe && "bg-agency-brand-soft/10",
-                )}
-              >
-                <div className="flex min-w-0 items-center gap-2">
-                  <CrmAvatar
-                    label={r.member.avatar}
-                    src={r.member.image}
-                    hue={r.member.hue}
-                    className="size-8 text-[11px]"
-                  />
-                  <div className="min-w-0">
-                    <Link
-                      href={workloadMemberHref(r.member.id)}
-                      className="block truncate font-sans text-[13px] font-semibold leading-tight text-fg hover:text-agency-brand"
-                    >
-                      {r.member.name}
-                    </Link>
-                    <div className="truncate font-sans text-[10px] text-fg-quiet">{r.member.role}</div>
-                  </div>
-                </div>
-                <span className="text-[11px] font-semibold tabular-nums" style={{ color: dep?.color }}>
-                  {dep?.short ?? r.member.dept}
-                </span>
-                <span className="text-[11px] tabular-nums text-fg">{r.member.weeklyHours}</span>
-                <span className="text-[11px] tabular-nums text-fg">{r.openCount}</span>
-                <span className="text-center text-[11px] tabular-nums text-fg">{r.highCount}</span>
-                <span
+            {filtered.map((r, i) => {
+              const dep = deptList.find((d) => d.id === r.member.dept);
+              return (
+                <div
+                  key={r.member.id}
                   className={cn(
-                    "text-center text-[11px] tabular-nums",
-                    r.overdueCount > 0 ? "text-agency-bad" : "text-fg-muted",
+                    "grid gap-2 border-b border-border-soft px-3 py-2 md:px-4 md:py-2.5",
+                    GRID,
+                    i === filtered.length - 1 && "border-0",
+                    r.overdueCount > 0 && "bg-agency-bad-soft/15",
+                    r.member.isMe && "bg-agency-brand-soft/10",
                   )}
                 >
-                  {r.overdueCount}
-                </span>
-                <span className="text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
-                <PulseUtilBar hours={r.loadIndex} budget={100} className="hidden max-w-[120px] self-center sm:block" />
-              </div>
-            );
-          })}
+                  <div className="flex min-w-0 items-center gap-2">
+                    <CrmAvatar
+                      label={r.member.avatar}
+                      src={r.member.image}
+                      hue={r.member.hue}
+                      className="size-8 text-[11px]"
+                    />
+                    <div className="min-w-0">
+                      <Link
+                        href={workloadMemberHref(r.member.id)}
+                        className="block truncate font-sans text-[13px] font-semibold leading-tight text-fg hover:text-agency-brand"
+                      >
+                        {r.member.name}
+                      </Link>
+                      <div className="truncate font-sans text-[10px] text-fg-quiet">{r.member.role}</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold tabular-nums" style={{ color: dep?.color }}>
+                    {dep?.short ?? r.member.dept}
+                  </span>
+                  <span className="text-[11px] tabular-nums text-fg">{r.member.weeklyHours}</span>
+                  <span className="text-[11px] tabular-nums text-fg">{r.openCount}</span>
+                  <span className="text-center text-[11px] tabular-nums text-fg">{r.highCount}</span>
+                  <span
+                    className={cn(
+                      "text-center text-[11px] tabular-nums",
+                      r.overdueCount > 0 ? "text-agency-bad" : "text-fg-muted",
+                    )}
+                  >
+                    {r.overdueCount}
+                  </span>
+                  <span className="text-[12px] font-semibold tabular-nums text-fg">{r.loadIndex}%</span>
+                  <PulseUtilBar hours={r.loadIndex} budget={100} className="hidden max-w-[120px] self-center sm:block" />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
         <p className="font-sans text-[11px] text-fg-muted">
-          Klik på navn for detaljevisning for rapportmåneden.
+          {filtered.length} medarbejdere vist · klik på navn for detaljevisning.
         </p>
         <Link href={routes.team} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
           Team-hub →

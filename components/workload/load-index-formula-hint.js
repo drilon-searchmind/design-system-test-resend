@@ -25,7 +25,7 @@ export function LoadIndexFormulaHintContent({ includeBarNote = false }) {
         </li>
       </ul>
       {includeBarNote ?
-        <p>Workload-baren viser samme Index som en bar (fyldt = høj belastning, max 100%).</p>
+        <p>Belægningsbaren viser samme index som en bar (fyldt = høj belastning, max 100%).</p>
       : null}
     </div>
   );

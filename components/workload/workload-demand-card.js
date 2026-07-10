@@ -19,11 +19,11 @@ export function WorkloadDemandCard({ demand }) {
             Efterspørgsel fra board
           </h2>
           <p className="mt-1 max-w-xl font-sans text-[11px] leading-snug text-fg-muted">
-            Åbne opgaver pr. disciplin — krydsreference mod strategisk workload (filter i{" "}
+            Åbne opgaver pr. disciplin — sammenlign med kapacitet i{" "}
             <Link href={routes.tasks} className="font-medium text-agency-brand hover:underline">
               Opgaver
             </Link>
-            ).
+            .
           </p>
         </div>
         <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">

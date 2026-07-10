@@ -2,11 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { TeamMemberMultiSelect } from "@/components/tasks/team-member-multi-select";
 import { routes } from "@/config/routes";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
+
+/**
+ * @typedef {{
+ *   save: () => Promise<void>;
+ *   reset: () => void;
+ * }} TemplateDetailMongoPanelHandle
+ */
 
 /**
  * PATCH/DELETE matcher `updateTaskTemplateMongo` / API.
@@ -15,23 +24,32 @@ import { cn } from "@/lib/utils";
  *   templateRouteId: string;
  *   wire: Record<string, unknown>;
  *   departments: Array<{ id: string; name?: string }>;
+ *   team: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   busy?: boolean;
  *   notice?: string | null;
  *   onBusyChange?: (b: boolean) => void;
  *   onNotice?: (s: string | null) => void;
  *   onReload: () => void | Promise<void>;
+ *   variant?: "standalone" | "inline";
+ *   onSaved?: () => void;
  * }} props
  */
-export function TemplateDetailMongoPanel({
-  templateRouteId,
-  wire,
-  departments,
-  busy = false,
-  notice,
-  onBusyChange,
-  onNotice,
-  onReload,
-}) {
+export const TemplateDetailMongoPanel = forwardRef(function TemplateDetailMongoPanel(
+  {
+    templateRouteId,
+    wire,
+    departments,
+    team,
+    busy = false,
+    notice,
+    onBusyChange,
+    onNotice,
+    onReload,
+    variant = "standalone",
+    onSaved,
+  },
+  ref,
+) {
   const router = useRouter();
   const [title, setTitle] = useState(String(wire.name ?? ""));
   const [description, setDescription] = useState(typeof wire.hint === "string" ? wire.hint : "");
@@ -47,9 +65,8 @@ export function TemplateDetailMongoPanel({
     const eh = typeof wire.estHours === "number" && Number.isFinite(wire.estHours) ? wire.estHours : null;
     return eh !== null ? String(eh) : "";
   });
-  const [checklistText, setChecklistText] = useState(
-    Array.isArray(wire.checklist) ? wire.checklist.map((x) => String(x)).join("\n") : "",
-  );
+  const [selectedAssignees, setSelectedAssignees] = useState(() => new Set());
+  const [billable, setBillable] = useState(/** @type {"yes" | "no"} */ (wire.billable === false ? "no" : "yes"));
   const [active, setActive] = useState(wire.active !== false);
 
   const reset = useCallback(() => {
@@ -67,13 +84,18 @@ export function TemplateDetailMongoPanel({
       const eh = typeof wire.estHours === "number" && Number.isFinite(wire.estHours) ? wire.estHours : null;
       return eh !== null ? String(eh) : "";
     });
-    setChecklistText(Array.isArray(wire.checklist) ? wire.checklist.map((x) => String(x)).join("\n") : "");
+    const keys = Array.isArray(wire.assigneeMemberKeys) ?
+      wire.assigneeMemberKeys.map((k) => String(k).trim()).filter(Boolean)
+    : [];
+    setSelectedAssignees(new Set(keys));
+    setBillable(wire.billable === false ? "no" : "yes");
     setActive(wire.active !== false);
-  }, [wire, templateRouteId]);
+  }, [wire]);
 
-  const deptOptions = useMemo(() => [{ id: "", label: "—" }, ...departments.map((d) => ({ id: d.id, label: d.name ?? d.id }))], [
-    departments,
-  ]);
+  const deptOptions = useMemo(
+    () => [{ id: "", label: "—" }, ...departments.map((d) => ({ id: d.id, label: d.name ?? d.id }))],
+    [departments],
+  );
 
   useEffect(() => {
     queueMicrotask(() => reset());
@@ -91,7 +113,8 @@ export function TemplateDetailMongoPanel({
         defaultPriority,
         scope,
         active,
-        checklistText,
+        billable: billable === "yes",
+        assigneeMemberKeys: [...selectedAssignees],
       };
       if (departmentKey === "" || departmentKey === "—") body.departmentKey = null;
       else body.departmentKey = departmentKey;
@@ -121,14 +144,16 @@ export function TemplateDetailMongoPanel({
         return;
       }
       await onReload();
+      onSaved?.();
     } catch (e) {
       onNotice?.(e instanceof Error ? e.message : "Fejl ved gem");
+      throw e;
     } finally {
       onBusyChange?.(false);
     }
   }, [
     active,
-    checklistText,
+    billable,
     defaultDueOffsetDays,
     defaultPriority,
     departmentKey,
@@ -136,12 +161,16 @@ export function TemplateDetailMongoPanel({
     onBusyChange,
     onNotice,
     onReload,
+    onSaved,
     router,
     scope,
+    selectedAssignees,
     suggestedHours,
     templateRouteId,
     title,
   ]);
+
+  useImperativeHandle(ref, () => ({ save, reset }), [reset, save]);
 
   const del = useCallback(async () => {
     if (
@@ -166,48 +195,54 @@ export function TemplateDetailMongoPanel({
     }
   }, [onBusyChange, onNotice, router, templateRouteId]);
 
+  const isInline = variant === "inline";
+
   return (
     <div className="tally-panel p-4 md:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Mongo-record</h2>
+      {!isInline ?
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Rediger skabelon</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={routes.templates}
+              className="inline-flex h-9 items-center rounded-md border border-border px-3 font-sans text-[13px] text-fg-muted hover:bg-surface-muted"
+            >
+              Tilbage til skabeloner
+            </Link>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => reset()}
+              className="h-9 rounded-md border border-border px-3 font-sans text-[13px] text-fg-muted hover:bg-surface-muted"
+            >
+              Nulstil
+            </button>
+            <button
+              type="button"
+              disabled={busy || !title.trim()}
+              onClick={() => void save()}
+              className={cn(
+                "h-9 rounded-md px-4 font-sans text-[13px] font-medium text-white",
+                "bg-agency-brand hover:opacity-90 disabled:opacity-40",
+              )}
+            >
+              Gem
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void del()}
+              className="h-9 rounded-md border border-agency-bad-border bg-agency-bad-soft px-3 font-sans text-[13px] font-medium text-agency-bad hover:opacity-90 disabled:opacity-40"
+            >
+              Slet
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={routes.templates}
-            className="inline-flex h-9 items-center rounded-md border border-border px-3 font-sans text-[13px] text-fg-muted hover:bg-surface-muted"
-          >
-            Tilbage til skabeloner
-          </Link>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => reset()}
-            className="h-9 rounded-md border border-border px-3 font-sans text-[13px] text-fg-muted hover:bg-surface-muted"
-          >
-            Nulstil
-          </button>
-          <button
-            type="button"
-            disabled={busy || !title.trim()}
-            onClick={() => void save()}
-            className={cn(
-              "h-9 rounded-md px-4 font-sans text-[13px] font-medium text-white",
-              "bg-agency-brand hover:opacity-90 disabled:opacity-40",
-            )}
-          >
-            Gem
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void del()}
-            className="h-9 rounded-md border border-agency-bad-border bg-agency-bad-soft px-3 font-sans text-[13px] font-medium text-agency-bad hover:opacity-90 disabled:opacity-40"
-          >
-            Slet
-          </button>
-        </div>
-      </div>
+      : (
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Rediger skabelon</h2>
+      )}
 
       {notice ?
         <p className="mt-3 rounded-lg border border-agency-warn-border bg-agency-warn-soft px-3 py-2 font-sans text-[12px] text-agency-warn">
@@ -256,6 +291,18 @@ export function TemplateDetailMongoPanel({
             ))}
           </select>
         </label>
+        <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted">
+          <span>Ansvarlige</span>
+          <TeamMemberMultiSelect
+            team={team}
+            selected={selectedAssignees}
+            onChange={setSelectedAssignees}
+            emptyLabel="Vælg ansvarlige"
+            allSelectedLabel="Alle ansvarlige"
+            countLabel={(n) => `${n} ansvarlige`}
+            showQuickActions
+          />
+        </div>
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
           <span>Prioritet (standard)</span>
           <select
@@ -272,7 +319,7 @@ export function TemplateDetailMongoPanel({
           </select>
         </label>
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Scope</span>
+          <span>Kundetype</span>
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value)}
@@ -306,7 +353,7 @@ export function TemplateDetailMongoPanel({
             type="text"
             inputMode="decimal"
             value={suggestedHours}
-            placeholder="Tom for at unsette felt"
+            placeholder="Tom for at fjerne felt"
             onChange={(e) => setSuggestedHours(e.target.value)}
             className={cn(
               "rounded-md border border-border bg-surface-muted px-3 py-2 text-[13px] text-fg",
@@ -314,23 +361,36 @@ export function TemplateDetailMongoPanel({
             )}
           />
         </label>
+        <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted sm:col-span-2">
+          <span>Tidstype</span>
+          <PulseSegmentedControl
+            size="sm"
+            active={billable}
+            onChange={(id) => setBillable(/** @type {"yes" | "no"} */ (id))}
+            tabs={[
+              { id: "yes", label: "Fakturerbar" },
+              { id: "no", label: "Intern" },
+            ]}
+          />
+        </div>
         <label className="flex cursor-pointer items-center gap-2 font-sans text-[12px] text-fg-muted sm:col-span-2">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="size-4" />{" "}
-          Aktiv
-        </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted sm:col-span-2">
-          <span>Tjekliste (ét pr. linje)</span>
-          <textarea
-            rows={6}
-            value={checklistText}
-            onChange={(e) => setChecklistText(e.target.value)}
-            className={cn(
-              "resize-y rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          />
+          Aktiv skabelon
         </label>
       </div>
+
+      {isInline ?
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-border-soft pt-4">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void del()}
+            className="h-9 rounded-md border border-agency-bad-border bg-agency-bad-soft px-3 font-sans text-[13px] font-medium text-agency-bad hover:opacity-90 disabled:opacity-40"
+          >
+            Slet skabelon
+          </button>
+        </div>
+      : null}
     </div>
   );
-}
+});

@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { agencyDeptColor } from "@/lib/crm/dept-tokens";
-import { formatCompactNumber, formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +15,56 @@ const TONE_LABEL = {
   sell: { label: "Over-allokeret", className: "border-agency-warn-border bg-agency-warn-soft text-agency-warn" },
   tight: { label: "Stram kap.", className: "border-agency-warn-border/80 bg-surface-muted text-agency-warn" },
 };
+
+const deptMatrixHeaderHintClass =
+  "font-[inherit] text-[inherit] underline decoration-dotted decoration-border/80 underline-offset-2 hover:text-fg";
+
+/**
+ * @param {{
+ *   label: import('react').ReactNode;
+ *   title: string;
+ *   content?: import('react').ReactNode;
+ *   children?: import('react').ReactNode;
+ *   align?: "start" | "center";
+ *   className?: string;
+ * }} props
+ */
+function DeptMatrixHeaderHint({ label, title, content, children, align = "start", className }) {
+  return (
+    <CrmHoverPopover
+      align={align}
+      title={title}
+      content={
+        content ?? (
+          <p className="font-sans text-[12px] leading-snug text-fg-muted">{children}</p>
+        )
+      }
+      triggerClassName={cn(deptMatrixHeaderHintClass, className)}
+    >
+      {label}
+    </CrmHoverPopover>
+  );
+}
+
+const STATUS_HINT = (
+  <div className="space-y-2 font-sans text-[12px] leading-snug text-fg-muted">
+    <p>Automatisk tone ud fra forbrug, tildeling og kapacitet i perioden:</p>
+    <ul className="list-inside list-disc space-y-1 text-[11px]">
+      <li>
+        <span className="text-fg">Balanceret</span> — forbrug og tildeling inden for normale grænser
+      </li>
+      <li>
+        <span className="text-fg">Overforbrug</span> — rapporteret forbrug overstiger tildelte timer
+      </li>
+      <li>
+        <span className="text-fg">Over-allokeret</span> — tildelte timer nær eller over kapacitetsloft
+      </li>
+      <li>
+        <span className="text-fg">Stram kap.</span> — høj udnyttelse uden akut over-allokering
+      </li>
+    </ul>
+  </div>
+);
 
 /**
  * @param {{ rows: ReturnType<typeof import('@/lib/crm/workload-utils').buildDeptWorkloadRows> }} props
@@ -38,16 +91,54 @@ export function WorkloadDeptMatrix({ rows }) {
         <table className="w-full min-w-[760px] border-collapse text-left text-[12px]">
           <thead>
             <tr className="border-b border-border bg-surface-muted/80 text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
-              <th className="py-3 pl-4 pr-2 font-medium">Disciplin</th>
-              <th className="py-3 pr-2 font-medium">Kap.</th>
-              <th className="py-3 pr-2 font-medium">Tild.</th>
-              <th className="py-3 pr-2 font-medium">Forbr.</th>
-              <th className="py-3 pr-2 font-medium">Δ</th>
-              <th className="min-w-[120px] py-3 pr-3 font-medium">Forbr. / tild.</th>
-              <th className="min-w-[120px] py-3 pr-3 font-medium">Tild. / kap.</th>
-              <th className="hidden py-3 pr-2 font-medium md:table-cell">Rev.</th>
-              <th className="hidden py-3 pr-2 font-medium lg:table-cell">Perf. util.</th>
-              <th className="py-3 pr-4 font-medium">Status</th>
+              <th className="py-3 pl-4 pr-2 font-medium">
+                <DeptMatrixHeaderHint label="Disciplin" title="Disciplin">
+                  Bureau-disciplin (SEO, Paid, osv.) — én række pr. afdeling i rapportmåneden.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="py-3 pr-2 font-medium">
+                <DeptMatrixHeaderHint label="Kap." title="Kapacitet">
+                  Månedligt kapacitetsloft for disciplinen i timer — baseret på team og kontrakter.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="py-3 pr-2 font-medium">
+                <DeptMatrixHeaderHint label="Tild." title="Tildelt">
+                  Kontrakttimer tildelt disciplinen via aktive kunder og allokeringsmatrix.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="py-3 pr-2 font-medium">
+                <DeptMatrixHeaderHint label="Forbr." title="Forbrug">
+                  Rapporterede timer fra tidsregistrering i den valgte rapportperiode.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="py-3 pr-2 font-medium">
+                <DeptMatrixHeaderHint label="Δ" title="Delta">
+                  Difference mellem forbrug og tildelt. Positiv = overforbrug, negativ = underskud mod budget.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="min-w-[120px] py-3 pr-3 font-medium">
+                <DeptMatrixHeaderHint label="Forbr. / tild." title="Forbrug / tildelt">
+                  Andel af tildelte timer der er forbrugt. Søjlen viser forbrug mod tildelt budget (100% = budget opbrugt).
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="min-w-[120px] py-3 pr-3 font-medium">
+                <DeptMatrixHeaderHint label="Tild. / kap." title="Tildelt / kapacitet">
+                  Andel af kapacitet der er solgt eller tildelt. Søjlen viser salg mod månedligt loft (over 100% = over-allokeret).
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="hidden py-3 pr-2 font-medium md:table-cell">
+                <DeptMatrixHeaderHint label="Rev." title="Omsætning">
+                  Omsætning knyttet til disciplinen fra performance-data (tilgængelig i demo/Pulse).
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="hidden py-3 pr-2 font-medium lg:table-cell">
+                <DeptMatrixHeaderHint label="Perf. util." title="Performance-udnyttelse">
+                  Udnyttelsesgrad for disciplinen — hvor stramt kapaciteten udnyttes ift. faktisk leverance.
+                </DeptMatrixHeaderHint>
+              </th>
+              <th className="py-3 pr-4 font-medium">
+                <DeptMatrixHeaderHint label="Status" title="Status" content={STATUS_HINT} />
+              </th>
             </tr>
           </thead>
           <tbody>

@@ -23,15 +23,17 @@ const SCOPE_DA = {
  *     scope: string;
  *     active: boolean;
  *     defaultPriority: string;
- *     checklistCount: number;
  *     defaultDueOffsetDays: number;
  *     estHours: number;
  *     usedCount: number;
  *     updatedAt: string;
+ *     assigneeLabel: string;
+ *     tidstypeLabel: string;
  *   };
+ *   trailing?: import('react').ReactNode;
  * }} props
  */
-export function TemplateDetailHeader({ templateRow }) {
+export function TemplateDetailHeader({ templateRow, trailing }) {
   const prio =
     templateRow.defaultPriority === "high" || templateRow.defaultPriority === "low"
       ? templateRow.defaultPriority
@@ -44,12 +46,10 @@ export function TemplateDetailHeader({ templateRow }) {
           href={routes.templates}
           className="text-fg-muted transition-colors hover:text-agency-brand hover:underline"
         >
-          Task templates
+          Opgaveskabeloner
         </Link>
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="truncate text-fg">{templateRow.name}</span>
-        <span className="mx-2 text-fg-quiet">/</span>
-        <span className="text-[11px] text-fg-muted">{templateRow.id}</span>
       </nav>
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
@@ -100,10 +100,16 @@ export function TemplateDetailHeader({ templateRow }) {
               {" · "}
               Est. timer (forslag): <span className="tabular-nums text-fg-soft">{templateRow.estHours}</span>
               {" · "}
-              Tjekliste: <span className="tabular-nums text-fg-soft">{templateRow.checklistCount}</span>
+              Ansvarlige: <span className="text-fg-soft">{templateRow.assigneeLabel}</span>
+              {" · "}
+              Tidstype: <span className="text-fg-soft">{templateRow.tidstypeLabel}</span>
             </p>
           </div>
         </div>
+
+        {trailing ?
+          <div className="flex shrink-0 flex-col items-end gap-2 md:mt-1">{trailing}</div>
+        : null}
       </header>
     </>
   );

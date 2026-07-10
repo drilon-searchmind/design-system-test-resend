@@ -6,8 +6,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import { useDataSource } from "@/components/crm/use-data-source";
-import { IconChart } from "@/components/crm/icons";
+import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
+import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
+import { LoadIndexFormulaHintContent } from "@/components/workload/load-index-formula-hint";
+import { TeamMemberOpenTasksCard } from "@/components/team/team-member-open-tasks-card";
 import { routes } from "@/config/routes";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
@@ -52,13 +56,11 @@ export function WorkloadMemberPortfolio() {
         setBundle(/** @type {Record<string, unknown>} */ (b));
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
+        const qs = databaseApiQuery({
+          year: String(normalizedPeriod.year),
           month: String(normalizedPeriod.month),
         });
-        const res = await fetch(
-          `/api/workload/${encodeURIComponent(memberKey)}?${qs}`,
-          { cache: "no-store" },
-        );
+        const res = await fetch(`/api/workload/${encodeURIComponent(memberKey)}?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
         if (res.status === 404 || !res.ok) {
@@ -88,12 +90,24 @@ export function WorkloadMemberPortfolio() {
 
   const subtitle = formatReportPeriodSubtitle(normalizedPeriod.year, normalizedPeriod.month);
 
-  const tasksOpen =
-    bundle && Array.isArray(bundle.tasksOpen) ?
-      /** @type {{ key: string; title: string; clientSlug?: string; status?: string; priority?: string; dueIso?: string | null }[]} */ (
-        bundle.tasksOpen
-      )
-    : [];
+  const tasksForCard = useMemo(() => {
+    if (!bundle || !Array.isArray(bundle.tasksOpen)) return [];
+    return /** @type {Record<string, unknown>[]} */ (bundle.tasksOpen).map((t) => ({
+      id: typeof t.key === "string" ? t.key : "",
+      key: typeof t.key === "string" ? t.key : "",
+      title: String(t.title ?? ""),
+      hint: typeof t.hint === "string" ? t.hint : "",
+      status: String(t.status ?? ""),
+      priority: String(t.priority ?? ""),
+      dueDate: typeof t.dueIso === "string" ? t.dueIso : "",
+      clientName:
+        typeof t.clientName === "string" && t.clientName ?
+          t.clientName
+        : typeof t.clientSlug === "string" ?
+          t.clientSlug
+        : "",
+    }));
+  }, [bundle]);
 
   const openStats = useMemo(() => {
     const raw =
@@ -110,10 +124,18 @@ export function WorkloadMemberPortfolio() {
 
   const member =
     bundle && typeof bundle.member === "object" && bundle.member ?
-      /** @type {{ id?: string; name?: string; role?: string; avatar?: string; hue?: number; weeklyHours?: number; isMe?: boolean }} */ (
+      /** @type {{ id?: string; name?: string; role?: string; avatar?: string; image?: string; hue?: number; weeklyHours?: number; isMe?: boolean }} */ (
         bundle.member
       )
     : null;
+
+  const department =
+    bundle && typeof bundle.department === "object" && bundle.department ?
+      /** @type {{ id?: string; name?: string; short?: string }} */ (bundle.department)
+    : null;
+
+  const loadIndex =
+    bundle && typeof bundle.loadIndex === "number" && Number.isFinite(bundle.loadIndex) ? bundle.loadIndex : 0;
 
   const hoursMonth =
     bundle && typeof bundle.hoursMonth === "number" && Number.isFinite(bundle.hoursMonth) ? bundle.hoursMonth : 0;
@@ -123,6 +145,12 @@ export function WorkloadMemberPortfolio() {
     Number.isFinite(bundle.billableHoursMonth) ?
       bundle.billableHoursMonth
     : 0;
+
+  const calendarTodayIso =
+    bundle && typeof bundle.calendarTodayIso === "string" ? bundle.calendarTodayIso : undefined;
+
+  const loadTone = loadIndex >= 82 ? "bad" : loadIndex >= 65 ? "warn" : "ok";
+  const backlogTone = openStats.overdue > 0 ? "bad" : openStats.high > 2 ? "warn" : "ok";
 
   if (!memberKey) {
     return (
@@ -135,8 +163,14 @@ export function WorkloadMemberPortfolio() {
   if (showSkeleton) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
+        <div className="h-10 animate-pulse rounded-lg bg-skeleton" />
         <div className="h-28 animate-pulse rounded-2xl bg-skeleton" />
-        <div className="h-40 animate-pulse rounded-2xl bg-skeleton" />
+        <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-[88px] animate-pulse rounded-2xl bg-skeleton" />
+          ))}
+        </div>
+        <div className="h-48 animate-pulse rounded-2xl bg-skeleton" />
       </div>
     );
   }
@@ -144,14 +178,11 @@ export function WorkloadMemberPortfolio() {
   if (!loading && (error || !bundle || !member)) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href={routes.workload}
-            className="font-sans text-[13px] font-medium text-agency-brand hover:underline"
-          >
-            ← Workload oversigt
+        <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
+          <Link href={routes.workload} className="text-fg-muted transition-colors hover:text-agency-brand hover:underline">
+            Belægning
           </Link>
-        </div>
+        </nav>
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error ?? "Medarbejder ikke fundet"}
         </p>
@@ -161,19 +192,17 @@ export function WorkloadMemberPortfolio() {
 
   return (
     <div className={cn("flex flex-col gap-[length:var(--ds-studio-stack)] transition-opacity", refreshing && "opacity-65")}>
-      <div className="flex flex-wrap gap-3">
-        <Link href={routes.workload} className="font-sans text-[13px] font-medium text-agency-brand hover:underline">
-          ← Workload oversigt
+      <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
+        <Link href={routes.workload} className="text-fg-muted transition-colors hover:text-agency-brand hover:underline">
+          Belægning
         </Link>
-      </div>
+        <span className="mx-2 text-fg-quiet">/</span>
+        <span className="truncate text-fg">{member.name}</span>
+      </nav>
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-            <IconChart size={14} className="text-agency-brand" aria-hidden />
-            Team workload
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="mt-1 flex flex-wrap items-center gap-3">
             <CrmAvatar
               label={typeof member.avatar === "string" ? member.avatar : "?"}
               src={typeof member.image === "string" ? member.image : undefined}
@@ -182,15 +211,22 @@ export function WorkloadMemberPortfolio() {
             />
             <div className="min-w-0">
               <h1 className="font-sans text-[21px] font-semibold tracking-tight text-fg">{member.name}</h1>
-              <p className="mt-0.5 font-sans text-[12px] text-fg-muted">{member.role}</p>
+              <p className="mt-0.5 font-sans text-[12px] text-fg-muted">
+                {member.role}
+                {department?.name ? ` · ${department.name}` : null}
+                {typeof member.weeklyHours === "number" ? ` · ${member.weeklyHours} t/uge` : null}
+              </p>
               <p className="mt-1 font-sans text-[12px] text-fg-muted">
                 <span className="capitalize">{subtitle}</span>
-                {member.isMe ? (
+                {member.isMe ?
                   <>
                     {" · "}
-                    <span className="font-semibold text-fg">Min profil</span>
+                    <span className="font-semibold text-fg">Din profil</span>
                   </>
-                ) : null}
+                : null}
+                {refreshing ?
+                  <span className="text-fg-quiet"> · Opdaterer…</span>
+                : null}
               </p>
             </div>
           </div>
@@ -204,55 +240,35 @@ export function WorkloadMemberPortfolio() {
         </div>
       </header>
 
-      <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-3">
-        <div className="tally-panel p-4">
-          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Åbne opgaver</p>
-          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{openStats.total}</p>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">
-            {openStats.high} høj prio · {openStats.overdue} overskridet
+      <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
+        <PulseKpiCard label="Åbne opgaver" value={String(openStats.total)} tone={backlogTone} />
+        <div className="tally-panel p-4 md:p-5">
+          <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-fg-soft">
+            <CrmHoverPopover
+              title="Index — belastning"
+              content={<LoadIndexFormulaHintContent includeBarNote />}
+              triggerClassName="underline decoration-dotted decoration-border/80 underline-offset-2"
+            >
+              Belægningsindex
+            </CrmHoverPopover>
           </p>
+          <p className={cn("mt-2 font-sans text-[26px] font-semibold tabular-nums tracking-tight", loadTone === "bad" ? "text-agency-bad" : loadTone === "warn" ? "text-agency-warn" : "text-agency-ok")}>
+            {loadIndex}%
+          </p>
+          <PulseUtilBar hours={loadIndex} budget={100} className="mt-3 max-w-full" />
         </div>
-        <div className="tally-panel p-4">
-          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Timer (Periode)</p>
-          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{hoursMonth} t</p>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">Alle poster i rapportmåneden</p>
-        </div>
-        <div className="tally-panel p-4">
-          <p className="text-[10px] uppercase tracking-wide text-fg-soft">Billable</p>
-          <p className="mt-2 text-[22px] font-semibold tabular-nums text-fg">{billableHoursMonth} t</p>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">Ud fra flaggede poster</p>
-        </div>
+        <PulseKpiCard label="Timer (periode)" value={`${hoursMonth} t`} tone="brand" />
+        <PulseKpiCard label="Fakturerbare timer" value={`${billableHoursMonth} t`} tone="ok" />
       </section>
 
-      <section className="tally-panel overflow-hidden">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="font-sans text-sm font-semibold text-fg">Åbne opgaver på dig</h2>
-          <p className="mt-1 font-sans text-[11px] text-fg-muted">Knyttet til {member.name} ({memberKey}).</p>
-        </div>
-        <ul className="divide-y divide-border-soft">
-          {tasksOpen.length === 0 ? (
-            <li className="px-4 py-8 font-sans text-[13px] text-fg-muted">Ingen åbne opgaver på denne bruger.</li>
-          ) : (
-            tasksOpen.map((t) => (
-              <li key={t.key || t.title} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3">
-                {t.key ?
-                  <Link
-                    href={`${routes.tasks}/${encodeURIComponent(t.key)}`}
-                    className="min-w-0 flex-1 font-sans text-[13px] font-semibold text-fg hover:text-agency-brand"
-                  >
-                    {t.title || t.key}
-                  </Link>
-                : <span className="min-w-0 flex-1 font-sans text-[13px] font-semibold text-fg">{t.title}</span>}
-                <span className="text-[10px] text-fg-quiet">{t.clientSlug ?? ""}</span>
-                <span className="text-[10px] text-fg-muted">{t.priority}</span>
-                {t.dueIso ? (
-                  <span className="text-[10px] text-fg-soft">Aflevering {t.dueIso.slice(0, 10)}</span>
-                ) : null}
-              </li>
-            ))
-          )}
-        </ul>
-      </section>
+      <p className="font-sans text-[11px] text-fg-quiet">
+        {openStats.high} høj prioritet ·{" "}
+        <span className={openStats.overdue > 0 ? "font-semibold text-agency-bad" : "text-fg-muted"}>
+          {openStats.overdue} overskredet
+        </span>
+      </p>
+
+      <TeamMemberOpenTasksCard tasks={tasksForCard} dueRefIso={calendarTodayIso} />
     </div>
   );
 }

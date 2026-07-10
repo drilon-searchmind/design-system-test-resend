@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
  *   refreshing?: boolean;
  *   loading?: boolean;
  *   clients?: import('@/lib/crm/pulse-types').PulseClient[] | null;
+ *   onOpenCreate?: () => void;
+ *   createModalOpen?: boolean;
+ *   dataSource?: "demo" | "database";
  * }} props
  */
 export function ClientsPageHeader({
@@ -19,6 +22,9 @@ export function ClientsPageHeader({
   refreshing = false,
   loading = false,
   clients = null,
+  onOpenCreate,
+  createModalOpen = false,
+  dataSource = "demo",
 }) {
   const subtitle = formatReportPeriodSubtitle(period.year, period.month);
   let bodyLine = "";
@@ -53,7 +59,27 @@ export function ClientsPageHeader({
         </p>
         </div>
 
-      <ReportPeriodPicker year={period.year} month={period.month} onChange={onPeriodChange} />
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-start sm:justify-end">
+        <div className="flex flex-wrap justify-end gap-2">
+          {onOpenCreate && dataSource === "database" ?
+            <button
+              type="button"
+              onClick={onOpenCreate}
+              aria-haspopup="dialog"
+              aria-expanded={createModalOpen}
+              className={cn(
+                "inline-flex h-[34px] items-center rounded-md border px-4 font-sans text-[13px] font-medium",
+                createModalOpen ?
+                  "border-agency-brand-border bg-agency-brand-soft text-agency-brand"
+                : "border-border bg-surface-muted text-fg-muted hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand",
+              )}
+            >
+              Ny kunde
+            </button>
+          : null}
+        </div>
+        <ReportPeriodPicker year={period.year} month={period.month} onChange={onPeriodChange} />
+      </div>
     </header>
   );
 }

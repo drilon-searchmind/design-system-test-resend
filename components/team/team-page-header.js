@@ -46,7 +46,7 @@ export function TeamPageHeader({
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
             <span className="capitalize">{subtitle}</span>
             {" — "}
-            Bureauhold med disciplin, kontrakteret tid og belægning fra åbne board-opgaver (samme logik som Workload).
+            Bureauhold med disciplin, kontrakteret tid og belægning fra åbne opgaver (samme logik som Belægning).
             {refreshing ?
               <span className="text-[11px] text-fg-quiet"> · Opdaterer…</span>
             : null}

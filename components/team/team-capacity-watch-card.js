@@ -19,7 +19,7 @@ export function TeamCapacityWatchCard({ teamRows }) {
           Belægningswatch (fra board)
         </h2>
         <p className="max-w-md font-sans text-[11px] text-fg-muted">
-          Samme index som Workload — profiler med højest belægning.
+          Samme index som Belægning — profiler med højest belægning.
         </p>
       </div>
       <ul className="mt-4 flex flex-col divide-y divide-border-soft">

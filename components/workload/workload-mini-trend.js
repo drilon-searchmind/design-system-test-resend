@@ -21,16 +21,16 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
 
   const subHint =
     series && Array.isArray(series) && series.length > 0
-      ? "Billable vs. intern aggregeret pr. rapportperiode/database — hurtig pres-læsning."
+      ? "Fakturerbar vs. intern tid aggregeret pr. rapportperiode."
       : useDemoFallback
-        ? "Billable vs. intern fra Pulse-fixtures — hurtig læsning af pres."
+        ? "Fakturerbar vs. intern fra Pulse-fixtures."
         : "Ingen trenddata for perioden endnu.";
 
   if (data.length === 0) {
     return (
       <section className="tally-panel p-4 md:p-5" aria-labelledby="workload-mini-trend-heading">
         <div id="workload-mini-trend-heading">
-          <PulseCardHeader title="Bureau-rhyme" sub={subHint} />
+          <PulseCardHeader title="Timer fordelt" sub={subHint} />
         </div>
         <p className="mt-3 font-sans text-[13px] text-fg-muted">{subHint}</p>
       </section>
@@ -51,7 +51,7 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
       aria-labelledby="workload-mini-trend-heading"
     >
       <div id="workload-mini-trend-heading">
-        <PulseCardHeader title={`Bureau-rhyme (${dayLabel})`} sub={subHint} />
+        <PulseCardHeader title={`Timer fordelt (${dayLabel})`} sub={subHint} />
       </div>
 
       <svg
@@ -117,7 +117,7 @@ export function WorkloadMiniTrend({ series = null, useDemoFallback = false }) {
 
       <div className="mt-1 flex flex-wrap gap-4 font-sans text-[11px] text-fg-muted">
         <span className="inline-flex items-center gap-2">
-          <span className="size-2.5 rounded-sm bg-agency-brand" /> Billable
+          <span className="size-2.5 rounded-sm bg-agency-brand" /> Fakturerbar
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="size-2.5 rounded-sm bg-agency-warn" /> Intern

@@ -26,7 +26,7 @@ const GRID =
   "grid-cols-[minmax(220px,2.2fr)_minmax(124px,0.92fr)_minmax(94px,0.85fr)_minmax(40px,0.38fr)_minmax(74px,0.72fr)_minmax(80px,0.74fr)_minmax(92px,0.85fr)_minmax(104px,0.92fr)_36px]";
 
 /**
- * @typedef {{ id: string; name: string; hint: string; dept: string; defaultPriority: string; defaultDueOffsetDays: number; estHours: number; checklistCount: number; scope: string; active: boolean; updatedAt: string; usedCount: number }} TemplateWireLike
+ * @typedef {{ id: string; name: string; hint: string; dept: string; defaultPriority: string; defaultDueOffsetDays: number; estHours: number; scope: string; active: boolean; updatedAt: string; usedCount: number; billable?: boolean }} TemplateWireLike
  */
 
 /**
@@ -104,7 +104,7 @@ export function TemplatesDirectory({
             </span>
             <input
               type="search"
-              placeholder="Søg navn, hint eller id…"
+              placeholder="Søg navn eller beskrivelse…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className={cn(
@@ -139,17 +139,17 @@ export function TemplatesDirectory({
       </div>
 
       {density === "cards" ? (
-        <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
+        <div className="grid max-h-[80vh] gap-3 overflow-y-auto p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
           {filtered.map((row) => (
             <TemplateGridCard key={row.id} row={row} departments={departments} />
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="max-h-[80vh] overflow-x-auto overflow-y-auto">
           <div className="min-w-[1080px]">
             <div
               className={cn(
-                "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
+                "sticky top-0 z-10 grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
                 "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
                 GRID,
               )}
@@ -169,7 +169,7 @@ export function TemplatesDirectory({
               >
                 Anvendelser {sort === "used" ? <PulseIconChevronDown className="inline opacity-70" /> : null}
               </button>
-              <span>Status</span>
+              <span>Aktiv</span>
               <span>Prio</span>
               <span>Deadline (+d)</span>
               <span>Est.</span>
@@ -219,7 +219,7 @@ export function TemplatesDirectory({
                         row.active ? "border-agency-brand-border text-agency-brand" : "border-border text-fg-quiet",
                       )}
                     >
-                      {row.active ? "Ja" : "Nej"}
+                      {row.active ? "Aktiv" : "Arkiv"}
                     </span>
                   </div>
                   <div className="flex items-center">

@@ -2,8 +2,6 @@
 
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconChart } from "@/components/crm/icons";
-import { TEAM } from "@/lib/crm/static-data";
-import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
 
 /**
@@ -24,15 +22,8 @@ export function WorkloadPageHeader({
   refreshing = false,
   loading = false,
 }) {
-  const demoFallbackName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "Medarbejder";
-  const displayName =
-    typeof mineLabel === "string" && mineLabel.trim() ?
-      mineLabel.trim()
-    : dataSource === "demo" ?
-      demoFallbackName
-    : "Dig";
-
   const subtitle = formatReportPeriodSubtitle(reportPeriod.year, reportPeriod.month);
+  const hasMine = typeof mineLabel === "string" && mineLabel.trim();
 
   return (
     <div className="flex flex-col gap-3">
@@ -42,17 +33,22 @@ export function WorkloadPageHeader({
             <IconChart size={14} className="text-agency-brand" aria-hidden />
             Kapacitet & belægning
           </p>
-          <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">Workload</h1>
+          <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">Belægning</h1>
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
             <span className="capitalize">{subtitle}</span>
-            {" — "}
-            Disciplin-matrix, team-liste og efterspørgsel fra boardet.
+            {" — "}Disciplin-matrix, teamliste og efterspørgsel fra opgaver.
             {refreshing ?
               <span className="text-[11px] text-fg-quiet"> · Opdaterer…</span>
             : null}
-            {" "}
-            Visning krydret med din profil:{" "}
-            <span className="font-semibold text-fg">{loading ? "\u2026" : displayName}</span>
+            {hasMine ?
+              <>
+                {" "}
+                Din række: <span className="font-semibold text-fg">{loading ? "\u2026" : mineLabel.trim()}</span>
+              </>
+            : null}
+            {dataSource === "demo" && !hasMine ?
+              <span className="text-[11px] text-fg-quiet"> · Demodata</span>
+            : null}
           </p>
         </div>
 

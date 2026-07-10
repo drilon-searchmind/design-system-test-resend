@@ -85,7 +85,7 @@ export function WorkloadPortfolio() {
         const res = await fetch(`/api/workload?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
-        if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Kunne ikke hente workload");
+        if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Kunne ikke hente belægning");
         setBundle(data);
         hasLoadedRef.current = true;
       }
@@ -116,11 +116,6 @@ export function WorkloadPortfolio() {
         /** @type {ReturnType<typeof import('@/lib/crm/workload-utils').buildDeptWorkloadRows>} */ (bundle.deptRows)
       : [];
     return workloadAgencyTotals(rows);
-  }, [bundle]);
-
-  const teamMemberCount = useMemo(() => {
-    if (!bundle || !Array.isArray(bundle.teamRows)) return 0;
-    return bundle.teamRows.length;
   }, [bundle]);
 
   const demandList = useMemo(() => {
@@ -155,19 +150,9 @@ export function WorkloadPortfolio() {
     };
   }, [bundle]);
 
-  const activeClients =
-    bundle && typeof bundle.activeClientsCount === "number" && Number.isFinite(bundle.activeClientsCount) ?
-      bundle.activeClientsCount
-    : 0;
-
   const billableHoursMonth =
     bundle && typeof bundle.billableHoursMonth === "number" && Number.isFinite(bundle.billableHoursMonth) ?
       bundle.billableHoursMonth
-    : 0;
-
-  const teamWeeklyHours =
-    bundle && typeof bundle.teamWeeklyHours === "number" && Number.isFinite(bundle.teamWeeklyHours) ?
-      bundle.teamWeeklyHours
     : 0;
 
   const budgetAlertsProp = useMemo(() => {
@@ -191,8 +176,8 @@ export function WorkloadPortfolio() {
           mineLabel={null}
           loading
         />
-        <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-[88px] animate-pulse rounded-2xl bg-skeleton md:h-[96px]" />
           ))}
         </div>
@@ -234,18 +219,15 @@ export function WorkloadPortfolio() {
           openTasks={openStats.total}
           openHigh={openStats.high}
           openOverdue={openStats.overdue}
-          activeClients={activeClients}
           billableHoursMonth={billableHoursMonth}
-          teamWeeklyHours={teamWeeklyHours}
-          teamMemberCount={teamMemberCount}
         />
 
         <p className="font-sans text-[11px] text-fg-quiet">
-          Board-backlog: <span className="font-semibold text-fg">{openStats.high}</span> høj prioritet ·{" "}
+          <span className="font-semibold text-fg">{openStats.high}</span> høj prioritet ·{" "}
           <span className={openStats.overdue > 0 ? "font-semibold text-agency-bad" : "text-fg-muted"}>
-            {openStats.overdue} overskridet
+            {openStats.overdue} overskredet
           </span>{" "}
-          på tværs af discipliner (ref. opgaver).
+          på tværs af discipliner.
         </p>
 
         <WorkloadDeptMatrix rows={deptRows} />

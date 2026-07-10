@@ -16,7 +16,7 @@ export function TeamMemberQuickLinksCard({ deptId, deptName }) {
             href={routes.workload}
             className="block rounded-lg border border-border-soft bg-surface-muted/30 px-3 py-2 font-sans text-[12px] font-medium text-fg transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft/20"
           >
-            Workload
+            Belægning
             <span className="ml-2 text-[10px] font-normal text-fg-quiet">kapacitet</span>
           </Link>
         </li>

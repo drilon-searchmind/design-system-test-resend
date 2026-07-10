@@ -224,7 +224,7 @@ export function TeamRosterDirectory({
           </h2>
           <p className="mt-1 font-sans text-[11px] leading-snug text-fg-muted">
             Medarbejdere med afdeling og belægning fra åbne board-opgaver — vælg afdeling i listen for at opdatere med det
-            samme. Brug <span className="text-fg-quiet">?dept=</span> fra Workload-filter.
+            samme. Brug <span className="text-fg-quiet">?dept=</span> fra Belægning-filter.
           </p>
         </div>
         <div className="flex w-full min-w-0 flex-col gap-2 md:max-w-none md:w-auto md:flex-1 md:flex-row md:justify-end md:gap-2">
@@ -370,9 +370,9 @@ export function TeamRosterDirectory({
             </span>
             <RosterHeaderHint
               align="start"
-              title="Workload"
+              title="Belægning"
               className="hidden sm:inline"
-              label="Workload"
+              label="Belægning"
               content={<LoadIndexFormulaHintContent includeBarNote />}
             />
             <span />
@@ -482,7 +482,7 @@ export function TeamRosterDirectory({
           {filtered.length} af {rows.length}
         </span>
         <Link href={routes.workload} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
-          Disciplin-matrix i Workload →
+          Disciplin-matrix i Belægning →
         </Link>
       </div>
     </section>

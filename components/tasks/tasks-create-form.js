@@ -29,6 +29,8 @@ function isoDatePlusCalendarDays(offsetDays) {
  *   priority: "high" | "medium" | "low";
  *   suggestedHours: number | null;
  *   defaultDueOffsetDays: number;
+ *   assigneeMemberKeys?: string[];
+ *   billable?: boolean;
  * }} TaskTemplatePreset
  */
 
@@ -92,6 +94,12 @@ export function TasksCreateForm({
       } else {
         setEstimateHours("");
       }
+      if (Array.isArray(tpl.assigneeMemberKeys) && tpl.assigneeMemberKeys.length) {
+        setSelectedAssignees(new Set(tpl.assigneeMemberKeys));
+      } else {
+        setSelectedAssignees(new Set());
+      }
+      setBillable(tpl.billable === false ? "no" : "yes");
     },
     [taskTemplatesForCreate],
   );
@@ -164,8 +172,8 @@ export function TasksCreateForm({
               ))}
             </select>
             <span className="font-sans text-[11px] leading-snug text-fg-quiet">
-              Udfylder titel, beskrivelse, disciplin, prioritet, deadline og timer ud fra Task template; du kan rette alt
-              før oprettelse.
+              Udfylder titel, beskrivelse, disciplin, ansvarlige, tidstype, prioritet og deadline; du kan rette alt før
+              oprettelse.
             </span>
           </label>
         : null}

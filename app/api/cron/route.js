@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
+import { processNpsScheduledSends } from "@/lib/server/nps-scheduled-send";
 
 /**
  * Vercel Cron or external scheduler — protect with CRON_SECRET.
@@ -18,6 +19,11 @@ export async function GET(request) {
     return NextResponse.json({ error: "Set CRON_SECRET in production" }, { status: 501 });
   }
 
-  // TODO: cleanup, sync, digest emails, etc.
-  return NextResponse.json({ ok: true, ran: "noop" });
+  try {
+    const nps = await processNpsScheduledSends();
+    return NextResponse.json({ ok: true, nps });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Cron failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

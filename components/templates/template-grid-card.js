@@ -21,11 +21,11 @@ const SCOPE_DA = {
  *   defaultPriority: string;
  *   defaultDueOffsetDays: number;
  *   estHours: number;
- *   checklistCount: number;
  *   scope: string;
  *   active: boolean;
  *   updatedAt: string;
  *   usedCount: number;
+ *   billable?: boolean;
  * }} TemplateWireRow
  */
 
@@ -89,8 +89,8 @@ export function TemplateGridCard({ row, departments }) {
             <div className="mt-0.5 tabular-nums text-fg">{row.estHours} t</div>
           </div>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Tjekliste</div>
-            <div className="mt-0.5 tabular-nums text-fg">{row.checklistCount} punkter</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Tidstype</div>
+            <div className="mt-0.5 text-fg">{row.billable === false ? "Intern" : "Fakturerbar"}</div>
           </div>
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Anvendelser</div>
@@ -99,11 +99,10 @@ export function TemplateGridCard({ row, departments }) {
         </div>
 
         <div className="mt-2 border-t border-border-soft pt-2 font-sans text-[10px] text-fg-muted">
-          <span className="font-semibold text-fg-soft">Scope:</span> {SCOPE_DA[row.scope] ?? row.scope}
+          <span className="font-semibold text-fg-soft">Kundetype:</span> {SCOPE_DA[row.scope] ?? row.scope}
           <span className="mx-1.5 text-fg-quiet">·</span>
           <span className="tabular-nums">Opd. {formatIsoDateDa(row.updatedAt)}</span>
         </div>
-        <p className="mt-2 text-[10px] text-fg-quiet">{row.id}</p>
       </article>
     </Link>
   );

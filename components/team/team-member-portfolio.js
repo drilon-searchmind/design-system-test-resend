@@ -195,7 +195,7 @@ export function TeamMemberPortfolio() {
       <p className="font-sans text-[11px] text-fg-muted">
         <span className="capitalize">{subtitle}</span>
         {" · "}
-        Rapporteret belægning og opgaver følger samme periode som Workload.
+        Rapporteret belægning og opgaver følger samme periode som Belægning.
       </p>
 
       <TeamMemberKpiStrip

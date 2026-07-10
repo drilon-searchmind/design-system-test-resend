@@ -1,20 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ClientDetailEditActions } from "@/components/clients/client-detail-edit-actions";
 import { useDataSource } from "@/components/crm/use-data-source";
-import {
-  TEMPLATE_DETAIL_TAB_IDS,
-  TemplateDetailTabbedBody,
-} from "@/components/templates/template-detail-tabbed-body";
+import { TemplateDetailOverview } from "@/components/templates/template-detail-tabbed-body";
 import { TemplateDetailHeader } from "@/components/templates/template-detail-header";
+import { TemplateDetailMongoPanel } from "@/components/templates/template-detail-mongo-panel";
 import { routes } from "@/config/routes";
 import { getTaskTemplatesDemoBundle } from "@/lib/crm/templates-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
 /** @typedef {{ id: string; name?: string; short?: string; color?: string }} DeptLite */
+/** @typedef {{ id: string; name: string; avatar?: string; hue?: number; image?: string }} TeamLite */
+
+/**
+ * @param {string[]} keys
+ * @param {TeamLite[]} team
+ */
+function formatAssigneeLabels(keys, team) {
+  if (!keys.length) return "Ikke angivet";
+  return keys.map((k) => team.find((m) => m.id === k)?.name ?? k).join(", ");
+}
 
 /**
  * @param {{ deptKey: string; departments: DeptLite[] }} opts
@@ -32,9 +41,10 @@ function resolveDeptLabel({ deptKey, departments }) {
  * @param {{
  *   wire: Record<string, unknown>;
  *   departments: DeptLite[];
+ *   team: TeamLite[];
  * }} opts
  */
-function buildTemplateHeaderRow({ wire, departments }) {
+function buildTemplateHeaderRow({ wire, departments, team }) {
   const dk = typeof wire.dept === "string" ? wire.dept : "—";
 
   /** @type {string} */
@@ -43,11 +53,6 @@ function buildTemplateHeaderRow({ wire, departments }) {
   const activeBool = wire.active !== false;
   /** @type {number} */
   const usedNum = typeof wire.usedCount === "number" && Number.isFinite(wire.usedCount) ? wire.usedCount : 0;
-  /** @type {number} */
-  const chkNum =
-    typeof wire.checklistCount === "number" && Number.isFinite(wire.checklistCount) ?
-      Math.max(0, wire.checklistCount)
-    : 0;
   /** @type {number} */
   const dod =
     typeof wire.defaultDueOffsetDays === "number" && Number.isFinite(wire.defaultDueOffsetDays)
@@ -59,6 +64,10 @@ function buildTemplateHeaderRow({ wire, departments }) {
   /** @type {string} */
   const up = typeof wire.updatedAt === "string" ? wire.updatedAt : "";
 
+  const assigneeKeys = Array.isArray(wire.assigneeMemberKeys) ?
+    wire.assigneeMemberKeys.map((k) => String(k).trim()).filter(Boolean)
+  : [];
+
   return {
     id: typeof wire.id === "string" ? wire.id : "—",
     name: typeof wire.name === "string" ? wire.name : "—",
@@ -68,11 +77,12 @@ function buildTemplateHeaderRow({ wire, departments }) {
     scope: scopeStr,
     active: activeBool,
     defaultPriority: typeof wire.defaultPriority === "string" ? wire.defaultPriority : "medium",
-    checklistCount: chkNum,
     defaultDueOffsetDays: dod,
     estHours: est,
     usedCount: usedNum,
     updatedAt: up,
+    assigneeLabel: formatAssigneeLabels(assigneeKeys, team),
+    tidstypeLabel: wire.billable === false ? "Intern" : "Fakturerbar",
   };
 }
 
@@ -81,12 +91,14 @@ function buildTemplateHeaderRow({ wire, departments }) {
  */
 export function TemplateDetailShell({ templateId }) {
   const dataSource = useDataSource();
-  const [detailTab, setDetailTab] = useState(TEMPLATE_DETAIL_TAB_IDS[0]);
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
+  const [editing, setEditing] = useState(false);
   const [mongoBusy, setMongoBusy] = useState(false);
   const [mongoNotice, setMongoNotice] = useState(/** @type {string | null} */ (null));
+  /** @type {import('react').RefObject<import('@/components/templates/template-detail-mongo-panel').TemplateDetailMongoPanelHandle | null>} */
+  const editPanelRef = useRef(null);
 
   const demoBundle = useMemo(() => getTaskTemplatesDemoBundle(), []);
   /** @type {Record<string, unknown> | undefined} */
@@ -108,6 +120,19 @@ export function TemplateDetailShell({ templateId }) {
         color: typeof d.color === "string" ? d.color : undefined,
       })),
     [demoBundle.departments],
+  );
+
+  /** @type {TeamLite[]} */
+  const demoTeamRows = useMemo(
+    () =>
+      (demoBundle.team ?? []).map((m) => ({
+        id: typeof m.id === "string" ? m.id : String(m?.id ?? ""),
+        name: typeof m.name === "string" ? m.name : String(m?.id ?? ""),
+        avatar: typeof m.avatar === "string" ? m.avatar : undefined,
+        hue: typeof m.hue === "number" ? m.hue : undefined,
+        image: typeof m.image === "string" ? m.image : undefined,
+      })),
+    [demoBundle.team],
   );
 
   const loadRemote = useCallback(async () => {
@@ -155,13 +180,52 @@ export function TemplateDetailShell({ templateId }) {
     return rows;
   }, [remote]);
 
+  /** @type {TeamLite[]} */
+  const mongoTeamRows = useMemo(() => {
+    const raw = remote != null && Array.isArray(remote.team) ? remote.team : [];
+    /** @type {TeamLite[]} */
+    const rows = [];
+    for (const item of raw) {
+      if (typeof item !== "object" || item === null) continue;
+      const id = typeof item.id === "string" ? item.id : "";
+      if (!id.trim()) continue;
+      rows.push({
+        id,
+        name: typeof item.name === "string" ? item.name : id,
+        avatar: typeof item.avatar === "string" ? item.avatar : undefined,
+        hue: typeof item.hue === "number" ? item.hue : undefined,
+        image: typeof item.image === "string" ? item.image : undefined,
+      });
+    }
+    return rows;
+  }, [remote]);
+
+  const startEdit = useCallback(() => {
+    setMongoNotice(null);
+    setEditing(true);
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    editPanelRef.current?.reset();
+    setMongoNotice(null);
+    setEditing(false);
+  }, []);
+
+  const saveEdit = useCallback(async () => {
+    try {
+      await editPanelRef.current?.save();
+    } catch {
+      // Fejl vises via mongoNotice i panelet
+    }
+  }, []);
+
   if (dataSource === "demo" && !demoWire) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
           Ingen skabelon med nøgle <span className="text-fg">{templateId}</span>.{" "}
           <Link href={routes.templates} className="text-agency-brand hover:underline">
-            Tilbage til Task templates
+            Tilbage til Opgaveskabeloner
           </Link>
         </p>
       </div>
@@ -171,34 +235,13 @@ export function TemplateDetailShell({ templateId }) {
   if (dataSource === "demo" && demoWire) {
     /** @type {typeof demoWire & Record<string, unknown>} */
     const w = demoWire;
-
-    /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */
-    const activityEntries = [];
-    const uAt = typeof w.updatedAt === "string" ? w.updatedAt : "";
-    if (uAt) {
-      activityEntries.push({
-        id: `${String(w.id)}-statisk`,
-        at: uAt,
-        kind: "Bibliotek",
-        summary: "Registreret i skabelonbiblioteket.",
-      });
-    }
-
-    const headerRow = buildTemplateHeaderRow({ wire: w, departments: demoDeptRows });
+    const headerRow = buildTemplateHeaderRow({ wire: w, departments: demoDeptRows, team: demoTeamRows });
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TemplateDetailHeader templateRow={headerRow} />
 
-        <TemplateDetailTabbedBody
-          tab={detailTab}
-          onTabChange={setDetailTab}
-          templateWire={w}
-          activityEntries={activityEntries}
-          checklistDemoNote
-          activityFootnote={undefined}
-          mongo={null}
-        />
+        <TemplateDetailOverview templateWire={w} departments={demoDeptRows} team={demoTeamRows} />
       </div>
     );
   }
@@ -209,14 +252,18 @@ export function TemplateDetailShell({ templateId }) {
       /** @type {Record<string, unknown>} */ (remote.template)
     : null;
 
-  /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */
-  const dbActivity =
-    remote && Array.isArray(remote.activityEntries) ?
-      /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */ (remote.activityEntries)
-    : [];
-
   if (dataSource === "database" && rTpl) {
-    const headerRow = buildTemplateHeaderRow({ wire: rTpl, departments: mongoDeptRows });
+    const headerRow = buildTemplateHeaderRow({ wire: rTpl, departments: mongoDeptRows, team: mongoTeamRows });
+
+    const editActions = (
+      <ClientDetailEditActions
+        editing={editing}
+        saving={mongoBusy}
+        onEdit={startEdit}
+        onSave={() => void saveEdit()}
+        onCancel={cancelEdit}
+      />
+    );
 
     return (
       <div
@@ -231,25 +278,26 @@ export function TemplateDetailShell({ templateId }) {
           </p>
         : null}
 
-        <TemplateDetailHeader templateRow={headerRow} />
+        <TemplateDetailHeader templateRow={headerRow} trailing={editActions} />
 
-        <TemplateDetailTabbedBody
-          tab={detailTab}
-          onTabChange={setDetailTab}
-          templateWire={rTpl}
-          activityEntries={dbActivity}
-          checklistDemoNote={false}
-          activityFootnote={undefined}
-          mongo={{
-            templateRouteId: templateId,
-            departments: mongoDeptRows,
-            busy: mongoBusy,
-            notice: mongoNotice,
-            onBusyChange: setMongoBusy,
-            onNotice: setMongoNotice,
-            onReload: loadRemote,
-          }}
-        />
+        {editing ?
+          <TemplateDetailMongoPanel
+            ref={editPanelRef}
+            templateRouteId={templateId}
+            wire={rTpl}
+            departments={mongoDeptRows}
+            team={mongoTeamRows}
+            busy={mongoBusy}
+            notice={mongoNotice}
+            onBusyChange={setMongoBusy}
+            onNotice={setMongoNotice}
+            onReload={loadRemote}
+            variant="inline"
+            onSaved={() => setEditing(false)}
+          />
+        : (
+          <TemplateDetailOverview templateWire={rTpl} departments={mongoDeptRows} team={mongoTeamRows} />
+        )}
       </div>
     );
   }
@@ -260,7 +308,7 @@ export function TemplateDetailShell({ templateId }) {
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error}{" "}
           <Link href={routes.templates} className="font-medium underline">
-            Tilbage til Task templates
+            Tilbage til Opgaveskabeloner
           </Link>
         </p>
       </div>
