@@ -46,24 +46,26 @@ export function PulseProfitabilityChart() {
                   <span className="font-sans text-[12.5px] font-medium text-fg">{d?.name ?? r.dept}</span>
                 </div>
 
-                <div className="relative h-[22px] overflow-hidden rounded-md bg-surface-muted-strong ring-1 ring-border/40">
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-md"
-                    style={{
-                      width: `${revPct}%`,
-                      backgroundColor: deptColor,
-                      opacity: 0.22,
-                    }}
-                  />
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-md transition-[width] duration-300"
-                    style={{
-                      width: `${innerPct}%`,
-                      backgroundColor: deptColor,
-                      maxWidth: "100%",
-                    }}
-                  />
-                  <span className="pointer-events-none absolute left-2 top-1/2 max-w-[85%] -translate-y-1/2 truncate text-[11.5px] font-medium tabular-nums text-fg mix-blend-difference">
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="relative h-[22px] min-w-0 flex-1 overflow-hidden rounded-md bg-surface-muted-strong ring-1 ring-border/40">
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-md"
+                      style={{
+                        width: `${revPct}%`,
+                        backgroundColor: deptColor,
+                        opacity: 0.22,
+                      }}
+                    />
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-md transition-[width] duration-300"
+                      style={{
+                        width: `${innerPct}%`,
+                        backgroundColor: deptColor,
+                        maxWidth: "100%",
+                      }}
+                    />
+                  </div>
+                  <span className="w-[4.25rem] shrink-0 text-right font-sans text-[11.5px] font-semibold tabular-nums text-fg">
                     {formatCurrencyCompact(r.revenue)}
                   </span>
                 </div>

@@ -10,6 +10,7 @@ import { PulseHealthDistribution } from "@/components/pulse/pulse-health-distrib
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { PulsePageHeader } from "@/components/pulse/pulse-page-header";
 import { PulsePeriodProvider } from "@/components/pulse/pulse-period-context";
+import { PulseLatestArticlesCard } from "@/components/pulse/pulse-latest-articles-card";
 import { PulseProfitabilityChart } from "@/components/pulse/pulse-profitability-chart";
 import { PulseSmartAlertsCard } from "@/components/pulse/pulse-smart-alerts-card";
 import { PulseUtilTrendChart } from "@/components/pulse/pulse-util-trend-chart";
@@ -165,7 +166,7 @@ export function PulseDashboard() {
 
           <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
             <PulseProfitabilityChart />
-            <PulseSmartAlertsCard />
+            <PulseLatestArticlesCard />
           </div>
 
           <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2">
@@ -174,6 +175,8 @@ export function PulseDashboard() {
           </div>
 
           <PulseClientsPanel />
+
+          <PulseSmartAlertsCard />
         </div>
       </PulseDataProvider>
     </PulsePeriodProvider>

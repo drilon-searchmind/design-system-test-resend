@@ -789,3 +789,15 @@ html[data-density="spacious"] {
 .kb-article-content li {
   margin: 0.25rem 0;
 }
+
+/** Diagonal hatch for DisabledOverlay — inactive / preview regions */
+.ds-disabled-hatch {
+  background-color: color-mix(in oklch, var(--ds-canvas) 62%, transparent);
+  background-image: repeating-linear-gradient(
+    -42deg,
+    transparent 0,
+    transparent 10px,
+    color-mix(in oklch, var(--ds-fg-muted) 52%, var(--ds-border)) 10px,
+    color-mix(in oklch, var(--ds-fg-muted) 52%, var(--ds-border)) 11px
+  );
+}
