@@ -1,13 +1,15 @@
 import Link from "next/link";
 
-import { routes } from "@/config/routes";
-import { getKnowledgeCategoryById } from "@/lib/crm/knowledge-utils";
+import { kbArticleHref } from "@/config/routes";
+import { getKnowledgeSectionById } from "@/lib/crm/knowledge-data";
+import { kbArticleSummary } from "@/lib/crm/knowledge-utils";
 import { cn } from "@/lib/utils";
 
-/** @typedef {import("@/lib/crm/knowledge-data.js").KNOWLEDGE_ARTICLES[number]} KbArticle */
-
 /**
- * @param {{ articles: KbArticle[]; className?: string }} props
+ * @param {{
+ *   articles: import("@/lib/crm/knowledge-utils").KnowledgeArticleView[];
+ *   className?: string;
+ * }} props
  */
 export function KbRelatedArticles({ articles, className }) {
   if (!articles.length) return null;
@@ -15,30 +17,36 @@ export function KbRelatedArticles({ articles, className }) {
   return (
     <div className={cn("tally-panel p-4", className)}>
       <h2 className="font-sans text-sm font-semibold text-fg">Relaterede artikler</h2>
-      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme kategori eller overlappende tags.</p>
+      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme sektion eller emne.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {articles.map((a) => {
-          const cat = getKnowledgeCategoryById(a.categoryId);
+          const section = getKnowledgeSectionById(a.sectionId);
+          const summary = kbArticleSummary(a, 80);
           return (
             <li key={a.slug}>
               <Link
-                href={`${routes.kb}/${a.slug}`}
-                className="group block rounded-lg border border-border-soft bg-surface-muted/30 px-2.5 py-2 transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft/25"
+                href={kbArticleHref(a.slug)}
+                className="group flex gap-2.5 rounded-lg border border-border-soft bg-surface-muted/30 px-2 py-2 transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft/25"
               >
-                <div className="flex items-start justify-between gap-2">
+                {a.headerImageUrl ?
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-md border border-border-soft bg-surface-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.headerImageUrl} alt="" className="size-full object-cover" />
+                  </div>
+                : null}
+                <span className="min-w-0 flex-1">
                   <span className="font-sans text-[12px] font-medium leading-snug text-fg group-hover:text-agency-brand">
                     {a.title}
                   </span>
-                  {cat ? (
-                    <span
-                      className="shrink-0 rounded border border-border-soft px-1 text-[9px] font-bold uppercase text-fg-soft"
-                      style={{ borderColor: `oklch(0.55 0.08 ${cat.deptHue} / 0.4)` }}
-                    >
-                      {cat.short}
+                  {summary ?
+                    <span className="mt-0.5 block line-clamp-2 font-sans text-[11px] text-fg-quiet">{summary}</span>
+                  : null}
+                  {section ?
+                    <span className="mt-0.5 block text-[9px] font-medium uppercase tracking-wide text-fg-soft">
+                      {section.name}
                     </span>
-                  ) : null}
-                </div>
-                <p className="mt-0.5 line-clamp-2 font-sans text-[11px] text-fg-quiet">{a.summary}</p>
+                  : null}
+                </span>
               </Link>
             </li>
           );

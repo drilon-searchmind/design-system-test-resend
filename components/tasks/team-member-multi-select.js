@@ -34,6 +34,7 @@ function resolveDialogPortalTarget(triggerEl) {
  *   showQuickActions?: boolean;
  *   className?: string;
  *   triggerClassName?: string;
+ *   menuPlacement?: "portal" | "inline";
  * }} props
  */
 export function TeamMemberMultiSelect({
@@ -48,6 +49,7 @@ export function TeamMemberMultiSelect({
   showQuickActions = true,
   className,
   triggerClassName,
+  menuPlacement = "portal",
 }) {
   const [open, setOpen] = useState(false);
   const [portalTarget, setPortalTarget] = useState(/** @type {HTMLElement | null} */ (null));
@@ -60,7 +62,8 @@ export function TeamMemberMultiSelect({
   const menuRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const portalTargetRef = useRef(/** @type {HTMLElement | null} */ (null));
 
-  const useDialogPortal = !POPOVER_SUPPORTED && portalTarget instanceof HTMLDialogElement;
+  const useDialogPortal = menuPlacement === "portal" && !POPOVER_SUPPORTED && portalTarget instanceof HTMLDialogElement;
+  const useInlineMenu = menuPlacement === "inline";
 
   const updateMenuPosition = useCallback(() => {
     const el = triggerRef.current;
@@ -102,10 +105,10 @@ export function TeamMemberMultiSelect({
 
   useEffect(() => {
     if (!open) return;
-    updateMenuPosition();
+    if (!useInlineMenu) updateMenuPosition();
 
     const menu = menuRef.current;
-    if (POPOVER_SUPPORTED && menu && !menu.matches(":popover-open")) {
+    if (!useInlineMenu && POPOVER_SUPPORTED && menu && !menu.matches(":popover-open")) {
       try {
         menu.showPopover();
       } catch {
@@ -120,33 +123,38 @@ export function TeamMemberMultiSelect({
     }
 
     function onScroll(e) {
+      if (useInlineMenu) return;
       const target = e.target;
       if (target instanceof Node && menuRef.current?.contains(target)) return;
       setOpen(false);
     }
 
     document.addEventListener("mousedown", onDoc);
-    window.addEventListener("scroll", onScroll, true);
-    window.addEventListener("resize", updateMenuPosition);
+    if (!useInlineMenu) {
+      window.addEventListener("scroll", onScroll, true);
+      window.addEventListener("resize", updateMenuPosition);
+    }
     return () => {
       document.removeEventListener("mousedown", onDoc);
-      window.removeEventListener("scroll", onScroll, true);
-      window.removeEventListener("resize", updateMenuPosition);
-      if (POPOVER_SUPPORTED && menuRef.current?.matches(":popover-open")) {
-        menuRef.current.hidePopover();
+      if (!useInlineMenu) {
+        window.removeEventListener("scroll", onScroll, true);
+        window.removeEventListener("resize", updateMenuPosition);
+        if (POPOVER_SUPPORTED && menuRef.current?.matches(":popover-open")) {
+          menuRef.current.hidePopover();
+        }
       }
     };
-  }, [open, updateMenuPosition]);
+  }, [open, updateMenuPosition, useInlineMenu]);
 
   useEffect(() => {
-    if (open) return;
+    if (open || useInlineMenu) return;
     const menu = menuRef.current;
     if (POPOVER_SUPPORTED && menu?.matches(":popover-open")) {
       menu.hidePopover();
     }
     portalTargetRef.current = null;
     setPortalTarget(null);
-  }, [open]);
+  }, [open, useInlineMenu]);
 
   const triggerLabel = useMemo(() => {
     if (selected.size === 0) return emptyLabel;
@@ -177,7 +185,7 @@ export function TeamMemberMultiSelect({
   function openMenu() {
     setOpen((v) => {
       const next = !v;
-      if (next) {
+      if (next && !useInlineMenu) {
         if (!POPOVER_SUPPORTED) {
           const target = resolveDialogPortalTarget(triggerRef.current);
           portalTargetRef.current = target;
@@ -189,21 +197,8 @@ export function TeamMemberMultiSelect({
     });
   }
 
-  const menuNode = (
-    <div
-      ref={menuRef}
-      popover={POPOVER_SUPPORTED ? "manual" : undefined}
-      style={{
-        top: menuStyle.top,
-        left: menuStyle.left,
-        width: menuStyle.width,
-        margin: 0,
-      }}
-      className={cn(
-        "rounded-xl border border-border bg-canvas p-2 shadow-xl",
-        useDialogPortal ? "absolute z-[200]" : "fixed z-[200]",
-      )}
-    >
+  const menuBody = (
+    <>
       {showQuickActions ?
         <div className="mb-2 flex flex-wrap gap-1 border-b border-border-soft px-1 pb-2">
           <button
@@ -271,11 +266,30 @@ export function TeamMemberMultiSelect({
           );
         })}
       </ul>
+    </>
+  );
+
+  const portalMenuNode = (
+    <div
+      ref={menuRef}
+      popover={POPOVER_SUPPORTED ? "manual" : undefined}
+      style={{
+        top: menuStyle.top,
+        left: menuStyle.left,
+        width: menuStyle.width,
+        margin: 0,
+      }}
+      className={cn(
+        "rounded-xl border border-border bg-canvas p-2 shadow-xl",
+        useDialogPortal ? "absolute z-[200]" : "fixed z-[200]",
+      )}
+    >
+      {menuBody}
     </div>
   );
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative shrink-0", className)}>
       <button
         ref={triggerRef}
         type="button"
@@ -295,11 +309,20 @@ export function TeamMemberMultiSelect({
         <PulseIconChevronDown size={10} className={cn("shrink-0 opacity-70 transition", open && "rotate-180")} />
       </button>
 
-      {typeof document !== "undefined" ?
+      {useInlineMenu ?
+        open ?
+          <div
+            ref={menuRef}
+            className="absolute right-0 top-[calc(100%+6px)] z-50 w-[min(280px,calc(100vw-2rem))] rounded-xl border border-border bg-canvas p-2 shadow-xl"
+          >
+            {menuBody}
+          </div>
+        : null
+      : typeof document !== "undefined" ?
         POPOVER_SUPPORTED ?
-          menuNode
+          portalMenuNode
         : open && portalTarget ?
-          createPortal(menuNode, portalTarget)
+          createPortal(portalMenuNode, portalTarget)
         : null
       : null}
     </div>

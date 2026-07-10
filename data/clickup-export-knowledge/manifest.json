@@ -1,0 +1,21 @@
+{
+  "exported_at": "2026-07-10T09:44:58.137Z",
+  "source": {
+    "workspace_id": "20450769",
+    "doc_id": "kg3eh-1581",
+    "doc_name": "Knowledge Base",
+    "clickup_url": "https://app.clickup.com/20450769/v/dc/kg3eh-1581",
+    "page_url_example": "https://app.clickup.com/20450769/v/dc/kg3eh-1581/kg3eh-641"
+  },
+  "stats": {
+    "top_level_pages": 15,
+    "total_pages": 102
+  },
+  "files": {
+    "manifest": "manifest.json",
+    "tree": "knowledge-base-tree.json",
+    "pages_flat": "knowledge-base-pages.json",
+    "pages_csv": "knowledge-base-pages.csv",
+    "pages_markdown_dir": "pages-md/"
+  }
+}

@@ -1,41 +1,52 @@
 import { IconDoc } from "@/components/crm/icons";
-import { PulseIconDownload } from "@/components/pulse/pulse-icons";
-import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
-import { TEAM } from "@/lib/crm/static-data";
+import { KbPageActions } from "@/components/kb/kb-page-actions";
+import { formatIsoDateDa } from "@/lib/crm/format-da";
 
-export function KbPageHeader() {
-  const meName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "Medarbejder";
-
+/**
+ * @param {{
+ *   stats: {
+ *     totalPublished: number;
+ *     drafts: number;
+ *     sectionsUsed: number;
+ *     lastUpdatedIso: string | null;
+ *   };
+ * }} props
+ */
+export function KbPageHeader({ stats }) {
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0">
-          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-            <IconDoc size={14} className="text-agency-brand" aria-hidden />
-            Vidensbase · intern wiki
-          </p>
-          <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[22px]">Knowledge base</h1>
-          <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-            Playbooks, SOP, sikkerhed og værktøjer til dit team. Du arbejder som{" "}
-            <span className="font-semibold text-fg">{meName}</span>.
-          </p>
-        </div>
+    <header className="flex flex-col gap-3 border-b border-border/70 pb-4 md:flex-row md:items-start md:justify-between">
+      <div className="min-w-0">
+        <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          <IconDoc size={14} className="text-agency-brand" aria-hidden />
+          Intern wiki
+        </p>
+        <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">Knowledge base</h1>
+        <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
+          Intern wiki med sektioner, underemner og procedurer — indhold oprettes og vedligeholdes her i Agency OS.
+        </p>
+        <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-sans text-[11px] text-fg-muted">
+          <div className="flex gap-1.5">
+            <dt className="text-fg-soft">Publiceret</dt>
+            <dd className="font-medium tabular-nums text-fg">{stats.totalPublished}</dd>
+          </div>
+          <div className="flex gap-1.5">
+            <dt className="text-fg-soft">Kladder</dt>
+            <dd className="font-medium tabular-nums text-fg">{stats.drafts}</dd>
+          </div>
+          <div className="flex gap-1.5">
+            <dt className="text-fg-soft">Sektioner</dt>
+            <dd className="font-medium tabular-nums text-fg">{stats.sectionsUsed}</dd>
+          </div>
+          <div className="flex gap-1.5">
+            <dt className="text-fg-soft">Opdateret</dt>
+            <dd className="font-medium text-fg">{formatIsoDateDa(stats.lastUpdatedIso ?? "")}</dd>
+          </div>
+        </dl>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex h-[26px] items-center gap-1.5 rounded-md border border-border bg-surface-muted px-3 font-sans text-[11px] font-medium text-fg-muted transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand"
-          >
-            <PulseIconDownload size={12} /> Eksport
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-[26px] items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[11px] font-medium text-agency-brand transition-colors hover:bg-agency-brand/15"
-          >
-            Ny artikel
-          </button>
-        </div>
-      </header>
-    </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <KbPageActions />
+      </div>
+    </header>
   );
 }

@@ -18,6 +18,7 @@ export const routes = {
   workload: "/workload",
   nps: "/nps",
   kb: "/kb",
+  kbNew: "/kb/new",
   team: "/team",
   users: "/users",
   reports: "/reports",
@@ -32,6 +33,20 @@ export const routes = {
     cron: "/api/cron",
   },
 };
+
+/**
+ * @param {string} slug
+ */
+export function kbArticleHref(slug) {
+  return `${routes.kb}/${encodeURIComponent(String(slug ?? "").trim())}`;
+}
+
+/**
+ * @param {string} slug
+ */
+export function kbArticleEditHref(slug) {
+  return `${kbArticleHref(slug)}/edit`;
+}
 
 /**
  * @param {string} memberKey TeamMember.key / demo TEAM.id

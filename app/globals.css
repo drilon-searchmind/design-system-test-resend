@@ -752,8 +752,40 @@ html[data-density="spacious"] {
   outline: none;
 }
 
-.task-comment-editor:empty::before {
+.kb-article-editor:focus {
+  outline: none;
+}
+
+.kb-article-editor:empty::before {
   content: attr(data-placeholder);
   color: var(--ds-fg-quiet);
   pointer-events: none;
+}
+
+.kb-article-content h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--ds-border-soft);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ds-fg);
+}
+
+.kb-article-content h2:first-child {
+  margin-top: 0;
+}
+
+.kb-article-content p {
+  margin: 0.65rem 0;
+}
+
+.kb-article-content ul,
+.kb-article-content ol {
+  margin: 0.65rem 0;
+  padding-left: 1.35rem;
+}
+
+.kb-article-content li {
+  margin: 0.25rem 0;
 }

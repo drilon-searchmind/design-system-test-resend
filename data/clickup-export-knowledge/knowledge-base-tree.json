@@ -1,0 +1,1473 @@
+[
+  {
+    "id": "kg3eh-1037532",
+    "name": "Lederhåndbog",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 0,
+    "path": "Lederhåndbog",
+    "date_created": "2026-03-09T08:32:30.935Z",
+    "date_updated": "2026-03-10T13:07:07.546Z",
+    "avatar": {
+      "value": "emoji::📗"
+    },
+    "children_count": 5,
+    "children": [
+      {
+        "id": "kg3eh-1037632",
+        "name": "Årligt review & lønsamtale",
+        "parent_page_id": "kg3eh-1037532",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Lederhåndbog / Årligt review & lønsamtale",
+        "date_created": "2026-03-09T08:34:40.385Z",
+        "date_updated": "2026-03-09T09:15:30.351Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1037652",
+        "name": "Feedback",
+        "parent_page_id": "kg3eh-1037532",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Lederhåndbog / Feedback",
+        "date_created": "2026-03-09T08:35:02.693Z",
+        "date_updated": "2026-03-10T13:09:28.820Z",
+        "avatar": null,
+        "children_count": 6,
+        "children": [
+          {
+            "id": "kg3eh-1037552",
+            "name": "PitStops",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 0,
+            "path": "Lederhåndbog / Feedback / PitStops",
+            "date_created": "2026-03-09T08:32:51.288Z",
+            "date_updated": "2026-03-10T13:01:59.983Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1037612",
+            "name": "Roundtable",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 1,
+            "path": "Lederhåndbog / Feedback / Roundtable",
+            "date_created": "2026-03-09T08:34:10.145Z",
+            "date_updated": "2026-03-10T13:02:59.568Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1037672",
+            "name": "Udviklingspotentiale og kundeportefølje",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 2,
+            "path": "Lederhåndbog / Feedback / Udviklingspotentiale og kundeportefølje",
+            "date_created": "2026-03-09T08:35:25.078Z",
+            "date_updated": "2026-03-10T13:02:16.159Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1037972",
+            "name": "SMART",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 3,
+            "path": "Lederhåndbog / Feedback / SMART",
+            "date_created": "2026-03-09T08:57:30.904Z",
+            "date_updated": "2026-03-10T13:01:57.545Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1038012",
+            "name": "eNPS",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 4,
+            "path": "Lederhåndbog / Feedback / eNPS",
+            "date_created": "2026-03-09T09:21:01.763Z",
+            "date_updated": "2026-03-10T13:02:28.467Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1057212",
+            "name": "Anebfalinger",
+            "parent_page_id": "kg3eh-1037652",
+            "depth": 2,
+            "sort_order": 5,
+            "path": "Lederhåndbog / Feedback / Anebfalinger",
+            "date_created": "2026-06-03T06:26:00.782Z",
+            "date_updated": "2026-06-03T06:26:05.664Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "kg3eh-1038132",
+        "name": "Svære personalesager",
+        "parent_page_id": "kg3eh-1037532",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Lederhåndbog / Svære personalesager",
+        "date_created": "2026-03-09T09:48:52.970Z",
+        "date_updated": "2026-03-10T13:03:22.156Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1038152",
+        "name": "Alt andet",
+        "parent_page_id": "kg3eh-1037532",
+        "depth": 1,
+        "sort_order": 3,
+        "path": "Lederhåndbog / Alt andet",
+        "date_created": "2026-03-09T09:51:11.681Z",
+        "date_updated": "2026-03-10T13:05:11.770Z",
+        "avatar": null,
+        "children_count": 4,
+        "children": [
+          {
+            "id": "kg3eh-1037592",
+            "name": "Zenegy",
+            "parent_page_id": "kg3eh-1038152",
+            "depth": 2,
+            "sort_order": 0,
+            "path": "Lederhåndbog / Alt andet / Zenegy",
+            "date_created": "2026-03-09T08:33:45.843Z",
+            "date_updated": "2026-03-10T13:06:36.033Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1038072",
+            "name": "Medarbejderens mærkedage",
+            "parent_page_id": "kg3eh-1038152",
+            "depth": 2,
+            "sort_order": 1,
+            "path": "Lederhåndbog / Alt andet / Medarbejderens mærkedage",
+            "date_created": "2026-03-09T09:45:40.870Z",
+            "date_updated": "2026-03-10T13:03:41.840Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1038872",
+            "name": "Det essentielle",
+            "parent_page_id": "kg3eh-1038152",
+            "depth": 2,
+            "sort_order": 2,
+            "path": "Lederhåndbog / Alt andet / Det essentielle",
+            "date_created": "2026-03-10T13:04:07.061Z",
+            "date_updated": "2026-03-10T13:04:14.979Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1038892",
+            "name": "Det praktiske",
+            "parent_page_id": "kg3eh-1038152",
+            "depth": 2,
+            "sort_order": 3,
+            "path": "Lederhåndbog / Alt andet / Det praktiske",
+            "date_created": "2026-03-10T13:04:16.657Z",
+            "date_updated": "2026-03-10T13:05:14.759Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "kg3eh-1038912",
+        "name": "Nye medarbejdere",
+        "parent_page_id": "kg3eh-1037532",
+        "depth": 1,
+        "sort_order": 4,
+        "path": "Lederhåndbog / Nye medarbejdere",
+        "date_created": "2026-03-10T13:05:41.195Z",
+        "date_updated": "2026-03-10T13:06:08.743Z",
+        "avatar": null,
+        "children_count": 2,
+        "children": [
+          {
+            "id": "kg3eh-1038032",
+            "name": "Rekruttering",
+            "parent_page_id": "kg3eh-1038912",
+            "depth": 2,
+            "sort_order": 0,
+            "path": "Lederhåndbog / Nye medarbejdere / Rekruttering",
+            "date_created": "2026-03-09T09:44:53.699Z",
+            "date_updated": "2026-03-10T13:06:20.874Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          },
+          {
+            "id": "kg3eh-1038052",
+            "name": "Onboarding",
+            "parent_page_id": "kg3eh-1038912",
+            "depth": 2,
+            "sort_order": 1,
+            "path": "Lederhåndbog / Nye medarbejdere / Onboarding",
+            "date_created": "2026-03-09T09:45:03.326Z",
+            "date_updated": "2026-03-10T13:06:17.918Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-10785",
+    "name": "Det essentielle",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 1,
+    "path": "Det essentielle",
+    "date_created": "2022-09-29T08:35:02.261Z",
+    "date_updated": "2025-08-14T12:42:39.514Z",
+    "avatar": {
+      "color": "#27AE60",
+      "value": "icon:fas:user-graduate"
+    },
+    "children_count": 16,
+    "children": [
+      {
+        "id": "kg3eh-10805",
+        "name": "Familiepolitik",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Det essentielle / Familiepolitik",
+        "date_created": "2022-09-29T08:36:39.128Z",
+        "date_updated": "2025-03-03T09:04:01.419Z",
+        "avatar": {
+          "value": "emoji::👨‍👩‍👧"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-10825",
+        "name": "Hjemmearbejde",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Det essentielle / Hjemmearbejde",
+        "date_created": "2022-09-29T08:36:40.916Z",
+        "date_updated": "2025-10-07T09:10:19.302Z",
+        "avatar": {
+          "value": "emoji::🏡"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-10845",
+        "name": "Persondatapolitik under ansættelsen",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Det essentielle / Persondatapolitik under ansættelsen",
+        "date_created": "2022-09-29T08:39:15.955Z",
+        "date_updated": "2026-02-24T09:24:38.664Z",
+        "avatar": {
+          "value": "icon:fas:user-lock"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247505",
+        "name": "Rejser, udlæg mv.",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 3,
+        "path": "Det essentielle / Rejser, udlæg mv.",
+        "date_created": "2022-11-08T12:24:20.569Z",
+        "date_updated": "2026-02-24T09:24:43.007Z",
+        "avatar": {
+          "value": "emoji::🧳"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247525",
+        "name": "Fravær",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 4,
+        "path": "Det essentielle / Fravær",
+        "date_created": "2022-11-08T13:02:07.745Z",
+        "date_updated": "2024-12-05T12:30:55.543Z",
+        "avatar": {
+          "value": "emoji::🤒"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247545",
+        "name": "Ferie og feriefri",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 5,
+        "path": "Det essentielle / Ferie og feriefri",
+        "date_created": "2022-11-08T13:22:14.049Z",
+        "date_updated": "2026-06-25T12:13:02.358Z",
+        "avatar": {
+          "value": "emoji::🌴"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247625",
+        "name": "Pensionsordning",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 6,
+        "path": "Det essentielle / Pensionsordning",
+        "date_created": "2022-11-08T13:59:14.444Z",
+        "date_updated": "2023-01-25T10:57:22.841Z",
+        "avatar": {
+          "value": "emoji::💰"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247725",
+        "name": "Sundhedsordning",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 7,
+        "path": "Det essentielle / Sundhedsordning",
+        "date_created": "2022-11-08T14:07:11.069Z",
+        "date_updated": "2024-01-05T09:20:24.669Z",
+        "avatar": {
+          "value": "emoji::🚑"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-250805",
+        "name": "Beredskabsplan ved databrud",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 8,
+        "path": "Det essentielle / Beredskabsplan ved databrud",
+        "date_created": "2022-11-09T09:08:01.638Z",
+        "date_updated": "2022-11-28T14:21:07.356Z",
+        "avatar": {
+          "value": "emoji::❗"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-250825",
+        "name": "Sikkerhedspolitik",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 9,
+        "path": "Det essentielle / Sikkerhedspolitik",
+        "date_created": "2022-11-09T09:21:37.032Z",
+        "date_updated": "2025-01-27T11:05:50.194Z",
+        "avatar": {
+          "value": "emoji::🦺"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258665",
+        "name": "Hvem er Searchmind",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 10,
+        "path": "Det essentielle / Hvem er Searchmind",
+        "date_created": "2022-11-24T14:54:51.335Z",
+        "date_updated": "2025-10-07T09:57:37.212Z",
+        "avatar": {
+          "color": "#27AE60",
+          "value": "icon:fas:user-friends"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258685",
+        "name": "En del af fællesskabet",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 11,
+        "path": "Det essentielle / En del af fællesskabet",
+        "date_created": "2022-11-24T14:55:50.228Z",
+        "date_updated": "2025-10-07T09:10:28.916Z",
+        "avatar": {
+          "value": "icon:fas:users"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258705",
+        "name": "Når du starter i Searchmind",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 12,
+        "path": "Det essentielle / Når du starter i Searchmind",
+        "date_created": "2022-11-24T14:56:03.250Z",
+        "date_updated": "2024-01-05T09:42:22.638Z",
+        "avatar": {
+          "value": "emoji::🆕"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258725",
+        "name": "Din udvikling",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 13,
+        "path": "Det essentielle / Din udvikling",
+        "date_created": "2022-11-24T14:57:53.812Z",
+        "date_updated": "2023-04-13T08:30:44.163Z",
+        "avatar": {
+          "value": "emoji::🪴"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258745",
+        "name": "Alt det andet",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 14,
+        "path": "Det essentielle / Alt det andet",
+        "date_created": "2022-11-24T15:08:53.495Z",
+        "date_updated": "2026-02-24T09:56:24.748Z",
+        "avatar": {
+          "value": "icon:fas:certificate"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-888432",
+        "name": "Gavereglement",
+        "parent_page_id": "kg3eh-10785",
+        "depth": 1,
+        "sort_order": 15,
+        "path": "Det essentielle / Gavereglement",
+        "date_created": "2024-06-27T08:45:27.437Z",
+        "date_updated": "2025-02-06T09:22:12.701Z",
+        "avatar": {
+          "value": "emoji::🎁"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-247645",
+    "name": "Det praktiske",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 2,
+    "path": "Det praktiske",
+    "date_created": "2022-11-08T13:59:16.608Z",
+    "date_updated": "2025-10-20T07:36:12.210Z",
+    "avatar": {
+      "color": "#27AE60",
+      "value": "icon:fas:info-circle"
+    },
+    "children_count": 10,
+    "children": [
+      {
+        "id": "kg3eh-1022832",
+        "name": "NPS",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Det praktiske / NPS",
+        "date_created": "2025-12-03T10:44:11.674Z",
+        "date_updated": "2025-12-03T10:47:10.046Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247705",
+        "name": "Zenegy (lønsystem)",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Det praktiske / Zenegy (lønsystem)",
+        "date_created": "2022-11-08T14:04:57.929Z",
+        "date_updated": "2023-01-02T11:06:48.324Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247745",
+        "name": "Mødelokaler",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Det praktiske / Mødelokaler",
+        "date_created": "2022-11-08T14:08:08.893Z",
+        "date_updated": "2025-11-07T10:11:59.693Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247765",
+        "name": "Parkering",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 3,
+        "path": "Det praktiske / Parkering",
+        "date_created": "2022-11-08T14:13:24.349Z",
+        "date_updated": "2025-11-11T10:33:51.443Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247785",
+        "name": "Lukkerutine",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 4,
+        "path": "Det praktiske / Lukkerutine",
+        "date_created": "2022-11-08T14:14:18.024Z",
+        "date_updated": "2022-11-29T07:47:19.965Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-247805",
+        "name": "Skabeloner til autosvar",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 5,
+        "path": "Det praktiske / Skabeloner til autosvar",
+        "date_created": "2022-11-08T14:32:39.074Z",
+        "date_updated": "2023-08-08T08:21:51.308Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-258785",
+        "name": "Mødetemplates",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 6,
+        "path": "Det praktiske / Mødetemplates",
+        "date_created": "2022-11-25T07:47:18.956Z",
+        "date_updated": "2022-11-29T07:48:08.394Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-281065",
+        "name": "Afdelingsoversigt",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 7,
+        "path": "Det praktiske / Afdelingsoversigt",
+        "date_created": "2023-02-20T11:35:00.507Z",
+        "date_updated": "2024-08-14T06:33:45.663Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-289825",
+        "name": "Kommunikationskanaler",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 8,
+        "path": "Det praktiske / Kommunikationskanaler",
+        "date_created": "2023-03-13T07:42:05.653Z",
+        "date_updated": "2024-07-31T12:35:09.330Z",
+        "avatar": {
+          "value": "emoji::🗣️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-322365",
+        "name": "Lokal kundemappe",
+        "parent_page_id": "kg3eh-247645",
+        "depth": 1,
+        "sort_order": 9,
+        "path": "Det praktiske / Lokal kundemappe",
+        "date_created": "2023-06-14T08:48:05.034Z",
+        "date_updated": "2023-06-15T06:20:52.730Z",
+        "avatar": {
+          "value": "emoji::➡️"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-258645",
+    "name": "Vidensdeling",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 3,
+    "path": "Vidensdeling",
+    "date_created": "2022-11-24T10:40:20.764Z",
+    "date_updated": "2025-01-07T13:43:57.092Z",
+    "avatar": {
+      "value": "emoji::🧠"
+    },
+    "children_count": 3,
+    "children": [
+      {
+        "id": "kg3eh-1025412",
+        "name": "2026",
+        "parent_page_id": "kg3eh-258645",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Vidensdeling / 2026",
+        "date_created": "2026-01-09T10:57:37.692Z",
+        "date_updated": "2026-04-27T12:22:35.625Z",
+        "avatar": {
+          "value": "emoji::💡"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-276805",
+        "name": "Client Lead Workshops",
+        "parent_page_id": "kg3eh-258645",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Vidensdeling / Client Lead Workshops",
+        "date_created": "2023-01-30T09:08:43.117Z",
+        "date_updated": "2023-01-30T12:50:43.287Z",
+        "avatar": {
+          "value": "emoji::🗣️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-977412",
+        "name": "2025",
+        "parent_page_id": "kg3eh-258645",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Vidensdeling / 2025",
+        "date_created": "2025-02-25T09:09:52.799Z",
+        "date_updated": "2025-08-20T13:46:23.947Z",
+        "avatar": {
+          "value": "emoji::💡"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-263805",
+    "name": "Interne procedurer",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 4,
+    "path": "Interne procedurer",
+    "date_created": "2022-12-09T13:03:19.036Z",
+    "date_updated": "2023-03-14T14:05:56.489Z",
+    "avatar": {
+      "value": "emoji::🎯"
+    },
+    "children_count": 1,
+    "children": [
+      {
+        "id": "kg3eh-263845",
+        "name": "Mappestruktur - Creative",
+        "parent_page_id": "kg3eh-263805",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Interne procedurer / Mappestruktur - Creative",
+        "date_created": "2022-12-09T13:09:05.638Z",
+        "date_updated": "2026-03-04T11:50:30.615Z",
+        "avatar": {
+          "value": "emoji::ℹ️"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-278665",
+    "name": "ClickUp Generelt",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 5,
+    "path": "ClickUp Generelt",
+    "date_created": "2023-02-08T10:45:42.417Z",
+    "date_updated": "2023-05-04T12:29:14.833Z",
+    "avatar": {
+      "value": "emoji::📚"
+    },
+    "children_count": 3,
+    "children": [
+      {
+        "id": "kg3eh-277245",
+        "name": "Statuses",
+        "parent_page_id": "kg3eh-278665",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "ClickUp Generelt / Statuses",
+        "date_created": "2023-02-03T08:50:37.806Z",
+        "date_updated": "2024-11-07T08:07:22.223Z",
+        "avatar": {
+          "color": "#F31D2F",
+          "value": "icon:fas:server"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-277305",
+        "name": "Budget Manager",
+        "parent_page_id": "kg3eh-278665",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "ClickUp Generelt / Budget Manager",
+        "date_created": "2023-02-03T08:54:37.359Z",
+        "date_updated": "2026-04-09T09:22:07.821Z",
+        "avatar": {
+          "value": "emoji::💸"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-278685",
+        "name": "10 Commandments",
+        "parent_page_id": "kg3eh-278665",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "ClickUp Generelt / 10 Commandments",
+        "date_created": "2023-02-08T10:46:19.882Z",
+        "date_updated": "2023-02-08T10:46:51.711Z",
+        "avatar": {
+          "value": "emoji::🔟"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-281",
+    "name": "Client Onboarding",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 6,
+    "path": "Client Onboarding",
+    "date_created": "2022-08-29T07:52:27.482Z",
+    "date_updated": "2023-05-01T18:07:52.775Z",
+    "avatar": {
+      "value": "emoji::🤩"
+    },
+    "children_count": 1,
+    "children": [
+      {
+        "id": "kg3eh-261",
+        "name": "Opstarsmail til ny kunde",
+        "parent_page_id": "kg3eh-281",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Client Onboarding / Opstarsmail til ny kunde",
+        "date_created": "2022-08-29T07:52:27.481Z",
+        "date_updated": "2023-03-06T09:27:17.797Z",
+        "avatar": {
+          "value": "emoji::👋"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-332032",
+    "name": "Searchmind Tech",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 7,
+    "path": "Searchmind Tech",
+    "date_created": "2023-08-14T07:22:32.853Z",
+    "date_updated": "2025-02-18T08:43:34.456Z",
+    "avatar": {
+      "value": "emoji::📠"
+    },
+    "children_count": 5,
+    "children": [
+      {
+        "id": "kg3eh-1017132",
+        "name": "Automations",
+        "parent_page_id": "kg3eh-332032",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Searchmind Tech / Automations",
+        "date_created": "2025-10-23T08:21:19.458Z",
+        "date_updated": "2025-10-23T08:22:58.074Z",
+        "avatar": {
+          "value": "emoji::🤖"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1017152",
+        "name": "Tools",
+        "parent_page_id": "kg3eh-332032",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Searchmind Tech / Tools",
+        "date_created": "2025-10-23T08:21:46.648Z",
+        "date_updated": "2025-10-23T08:23:16.990Z",
+        "avatar": {
+          "value": "emoji::⚒️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1054192",
+        "name": "Github",
+        "parent_page_id": "kg3eh-332032",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Searchmind Tech / Github",
+        "date_created": "2026-05-11T09:03:39.001Z",
+        "date_updated": "2026-05-11T09:14:49.269Z",
+        "avatar": {
+          "value": "emoji::🐈‍⬛"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-332052",
+        "name": "Logins (tech)",
+        "parent_page_id": "kg3eh-332032",
+        "depth": 1,
+        "sort_order": 3,
+        "path": "Searchmind Tech / Logins (tech)",
+        "date_created": "2023-08-14T07:27:34.427Z",
+        "date_updated": "2024-05-01T08:22:42.744Z",
+        "avatar": {
+          "value": "emoji::🔑"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-831892",
+        "name": "Teknisk rapport",
+        "parent_page_id": "kg3eh-332032",
+        "depth": 1,
+        "sort_order": 4,
+        "path": "Searchmind Tech / Teknisk rapport",
+        "date_created": "2024-05-14T10:15:37.687Z",
+        "date_updated": "2025-10-23T08:23:04.803Z",
+        "avatar": {
+          "value": "emoji::🌐"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-337352",
+    "name": "Morebizz",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 8,
+    "path": "Morebizz",
+    "date_created": "2023-08-31T11:32:25.510Z",
+    "date_updated": "2025-04-16T11:53:02.114Z",
+    "avatar": {
+      "value": "emoji::💰"
+    },
+    "children_count": 2,
+    "children": [
+      {
+        "id": "kg3eh-337432",
+        "name": "Creative",
+        "parent_page_id": "kg3eh-337352",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Morebizz / Creative",
+        "date_created": "2023-08-31T11:36:10.556Z",
+        "date_updated": "2024-06-03T09:25:36.904Z",
+        "avatar": {
+          "value": "emoji::🧑‍🎨"
+        },
+        "children_count": 2,
+        "children": [
+          {
+            "id": "kg3eh-337452",
+            "name": "Creative Produktion",
+            "parent_page_id": "kg3eh-337432",
+            "depth": 2,
+            "sort_order": 0,
+            "path": "Morebizz / Creative / Creative Produktion",
+            "date_created": "2023-08-31T11:36:28.442Z",
+            "date_updated": "2024-10-11T08:16:41.538Z",
+            "avatar": null,
+            "children_count": 2,
+            "children": [
+              {
+                "id": "kg3eh-338052",
+                "name": "Video produktion - SEO",
+                "parent_page_id": "kg3eh-337452",
+                "depth": 3,
+                "sort_order": 0,
+                "path": "Morebizz / Creative / Creative Produktion / Video produktion - SEO",
+                "date_created": "2023-08-31T11:43:39.931Z",
+                "date_updated": "2024-10-11T08:15:00.577Z",
+                "avatar": null,
+                "children_count": 0,
+                "children": []
+              },
+              {
+                "id": "kg3eh-339912",
+                "name": "Video produktion",
+                "parent_page_id": "kg3eh-337452",
+                "depth": 3,
+                "sort_order": 1,
+                "path": "Morebizz / Creative / Creative Produktion / Video produktion",
+                "date_created": "2023-09-05T12:40:08.125Z",
+                "date_updated": "2024-10-11T08:13:22.368Z",
+                "avatar": null,
+                "children_count": 0,
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "kg3eh-338092",
+            "name": "Creativ behandling",
+            "parent_page_id": "kg3eh-337432",
+            "depth": 2,
+            "sort_order": 1,
+            "path": "Morebizz / Creative / Creativ behandling",
+            "date_created": "2023-08-31T11:49:14.311Z",
+            "date_updated": "2024-10-11T08:14:45.602Z",
+            "avatar": null,
+            "children_count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "kg3eh-855092",
+        "name": "Content",
+        "parent_page_id": "kg3eh-337352",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Morebizz / Content",
+        "date_created": "2024-06-03T09:47:25.259Z",
+        "date_updated": "2024-08-14T09:42:00.031Z",
+        "avatar": {
+          "value": "emoji::👨‍💻"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-641",
+    "name": "Knowledge Base Overview",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 9,
+    "path": "Knowledge Base Overview",
+    "date_created": "2022-08-29T07:52:27.481Z",
+    "date_updated": "2025-08-27T13:04:47.001Z",
+    "avatar": {
+      "color": "#3498DB",
+      "value": "icon:fas:map-marker-alt"
+    },
+    "children_count": 0,
+    "children": []
+  },
+  {
+    "id": "kg3eh-670832",
+    "name": "Logins",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 10,
+    "path": "Logins",
+    "date_created": "2023-12-01T09:16:58.033Z",
+    "date_updated": "2026-03-17T10:25:45.903Z",
+    "avatar": {
+      "value": "emoji::🔐"
+    },
+    "children_count": 2,
+    "children": [
+      {
+        "id": "kg3eh-261725",
+        "name": "WP MAIN PUBLISH",
+        "parent_page_id": "kg3eh-670832",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Logins / WP MAIN PUBLISH",
+        "date_created": "2022-12-05T19:14:11.869Z",
+        "date_updated": "2026-03-17T10:25:31.085Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-318724",
+        "name": "AI Google",
+        "parent_page_id": "kg3eh-670832",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Logins / AI Google",
+        "date_created": "2023-06-08T05:26:39.844Z",
+        "date_updated": "2026-03-17T10:25:33.978Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-704432",
+    "name": "Referral / Partner aftaler",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 11,
+    "path": "Referral / Partner aftaler",
+    "date_created": "2024-01-24T08:01:08.001Z",
+    "date_updated": "2024-02-06T14:26:08.931Z",
+    "avatar": {
+      "value": "emoji::🔗"
+    },
+    "children_count": 0,
+    "children": []
+  },
+  {
+    "id": "kg3eh-7705",
+    "name": "Rabatkoder",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 12,
+    "path": "Rabatkoder",
+    "date_created": "2022-09-27T07:02:48.404Z",
+    "date_updated": "2025-05-16T09:18:30.227Z",
+    "avatar": {
+      "value": "emoji::💰"
+    },
+    "children_count": 18,
+    "children": [
+      {
+        "id": "kg3eh-1015932",
+        "name": "Aarhus Barbers saloner - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Rabatkoder / Aarhus Barbers saloner - rabatkode",
+        "date_created": "2025-10-20T07:34:46.567Z",
+        "date_updated": "2025-11-05T08:57:22.156Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1018352",
+        "name": "STOFF Nagel - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Rabatkoder / STOFF Nagel - rabatkode",
+        "date_created": "2025-11-05T08:56:32.124Z",
+        "date_updated": "2025-11-05T08:57:36.867Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1021272",
+        "name": "kaereboern.dk",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Rabatkoder / kaereboern.dk",
+        "date_created": "2025-11-19T09:06:31.373Z",
+        "date_updated": "2026-04-09T09:24:13.151Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-1051832",
+        "name": "oversizedliftingclub.dk - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 3,
+        "path": "Rabatkoder / oversizedliftingclub.dk - rabatkode",
+        "date_created": "2026-04-28T11:32:37.202Z",
+        "date_updated": "2026-04-28T11:33:08.973Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-256145",
+        "name": "Rains - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 4,
+        "path": "Rabatkoder / Rains - rabatkode",
+        "date_created": "2022-11-18T15:13:04.522Z",
+        "date_updated": "2024-11-13T13:16:27.686Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-356432",
+        "name": "Ruebirch.dk - Rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 5,
+        "path": "Rabatkoder / Ruebirch.dk - Rabatkode",
+        "date_created": "2023-10-24T13:54:39.062Z",
+        "date_updated": "2023-10-24T13:56:05.245Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-782572",
+        "name": "bareen.dk - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 6,
+        "path": "Rabatkoder / bareen.dk - rabatkode",
+        "date_created": "2024-03-06T09:56:54.807Z",
+        "date_updated": "2025-10-20T07:34:36.254Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8325",
+        "name": "Grundled.dk\t- rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 7,
+        "path": "Rabatkoder / Grundled.dk\t- rabatkode",
+        "date_created": "2022-09-27T08:00:19.114Z",
+        "date_updated": "2024-06-21T12:24:38.952Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8345",
+        "name": "\ttoftjessen.dk\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 8,
+        "path": "Rabatkoder / \ttoftjessen.dk\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.155Z",
+        "date_updated": "2025-01-09T07:41:14.749Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8385",
+        "name": "\ta-view.dk\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 9,
+        "path": "Rabatkoder / \ta-view.dk\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.191Z",
+        "date_updated": "2025-10-02T07:54:56.791Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8465",
+        "name": "\tbruunsbazaar.dk\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 10,
+        "path": "Rabatkoder / \tbruunsbazaar.dk\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.265Z",
+        "date_updated": "2024-05-14T12:10:33.922Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8505",
+        "name": "\tGinministeriet\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 11,
+        "path": "Rabatkoder / \tGinministeriet\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.297Z",
+        "date_updated": "2025-01-14T13:41:16.001Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8545",
+        "name": "\tIslandsrejser.dk\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 12,
+        "path": "Rabatkoder / \tIslandsrejser.dk\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.332Z",
+        "date_updated": "2025-03-11T14:08:56.759Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8565",
+        "name": "flowr.dk\t- rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 13,
+        "path": "Rabatkoder / flowr.dk\t- rabatkode",
+        "date_created": "2022-09-27T08:00:19.354Z",
+        "date_updated": "2026-02-09T14:12:46.425Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8585",
+        "name": "Spejlblank.dk - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 14,
+        "path": "Rabatkoder / Spejlblank.dk - rabatkode",
+        "date_created": "2022-09-27T08:00:19.365Z",
+        "date_updated": "2025-10-08T13:37:00.590Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8625",
+        "name": "Aboutvintage.com\t- rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 15,
+        "path": "Rabatkoder / Aboutvintage.com\t- rabatkode",
+        "date_created": "2022-09-27T08:00:19.393Z",
+        "date_updated": "2025-10-08T13:13:36.179Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-8685",
+        "name": "\tJamesay.dk\t- rabatkode\t\n",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 16,
+        "path": "Rabatkoder / \tJamesay.dk\t- rabatkode\t\n",
+        "date_created": "2022-09-27T08:00:19.421Z",
+        "date_updated": "2025-01-09T10:43:57.650Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-981312",
+        "name": "Humdakin - rabatkode",
+        "parent_page_id": "kg3eh-7705",
+        "depth": 1,
+        "sort_order": 17,
+        "path": "Rabatkoder / Humdakin - rabatkode",
+        "date_created": "2025-03-11T13:54:25.789Z",
+        "date_updated": "2025-03-11T13:55:58.882Z",
+        "avatar": null,
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-952052",
+    "name": "AI & Tools",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 13,
+    "path": "AI & Tools",
+    "date_created": "2024-11-28T11:06:06.871Z",
+    "date_updated": "2025-02-18T08:43:42.068Z",
+    "avatar": {
+      "value": "emoji::🤖"
+    },
+    "children_count": 2,
+    "children": [
+      {
+        "id": "kg3eh-952072",
+        "name": "AI Brug & retningslinjer",
+        "parent_page_id": "kg3eh-952052",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "AI & Tools / AI Brug & retningslinjer",
+        "date_created": "2024-11-28T11:06:24.744Z",
+        "date_updated": "2024-12-17T08:14:09.911Z",
+        "avatar": {
+          "value": "emoji::⚖️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-976792",
+        "name": "Tools",
+        "parent_page_id": "kg3eh-952052",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "AI & Tools / Tools",
+        "date_created": "2025-02-18T08:45:39.800Z",
+        "date_updated": "2026-03-17T10:26:36.006Z",
+        "avatar": {
+          "value": "emoji::🛠️"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "kg3eh-965752",
+    "name": "Uniqkey",
+    "parent_page_id": null,
+    "depth": 0,
+    "sort_order": 14,
+    "path": "Uniqkey",
+    "date_created": "2025-01-21T10:41:44.426Z",
+    "date_updated": "2025-02-20T12:55:05.941Z",
+    "avatar": {
+      "value": "emoji::🔐"
+    },
+    "children_count": 3,
+    "children": [
+      {
+        "id": "kg3eh-965772",
+        "name": "Manuel opdatering af kode",
+        "parent_page_id": "kg3eh-965752",
+        "depth": 1,
+        "sort_order": 0,
+        "path": "Uniqkey / Manuel opdatering af kode",
+        "date_created": "2025-01-21T10:42:11.154Z",
+        "date_updated": "2025-02-20T13:02:22.756Z",
+        "avatar": {
+          "value": "emoji::🔑"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-965792",
+        "name": "Nulstilling af Master password",
+        "parent_page_id": "kg3eh-965752",
+        "depth": 1,
+        "sort_order": 1,
+        "path": "Uniqkey / Nulstilling af Master password",
+        "date_created": "2025-01-21T10:44:47.751Z",
+        "date_updated": "2025-01-21T10:48:16.977Z",
+        "avatar": {
+          "value": "emoji::🗣️"
+        },
+        "children_count": 0,
+        "children": []
+      },
+      {
+        "id": "kg3eh-965812",
+        "name": "Uniqkey som 2FA authentication app",
+        "parent_page_id": "kg3eh-965752",
+        "depth": 1,
+        "sort_order": 2,
+        "path": "Uniqkey / Uniqkey som 2FA authentication app",
+        "date_created": "2025-01-21T10:48:36.086Z",
+        "date_updated": "2025-01-21T10:59:41.981Z",
+        "avatar": {
+          "value": "emoji::🔐"
+        },
+        "children_count": 0,
+        "children": []
+      }
+    ]
+  }
+]

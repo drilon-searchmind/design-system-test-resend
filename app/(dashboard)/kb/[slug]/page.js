@@ -2,16 +2,21 @@ import { notFound } from "next/navigation";
 
 import { KbArticleBody } from "@/components/kb/kb-article-body";
 import { KbArticleHeader } from "@/components/kb/kb-article-header";
+import { KbArticleHero } from "@/components/kb/kb-article-hero";
 import { KbArticleMetaCard } from "@/components/kb/kb-article-meta-card";
 import { KbRelatedArticles } from "@/components/kb/kb-related-articles";
 import { shellMainStudio } from "@/config/shell";
-import { getKnowledgeArticleBySlug, getRelatedKnowledgeArticles } from "@/lib/crm/knowledge-utils";
+import {
+  fetchKnowledgeArticleBySlug,
+  fetchKnowledgeArticles,
+  relatedKnowledgeArticles,
+} from "@/lib/server/knowledge-data";
 import { cn } from "@/lib/utils";
 
 /** @param {{ params: Promise<{ slug: string }> }} props */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const article = getKnowledgeArticleBySlug(slug);
+  const article = await fetchKnowledgeArticleBySlug(slug);
   if (!article) return { title: "Knowledge base · 1337-crm by Searchmind" };
   const draft = article.published ? "" : " (kladde)";
   return { title: `${article.title}${draft} · Knowledge base · 1337-crm by Searchmind` };
@@ -20,23 +25,28 @@ export async function generateMetadata({ params }) {
 /** @param {{ params: Promise<{ slug: string }> }} props */
 export default async function KnowledgeArticlePage({ params }) {
   const { slug } = await params;
-  const article = getKnowledgeArticleBySlug(slug);
+  const article = await fetchKnowledgeArticleBySlug(slug);
   if (!article) notFound();
 
-  const related = getRelatedKnowledgeArticles(article, 4);
+  const allArticles = await fetchKnowledgeArticles();
+  const related = relatedKnowledgeArticles(article, allArticles, 5);
+  const childArticles = allArticles.filter((a) => a.parentSlug === article.slug && a.published);
 
   return (
     <main className={cn(shellMainStudio)}>
-      <KbArticleHeader article={article} />
+      <KbArticleHeader article={article} childArticles={childArticles} />
 
-      <section className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.22fr)_minmax(260px,0.78fr)] lg:items-start">
-        <article className="tally-panel min-w-0 p-4 md:p-[length:var(--ds-studio-pad-main)]">
-          <h2 className="sr-only">Indhold</h2>
-          <KbArticleBody bodyMd={article.bodyMd} />
+      <section className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.22fr)_minmax(260px,0.72fr)] lg:items-start">
+        <article className="tally-panel min-w-0 overflow-hidden">
+          <KbArticleHero imageUrl={article.headerImageUrl ?? ""} alt={article.title} embedded />
+          <div className="p-4 md:p-[length:var(--ds-studio-pad-main)]">
+            <h2 className="sr-only">Indhold</h2>
+            <KbArticleBody bodyMd={article.bodyMd} />
+          </div>
         </article>
-        <div className="flex min-w-0 flex-col gap-[length:var(--ds-studio-stack)]">
-          <KbArticleMetaCard article={article} />
+        <div className="flex min-w-0 flex-col gap-[length:var(--ds-studio-stack)] lg:sticky lg:top-4">
           <KbRelatedArticles articles={related} />
+          <KbArticleMetaCard article={article} />
         </div>
       </section>
     </main>

@@ -1,10 +1,23 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Lightweight markdown-ish body: `##` / `###`, bullet lines, paragraphs, inline `code`.
+ * Renders markdown-ish or rich-text HTML article bodies.
  * @param {{ bodyMd: string; className?: string }} props
  */
 export function KbArticleBody({ bodyMd, className }) {
+  if (!bodyMd?.trim()) {
+    return <p className="font-sans text-[13px] text-fg-muted">Ingen brødtekst endnu.</p>;
+  }
+
+  if (looksLikeHtml(bodyMd)) {
+    return (
+      <div
+        className={cn("kb-article-content task-comment-body font-sans text-[14px] leading-relaxed text-fg-muted", className)}
+        dangerouslySetInnerHTML={{ __html: bodyMd }}
+      />
+    );
+  }
+
   const blocks = parseKbMarkdown(bodyMd);
 
   return (
@@ -44,6 +57,11 @@ export function KbArticleBody({ bodyMd, className }) {
       })}
     </div>
   );
+}
+
+/** @param {string} text */
+function looksLikeHtml(text) {
+  return /<(?:p|div|h[1-6]|ul|ol|li|br|strong|em|b|i|u)\b/i.test(text);
 }
 
 /** @param {string} text */

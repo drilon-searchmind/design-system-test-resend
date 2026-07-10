@@ -11,6 +11,7 @@
     "fetch-clickup-customers": "node --env-file=.env scripts/run-fetch-clickup-customers.mjs",
     "fetch-clickup-users": "node --env-file=.env scripts/run-fetch-clickup-users.mjs",
     "fetch-clickup-all": "node --env-file=.env scripts/run-fetch-clickup-all.mjs",
+    "fetch-clickup-knowledge": "node --env-file=.env scripts/run-fetch-clickup-knowledge.mjs",
     "import-clickup-customers": "node --env-file=.env scripts/run-import-clickup-customers.mjs",
     "import-clickup-users": "node --env-file=.env scripts/run-import-clickup-users.mjs",
     "import-clickup-customers-api": "node --env-file=.env scripts/run-import-clickup-customers-api.mjs",
