@@ -1,11 +1,8 @@
 "use client";
 
 import { IconShield } from "@/components/crm/icons";
-import { PulseIconDownload } from "@/components/pulse/pulse-icons";
-import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { TEAM } from "@/lib/crm/static-data";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
-import { useState } from "react";
 
 /**
  * @param {{
@@ -19,7 +16,6 @@ export function UsersPageHeader({
   mineLabel = null,
   loading = false,
 }) {
-  const [view, setView] = useState("all");
   const demoName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "Medarbejder";
   const displayName =
     typeof mineLabel === "string" && mineLabel.trim() ?
@@ -44,23 +40,6 @@ export function UsersPageHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <PulseSegmentedControl
-            size="sm"
-            active={view}
-            onChange={setView}
-            tabs={[
-              { id: "all", label: "Alle konti" },
-              { id: "security", label: "Sikkerhed" },
-            ]}
-          />
-          <button
-            type="button"
-            disabled
-            className="inline-flex h-[26px] items-center gap-1.5 rounded-md border border-border bg-surface-muted px-3 font-sans text-[11px] font-medium text-fg-muted opacity-60"
-            title="Kommer snart"
-          >
-            <PulseIconDownload size={12} /> Audit log
-          </button>
           <button
             type="button"
             disabled
@@ -70,13 +49,6 @@ export function UsersPageHeader({
           </button>
         </div>
       </header>
-
-      {view !== "all" ? (
-        <p className="rounded-xl border border-border-soft bg-surface-muted/50 px-3 py-2.5 font-sans text-[12px] leading-snug text-fg-muted">
-          <span className="font-medium text-fg">Sikkerhedsvisning</span> — policy-tjek og MFA-drift i fuld Agency OS;
-          denne visning viser ingen ekstra kolonner endnu.
-        </p>
-      ) : null}
     </div>
   );
 }

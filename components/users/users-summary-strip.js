@@ -29,7 +29,7 @@ export function UsersSummaryStrip({
       <PulseKpiCard label="Aktive (Google / SSO)" value={String(active)} tone="ok" />
       <PulseKpiCard label="Invitationer åbne" value={String(invited)} tone={inviteTone} />
       <PulseKpiCard label="Suspenderet" value={String(suspended)} tone={suspTone} />
-      <PulseKpiCard label="Admin / lead (aktive)" value={String(adminish)} tone="brand" />
+      <PulseKpiCard label="Administratorer (aktive)" value={String(adminish)} tone="brand" />
       <PulseKpiCard
         label={`Aktive med MFA`}
         value={`${withMfa} (${mfaPct}%)`}

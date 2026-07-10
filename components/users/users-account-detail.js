@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { routes } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
-import { agencyPlatformRoleLabel } from "@/lib/crm/users-utils";
+import { userRoleLabel } from "@/lib/crm/users-utils";
 
 /** @typedef {typeof import('@/lib/crm/users-data').AGENCY_USERS[number]} AgencyUserRow */
 
@@ -45,7 +45,7 @@ export function UsersAccountHeader({ user, showBorder = false }) {
             </div>
             <p className="mt-2 text-[13px] text-fg-muted">{user.email}</p>
             <p className="mt-1 font-sans text-[13px] text-fg-muted">
-              Platform-rolle: <span className="font-semibold text-fg">{agencyPlatformRoleLabel(user.platformRole)}</span>
+              Rolle: <span className="font-semibold text-fg">{userRoleLabel(user.isAdmin)}</span>
             </p>
             {user.teamMemberId ? (
               <p className="mt-2 font-sans text-[12px] text-fg-muted">

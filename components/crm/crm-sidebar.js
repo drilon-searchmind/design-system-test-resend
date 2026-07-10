@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 import { routes } from "@/config/routes";
 import { CRM_NAV_GROUPS, CRM_NAV_ITEMS } from "@/lib/crm/nav-config";
@@ -52,6 +53,9 @@ export function CrmSidebar({
   onNavigate,
 }) {
   const w = collapsed ? 56 : 220;
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
+  const navItems = CRM_NAV_ITEMS.filter((item) => item.id !== "users" || isAdmin);
 
   return (
     <aside
@@ -124,7 +128,7 @@ export function CrmSidebar({
                 {group.label}
               </div>
             ) : null}
-            {CRM_NAV_ITEMS.filter((i) => i.group === group.id).map((item) => {
+            {navItems.filter((i) => i.group === group.id).map((item) => {
               const href = item.href ?? "";
               const active = isNavActive(pathname, href, item.id);
               const itemClass = cn(

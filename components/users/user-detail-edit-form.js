@@ -52,6 +52,16 @@ export function UserDetailEditForm({ draft, onChange }) {
           <Field label="Profilbillede (URL)">
             <input value={draft.image} onChange={(e) => setField("image", e.target.value)} className={clientEditInputClass} />
           </Field>
+          <Field label="Rolle">
+            <select
+              value={draft.isAdmin ? "admin" : "standard"}
+              onChange={(e) => setField("isAdmin", e.target.value === "admin")}
+              className={clientEditInputClass}
+            >
+              <option value="standard">Standard</option>
+              <option value="admin">Admin</option>
+            </select>
+          </Field>
           <Field label="Adgangsniveau">
             <select
               value={draft.accessTier}

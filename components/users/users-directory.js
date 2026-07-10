@@ -9,7 +9,7 @@ import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { routes } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { AGENCY_USERS as FALLBACK_AGENCY_USERS } from "@/lib/crm/users-data";
-import { agencyPlatformRoleLabel } from "@/lib/crm/users-utils";
+import { userRoleLabel } from "@/lib/crm/users-utils";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +26,7 @@ function formatSeen(iso) {
  *   users?: import('@/lib/crm/users-data').AGENCY_USERS;
  *   myTeamMemberKey?: string | null;
  *   initialStatus?: 'all'|'active'|'invited'|'suspended';
- *   initialRole?: 'all'|'admin'|'lead'|'finance'|'member'|'readonly';
+ *   initialRole?: 'all'|'admin'|'standard';
  *   headingId?: string;
  *   dataSource?: 'demo' | 'database';
  * }} props
@@ -49,7 +49,8 @@ export function UsersDirectory({
     const ql = q.trim().toLowerCase();
     let list = users.filter((u) => {
       if (statusF !== "all" && u.status !== statusF) return false;
-      if (roleF !== "all" && u.platformRole !== roleF) return false;
+      if (roleF === "admin" && !u.isAdmin) return false;
+      if (roleF === "standard" && u.isAdmin) return false;
       if (ql && !`${u.name} ${u.email} ${u.departmentLabel ?? ""}`.toLowerCase().includes(ql) && !u.id.toLowerCase().includes(ql)) {
         return false;
       }
@@ -57,7 +58,10 @@ export function UsersDirectory({
     });
     list = [...list];
     list.sort((a, b) => {
-      if (sort === "role") return a.platformRole.localeCompare(b.platformRole) || a.name.localeCompare(b.name, "da");
+      if (sort === "role") {
+        const roleOrder = (u) => (u.isAdmin ? "0" : "1");
+        return roleOrder(a).localeCompare(roleOrder(b)) || a.name.localeCompare(b.name, "da");
+      }
       if (sort === "seen") return (b.lastSeenAt ?? "").localeCompare(a.lastSeenAt ?? "");
       return a.name.localeCompare(b.name, "da");
     });
@@ -122,10 +126,7 @@ export function UsersDirectory({
           tabs={[
             { id: "all", label: "Alle roller" },
             { id: "admin", label: "Admin" },
-            { id: "lead", label: "Lead" },
-            { id: "finance", label: "Øko." },
-            { id: "member", label: "Std." },
-            { id: "readonly", label: "RO" },
+            { id: "standard", label: "Standard" },
           ]}
         />
       </div>
@@ -209,7 +210,7 @@ export function UsersDirectory({
                   </div>
                 </div>
                 <span className="truncate self-center text-[11px] text-fg-muted">{u.email}</span>
-                <span className="self-center font-sans text-[12px] text-fg-muted">{agencyPlatformRoleLabel(u.platformRole)}</span>
+                <span className="self-center font-sans text-[12px] text-fg-muted">{userRoleLabel(u.isAdmin)}</span>
                 <div className="self-center">
                   {u.status === "invited" ? (
                     <span className="inline-flex rounded border border-agency-brand-border bg-agency-brand-soft px-1.5 py-0 text-[9px] font-semibold uppercase text-agency-brand">

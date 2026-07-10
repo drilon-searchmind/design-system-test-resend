@@ -6,6 +6,7 @@ import { parseUserAccountId } from "@/lib/crm/user-account-id";
 import { getAgencyUserById } from "@/lib/crm/users-utils";
 import User from "@/lib/db/models/user";
 import { connectDb } from "@/lib/db/mongoose";
+import { requireAdminPage } from "@/lib/server/require-admin";
 import { cn } from "@/lib/utils";
 
 /** @param {{ params: Promise<{ userId: string }> }} props */
@@ -31,6 +32,8 @@ export async function generateMetadata({ params }) {
 
 /** @param {{ params: Promise<{ userId: string }> }} props */
 export default async function UserAccountPage({ params }) {
+  await requireAdminPage();
+
   const { userId } = await params;
 
   const demo = getAgencyUserById(userId);

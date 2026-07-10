@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { fetchUserDetailBundle, updateUserMongo } from "@/lib/server/user-detail-data";
-import { requireSession } from "@/lib/server/require-session";
+import { requireAdmin } from "@/lib/server/require-admin";
 
 /**
  * @param {import('next/server').NextRequest} _req
  * @param {{ params: Promise<{ userId: string }> }} ctx
  */
 export async function GET(_req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { userId } = await ctx.params;
@@ -30,7 +30,7 @@ export async function GET(_req, ctx) {
  * @param {{ params: Promise<{ userId: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { userId } = await ctx.params;

@@ -21,6 +21,7 @@
     "clickup-migrate": "node --env-file=.env scripts/run-clickup-migrate.mjs",
     "sync-member-disciplines": "node --env-file=.env scripts/run-sync-member-disciplines.mjs",
     "sync-member-disciplines-dry-run": "node --env-file=.env scripts/run-sync-member-disciplines.mjs -- --dry-run",
+    "backfill-user-is-admin": "node --env-file=.env scripts/run-backfill-user-is-admin.mjs",
     "reset-demo": "node --env-file=.env scripts/run-reset-demo.mjs"
   },
   "dependencies": {

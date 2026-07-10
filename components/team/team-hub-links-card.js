@@ -1,8 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 import { routes } from "@/config/routes";
 
 export function TeamHubLinksCard() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
+
+  const links = [
+    { href: routes.workload, label: "Belægning", hint: "Matrix & kapacitet" },
+    { href: routes.time, label: "Tidsregistrering", hint: "Forbrug" },
+    ...(isAdmin ?
+      [{ href: routes.users, label: "Brugerstyring", hint: "Auth & roller" }]
+    : []),
+    { href: routes.kb, label: "Knowledge base", hint: "SOP / playbooks" },
+  ];
+
   return (
     <section className="tally-panel p-4 md:p-5">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Relateret i OS</h2>
@@ -10,12 +25,7 @@ export function TeamHubLinksCard() {
         Capacity, backlog og bureau‑rytme finder du hurtigt herfra.
       </p>
       <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { href: routes.workload, label: "Belægning", hint: "Matrix & kapacitet" },
-          { href: routes.time, label: "Tidsregistrering", hint: "Forbrug" },
-          { href: routes.users, label: "Brugerstyring", hint: "Auth & roller" },
-          { href: routes.kb, label: "Knowledge base", hint: "SOP / playbooks" },
-        ].map((x) => (
+        {links.map((x) => (
           <li key={x.href}>
             <Link
               href={x.href}

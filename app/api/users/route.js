@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { requireSession } from "@/lib/server/require-session";
+import { requireAdmin } from "@/lib/server/require-admin";
 import { fetchUsersAdminPortfolio } from "@/lib/server/users-admin-data";
 
 export async function GET() {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   try {

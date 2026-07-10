@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { UsersPageClient } from "@/components/users/users-page-client";
 import { shellMainStudio } from "@/config/shell";
+import { requireAdminPage } from "@/lib/server/require-admin";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Brugerstyring · 1337-crm by Searchmind" };
@@ -19,7 +20,9 @@ function Fallback() {
   );
 }
 
-export default function UsersAdminPage() {
+export default async function UsersAdminPage() {
+  await requireAdminPage();
+
   return (
     <main className={cn(shellMainStudio)}>
       <Suspense fallback={<Fallback />}>

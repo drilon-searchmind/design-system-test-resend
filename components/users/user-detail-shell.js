@@ -12,7 +12,7 @@ import { routes } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { TEAM } from "@/lib/crm/static-data";
 import { accessTierLabel, editDraftToPatch, userDetailToEditDraft } from "@/lib/crm/user-edit-utils";
-import { getAgencyUserById, agencyPlatformRoleLabel } from "@/lib/crm/users-utils";
+import { getAgencyUserById, userRoleLabel } from "@/lib/crm/users-utils";
 import { cn } from "@/lib/utils";
 
 /**
@@ -120,7 +120,7 @@ export function UserDetailShell({ userId }) {
           <section className="tally-panel p-4 md:p-5">
             <h2 className="font-sans text-sm font-semibold text-fg">Team roster (demo)</h2>
             <dl className="mt-3 space-y-2 font-sans text-[12px] text-fg-muted">
-              <Row label="Rolle" value={demoTeam.role} />
+              <Row label="Titel" value={demoTeam.role} />
               <Row label="Disciplin" value={demoTeam.dept} />
               <Row label="Timer/uge" value={String(demoTeam.weeklyHours)} />
             </dl>
@@ -167,7 +167,7 @@ export function UserDetailShell({ userId }) {
     image: remote.image,
     avatar: remote.avatarInitials,
     hue: remote.hue,
-    platformRole: remote.platformRole,
+    isAdmin: remote.isAdmin,
     status: remote.status,
     teamMemberId: remote.teamMemberKey,
     departmentLabel: remote.departmentLabel,
@@ -201,7 +201,7 @@ export function UserDetailShell({ userId }) {
             <h2 className="font-sans text-sm font-semibold text-fg">Team roster</h2>
             <dl className="mt-3 space-y-2 font-sans text-[12px] text-fg-muted">
               <Row label="Roster-nøgle" value={remote.teamMemberKey ?? "—"} />
-              <Row label="Rolle" value={remote.roleTitle || "—"} />
+              <Row label="Titel" value={remote.roleTitle || "—"} />
               <Row label="Primær disciplin" value={remote.departmentKey || "—"} />
               <Row label="Discipliner" value={remote.departmentLabel ?? "—"} />
               <Row label="Avatar" value={remote.avatarInitials} />
@@ -216,8 +216,8 @@ export function UserDetailShell({ userId }) {
             <dl className="mt-3 space-y-2 font-sans text-[12px] text-fg-muted">
               <Row label="Bruger-id" value={remote.id} mono />
               <Row label="Email" value={remote.email} />
+              <Row label="Rolle" value={userRoleLabel(remote.isAdmin)} />
               <Row label="Adgangsniveau" value={accessTierLabel(remote.accessTier)} />
-              <Row label="Platform-rolle" value={agencyPlatformRoleLabel(remote.platformRole)} />
               {remote.image ? <Row label="Profilbillede" value={remote.image} /> : null}
             </dl>
           </section>

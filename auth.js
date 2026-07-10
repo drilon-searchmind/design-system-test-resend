@@ -21,6 +21,7 @@ const DEV_SESSION = {
     name: "Dev User",
     image: null,
     accessTier: ACCESS_TIERS.INTERNAL_FULL,
+    isAdmin: false,
   },
   expires: "2099-01-01T00:00:00.000Z",
 };
@@ -44,7 +45,7 @@ async function getDevSessionPayload() {
   try {
     await connectDb();
     const user = await User.findOne({ email: normalizeEmail(DEV_SESSION.user.email) })
-      .select("_id name email image accessTier")
+      .select("_id name email image accessTier isAdmin")
       .lean();
     if (user?._id) {
       return {
@@ -54,6 +55,7 @@ async function getDevSessionPayload() {
           name: String(user.name ?? DEV_SESSION.user.name),
           image: user.image ? String(user.image) : null,
           accessTier: accessTierFromUserDoc(user),
+          isAdmin: user.isAdmin === true,
         },
         expires: DEV_SESSION.expires,
       };
@@ -135,12 +137,18 @@ const nextAuth = hasGoogleOAuth
             if (mongoUserId) {
               token.userId = mongoUserId;
               await connectDb();
-              const dbUser = await User.findById(mongoUserId).select("accessTier").lean();
-              if (dbUser) token.accessTier = accessTierFromUserDoc(dbUser);
+              const dbUser = await User.findById(mongoUserId).select("accessTier isAdmin").lean();
+              if (dbUser) {
+                token.accessTier = accessTierFromUserDoc(dbUser);
+                token.isAdmin = dbUser.isAdmin === true;
+              }
             }
           }
           if (user && !token.accessTier) {
             token.accessTier = ACCESS_TIERS.INTERNAL_FULL;
+          }
+          if (user && token.isAdmin == null) {
+            token.isAdmin = false;
           }
           return token;
         },
@@ -154,7 +162,7 @@ const nextAuth = hasGoogleOAuth
             if (!mongoUserId && session.user.email) {
               await connectDb();
               const byEmail = await User.findOne({ email: normalizeEmail(session.user.email) })
-                .select("_id name email image accessTier")
+                .select("_id name email image accessTier isAdmin")
                 .lean();
               if (byEmail?._id) {
                 mongoUserId = String(byEmail._id);
@@ -162,21 +170,24 @@ const nextAuth = hasGoogleOAuth
                 if (byEmail.email) session.user.email = String(byEmail.email);
                 session.user.image = byEmail.image ? String(byEmail.image) : null;
                 session.user.accessTier = accessTierFromUserDoc(byEmail);
+                session.user.isAdmin = byEmail.isAdmin === true;
               }
             }
 
             session.user.id = mongoUserId ?? (typeof token.sub === "string" ? token.sub : session.user.id);
             session.user.accessTier =
               /** @type {string} */ (token.accessTier) ?? ACCESS_TIERS.INTERNAL_FULL;
+            session.user.isAdmin = token.isAdmin === true;
 
             if (mongoUserId) {
               await connectDb();
-              const dbUser = await User.findById(mongoUserId).select("name email image accessTier").lean();
+              const dbUser = await User.findById(mongoUserId).select("name email image accessTier isAdmin").lean();
               if (dbUser) {
                 if (dbUser.name) session.user.name = String(dbUser.name);
                 if (dbUser.email) session.user.email = String(dbUser.email);
                 session.user.image = dbUser.image ? String(dbUser.image) : null;
                 session.user.accessTier = accessTierFromUserDoc(dbUser);
+                session.user.isAdmin = dbUser.isAdmin === true;
               }
             }
           }

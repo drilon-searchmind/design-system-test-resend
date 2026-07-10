@@ -8,16 +8,10 @@ export function UsersRbacCard() {
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Roller</h2>
       <ul className="mt-4 space-y-2 font-sans text-[12px] text-fg-muted">
         <li>
-          <span className="font-semibold text-fg">Administrator</span> — fuld workspace + brugerprovisionering.
+          <span className="font-semibold text-fg">Admin</span> — fuld workspace, brugerstyring og indstillinger.
         </li>
         <li>
-          <span className="font-semibold text-fg">Lead</span> — disciplinansvar, godkendelser (planlagt).
-        </li>
-        <li>
-          <span className="font-semibold text-fg">Økonomi</span> — kontrakt & margin visninger.
-        </li>
-        <li>
-          <span className="font-semibold text-fg">Kun læsning</span> — partner/intern uden skriveadgang.
+          <span className="font-semibold text-fg">Standard</span> — intern bruger med fuld produktadgang.
         </li>
       </ul>
       <p className="mt-4 border-t border-border-soft pt-3 font-sans text-[11px] text-fg-muted">

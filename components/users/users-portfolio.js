@@ -6,9 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 import { useDataSource } from "@/components/crm/use-data-source";
 import { UsersDirectory } from "@/components/users/users-directory";
-import { UsersInvitesQueueCard } from "@/components/users/users-invites-queue-card";
 import { UsersPageHeader } from "@/components/users/users-page-header";
-import { UsersRbacCard } from "@/components/users/users-rbac-card";
 import { UsersSummaryStrip } from "@/components/users/users-summary-strip";
 import { getUsersDemoBundle } from "@/lib/crm/users-demo-bundle";
 import { cn } from "@/lib/utils";
@@ -21,14 +19,7 @@ export function UsersPortfolio() {
   const rawRole = searchParams.get("role");
   const initialStatus =
     rawStatus === "invited" || rawStatus === "active" || rawStatus === "suspended" ? rawStatus : "all";
-  const initialRole =
-    rawRole === "admin" ||
-    rawRole === "lead" ||
-    rawRole === "finance" ||
-    rawRole === "member" ||
-    rawRole === "readonly" ?
-      rawRole
-    : "all";
+  const initialRole = rawRole === "admin" || rawRole === "standard" ? rawRole : "all";
 
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
@@ -137,11 +128,6 @@ export function UsersPortfolio() {
           withMfa={stats.withMfa}
           mfaPct={stats.mfaPct}
         />
-
-        <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
-          <UsersInvitesQueueCard />
-          <UsersRbacCard />
-        </div>
 
         <UsersDirectory
           key={`${initialStatus}-${initialRole}-${dataSource}`}
