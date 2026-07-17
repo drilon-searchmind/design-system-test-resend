@@ -17,6 +17,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   routes.kb,
   routes.team,
   routes.users,
+  routes.notifications,
   routes.reports,
   routes.chat,
 ];

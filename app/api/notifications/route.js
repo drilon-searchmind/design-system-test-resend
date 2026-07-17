@@ -14,9 +14,14 @@ export async function GET(req) {
   if ("response" in authResult) return authResult.response;
 
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const limitRaw = req.nextUrl.searchParams.get("limit");
+  const limit = limitRaw != null ? Number.parseInt(limitRaw, 10) : undefined;
 
   try {
-    const bundle = await fetchNotificationsForSession(authResult.session, { includeTest });
+    const bundle = await fetchNotificationsForSession(authResult.session, {
+      includeTest,
+      limit: Number.isFinite(limit) ? limit : undefined,
+    });
     return NextResponse.json(bundle);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Kunne ikke hente notifikationer";

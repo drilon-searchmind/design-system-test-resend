@@ -21,6 +21,7 @@ export const routes = {
   kbNew: "/kb/new",
   team: "/team",
   users: "/users",
+  notifications: "/notifications",
   reports: "/reports",
   chat: "/chat",
   /** Scripted AI Chat demo (Slack-like) reached from the AI Chat one-pager */
