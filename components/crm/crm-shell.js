@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 
 import { usePathname } from "next/navigation";
 
+import { CrmAgencyGridSpotlight } from "@/components/crm/crm-agency-grid-spotlight";
 import { routes } from "@/config/routes";
 import { getWorkspaceTitle } from "@/lib/crm/workspace-title";
 
@@ -57,6 +58,7 @@ function persistSidebarCollapsed(next) {
 export function CrmShell({ children }) {
   const pathname = usePathname();
   const title = getWorkspaceTitle(pathname);
+  const mainScrollRef = useRef(/** @type {HTMLDivElement | null} */ (null));
 
   const collapsed = useSyncExternalStore(
     subscribeToSidebarStorage,
@@ -85,7 +87,8 @@ export function CrmShell({ children }) {
 
   return (
     <TimerModalProvider>
-      <div data-surface="marketing-tally" className="flex min-h-0 flex-1">
+      <div data-surface="marketing-tally" className="crm-agency-shell flex min-h-0 flex-1">
+        <CrmAgencyGridSpotlight scrollRef={mainScrollRef} />
         <CrmSidebar
           className="hidden md:flex"
           pathname={pathname}
@@ -119,7 +122,9 @@ export function CrmShell({ children }) {
         ) : null}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <CrmTopbar title={title} onOpenNav={() => setMobileOpen(true)} />
-          <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+          <div ref={mainScrollRef} className="min-h-0 flex-1 overflow-auto">
+            {children}
+          </div>
         </div>
       </div>
       <CrmTimerModal />

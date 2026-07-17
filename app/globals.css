@@ -654,6 +654,59 @@ html[data-density="spacious"] {
   background-attachment: fixed;
 }
 
+/**
+ * Agency OS shell — fixed top grid spotlight (matches marketing hero), gradients below.
+ */
+[data-surface="marketing-tally"].crm-agency-shell {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      1200px 600px at 12% -10%,
+      color-mix(in oklch, var(--tally-accent-tint) 70%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 88% 8%,
+      color-mix(in oklch, var(--tally-companion) 35%, transparent),
+      transparent 55%
+    ),
+    var(--tally-paper-0);
+  background-attachment: fixed;
+}
+
+.crm-agency-grid-spotlight {
+  position: fixed;
+  top: 3.25rem;
+  left: 0;
+  right: 0;
+  height: min(560px, 62vh);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  background-image:
+    linear-gradient(to right, color-mix(in oklch, var(--tally-ink-0) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--tally-ink-0) 7%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 78% 64% at 50% 50%, black 32%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 78% 64% at 50% 50%, black 32%, transparent 78%);
+}
+
+[data-surface="marketing-tally"].crm-agency-shell > *:not(.crm-agency-grid-spotlight) {
+  position: relative;
+  z-index: 1;
+}
+
+/** 64px squared grid overlay — marketing hero / auth (masked spotlight) */
+.tally-grid-lines {
+  background-image:
+    linear-gradient(to right, color-mix(in oklch, var(--tally-ink-0) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--tally-ink-0) 6%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, black 30%, transparent 70%);
+}
+
 [data-surface="marketing-tally"] ::selection {
   background: var(--tally-accent);
   color: var(--tally-paper-0);

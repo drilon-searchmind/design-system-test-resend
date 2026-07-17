@@ -60,7 +60,7 @@ export function CrmSidebar({
   return (
     <aside
       className={cn(
-        "flex shrink-0 flex-col border-r border-border bg-canvas/80",
+        "flex shrink-0 flex-col border-r border-border bg-canvas/65 backdrop-blur-sm",
         className,
       )}
       style={{ width: w, transition: "width 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)" }}
