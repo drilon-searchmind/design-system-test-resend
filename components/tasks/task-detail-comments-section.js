@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { TaskRichCommentEditor } from "@/components/tasks/task-rich-comment-editor";
+import { formatCommentDateTimeEn } from "@/lib/crm/format-da";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ async function readApiJson(res) {
  *   id: string;
  *   bodyHtml: string;
  *   createdAt: string;
+ *   createdAtIso?: string;
  *   author?: TeamWire | null;
  * }} CommentWire
  */
@@ -54,6 +56,7 @@ async function readApiJson(res) {
  *   team?: TeamWire[];
  *   highlightCommentId?: string;
  *   layout?: "default" | "sidebar";
+ *   showHeading?: boolean;
  * }} props
  */
 export function TaskDetailCommentsSection({
@@ -62,6 +65,7 @@ export function TaskDetailCommentsSection({
   team = [],
   highlightCommentId = "",
   layout = "default",
+  showHeading = true,
 }) {
   const [comments, setComments] = useState(/** @type {CommentWire[]} */ ([]));
   const [loading, setLoading] = useState(false);
@@ -142,27 +146,40 @@ export function TaskDetailCommentsSection({
     image: m.image,
   }));
 
+  const isSidebar = layout === "sidebar";
+
   return (
     <section
       id="task-comments"
       className={cn(
-        "tally-panel flex flex-col overflow-hidden",
-        layout === "sidebar" ? "max-h-[80vh] p-4 md:p-5" : "p-4 md:p-5",
+        "flex min-w-0 flex-col overflow-hidden",
+        isSidebar ?
+          "max-h-[90vh] rounded-xl border border-border/60 bg-surface-muted/30 p-4 md:p-5"
+        : "tally-panel p-4 md:p-5",
       )}
     >
-      <h2 className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kommentarer</h2>
+      {showHeading ?
+        <h2 className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          Kommentarer
+        </h2>
+      : null}
       {mode === "demo" ?
-        <p className="mt-1 shrink-0 font-sans text-[12px] text-fg-muted">
+        <p className={cn("shrink-0 font-sans text-[12px] text-fg-muted", showHeading && "mt-1")}>
           Kommentarer er kun tilgængelige i database-tilstand.
         </p>
       : null}
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+          showHeading || mode === "demo" ? "mt-3" : "",
+        )}
+      >
         <ul className="flex flex-col gap-3 pr-0.5">
           {loading ?
             <li className="text-[13px] text-fg-muted">Indlæser kommentarer…</li>
           : comments.length === 0 ?
-            <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-center text-[13px] text-fg-muted">
+            <li className="px-1 py-4 text-center text-[13px] text-fg-muted">
               Ingen kommentarer endnu — vær den første.
             </li>
           : comments.map((c) => {
@@ -171,7 +188,7 @@ export function TaskDetailCommentsSection({
                 <li
                   key={c.id}
                   id={`comment-${c.id}`}
-                  className="scroll-mt-28 rounded-xl border border-border-soft bg-surface-muted/25 p-3 transition-shadow"
+                  className="scroll-mt-28 py-1 transition-shadow"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     {author ?
@@ -180,7 +197,7 @@ export function TaskDetailCommentsSection({
                           label={author.avatar ?? author.name.slice(0, 2)}
                           src={author.image}
                           hue={author.hue ?? 220}
-                          className="size-7 text-[9px]"
+                          className="size-5 text-[8px]"
                           alt={author.name}
                         />
                         <span className="font-sans text-[12px] font-semibold text-fg">{author.name}</span>
@@ -189,10 +206,12 @@ export function TaskDetailCommentsSection({
                       <span className="font-sans text-[12px] font-semibold text-fg">Ukendt</span>
                     )}
                     <span className="text-fg-quiet">·</span>
-                    <span className="text-[10px] tabular-nums text-fg-quiet">{c.createdAt}</span>
+                    <span className="text-[10px] tabular-nums text-fg-quiet">
+                      {formatCommentDateTimeEn(c.createdAtIso || c.createdAt)}
+                    </span>
                   </div>
                   <div
-                    className="task-comment-body mt-2 font-sans text-[13px] leading-relaxed text-fg-muted"
+                    className="task-comment-body mt-1.5 font-sans text-[13px] leading-relaxed text-fg-muted"
                     dangerouslySetInnerHTML={{ __html: c.bodyHtml }}
                   />
                 </li>

@@ -76,3 +76,22 @@ export function memberProfileHref(member) {
   return routes.users;
 }
 
+/**
+ * Canonical href for a task wire row or id string.
+ * Delopgaver bruger `/tasks/{parentId}/{subTaskId}`.
+ * @param {string | { id: string; isSubTask?: boolean; parentTaskId?: string }} task
+ */
+export function taskHref(task) {
+  if (typeof task === "string") {
+    const id = String(task ?? "").trim();
+    return id ? `${routes.tasks}/${encodeURIComponent(id)}` : routes.tasks;
+  }
+  const id = String(task?.id ?? "").trim();
+  if (!id) return routes.tasks;
+  const parentId = String(task?.parentTaskId ?? "").trim();
+  if (task?.isSubTask && parentId) {
+    return `${routes.tasks}/${encodeURIComponent(parentId)}/${encodeURIComponent(id)}`;
+  }
+  return `${routes.tasks}/${encodeURIComponent(id)}`;
+}
+

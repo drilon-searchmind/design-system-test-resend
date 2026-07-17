@@ -1,6 +1,5 @@
 "use client";
 
-import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
 import { TaskDetailActivityCard } from "@/components/tasks/task-detail-activity-card";
 import { TaskDetailAssigneeCard } from "@/components/tasks/task-detail-assignee-card";
 import { TaskDetailCommentsSection } from "@/components/tasks/task-detail-comments-section";
@@ -8,7 +7,9 @@ import { TaskDetailContextCard } from "@/components/tasks/task-detail-context-ca
 import { TaskDetailDescriptionCard } from "@/components/tasks/task-detail-description-card";
 import { TaskDetailKpiStrip } from "@/components/tasks/task-detail-kpi-strip";
 import { TaskDetailTimeTodayCard } from "@/components/tasks/task-detail-time-today-card";
+import { TaskSubtasksSection } from "@/components/tasks/task-subtasks-section";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { cn } from "@/lib/utils";
 
 export const TASK_DETAIL_TAB_IDS = /** @type {const} */ (["overblik", "aktivitet"]);
 
@@ -31,7 +32,6 @@ export function normalizeTaskDetailTab(tab) {
  *   clientRow: Record<string, unknown>;
  *   assigneePulse: Record<string, unknown> | null;
  *   departments: Array<Record<string, unknown>>;
- *   alerts: unknown[];
  *   activityFootnote?: string;
  *   demoActivity?: Array<{ id: string; at: string; actorId: string; kind: string; body: string }>;
  *   dbActivity?: Array<{ id: string; at: string; kind: string; summary: string }>;
@@ -50,6 +50,17 @@ export function normalizeTaskDetailTab(tab) {
  *   mode?: "demo" | "database";
  *   team?: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   highlightCommentId?: string;
+ *   subTasks?: Array<Record<string, unknown>>;
+ *   subTaskCreateContext?: {
+ *     parentTaskId: string;
+ *     parentTaskTitle: string;
+ *     departments: Array<{ id: string; name: string }>;
+ *     team: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
+ *     clientsPicklist: Array<{ value: string; label: string }>;
+ *     taskTemplatesForCreate?: Array<Record<string, unknown>>;
+ *     onSubTaskCreated?: () => void;
+ *     readOnly?: boolean;
+ *   } | null;
  * }} props
  */
 export function TaskDetailTabbedBody({
@@ -59,7 +70,6 @@ export function TaskDetailTabbedBody({
   clientRow,
   assigneePulse,
   departments,
-  alerts,
   activityFootnote,
   demoActivity = [],
   dbActivity = [],
@@ -70,6 +80,8 @@ export function TaskDetailTabbedBody({
   mode = "demo",
   team = [],
   highlightCommentId = "",
+  subTasks = [],
+  subTaskCreateContext = null,
 }) {
   const resolvedTab = normalizeTaskDetailTab(tab);
 
@@ -99,9 +111,9 @@ export function TaskDetailTabbedBody({
   const loggedMinutes = timeEntries.reduce((s, e) => s + (Number(e.dur) || 0), 0);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,30%)] lg:items-start">
-      <div className="flex min-w-0 flex-col gap-6">
-        <div className="flex flex-col gap-2 border-b border-border/60 pb-4">
+    <div className="grid gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,38%)] lg:gap-x-10 lg:items-start">
+      <div className="order-1 border-b border-border/60 pb-4 lg:col-start-1 lg:row-start-1">
+        <div className="flex min-w-0 flex-col gap-2">
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Sektion</p>
           <nav aria-label="Opgave-undersektioner">
             <PulseSegmentedControl
@@ -112,10 +124,12 @@ export function TaskDetailTabbedBody({
             />
           </nav>
         </div>
+      </div>
 
+      <div className="order-2 flex min-w-0 flex-col gap-6 lg:col-start-1 lg:row-start-2">
         <div role="tabpanel" className="min-w-0">
           {resolvedTab === "overblik" ?
-            <section aria-labelledby="task-tab-overview" className={stack}>
+            <section aria-labelledby="task-tab-overview" className={cn(stack, "min-w-0")}>
               <h2 id="task-tab-overview" className="sr-only">
                 Overblik
               </h2>
@@ -139,6 +153,23 @@ export function TaskDetailTabbedBody({
                 }
                 mode={mode}
               />
+              {subTaskCreateContext ?
+                <TaskSubtasksSection
+                  parentTaskId={subTaskCreateContext.parentTaskId}
+                  parentTaskTitle={subTaskCreateContext.parentTaskTitle}
+                  subTasks={
+                    /** @type {Array<{ id: string; title: string; hint?: string; status: string; priority: 'high' | 'medium' | 'low'; dueDate?: string; isSubTask?: boolean; parentTaskId?: string }>} */ (
+                      subTasks
+                    )
+                  }
+                  departments={subTaskCreateContext.departments}
+                  team={subTaskCreateContext.team}
+                  clientsPicklist={subTaskCreateContext.clientsPicklist}
+                  taskTemplatesForCreate={subTaskCreateContext.taskTemplatesForCreate ?? []}
+                  onCreated={subTaskCreateContext.onSubTaskCreated}
+                  readOnly={subTaskCreateContext.readOnly === true}
+                />
+              : null}
               <TaskDetailTimeTodayCard
                 taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
                 entries={timeEntries}
@@ -170,19 +201,6 @@ export function TaskDetailTabbedBody({
                 }
                 departmentsLookup={mode === "database" ? departments : undefined}
               />
-              <ClientDetailAlertsCard
-                clientId={typeof clientRow.id === "string" ? clientRow.id : ""}
-                alerts={
-                  /** @type {{ id: string; severity: string; title: string; body: string; age: string; client?: string | null }[]} */ (
-                    alerts ?? []
-                  )
-                }
-                description={
-                  mode === "database" ?
-                    "Udtræk af budget-/sundhedsalarmer på kunden i månedligt Pulse-udsnit."
-                  : undefined
-                }
-              />
             </section>
           : null}
 
@@ -192,13 +210,14 @@ export function TaskDetailTabbedBody({
         </div>
       </div>
 
-      <aside className="min-w-0 lg:sticky lg:top-4 lg:self-start">
+      <aside className="order-3 min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start">
         <TaskDetailCommentsSection
           taskId={typeof taskRow.id === "string" ? taskRow.id : ""}
           mode={mode}
           team={team}
           highlightCommentId={highlightCommentId}
           layout="sidebar"
+          showHeading
         />
       </aside>
     </div>

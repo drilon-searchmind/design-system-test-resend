@@ -15,6 +15,9 @@ import { cn } from "@/lib/utils";
  *   clientsPicklist: Array<{ value: string; label: string }>;
  *   deleting?: boolean;
  *   onDelete?: () => void;
+ *   isSubTask?: boolean;
+ *   inheritedClientName?: string;
+ *   inheritedPriorityLabel?: string;
  * }} props
  */
 export function TaskDetailEditForm({
@@ -25,6 +28,9 @@ export function TaskDetailEditForm({
   clientsPicklist,
   deleting = false,
   onDelete,
+  isSubTask = false,
+  inheritedClientName = "",
+  inheritedPriorityLabel = "",
 }) {
   /** @param {Partial<TaskEditDraft>} patch */
   function patchDraft(patch) {
@@ -46,19 +52,29 @@ export function TaskDetailEditForm({
           <Field label="Titel" required className="sm:col-span-2">
             <input value={draft.title} onChange={(e) => setField("title", e.target.value)} className={clientEditInputClass} />
           </Field>
-          <Field label="Kunde" required>
-            <select
-              value={draft.clientSlug}
-              onChange={(e) => setField("clientSlug", e.target.value)}
-              className={clientEditInputClass}
-            >
-              {clientsPicklist.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          {isSubTask ?
+            <>
+              <Field label="Kunde (arvet)">
+                <input value={inheritedClientName || draft.clientSlug} readOnly disabled className={clientEditInputClass} />
+              </Field>
+              <Field label="Prioritet (arvet)">
+                <input value={inheritedPriorityLabel || draft.priority} readOnly disabled className={clientEditInputClass} />
+              </Field>
+            </>
+          : <Field label="Kunde" required>
+              <select
+                value={draft.clientSlug}
+                onChange={(e) => setField("clientSlug", e.target.value)}
+                className={clientEditInputClass}
+              >
+                {clientsPicklist.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          }
           <Field label="Deadline">
             <input
               type="date"
@@ -67,7 +83,7 @@ export function TaskDetailEditForm({
               className={clientEditInputClass}
             />
           </Field>
-          <Field label="Hint" className="sm:col-span-2">
+          <Field label="Hint" className="hidden sm:col-span-2">
             <input value={draft.hint} onChange={(e) => setField("hint", e.target.value)} className={clientEditInputClass} />
           </Field>
           <Field label="Disciplin">
@@ -97,13 +113,15 @@ export function TaskDetailEditForm({
               ))}
             </select>
           </Field>
-          <Field label="Prioritet">
-            <select value={draft.priority} onChange={(e) => setField("priority", e.target.value)} className={clientEditInputClass}>
-              <option value="high">Høj</option>
-              <option value="medium">Medium</option>
-              <option value="low">Lav</option>
-            </select>
-          </Field>
+          {!isSubTask ?
+            <Field label="Prioritet">
+              <select value={draft.priority} onChange={(e) => setField("priority", e.target.value)} className={clientEditInputClass}>
+                <option value="high">Høj</option>
+                <option value="medium">Medium</option>
+                <option value="low">Lav</option>
+              </select>
+            </Field>
+          : null}
           <Field label="Estimerede timer">
             <input
               type="number"

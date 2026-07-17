@@ -46,6 +46,7 @@ function isoDatePlusCalendarDays(offsetDays) {
  *   onSubmit: (body: Record<string, unknown>) => void;
  *   onCancel: () => void;
  *   variant?: "card" | "modal";
+ *   parentTaskId?: string;
  * }} props
  */
 export function TasksCreateForm({
@@ -59,7 +60,9 @@ export function TasksCreateForm({
   onSubmit,
   onCancel,
   variant = "card",
+  parentTaskId = "",
 }) {
+  const isSubTaskCreate = Boolean(parentTaskId.trim());
   const descriptionRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const [templateKey, setTemplateKey] = useState("");
   const [title, setTitle] = useState("");
@@ -111,11 +114,16 @@ export function TasksCreateForm({
       title: title.trim(),
       hint,
       description,
-      clientSlug,
       priority,
       status,
       billable: billable === "yes",
     };
+    if (!isSubTaskCreate) {
+      body.clientSlug = clientSlug;
+      body.priority = priority;
+    } else {
+      body.parentTaskId = parentTaskId.trim();
+    }
     if (dueDate.trim()) body.dueDate = dueDate.trim().slice(0, 10);
     if (departmentKey && departmentKey !== "—") body.departmentKey = departmentKey;
     if (selectedAssignees.size) body.assigneeMemberKeys = [...selectedAssignees];
@@ -139,6 +147,8 @@ export function TasksCreateForm({
     templateKey,
     estimateHours,
     onSubmit,
+    isSubTaskCreate,
+    parentTaskId,
   ]);
 
   const isModal = variant === "modal";
@@ -147,10 +157,12 @@ export function TasksCreateForm({
     <div
       className={cn(isModal ? "flex flex-col gap-4" : "tally-panel p-4 md:p-5")}
       role="region"
-      aria-label={isModal ? "Opret ny opgave — formular" : "Opret opgave"}
+      aria-label={isModal ? "Opret ny opgave — formular" : isSubTaskCreate ? "Opret delopgave" : "Opret opgave"}
     >
       {isModal ? null : (
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ny opgave</h2>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          {isSubTaskCreate ? "Ny delopgave" : "Ny opgave"}
+        </h2>
       )}
       <div className={cn("grid gap-4 sm:grid-cols-2", !isModal && "mt-4")}>
         {taskTemplatesForCreate.length > 0 ?
@@ -188,23 +200,30 @@ export function TasksCreateForm({
             )}
           />
         </label>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Kunde *</span>
-          <select
-            value={clientSlug}
-            onChange={(e) => setClientSlug(e.target.value)}
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          >
-            {clientsPicklist.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!isSubTaskCreate ?
+          <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
+            <span>Kunde *</span>
+            <select
+              value={clientSlug}
+              onChange={(e) => setClientSlug(e.target.value)}
+              className={cn(
+                "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
+                "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
+              )}
+            >
+              {clientsPicklist.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        : (
+          <p className="flex flex-col justify-end font-sans text-[12px] leading-snug text-fg-muted">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kunde & prioritet</span>
+            <span className="mt-1">Arves fra hovedopgaven.</span>
+          </p>
+        )}
 
         <div className="flex flex-col gap-1.5 font-sans text-[12px] text-fg-muted sm:col-span-2">
           <span>Beskrivelse</span>
@@ -215,7 +234,7 @@ export function TasksCreateForm({
           />
         </div>
 
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted sm:col-span-2">
+        <label className="hidden flex-col gap-1 font-sans text-[12px] text-fg-muted sm:col-span-2">
           <span>Kort hint (valgfri)</span>
           <input
             value={hint}
@@ -302,21 +321,23 @@ export function TasksCreateForm({
             Styrer standard for tidsregistrering på opgaven — kan overrides i timer.
           </span>
         </div>
-        <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
-          <span>Prioritet</span>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className={cn(
-              "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
-              "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-            )}
-          >
-            <option value="high">Høj</option>
-            <option value="medium">Medium</option>
-            <option value="low">Lav</option>
-          </select>
-        </label>
+        {!isSubTaskCreate ?
+          <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
+            <span>Prioritet</span>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className={cn(
+                "rounded-md border border-border bg-surface-muted px-3 py-2 font-sans text-[13px] text-fg",
+                "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
+              )}
+            >
+              <option value="high">Høj</option>
+              <option value="medium">Medium</option>
+              <option value="low">Lav</option>
+            </select>
+          </label>
+        : null}
         <label className="flex flex-col gap-1 font-sans text-[12px] text-fg-muted">
           <span>Status</span>
           <select

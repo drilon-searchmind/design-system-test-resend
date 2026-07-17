@@ -1,15 +1,17 @@
 "use client";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
+import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 
 /**
  * @param {{
  *   creator?: { name: string; avatar?: string; hue?: number; image?: string } | null;
  *   createdAt?: string;
+ *   priority?: 'high' | 'medium' | 'low';
  * }} props
  */
-export function TaskDetailCreatedBy({ creator, createdAt = "" }) {
+export function TaskDetailCreatedBy({ creator, createdAt = "", priority = "medium" }) {
   const label = creator?.name ?? "Ukendt";
   const dateLabel = createdAt ? formatIsoDateDa(createdAt) : "—";
 
@@ -28,6 +30,8 @@ export function TaskDetailCreatedBy({ creator, createdAt = "" }) {
       <span className="font-medium text-fg">{label}</span>
       <span className="text-fg-quiet">·</span>
       <span className="tabular-nums text-fg-soft">{dateLabel}</span>
+      <span className="text-fg-quiet">·</span>
+      <TaskPriorityChip priority={priority} />
     </p>
   );
 }

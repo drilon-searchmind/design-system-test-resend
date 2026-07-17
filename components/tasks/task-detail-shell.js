@@ -16,12 +16,11 @@ import { TaskDetailHeader } from "@/components/tasks/task-detail-header";
 import { TaskDetailStatusBar } from "@/components/tasks/task-detail-status-bar";
 import { ClientDetailEditActions } from "@/components/clients/client-detail-edit-actions";
 import { useDataSource } from "@/components/crm/use-data-source";
-import { routes } from "@/config/routes";
+import { routes, taskHref } from "@/config/routes";
 import {
   CLIENTS,
   CONTRACTS,
   DEPARTMENTS,
-  SMART_ALERTS,
   TASK_ACTIVITY_LOG,
   TASKS,
   TEAM,
@@ -31,17 +30,15 @@ import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { editDraftToPatch, taskStatusPatch, taskWireToEditDraft } from "@/lib/crm/task-edit-utils";
 import {
   sanitizeTaskUiStatus,
-  taskDaysUntilDue,
   taskDueReferenceTodayIso,
   taskIsDone,
-  taskIsOverdue,
 } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 /**
- * @param {{ taskId: string; initialTab?: string; highlightCommentId?: string }} props
+ * @param {{ taskId: string; parentTaskId?: string; initialTab?: string; highlightCommentId?: string }} props
  */
-export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = "" }) {
+export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", highlightCommentId = "" }) {
   const router = useRouter();
   const dataSource = useDataSource();
   const defaultTab = TASK_DETAIL_TAB_IDS[0];
@@ -63,7 +60,9 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
     setError(null);
     try {
       const qs = databaseApiQuery();
-      const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, { cache: "no-store" });
+      const parentQs =
+        parentTaskId.trim() ? `&parentTaskId=${encodeURIComponent(parentTaskId.trim())}` : "";
+      const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}${parentQs}`, { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaven");
       setRemote(data);
@@ -72,7 +71,7 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
     } finally {
       setLoading(false);
     }
-  }, [taskId]);
+  }, [parentTaskId, taskId]);
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -106,7 +105,8 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
       setEditNotice("Titel er påkrævet.");
       return;
     }
-    if (!draft.clientSlug.trim()) {
+    const editingSubTask = draft.isSubTask === true;
+    if (!editingSubTask && !draft.clientSlug.trim()) {
       setEditNotice("Vælg en kunde.");
       return;
     }
@@ -140,6 +140,10 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
     ) {
       return;
     }
+    const currentTask =
+      remote && typeof remote.task === "object" && remote.task !== null ?
+        /** @type {Record<string, unknown>} */ (remote.task)
+      : null;
     setDeleting(true);
     setEditNotice(null);
     try {
@@ -147,13 +151,17 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
       const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke slette");
-      router.push(routes.tasks);
+      const parentAfterDelete =
+        currentTask?.isSubTask === true && typeof currentTask.parentTaskId === "string"
+          ? currentTask.parentTaskId.trim()
+          : "";
+      router.push(parentAfterDelete ? taskHref(parentAfterDelete) : routes.tasks);
     } catch (e) {
       setEditNotice(e instanceof Error ? e.message : "Fejl ved sletning");
     } finally {
       setDeleting(false);
     }
-  }, [router, taskId]);
+  }, [remote, router, taskId]);
 
   const updateStatus = useCallback(
     async (nextStatus) => {
@@ -188,6 +196,21 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
   const demoTask = TASKS.find((t) => t.id === taskId);
   const dueRefDemo = taskDueReferenceTodayIso();
 
+  if (dataSource === "demo" && demoTask && parentTaskId.trim()) {
+    if (demoTask.isSubTask !== true || String(demoTask.parentTaskId ?? "") !== parentTaskId.trim()) {
+      return (
+        <div className="space-y-4">
+          <p className="font-sans text-[13px] text-fg-muted">
+            Delopgaven hører ikke til den angivne hovedopgave.{" "}
+            <Link href={routes.tasks} className="text-agency-brand hover:underline">
+              Tilbage til Opgaver
+            </Link>
+          </p>
+        </div>
+      );
+    }
+  }
+
   if (dataSource === "demo" && !demoTask) {
     return (
       <div className="space-y-4">
@@ -210,20 +233,16 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
     const timeDemo = TIME_ENTRIES_TODAY.filter((e) => e.task === demoTask.id);
     const dep = DEPARTMENTS.find((d) => d.id === demoTask.dept);
     const done = taskIsDone(demoTask.status);
-    const overdue = taskIsOverdue(demoTask, dueRefDemo);
-    const days = !done ? taskDaysUntilDue(demoTask.dueDate, dueRefDemo) : null;
 
-    const subtitle = done
-      ? "Afsluttet på board."
-      : demoTask.status === "blocked"
-        ? "Blokket — afvent dokumenteret clearance."
-        : overdue && typeof days === "number"
-          ? `${Math.abs(days)} kalenderdage over deadline.`
-          : days === 0
-            ? "Deadline i dag."
-            : typeof days === "number"
-              ? `${days} d til deadline.`
-              : "Åben leverance.";
+    const subtitle =
+      done
+        ? "Afsluttet på board."
+        : demoTask.status === "blocked"
+          ? "Blokket — afvent dokumenteret clearance."
+          : "";
+
+    const demoPriority =
+      demoTask.priority === "high" || demoTask.priority === "low" ? demoTask.priority : "medium";
 
     if (!client || !contract) {
       return (
@@ -241,6 +260,14 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
       }),
     );
 
+    const demoSubTasks = TASKS.filter(
+      (t) => t.isSubTask === true && String(t.parentTaskId ?? "") === demoTask.id,
+    );
+    const parentDemo =
+      demoTask.isSubTask === true && demoTask.parentTaskId ?
+        TASKS.find((t) => t.id === demoTask.parentTaskId) ?? null
+      : null;
+
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TaskDetailHeader
@@ -256,6 +283,12 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             clientName: demoTask.clientName,
             clientLogo: demoTask.clientLogo,
             clientHue: demoTask.clientHue,
+            isSubTask: demoTask.isSubTask === true,
+            parentTaskId: typeof demoTask.parentTaskId === "string" ? demoTask.parentTaskId : "",
+            parentTaskTitle:
+              typeof demoTask.parentTaskTitle === "string" && demoTask.parentTaskTitle.trim()
+                ? demoTask.parentTaskTitle
+                : parentDemo?.title ?? "",
           }}
           deptLabel={dep?.name ?? demoTask.dept}
           subtitle={subtitle}
@@ -280,6 +313,7 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             : null
           }
           createdAt={demoTask.dueDate}
+          priority={demoPriority}
         />
 
         <TaskDetailTabbedBody
@@ -288,7 +322,6 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
           taskRow={demoTask}
           assigneePulse={assignee}
           departments={departmentRowsDemo}
-          alerts={SMART_ALERTS}
           demoActivity={demoActivity}
           dbActivity={[]}
           clientRow={{
@@ -307,6 +340,28 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
           mode="demo"
           activityFootnote={undefined}
           highlightCommentId={highlightCommentId}
+          subTasks={demoSubTasks}
+          subTaskCreateContext={
+            demoTask.isSubTask !== true ?
+              {
+                parentTaskId: demoTask.id,
+                parentTaskTitle: demoTask.title,
+                departments: departmentRowsDemo.map((d) => ({
+                  id: String(d.id),
+                  name: typeof d.name === "string" ? d.name : String(d.id),
+                })),
+                team: TEAM.map((m) => ({
+                  id: m.id,
+                  name: m.name,
+                  avatar: m.avatar,
+                  hue: m.hue,
+                  image: typeof m.image === "string" ? m.image : undefined,
+                })),
+                clientsPicklist: [],
+                readOnly: true,
+              }
+            : null
+          }
         />
 
         <p className="font-sans text-[12px] text-fg-quiet">
@@ -348,12 +403,6 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
     const dueRef = taskDueReferenceTodayIso();
 
     const done = taskIsDone(String(rTask.status ?? ""));
-    const overdue =
-      typeof rTask.dueDate === "string" ?
-        taskIsOverdue({ status: String(rTask.status), dueDate: rTask.dueDate }, dueRef)
-      : false;
-    const days =
-      typeof rTask.dueDate === "string" ? taskDaysUntilDue(rTask.dueDate, dueRef) : null;
     const st = String(rTask.status ?? "todo");
 
     const subtitle =
@@ -361,13 +410,12 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
         ? "Afsluttet i CRM."
         : st === "blocked"
           ? "Blokeret — af dokumenteret clearance før genoptag."
-          : overdue && typeof days === "number"
-            ? `${Math.abs(days)} d over deadline.`
-            : days === 0
-              ? "Deadline i dag."
-              : typeof days === "number"
-                ? `${days} d til deadline.`
-                : "Åben leverance.";
+          : "";
+
+    const taskPriority =
+      rTask.priority === "high" || rTask.priority === "low"
+        ? rTask.priority
+        : /** @type {'medium'} */ ("medium");
 
     const depKey = typeof rTask.dept === "string" ? rTask.dept.trim() || "—" : "—";
     const depMeta = departmentRowsMongo.find((d) => String(d.id) === depKey);
@@ -415,8 +463,21 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
         )
       : [];
 
-    const alerts =
-      remote && Array.isArray(remote.alerts) ? /** @type {unknown[]} */ (remote.alerts) : [];
+    const subTasksRaw = remote && Array.isArray(remote.subTasks) ? remote.subTasks : [];
+    /** @type {Array<Record<string, unknown>>} */
+    const subTasks = /** @type {Array<Record<string, unknown>>} */ (subTasksRaw);
+
+    const isSubTaskRow = rTask.isSubTask === true;
+    const parentTaskTitle =
+      typeof rTask.parentTaskTitle === "string" ? rTask.parentTaskTitle
+      : remote && remote.parentTask && typeof remote.parentTask === "object" && typeof remote.parentTask.title === "string"
+        ? remote.parentTask.title
+      : "";
+
+    const priorityLabel =
+      rTask.priority === "high" ? "Høj"
+      : rTask.priority === "low" ? "Lav"
+      : "Medium";
 
     return (
       <div
@@ -487,6 +548,11 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
                   : "—",
             clientLogo: typeof rTask.clientLogo === "string" ? rTask.clientLogo : "?",
             clientHue: typeof rTask.clientHue === "number" ? rTask.clientHue : 220,
+            isSubTask: isSubTaskRow,
+            parentTaskId:
+              typeof rTask.parentTaskId === "string" ? rTask.parentTaskId
+              : parentTaskId.trim() || "",
+            parentTaskTitle,
           }}
           deptLabel={deptName}
           subtitle={subtitle}
@@ -515,6 +581,7 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             : typeof rTask.createdAtIso === "string" ? rTask.createdAtIso
             : ""
           }
+          priority={taskPriority}
         />
 
         {editing && draft ?
@@ -526,6 +593,13 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             clientsPicklist={clientsPick}
             deleting={deleting}
             onDelete={() => void deleteTask()}
+            isSubTask={draft.isSubTask === true}
+            inheritedClientName={
+              typeof rTask.clientName === "string" ? rTask.clientName
+              : typeof rClient.name === "string" ? String(rClient.name)
+              : ""
+            }
+            inheritedPriorityLabel={priorityLabel}
           />
         : <TaskDetailTabbedBody
             tab={detailTab}
@@ -533,7 +607,6 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             taskRow={{ ...rTask, id: typeof rTask.id === "string" ? rTask.id : taskId }}
             assigneePulse={rAssignee}
             departments={departmentRowsMongo}
-            alerts={alerts}
             demoActivity={[]}
             dbActivity={dbActivity}
             contractWire={rContract}
@@ -548,6 +621,22 @@ export function TaskDetailShell({ taskId, initialTab = "", highlightCommentId = 
             activityFootnote={undefined}
             team={teamFull}
             highlightCommentId={highlightCommentId}
+            subTasks={subTasks}
+            subTaskCreateContext={
+              !isSubTaskRow ?
+                {
+                  parentTaskId: typeof rTask.id === "string" ? rTask.id : taskId,
+                  parentTaskTitle: typeof rTask.title === "string" ? rTask.title : "Hovedopgave",
+                  departments: deptWire.map((d) => ({
+                    id: d.id,
+                    name: typeof d.name === "string" ? d.name : d.id,
+                  })),
+                  team: teamFull,
+                  clientsPicklist: clientsPick,
+                  onSubTaskCreated: () => void loadRemote(),
+                }
+              : null
+            }
           />
         }
       </div>

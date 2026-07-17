@@ -27,21 +27,44 @@ const TONE_ICON = {
  *   value: string;
  *   tone?: keyof typeof TONE_ICON;
  *   children?: import("react").ReactNode;
+ *   surface?: "panel" | "muted" | "bare";
+ *   hideIcon?: boolean;
+ *   className?: string;
  * }} props
  */
-function TaskDetailCompactKpi({ icon, label, value, tone = "brand", children }) {
+function TaskDetailCompactKpi({
+  icon,
+  label,
+  value,
+  tone = "brand",
+  children,
+  surface = "panel",
+  hideIcon = false,
+  className,
+}) {
   const toneClass = TONE_ICON[tone] ?? TONE_ICON.brand;
 
   return (
-    <div className="tally-panel flex min-w-[9.5rem] flex-1 items-center gap-2.5 px-3 py-2.5">
-      <span
-        className={cn(
-          "flex size-7 shrink-0 items-center justify-center rounded-lg border",
-          toneClass,
-        )}
-      >
-        {icon}
-      </span>
+    <div
+      className={cn(
+        "flex items-center gap-2.5 px-3 py-2.5",
+        surface === "muted" && "rounded-xl border border-border bg-surface-muted",
+        surface === "panel" && "tally-panel",
+        surface === "bare" && "px-0 py-2",
+        surface !== "bare" && "min-w-0",
+        className,
+      )}
+    >
+      {!hideIcon ?
+        <span
+          className={cn(
+            "flex size-7 shrink-0 items-center justify-center rounded-lg border",
+            toneClass,
+          )}
+        >
+          {icon}
+        </span>
+      : null}
       <div className="min-w-0 flex-1">
         <p className="text-[9px] font-semibold uppercase tracking-[0.07em] text-fg-soft">{label}</p>
         {children ?? (
@@ -84,8 +107,6 @@ export function TaskDetailKpiStrip({
   const dueTone =
     !open ? "ok" : days === null || !Number.isFinite(days) ? "brand" : overdue ? "bad" : days <= 7 ? "warn" : "ok";
 
-  const daysLabel = !open ? "—" : overdue ? `${Math.abs(days ?? 0)} d overskredet` : days === 0 ? "I dag" : `Om ${days} d`;
-
   const list = departments ?? DEPARTMENTS;
   const dep = list.find((d) => String(d.id) === String(task.dept));
 
@@ -106,18 +127,15 @@ export function TaskDetailKpiStrip({
   const loggedTone = loggedMinutes > 0 ? "brand" : "ok";
 
   return (
-    <section className="flex flex-wrap gap-2">
-      <TaskDetailCompactKpi
-        icon={<IconLayers size={14} />}
-        label="Disciplin"
-        value={disc}
-        tone="brand"
-      />
+    <section className="grid min-w-0 w-full gap-2 lg:grid-cols-[minmax(0,19.5rem)_minmax(0,1fr)] lg:items-stretch lg:gap-3">
       <TaskDetailCompactKpi
         icon={<IconUser size={14} />}
         label="Ansvarlig"
         value={assigneeLabel}
         tone={assigneeName ? "brand" : "ok"}
+        surface="bare"
+        hideIcon
+        className="min-w-0 lg:max-w-[19.5rem]"
       >
         <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
           {assigneeName && assignee ?
@@ -139,30 +157,36 @@ export function TaskDetailKpiStrip({
           </p>
         </div>
       </TaskDetailCompactKpi>
-      <TaskDetailCompactKpi
-        icon={<IconCalendar size={14} />}
-        label="Deadline"
-        value={formatIsoDateDa(task.dueDate)}
-        tone={dueTone}
-      />
-      <TaskDetailCompactKpi
-        icon={<IconTimer size={14} />}
-        label="Estimeret"
-        value={estimateLabel}
-        tone={estimateTone}
-      />
-      <TaskDetailCompactKpi
-        icon={<IconClock size={14} />}
-        label="Registreret"
-        value={loggedLabel}
-        tone={loggedTone}
-      />
-      <TaskDetailCompactKpi
-        icon={<IconClock size={14} />}
-        label="Til deadline"
-        value={daysLabel}
-        tone={dueTone}
-      />
+      <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
+        <TaskDetailCompactKpi
+          icon={<IconLayers size={14} />}
+          label="Disciplin"
+          value={disc}
+          tone="brand"
+          className="min-w-0 w-full px-2.5"
+        />
+        <TaskDetailCompactKpi
+          icon={<IconTimer size={14} />}
+          label="Estimeret"
+          value={estimateLabel}
+          tone={estimateTone}
+          className="min-w-0 w-full px-2.5"
+        />
+        <TaskDetailCompactKpi
+          icon={<IconClock size={14} />}
+          label="Registreret"
+          value={loggedLabel}
+          tone={loggedTone}
+          className="min-w-0 w-full px-2.5"
+        />
+        <TaskDetailCompactKpi
+          icon={<IconCalendar size={14} />}
+          label="Deadline"
+          value={formatIsoDateDa(task.dueDate)}
+          tone={dueTone}
+          className="min-w-0 w-full px-2.5"
+        />
+      </div>
     </section>
   );
 }

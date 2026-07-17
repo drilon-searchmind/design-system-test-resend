@@ -18,6 +18,7 @@ import { getTasksDemoBundle } from "@/lib/crm/tasks-demo-bundle";
 import { computeTasksSummary } from "@/lib/crm/task-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
+import { taskHref } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
 /** @typedef {ReturnType<typeof getTasksDemoBundle>} TasksPortfolioBundle */
@@ -156,7 +157,7 @@ export function TasksPortfolio() {
         await load();
         window.dispatchEvent(new Event("crm-notifications-changed"));
         if (typeof data?.wire?.id === "string" && data.wire.id) {
-          router.push(`/tasks/${encodeURIComponent(data.wire.id)}`);
+          router.push(taskHref(data.wire));
         }
       } catch (e) {
         setCreateError(e instanceof Error ? e.message : "Fejl");

@@ -2,9 +2,10 @@ import Link from "next/link";
 
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { TaskStatusChip } from "@/components/crm/task-status-chip";
-import { routes } from "@/config/routes";
+import { taskHref } from "@/config/routes";
+import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
 import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
-import { taskDaysUntilDue, taskIsDone, taskIsOverdue } from "@/lib/crm/task-utils";
+import { taskDaysUntilDue, taskIsDone, taskIsOverdue, taskIsSubTaskRow } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,6 +24,9 @@ import { cn } from "@/lib/utils";
  *     priority: 'high' | 'medium' | 'low';
  *     dueDate: string;
  *     estimateHours?: number | null;
+ *     isSubTask?: boolean;
+ *     parentTaskId?: string;
+ *     parentTaskTitle?: string;
  *   };
  *   dueReferenceIso: string;
  *   departments?: Array<{ id: string; short?: string }>;
@@ -39,22 +43,22 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
 
   return (
     <Link
-      href={`${routes.tasks}/${encodeURIComponent(row.id)}`}
+      href={taskHref(row)}
       className={cn(
         "tally-panel flex flex-col p-3.5 transition-all",
         "hover:border-agency-brand-border md:p-4",
+        taskIsSubTaskRow(row) && "border-dashed",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="font-sans text-[13.5px] font-semibold leading-snug text-fg">{row.title}</div>
-          {row.hint ? (
-            <p className="mt-1 line-clamp-2 font-sans text-[11px] leading-relaxed text-fg-quiet">{row.hint}</p>
-          ) : (
-            <p className="mt-1 line-clamp-2 font-sans text-[11px] italic leading-relaxed text-fg-quiet">
-              Ingen kort hint — fuld beskrivelse på opgave-siden.
-            </p>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-sans text-[13.5px] font-semibold leading-snug text-fg">{row.title}</div>
+            {taskIsSubTaskRow(row) ? <TaskSubtaskBadge compact /> : null}
+          </div>
+          {taskIsSubTaskRow(row) && row.parentTaskTitle ?
+            <p className="mt-1 font-sans text-[10px] text-fg-quiet">Under {row.parentTaskTitle}</p>
+          : null}
         </div>
         <span
           className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-[12px] font-semibold text-white"

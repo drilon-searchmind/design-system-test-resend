@@ -7,9 +7,9 @@ import { TaskDetailShell } from "@/components/tasks/task-detail-shell";
 import { useDataSource } from "@/components/crm/use-data-source";
 
 /**
- * @param {{ taskId: string }} props
+ * @param {{ taskId: string; parentTaskId?: string }} props
  */
-export function TaskDetailPageClient({ taskId }) {
+export function TaskDetailPageClient({ taskId, parentTaskId = "" }) {
   const dataSource = useDataSource();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") ?? "";
@@ -24,8 +24,9 @@ export function TaskDetailPageClient({ taskId }) {
 
   return (
     <TaskDetailShell
-      key={`${taskId}-${dataSource}`}
+      key={`${parentTaskId || "root"}-${taskId}-${dataSource}`}
       taskId={taskId}
+      parentTaskId={parentTaskId}
       initialTab={initialTab}
       highlightCommentId={highlightCommentId}
     />

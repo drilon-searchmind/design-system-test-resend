@@ -23,11 +23,8 @@ export function TaskDetailAssigneeCard({ member, departmentsLookup }) {
   return (
     <div className="tally-panel p-4 md:p-5">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Ansvarlig</h2>
-      <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Tilknyttet CRM-teamprofil ved <span className="">TeamMember.assigneeMemberKey → task.assigneeMemberKey</span>.
-      </p>
       {member ?
-        <div className={cn("mt-4 flex items-start gap-3 border-t border-border-soft pt-4")}>
+        <div className={cn("mt-4 flex items-start gap-3")}>
           <CrmAvatar label={member.avatar} src={member.image} hue={member.hue} className="size-12 text-[13px]" />
           <div className="min-w-0">
             <p className="font-sans text-[14px] font-semibold text-fg">{member.name}</p>

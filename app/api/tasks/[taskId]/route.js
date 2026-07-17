@@ -15,6 +15,7 @@ export async function GET(req, ctx) {
   const { taskId } = await ctx.params;
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
+  const expectedParentTaskId = req.nextUrl.searchParams.get("parentTaskId")?.trim() ?? "";
 
   try {
     const bundle = await fetchTaskDetailBundle(
@@ -22,6 +23,7 @@ export async function GET(req, ctx) {
         {
           taskKeyOrId: taskId,
           includeTest,
+          ...(expectedParentTaskId ? { expectedParentTaskId } : {}),
         },
         resolved,
       ),

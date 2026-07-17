@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
+import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
 import { PulseIconDownload } from "@/components/pulse/pulse-icons";
 import { routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
@@ -18,9 +18,12 @@ import { cn } from "@/lib/utils";
  *     clientName: string;
  *     clientLogo: string;
  *     clientHue: number;
+ *     isSubTask?: boolean;
+ *     parentTaskId?: string;
+ *     parentTaskTitle?: string;
  *   };
  *   deptLabel: string;
- *   subtitle: string;
+ *   subtitle?: string;
  *   trailing?: import('react').ReactNode;
  *   showExport?: boolean;
  * }} props
@@ -28,10 +31,13 @@ import { cn } from "@/lib/utils";
 export function TaskDetailHeader({
   task,
   deptLabel,
-  subtitle,
+  subtitle = "",
   trailing,
   showExport = true,
 }) {
+  const isSubTask = task.isSubTask === true && Boolean(String(task.parentTaskId ?? "").trim());
+  const subtitleTrimmed = subtitle.trim();
+
   return (
     <>
       <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
@@ -61,18 +67,22 @@ export function TaskDetailHeader({
             {task.clientLogo}
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-              Opgave · {deptLabel}
-            </p>
-            <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{task.title}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+                {isSubTask ? "Delopgave" : "Opgave"} · {deptLabel}
+              </p>
+              {isSubTask ? <TaskSubtaskBadge compact /> : null}
+            </div>
+            <h1 className="mt-2 font-sans text-[22px] font-semibold tracking-tight text-fg md:mt-3">{task.title}</h1>
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {task.clientName}
-              <br />
-              {subtitle}
+              {subtitleTrimmed ?
+                <>
+                  <br />
+                  {subtitleTrimmed}
+                </>
+              : null}
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <TaskPriorityChip priority={task.priority} />
-            </div>
           </div>
         </div>
 

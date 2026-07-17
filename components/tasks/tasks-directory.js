@@ -19,7 +19,9 @@ import {
   PulseIconSearch,
 } from "@/components/pulse/pulse-icons";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
-import { routes } from "@/config/routes";
+import { routes, taskHref } from "@/config/routes";
+import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
+import { taskIsSubTaskRow } from "@/lib/crm/task-utils";
 import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import {
   TASK_STATUS_SECTION_LABELS,
@@ -50,6 +52,9 @@ const GRID =
  *     priority: string;
  *     dueDate: string;
  *     estimateHours?: number | null;
+ *     isSubTask?: boolean;
+ *     parentTaskId?: string;
+ *     parentTaskTitle?: string;
  *   };
  *   teamById: Record<string, { id: string; name: string; avatar?: string; hue?: number; image?: string }>;
  *   deptById: Record<string, { id: string; name?: string; short?: string }>;
@@ -79,17 +84,21 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
 
   return (
     <Link
-      href={`${routes.tasks}/${encodeURIComponent(row.id)}`}
+      href={taskHref(row)}
       className={cn(
         "grid w-full gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-2.5",
         GRID,
         showBorder && "border-b border-border-soft",
+        taskIsSubTaskRow(row) && "bg-surface-muted/35",
       )}
     >
       <div className="min-w-0">
-        <div className="font-sans text-[13px] font-medium leading-snug text-fg">{row.title}</div>
-        {row.hint ?
-          <div className="mt-0.5 line-clamp-1 font-sans text-[11px] text-fg-quiet">{row.hint}</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="font-sans text-[13px] font-medium leading-snug text-fg">{row.title}</div>
+          {taskIsSubTaskRow(row) ? <TaskSubtaskBadge compact /> : null}
+        </div>
+        {taskIsSubTaskRow(row) && row.parentTaskTitle ?
+          <div className="mt-0.5 line-clamp-1 font-sans text-[10px] text-fg-quiet">Under {row.parentTaskTitle}</div>
         : null}
       </div>
 

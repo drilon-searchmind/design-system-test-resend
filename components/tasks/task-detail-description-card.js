@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
  */
 export function TaskDetailDescriptionCard({ task, mode = "demo" }) {
   const descriptionHtml = typeof task.description === "string" ? task.description.trim() : "";
-  const hint = typeof task.hint === "string" ? task.hint.trim() : "";
 
   const titleChip = mode === "database" ? "Beskrivelse" : "Opgavespec";
 
@@ -26,18 +25,11 @@ export function TaskDetailDescriptionCard({ task, mode = "demo" }) {
           className="task-comment-body mt-3 font-sans text-[13px] leading-relaxed text-fg-muted"
           dangerouslySetInnerHTML={{ __html: descriptionHtml }}
         />
-      : hint ?
-        <p className={cn("mt-3 font-sans text-[13px] leading-relaxed text-fg-muted")}>{hint}</p>
       : (
         <p className="mt-3 font-sans text-[13px] leading-relaxed text-fg-quiet">
           Ingen beskrivelse endnu — tilføj en via redigering eller ved oprettelse.
         </p>
       )}
-      {descriptionHtml && hint ?
-        <p className="mt-3 border-t border-border-soft pt-3 font-sans text-[12px] leading-relaxed text-fg-quiet">
-          <span className="font-semibold text-fg-muted">Hint:</span> {hint}
-        </p>
-      : null}
     </div>
   );
 }
