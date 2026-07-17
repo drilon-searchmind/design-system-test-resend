@@ -23,12 +23,12 @@ import {
   PULSE_KPI_SPARK_UTIL,
 } from "@/lib/crm/pulse-fixtures";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 export function PulseDashboard() {
   const dataSource = useDataSource();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, primaryPeriod, queryParams } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {import('@/lib/crm/pulse-types').PulseBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,14 +41,11 @@ export function PulseDashboard() {
     else setRefreshing(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
       if (dataSource === "demo") {
-        setBundle(getPulseDemoBundle(p));
+        setBundle(getPulseDemoBundle(primaryPeriod));
         return;
       }
-      const qs = databaseApiQuery({ year: String(p.year),
-        month: String(p.month),
-      });
+      const qs = databaseApiQuery(queryParams);
       const res = await fetch(`/api/pulse?${qs}`, { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente data");
@@ -61,7 +58,7 @@ export function PulseDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, period]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -69,25 +66,13 @@ export function PulseDashboard() {
     });
   }, [load]);
 
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
-
   if (loading && !bundle) {
     return (
-      <PulsePeriodProvider
-        year={period.year}
-        month={period.month}
-        onChange={handlePeriodChange}
-      >
+      <PulsePeriodProvider selection={selection} onSelectionChange={setSelection}>
         <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
           <div className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
             <div className="h-20 flex-1 animate-pulse rounded-[20px] bg-skeleton" />
-            <ReportPeriodPicker
-              year={period.year}
-              month={period.month}
-              onChange={handlePeriodChange}
-            />
+            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
           </div>
           <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
@@ -114,12 +99,7 @@ export function PulseDashboard() {
   const marginDelta = m.avgMargin - m.avgMarginPrev;
 
   return (
-    <PulsePeriodProvider
-      year={period.year}
-      month={period.month}
-      onChange={handlePeriodChange}
-      refreshing={refreshing}
-    >
+    <PulsePeriodProvider selection={selection} onSelectionChange={setSelection} refreshing={refreshing}>
       <PulseDataProvider data={bundle}>
         <PulsePageHeader />
 

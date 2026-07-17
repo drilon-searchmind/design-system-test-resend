@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { normalizeReportPeriod } from "@/lib/crm/report-period";
 import { requireSession } from "@/lib/server/require-session";
 import { fetchWorkloadPortfolio } from "@/lib/server/workload-data";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -12,19 +12,18 @@ export async function GET(req) {
   if ("response" in authResult) return authResult.response;
 
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
-  const period = normalizeReportPeriod({
-    year: Number.isFinite(year) ? year : undefined,
-    month: Number.isFinite(month) ? month : undefined,
-  });
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchWorkloadPortfolio({
-      includeTest,
-      session: authResult.session,
-      ...period,
-    });
+    const bundle = await fetchWorkloadPortfolio(
+      withReportPeriodRequest(
+        {
+          includeTest,
+          session: authResult.session,
+        },
+        resolved,
+      ),
+    );
     return NextResponse.json(bundle);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Kunne ikke hente workload";

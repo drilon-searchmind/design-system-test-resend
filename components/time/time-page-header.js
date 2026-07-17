@@ -4,13 +4,14 @@ import { useTimerModal } from "@/components/crm/timer-modal-context";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconClock } from "@/components/crm/icons";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
-import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
+import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { TEAM } from "@/lib/crm/static-data";
 
 /**
  * @param {{
- *   reportPeriod: { year: number; month: number };
- *   onReportPeriodChange: (p: { year: number; month: number }) => void;
+ *   selection: import('@/lib/crm/report-period').ReportPeriodSelection;
+ *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
+ *   subtitle?: string;
  *   mineLabel?: string | null;
  *   dataSource?: "demo" | "database";
  *   refreshing?: boolean;
@@ -20,8 +21,9 @@ import { TEAM } from "@/lib/crm/static-data";
  * }} props
  */
 export function TimePageHeader({
-  reportPeriod,
-  onReportPeriodChange,
+  selection,
+  onSelectionChange,
+  subtitle: subtitleProp,
   mineLabel = null,
   dataSource = "demo",
   refreshing = false,
@@ -37,7 +39,7 @@ export function TimePageHeader({
       demoFallbackName
     : "Dig";
 
-  const subtitle = formatReportPeriodSubtitle(reportPeriod.year, reportPeriod.month);
+  const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
 
   return (
     <div className="flex flex-col gap-3">
@@ -84,7 +86,7 @@ export function TimePageHeader({
               </button>
             : null}
 
-            <ReportPeriodPicker year={reportPeriod.year} month={reportPeriod.month} onChange={onReportPeriodChange} />
+            <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
           </div>
         </div>
       </header>

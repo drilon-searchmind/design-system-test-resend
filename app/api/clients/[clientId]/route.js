@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { fetchClientDetailBundle } from "@/lib/server/client-detail-data";
 import { updateClientMongo } from "@/lib/server/client-update-data";
 import { requireSession } from "@/lib/server/require-session";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -14,16 +15,18 @@ export async function GET(req, ctx) {
 
   const { clientId } = await ctx.params;
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchClientDetailBundle({
-      clientKey: clientId,
-      includeTest,
-      year: Number.isFinite(year) ? year : undefined,
-      month: Number.isFinite(month) ? month : undefined,
-    });
+    const bundle = await fetchClientDetailBundle(
+      withReportPeriodRequest(
+        {
+          clientKey: clientId,
+          includeTest,
+        },
+        resolved,
+      ),
+    );
 
     if (bundle?.error) {
       return NextResponse.json({ error: bundle.error }, { status: bundle.status ?? 400 });

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { normalizeReportPeriod } from "@/lib/crm/report-period";
 import { deleteTaskMongo, fetchTaskDetailBundle, updateTaskMongo } from "@/lib/server/tasks-data";
 import { requireSession } from "@/lib/server/require-session";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -14,19 +14,18 @@ export async function GET(req, ctx) {
 
   const { taskId } = await ctx.params;
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
-  const period = normalizeReportPeriod({
-    year: Number.isFinite(year) ? year : undefined,
-    month: Number.isFinite(month) ? month : undefined,
-  });
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchTaskDetailBundle({
-      taskKeyOrId: taskId,
-      includeTest,
-      ...period,
-    });
+    const bundle = await fetchTaskDetailBundle(
+      withReportPeriodRequest(
+        {
+          taskKeyOrId: taskId,
+          includeTest,
+        },
+        resolved,
+      ),
+    );
     if (bundle && typeof bundle === "object" && "error" in bundle && bundle.error) {
       return NextResponse.json({ error: bundle.error }, { status: bundle.status ?? 400 });
     }

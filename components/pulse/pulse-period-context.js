@@ -3,37 +3,50 @@
 import { createContext, useContext, useMemo } from "react";
 
 import {
-  formatReportPeriodLabel,
-  formatReportPeriodSubtitle,
-  isCurrentReportPeriod,
+  formatReportPeriodSelectionSubtitle,
+  isCurrentMonthSelection,
+  normalizeReportPeriodSelection,
+  primaryReportPeriod,
 } from "@/lib/crm/report-period";
 
-/** @typedef {{ year: number; month: number; label: string; subtitle: string; isCurrent: boolean; onChange: (p: { year: number; month: number }) => void; refreshing?: boolean }} PulsePeriodContextValue */
+/** @typedef {import('@/lib/crm/report-period').ReportPeriodSelection} ReportPeriodSelection */
+
+/** @typedef {{
+ *   selection: ReportPeriodSelection;
+ *   primaryPeriod: import('@/lib/crm/report-period').ReportPeriod;
+ *   label: string;
+ *   subtitle: string;
+ *   isCurrent: boolean;
+ *   onSelectionChange: (selection: ReportPeriodSelection) => void;
+ *   refreshing?: boolean;
+ * }} PulsePeriodContextValue */
 
 /** @type {import('react').Context<PulsePeriodContextValue | null>} */
 const PulsePeriodContext = createContext(null);
 
 /**
  * @param {{
- *   year: number;
- *   month: number;
- *   onChange: (p: { year: number; month: number }) => void;
+ *   selection: ReportPeriodSelection;
+ *   onSelectionChange: (selection: ReportPeriodSelection) => void;
  *   refreshing?: boolean;
  *   children: import('react').ReactNode;
  * }} props
  */
-export function PulsePeriodProvider({ year, month, onChange, refreshing = false, children }) {
+export function PulsePeriodProvider({ selection, onSelectionChange, refreshing = false, children }) {
+  const normalized = useMemo(() => normalizeReportPeriodSelection(selection), [selection]);
+  const primaryPeriod = useMemo(() => primaryReportPeriod(normalized), [normalized]);
+
   const value = useMemo(
     () => ({
-      year,
-      month,
-      label: formatReportPeriodLabel(year, month),
-      subtitle: formatReportPeriodSubtitle(year, month),
-      isCurrent: isCurrentReportPeriod(year, month),
-      onChange,
+      selection: normalized,
+      primaryPeriod,
+      label: formatReportPeriodSelectionSubtitle(normalized),
+      subtitle: formatReportPeriodSelectionSubtitle(normalized),
+      isCurrent: isCurrentMonthSelection(normalized),
+      onSelectionChange,
       refreshing,
     }),
-    [year, month, onChange, refreshing],
+    [normalized, primaryPeriod, onSelectionChange, refreshing],
   );
 
   return <PulsePeriodContext.Provider value={value}>{children}</PulsePeriodContext.Provider>;

@@ -13,12 +13,8 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { contractDaysUntilRenewal } from "@/lib/crm/contract-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { routes } from "@/config/routes";
-import {
-  formatReportPeriodSubtitle,
-  getCurrentReportPeriod,
-  lastCalendarDayIsoOfReportMonth,
-  normalizeReportPeriod,
-} from "@/lib/crm/report-period";
+import { lastCalendarDayIsoOfReportMonth } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import {
   CLIENTS,
   CONTRACT_REVISION_LOG,
@@ -35,24 +31,17 @@ import { cn } from "@/lib/utils";
  */
 export function ContractDetailShell({ contractId }) {
   const dataSource = useDataSource();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [detailTab, setDetailTab] = useState(CONTRACT_DETAIL_TAB_IDS[0]);
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
 
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
-
   const loadRemote = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
-      const qs = databaseApiQuery({ year: String(p.year),
-        month: String(p.month),
-      });
+      const qs = databaseApiQuery(queryParams);
       const res = await fetch(`/api/contracts/${encodeURIComponent(contractId)}?${qs}`, {
         cache: "no-store",
       });
@@ -64,7 +53,7 @@ export function ContractDetailShell({ contractId }) {
     } finally {
       setLoading(false);
     }
-  }, [contractId, period]);
+  }, [contractId, queryParams]);
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -74,7 +63,7 @@ export function ContractDetailShell({ contractId }) {
   }, [dataSource, loadRemote]);
 
   const demoCtr = CONTRACTS.find((c) => c.id === contractId);
-  const renewalRefDemo = lastCalendarDayIsoOfReportMonth(period.year, period.month);
+  const renewalRefDemo = lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month);
 
   if (dataSource === "demo" && !demoCtr) {
     return (
@@ -104,7 +93,6 @@ export function ContractDetailShell({ contractId }) {
     const clientTasks = TASKS.filter((t) => t.clientId === demoCtr.clientId);
     const retainerHist = RETAINER_HISTORY[demoCtr.clientId] ?? [];
     const daysUntilRenewal = contractDaysUntilRenewal(demoCtr.renewalAt, renewalRefDemo);
-    const subtitle = formatReportPeriodSubtitle(period.year, period.month);
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -133,7 +121,7 @@ export function ContractDetailShell({ contractId }) {
           renewalReferenceIso={renewalRefDemo}
           trailing={
             <div className="flex flex-col items-end gap-1">
-              <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+              <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
               <span className="hidden text-right font-sans text-[10px] text-fg-quiet sm:inline">
                 Reference: {subtitle}
               </span>
@@ -163,8 +151,7 @@ export function ContractDetailShell({ contractId }) {
     const ctr = /** @type {import('@/lib/crm/static-data').CONTRACTS[number]} */ (remote.contract);
     /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */
     const client = /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (remote.client);
-    const renewalRef = String(remote.renewalReferenceIso ?? lastCalendarDayIsoOfReportMonth(period.year, period.month));
-    const subtitle = formatReportPeriodSubtitle(period.year, period.month);
+    const renewalRef = String(remote.renewalReferenceIso ?? lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month));
 
     /** @type {import('@/lib/crm/pulse-types').PulseTeamMember | null} */
     const owner =
@@ -217,7 +204,7 @@ export function ContractDetailShell({ contractId }) {
           renewalReferenceIso={renewalRef}
           trailing={
             <div className="flex flex-col items-end gap-1">
-              <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+              <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
               <span className="max-w-[240px] text-right font-sans text-[10px] text-fg-quiet">
                 Timer &amp; KPI for {periodLabel}
                 <span className="hidden sm:inline">{` (${subtitle})`}</span>
@@ -258,9 +245,9 @@ export function ContractDetailShell({ contractId }) {
           }}
           owner={null}
           daysUntilRenewal={0}
-          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(period.year, period.month)}
+          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month)}
           trailing={
-            <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
           }
         />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
@@ -288,9 +275,9 @@ export function ContractDetailShell({ contractId }) {
           }}
           owner={null}
           daysUntilRenewal={0}
-          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(period.year, period.month)}
+          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month)}
           trailing={
-            <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
           }
         />
         <div className="space-y-3">

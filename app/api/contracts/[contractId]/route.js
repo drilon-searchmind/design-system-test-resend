@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { fetchContractDetailBundle } from "@/lib/server/contracts-data";
 import { requireSession } from "@/lib/server/require-session";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -13,16 +14,18 @@ export async function GET(req, ctx) {
 
   const { contractId } = await ctx.params;
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchContractDetailBundle({
-      contractKey: contractId,
-      includeTest,
-      year: Number.isFinite(year) ? year : undefined,
-      month: Number.isFinite(month) ? month : undefined,
-    });
+    const bundle = await fetchContractDetailBundle(
+      withReportPeriodRequest(
+        {
+          contractKey: contractId,
+          includeTest,
+        },
+        resolved,
+      ),
+    );
 
     if (bundle?.error) {
       return NextResponse.json({ error: bundle.error }, { status: bundle.status ?? 400 });

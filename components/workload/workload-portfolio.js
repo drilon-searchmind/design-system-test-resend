@@ -12,11 +12,9 @@ import { WorkloadSummaryStrip } from "@/components/workload/workload-summary-str
 import { WorkloadTeamDirectory } from "@/components/workload/workload-team-directory";
 import { getWorkloadDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { workloadAgencyTotals } from "@/lib/crm/workload-utils";
 import { cn } from "@/lib/utils";
-
-/** @typedef {{ year: number; month: number }} ReportPeriodState */
 
 /**
  * @param {Record<string, unknown> | null} bundle
@@ -47,19 +45,12 @@ function departmentsFromBundle(bundle) {
 
 export function WorkloadPortfolio() {
   const dataSource = useDataSource();
-  const [reportPeriod, setReportPeriod] = useState(
-    /** @type {ReportPeriodState} */ (normalizeReportPeriod(getCurrentReportPeriod())),
-  );
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
-
-  const normalizedPeriod = useMemo(
-    () => normalizeReportPeriod({ year: reportPeriod.year, month: reportPeriod.month }),
-    [reportPeriod.month, reportPeriod.year],
-  );
 
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
@@ -70,18 +61,12 @@ export function WorkloadPortfolio() {
       if (dataSource === "demo") {
         setBundle(
           /** @type {Record<string, unknown>} */ (
-            getWorkloadDemoBundle({
-              year: normalizedPeriod.year,
-              month: normalizedPeriod.month,
-            })
+            getWorkloadDemoBundle(primaryPeriod)
           ),
         );
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({
-          year: String(normalizedPeriod.year),
-          month: String(normalizedPeriod.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/workload?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
@@ -96,7 +81,7 @@ export function WorkloadPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, normalizedPeriod.month, normalizedPeriod.year]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -164,14 +149,15 @@ export function WorkloadPortfolio() {
 
   const departments = useMemo(() => departmentsFromBundle(bundle), [bundle]);
 
-  const headerPeriodMemo = normalizedPeriod;
+  const headerSelectionMemo = selection;
 
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <WorkloadPageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           dataSource={dataSource}
           mineLabel={null}
           loading
@@ -189,8 +175,9 @@ export function WorkloadPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <WorkloadPageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           dataSource={dataSource}
           mineLabel={null}
         />
@@ -204,8 +191,9 @@ export function WorkloadPortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <WorkloadPageHeader
-        reportPeriod={normalizedPeriod}
-        onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         dataSource={dataSource}
         mineLabel={mineLabel}
         refreshing={refreshing}

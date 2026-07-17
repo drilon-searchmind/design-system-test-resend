@@ -1,13 +1,14 @@
 "use client";
 
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
-import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
+import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
 /**
  * @param {{
- *   period: { year: number; month: number };
- *   onPeriodChange: (p: { year: number; month: number }) => void;
+ *   selection: import('@/lib/crm/report-period').ReportPeriodSelection;
+ *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
+ *   subtitle?: string;
  *   refreshing?: boolean;
  *   loading?: boolean;
  *   clients?: import('@/lib/crm/pulse-types').PulseClient[] | null;
@@ -17,8 +18,9 @@ import { cn } from "@/lib/utils";
  * }} props
  */
 export function ClientsPageHeader({
-  period,
-  onPeriodChange,
+  selection,
+  onSelectionChange,
+  subtitle: subtitleProp,
   refreshing = false,
   loading = false,
   clients = null,
@@ -26,7 +28,7 @@ export function ClientsPageHeader({
   createModalOpen = false,
   dataSource = "demo",
 }) {
-  const subtitle = formatReportPeriodSubtitle(period.year, period.month);
+  const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
   let bodyLine = "";
 
   if (loading && !clients) {
@@ -78,7 +80,7 @@ export function ClientsPageHeader({
             </button>
           : null}
         </div>
-        <ReportPeriodPicker year={period.year} month={period.month} onChange={onPeriodChange} />
+        <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
       </div>
     </header>
   );

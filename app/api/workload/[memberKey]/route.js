@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { normalizeReportPeriod } from "@/lib/crm/report-period";
 import { requireSession } from "@/lib/server/require-session";
 import { fetchWorkloadMemberDetail } from "@/lib/server/workload-data";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -16,20 +16,19 @@ export async function GET(req, ctx) {
   const memberKey = decodeURIComponent(memberKeyEncoded ?? "");
 
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
-  const period = normalizeReportPeriod({
-    year: Number.isFinite(year) ? year : undefined,
-    month: Number.isFinite(month) ? month : undefined,
-  });
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchWorkloadMemberDetail({
-      memberKey,
-      includeTest,
-      session: authResult.session,
-      ...period,
-    });
+    const bundle = await fetchWorkloadMemberDetail(
+      withReportPeriodRequest(
+        {
+          memberKey,
+          includeTest,
+          session: authResult.session,
+        },
+        resolved,
+      ),
+    );
 
     if (!bundle) {
       return NextResponse.json({ error: "Medarbejder ikke fundet" }, { status: 404 });

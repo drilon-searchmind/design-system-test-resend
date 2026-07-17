@@ -17,7 +17,7 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { getTasksDemoBundle } from "@/lib/crm/tasks-demo-bundle";
 import { computeTasksSummary } from "@/lib/crm/task-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 /** @typedef {ReturnType<typeof getTasksDemoBundle>} TasksPortfolioBundle */
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 export function TasksPortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {TasksPortfolioBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -49,19 +49,14 @@ export function TasksPortfolio() {
     setCreateError(null);
   }, []);
 
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
-
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
     if (isInitial) setLoading(true);
     else setRefreshing(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
       if (dataSource === "demo") {
-        const nextBundle = getTasksDemoBundle(p);
+        const nextBundle = getTasksDemoBundle(primaryPeriod);
         setBundle(nextBundle);
         if (!assigneeFilterInitializedRef.current) {
           setSelectedAssignees(
@@ -71,9 +66,7 @@ export function TasksPortfolio() {
         }
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(p.year),
-          month: String(p.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/tasks?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaver");
@@ -93,7 +86,7 @@ export function TasksPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, period]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -178,8 +171,9 @@ export function TasksPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TasksPageHeader
-          period={period}
-          onPeriodChange={handlePeriodChange}
+          selection={selection}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           loading
           summary={null}
           mineLabel={null}
@@ -201,8 +195,9 @@ export function TasksPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TasksPageHeader
-          period={period}
-          onPeriodChange={handlePeriodChange}
+          selection={selection}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           summary={null}
           mineLabel={null}
           dataSource={dataSource}
@@ -217,8 +212,9 @@ export function TasksPortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <TasksPageHeader
-        period={period}
-        onPeriodChange={handlePeriodChange}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         refreshing={refreshing}
         summary={filteredSummary}
         assigneeFilterLabel={assigneeFilterLabel}

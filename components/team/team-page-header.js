@@ -3,13 +3,14 @@
 import { IconUsers } from "@/components/crm/icons";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { TEAM } from "@/lib/crm/static-data";
-import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
+import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 
 /**
  * @param {{
- *   reportPeriod: { year: number; month: number };
- *   onReportPeriodChange: (p: { year: number; month: number }) => void;
+ *   selection: import('@/lib/crm/report-period').ReportPeriodSelection;
+ *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
+ *   subtitle?: string;
  *   dataSource?: "demo" | "database";
  *   mineLabel?: string | null;
  *   refreshing?: boolean;
@@ -17,8 +18,9 @@ import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
  * }} props
  */
 export function TeamPageHeader({
-  reportPeriod,
-  onReportPeriodChange,
+  selection,
+  onSelectionChange,
+  subtitle: subtitleProp,
   dataSource = "demo",
   mineLabel = null,
   refreshing = false,
@@ -32,7 +34,7 @@ export function TeamPageHeader({
       demoFallbackName
     : "Dig";
 
-  const subtitle = formatReportPeriodSubtitle(reportPeriod.year, reportPeriod.month);
+  const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
 
   return (
     <div className="flex flex-col gap-4">
@@ -56,7 +58,7 @@ export function TeamPageHeader({
           </p>
         </div>
 
-        <ReportPeriodPicker year={reportPeriod.year} month={reportPeriod.month} onChange={onReportPeriodChange} />
+        <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
       </header>
     </div>
   );

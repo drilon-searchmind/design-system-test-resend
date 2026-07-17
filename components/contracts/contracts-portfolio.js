@@ -8,23 +8,19 @@ import { ContractsSummaryStrip } from "@/components/contracts/contracts-summary-
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getContractsDemoBundle } from "@/lib/crm/contracts-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 /** @typedef {ReturnType<typeof getContractsDemoBundle>} ContractsPortfolioBundle */
 
 export function ContractsPortfolio() {
   const dataSource = useDataSource();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {ContractsPortfolioBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
-
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
 
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
@@ -32,14 +28,11 @@ export function ContractsPortfolio() {
     else setRefreshing(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
       if (dataSource === "demo") {
-        setBundle(getContractsDemoBundle(p));
+        setBundle(getContractsDemoBundle(primaryPeriod));
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(p.year),
-          month: String(p.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/contracts?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente kontrakter");
@@ -53,7 +46,7 @@ export function ContractsPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, period]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -69,8 +62,9 @@ export function ContractsPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <ContractsPageHeader
-          period={period}
-          onPeriodChange={handlePeriodChange}
+          selection={selection}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           loading
           summary={null}
         />
@@ -87,7 +81,7 @@ export function ContractsPortfolio() {
   if (error || !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-        <ContractsPageHeader period={period} onPeriodChange={handlePeriodChange} summary={null} />
+        <ContractsPageHeader selection={selection} onSelectionChange={setSelection} subtitle={subtitle} summary={null} />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error ?? "Ingen data"}
         </p>
@@ -98,8 +92,9 @@ export function ContractsPortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <ContractsPageHeader
-        period={period}
-        onPeriodChange={handlePeriodChange}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         refreshing={refreshing}
         summary={bundle.summary}
       />

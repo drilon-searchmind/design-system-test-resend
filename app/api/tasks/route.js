@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { normalizeReportPeriod } from "@/lib/crm/report-period";
 import { assigneeMemberKeyForDbUser } from "@/lib/server/session-team-member";
 import { createTaskMongo, fetchTasksPortfolio } from "@/lib/server/tasks-data";
 import { requireSession } from "@/lib/server/require-session";
+import { resolveReportPeriodRequest, withReportPeriodRequest } from "@/lib/server/resolve-report-periods";
 
 /**
  * @param {import('next/server').NextRequest} req
@@ -13,16 +13,13 @@ export async function GET(req) {
   if ("response" in authResult) return authResult.response;
 
   const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
-  const year = Number(req.nextUrl.searchParams.get("year"));
-  const month = Number(req.nextUrl.searchParams.get("month"));
-  const period = normalizeReportPeriod({
-    year: Number.isFinite(year) ? year : undefined,
-    month: Number.isFinite(month) ? month : undefined,
-  });
+  const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
     const mineAssigneeKey = await assigneeMemberKeyForDbUser(authResult.session);
-    const bundle = await fetchTasksPortfolio({ includeTest, mineAssigneeKey, ...period });
+    const bundle = await fetchTasksPortfolio(
+      withReportPeriodRequest({ includeTest, mineAssigneeKey }, resolved),
+    );
     return NextResponse.json(bundle);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Kunne ikke hente opgaver";

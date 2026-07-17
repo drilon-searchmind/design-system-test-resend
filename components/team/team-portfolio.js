@@ -13,29 +13,20 @@ import { TeamRosterDirectory, UNASSIGNED_DISCIPLINE_ID } from "@/components/team
 import { TeamSummaryStrip } from "@/components/team/team-summary-strip";
 import { getTeamDemoBundle } from "@/lib/crm/team-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
-
-/** @typedef {{ year: number; month: number }} Rp */
 
 export function TeamPortfolio() {
   const dataSource = useDataSource();
   const searchParams = useSearchParams();
   const deptParam = searchParams.get("dept");
 
-  const [reportPeriod, setReportPeriod] = useState(
-    /** @type {Rp} */ (normalizeReportPeriod(getCurrentReportPeriod())),
-  );
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
-
-  const normalizedPeriod = useMemo(
-    () => normalizeReportPeriod({ year: reportPeriod.year, month: reportPeriod.month }),
-    [reportPeriod.month, reportPeriod.year],
-  );
 
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
@@ -46,17 +37,12 @@ export function TeamPortfolio() {
       if (dataSource === "demo") {
         setBundle(
           /** @type {Record<string, unknown>} */ (
-            getTeamDemoBundle({
-              year: normalizedPeriod.year,
-              month: normalizedPeriod.month,
-            })
+            getTeamDemoBundle(primaryPeriod)
           ),
         );
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
-          month: String(normalizedPeriod.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/team?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
@@ -71,7 +57,7 @@ export function TeamPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, normalizedPeriod.month, normalizedPeriod.year]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -83,7 +69,7 @@ export function TeamPortfolio() {
     });
   }, [load]);
 
-  const headerPeriodMemo = normalizedPeriod;
+  const headerSelectionMemo = selection;
 
   const validDept = useMemo(() => {
     if (!deptParam) return undefined;
@@ -101,8 +87,9 @@ export function TeamPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TeamPageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           dataSource={dataSource}
           mineLabel={null}
           loading
@@ -120,8 +107,9 @@ export function TeamPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TeamPageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           dataSource={dataSource}
           mineLabel={null}
         />
@@ -140,8 +128,9 @@ export function TeamPortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <TeamPageHeader
-        reportPeriod={normalizedPeriod}
-        onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         dataSource={dataSource}
         mineLabel={mineLabel}
         refreshing={refreshing}

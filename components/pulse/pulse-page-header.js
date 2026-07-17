@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export function PulsePageHeader() {
   const { agencyMetrics: m, period: bundlePeriod } = usePulseData();
-  const { year, month, onChange, refreshing, subtitle } = usePulsePeriod();
+  const { selection, onSelectionChange, refreshing, subtitle } = usePulsePeriod();
 
   return (
     <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
@@ -31,7 +31,7 @@ export function PulsePageHeader() {
         </p>
       </div>
 
-      <ReportPeriodPicker year={year} month={month} onChange={onChange} />
+      <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
     </header>
   );
 }

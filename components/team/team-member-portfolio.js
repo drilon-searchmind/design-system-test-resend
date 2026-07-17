@@ -12,11 +12,9 @@ import { TeamMemberOpenTasksCard } from "@/components/team/team-member-open-task
 import { TeamMemberQuickLinksCard } from "@/components/team/team-member-quick-links-card";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
-
-/** @typedef {{ year: number; month: number }} Rp */
 
 export function TeamMemberPortfolio() {
   const dataSource = useDataSource();
@@ -24,19 +22,12 @@ export function TeamMemberPortfolio() {
   const rawId = typeof params.memberId === "string" ? params.memberId : "";
   const memberKey = decodeURIComponent(rawId);
 
-  const [reportPeriod, setReportPeriod] = useState(
-    /** @type {Rp} */ (normalizeReportPeriod(getCurrentReportPeriod())),
-  );
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
-
-  const normalizedPeriod = useMemo(
-    () => normalizeReportPeriod({ year: reportPeriod.year, month: reportPeriod.month }),
-    [reportPeriod.month, reportPeriod.year],
-  );
 
   const load = useCallback(async () => {
     if (!memberKey) return;
@@ -46,17 +37,12 @@ export function TeamMemberPortfolio() {
     setError(null);
     try {
       if (dataSource === "demo") {
-        const b = getWorkloadMemberDemoBundle(memberKey, {
-          year: normalizedPeriod.year,
-          month: normalizedPeriod.month,
-        });
+        const b = getWorkloadMemberDemoBundle(memberKey, primaryPeriod);
         if (!b) throw new Error("Medarbejder ikke fundet");
         setBundle(/** @type {Record<string, unknown>} */ (b));
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
-          month: String(normalizedPeriod.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/workload/${encodeURIComponent(memberKey)}?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
@@ -73,7 +59,7 @@ export function TeamMemberPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, memberKey, normalizedPeriod.month, normalizedPeriod.year]);
+  }, [dataSource, memberKey, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -143,8 +129,6 @@ export function TeamMemberPortfolio() {
       bundle.overdueCount
     : 0;
 
-  const subtitle = formatReportPeriodSubtitle(normalizedPeriod.year, normalizedPeriod.month);
-
   if (!memberKey) {
     return (
       <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
@@ -183,11 +167,7 @@ export function TeamMemberPortfolio() {
         <Link href={routes.team} className="font-sans text-[13px] font-medium text-agency-brand hover:underline">
           ← Team
         </Link>
-        <ReportPeriodPicker
-          year={reportPeriod.year}
-          month={reportPeriod.month}
-          onChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
-        />
+        <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
       </div>
 
       <TeamMemberHeader member={member} department={department} />

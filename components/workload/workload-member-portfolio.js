@@ -15,10 +15,8 @@ import { TeamMemberOpenTasksCard } from "@/components/team/team-member-open-task
 import { routes } from "@/config/routes";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
-
-/** @typedef {{ year: number; month: number }} ReportPeriodState */
 
 export function WorkloadMemberPortfolio() {
   const dataSource = useDataSource();
@@ -26,19 +24,12 @@ export function WorkloadMemberPortfolio() {
   const rawKey = typeof params.memberKey === "string" ? params.memberKey : "";
   const memberKey = decodeURIComponent(rawKey);
 
-  const [reportPeriod, setReportPeriod] = useState(
-    /** @type {ReportPeriodState} */ (normalizeReportPeriod(getCurrentReportPeriod())),
-  );
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
-
-  const normalizedPeriod = useMemo(
-    () => normalizeReportPeriod({ year: reportPeriod.year, month: reportPeriod.month }),
-    [reportPeriod.month, reportPeriod.year],
-  );
 
   const load = useCallback(async () => {
     if (!memberKey) return;
@@ -48,18 +39,12 @@ export function WorkloadMemberPortfolio() {
     setError(null);
     try {
       if (dataSource === "demo") {
-        const b = getWorkloadMemberDemoBundle(memberKey, {
-          year: normalizedPeriod.year,
-          month: normalizedPeriod.month,
-        });
+        const b = getWorkloadMemberDemoBundle(memberKey, primaryPeriod);
         if (!b) throw new Error("Medarbejder ikke fundet");
         setBundle(/** @type {Record<string, unknown>} */ (b));
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({
-          year: String(normalizedPeriod.year),
-          month: String(normalizedPeriod.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/workload/${encodeURIComponent(memberKey)}?${qs}`, { cache: "no-store" });
         /** @type {{ error?: string } & Record<string, unknown>} */
         const data = await res.json();
@@ -76,7 +61,7 @@ export function WorkloadMemberPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, memberKey, normalizedPeriod.month, normalizedPeriod.year]);
+  }, [dataSource, memberKey, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -87,8 +72,6 @@ export function WorkloadMemberPortfolio() {
       void load();
     });
   }, [load]);
-
-  const subtitle = formatReportPeriodSubtitle(normalizedPeriod.year, normalizedPeriod.month);
 
   const tasksForCard = useMemo(() => {
     if (!bundle || !Array.isArray(bundle.tasksOpen)) return [];
@@ -232,11 +215,7 @@ export function WorkloadMemberPortfolio() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <ReportPeriodPicker
-            year={reportPeriod.year}
-            month={reportPeriod.month}
-            onChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
-          />
+          <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
         </div>
       </header>
 

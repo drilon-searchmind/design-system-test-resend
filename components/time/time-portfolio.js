@@ -15,35 +15,22 @@ import { routes } from "@/config/routes";
 import { getTimeEntriesDemoBundle } from "@/lib/crm/time-entries-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatIsoWeekdayLongDa } from "@/lib/crm/format-da";
-import { formatReportPeriodSubtitle, getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { buildReportMonthCalendarCells, minutesPerUtcIsoDayFromWireEntries } from "@/lib/crm/time-utils";
 import { cn } from "@/lib/utils";
 
 /**
  * Kalenderfelter ud fra bunlde — API/demo sender `calendarCells`; ellers falder vi tilbage.
  * @param {Record<string, unknown> | null} bundle
+ * @param {{ year: number; month: number }} primaryPeriod
  */
-function calendarCellsForBundle(bundle) {
+function calendarCellsForBundle(bundle, primaryPeriod) {
   const raw = bundle && Array.isArray(bundle.calendarCells) ? bundle.calendarCells : null;
   if (raw && raw.length > 0) return raw;
 
-  const rpUnknown = bundle?.reportPeriod;
-  const yr =
-    rpUnknown &&
-    typeof rpUnknown === "object" &&
-    rpUnknown !== null &&
-    "year" in rpUnknown ?
-      Number(rpUnknown.year)
-    : NaN;
-  const mo =
-    rpUnknown && typeof rpUnknown === "object" && rpUnknown !== null && "month" in rpUnknown ?
-      Number(rpUnknown.month)
-    : NaN;
-
   /** @type {{ year: number; month: number }} */
-  const reportPeriod = Number.isFinite(yr) && Number.isFinite(mo) ?
-    normalizeReportPeriod({ year: yr, month: mo })
-  : normalizeReportPeriod(getCurrentReportPeriod());
+  const reportPeriod = normalizeReportPeriod(primaryPeriod);
 
   const tk =
     typeof bundle?.todayKey === "string" ?
@@ -90,10 +77,7 @@ function weekdayWorkedMinutesSum(cells) {
 export function TimePortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
-  /** @typedef {{ year: number; month: number }} RP */
-  const [reportPeriod, setReportPeriod] = useState(
-    /** @type {RP} */ (normalizeReportPeriod(getCurrentReportPeriod())),
-  );
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
 
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
@@ -118,11 +102,6 @@ export function TimePortfolio() {
     setCreateError(null);
   }, []);
 
-  const normalizedPeriod = useMemo(
-    () => normalizeReportPeriod({ year: reportPeriod.year, month: reportPeriod.month }),
-    [reportPeriod.year, reportPeriod.month],
-  );
-
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
     if (isInitial) setLoading(true);
@@ -131,16 +110,11 @@ export function TimePortfolio() {
     try {
       if (dataSource === "demo") {
         /** @type {Record<string, unknown>} */
-        const b = getTimeEntriesDemoBundle({
-          year: normalizedPeriod.year,
-          month: normalizedPeriod.month,
-        });
+        const b = getTimeEntriesDemoBundle(primaryPeriod);
         setBundle(b);
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(normalizedPeriod.year),
-          month: String(normalizedPeriod.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/time-entries?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente tidsdata");
@@ -154,7 +128,7 @@ export function TimePortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, normalizedPeriod.month, normalizedPeriod.year]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -162,7 +136,7 @@ export function TimePortfolio() {
 
   useEffect(() => {
     setPickedDayIso(null);
-  }, [normalizedPeriod.year, normalizedPeriod.month, dataSource]);
+  }, [primaryPeriod.year, primaryPeriod.month, dataSource]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -170,7 +144,7 @@ export function TimePortfolio() {
     });
   }, [load]);
 
-  const calendarCells = useMemo(() => calendarCellsForBundle(bundle ?? null), [bundle]);
+  const calendarCells = useMemo(() => calendarCellsForBundle(bundle ?? null, primaryPeriod), [bundle, primaryPeriod]);
 
   const entriesAll = useMemo(
     () =>
@@ -276,9 +250,7 @@ export function TimePortfolio() {
   const subtitleForUi =
     (bundle && typeof bundle.periodSubtitle === "string" ?
       bundle.periodSubtitle.trim().slice(0, 1).toUpperCase() + bundle.periodSubtitle.trim().slice(1)
-    : formatReportPeriodSubtitle(normalizedPeriod.year, normalizedPeriod.month).replace(/^./, (ch) =>
-        ch.toUpperCase(),
-      )) || "";
+    : subtitle.replace(/^./, (ch) => ch.toUpperCase())) || "";
 
   const compareLabelDa = `${subtitleForUi} vs. mål (arb.d.)`;
 
@@ -320,14 +292,15 @@ export function TimePortfolio() {
     [closeCreate, dataSource, load, router],
   );
 
-  const headerPeriodMemo = normalizedPeriod;
+  const headerSelectionMemo = selection;
 
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TimePageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           mineLabel={null}
           dataSource={dataSource}
           loading
@@ -350,8 +323,9 @@ export function TimePortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TimePageHeader
-          reportPeriod={headerPeriodMemo}
-          onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+          selection={headerSelectionMemo}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           mineLabel={null}
           dataSource={dataSource}
         />
@@ -384,8 +358,9 @@ export function TimePortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <TimePageHeader
-        reportPeriod={normalizedPeriod}
-        onReportPeriodChange={(p) => setReportPeriod(normalizeReportPeriod(p))}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         mineLabel={mineLabel}
         dataSource={dataSource}
         refreshing={refreshing}

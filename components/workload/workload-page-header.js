@@ -2,12 +2,13 @@
 
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconChart } from "@/components/crm/icons";
-import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
+import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 
 /**
  * @param {{
- *   reportPeriod: { year: number; month: number };
- *   onReportPeriodChange: (p: { year: number; month: number }) => void;
+ *   selection: import('@/lib/crm/report-period').ReportPeriodSelection;
+ *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
+ *   subtitle?: string;
  *   dataSource?: "demo" | "database";
  *   mineLabel?: string | null;
  *   refreshing?: boolean;
@@ -15,14 +16,15 @@ import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
  * }} props
  */
 export function WorkloadPageHeader({
-  reportPeriod,
-  onReportPeriodChange,
+  selection,
+  onSelectionChange,
+  subtitle: subtitleProp,
   dataSource = "demo",
   mineLabel = null,
   refreshing = false,
   loading = false,
 }) {
-  const subtitle = formatReportPeriodSubtitle(reportPeriod.year, reportPeriod.month);
+  const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
   const hasMine = typeof mineLabel === "string" && mineLabel.trim();
 
   return (
@@ -53,7 +55,7 @@ export function WorkloadPageHeader({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
-          <ReportPeriodPicker year={reportPeriod.year} month={reportPeriod.month} onChange={onReportPeriodChange} />
+          <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
         </div>
       </header>
     </div>

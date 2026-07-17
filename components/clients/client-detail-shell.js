@@ -25,11 +25,7 @@ import {
   TASKS,
   TEAM,
 } from "@/lib/crm/static-data";
-import {
-  formatReportPeriodSubtitle,
-  getCurrentReportPeriod,
-  normalizeReportPeriod,
-} from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,7 +34,7 @@ import { cn } from "@/lib/utils";
 export function ClientDetailShell({ clientSlug }) {
   const router = useRouter();
   const dataSource = useDataSource();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, queryParams, subtitle } = useReportPeriodState();
   const [detailTab, setDetailTab] = useState(CLIENT_DETAIL_TAB_DEFS[0].id);
 
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
@@ -50,18 +46,11 @@ export function ClientDetailShell({ clientSlug }) {
   const [saving, setSaving] = useState(false);
   const [editNotice, setEditNotice] = useState(/** @type {string | null} */ (null));
 
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
-
   const loadRemote = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
-      const qs = databaseApiQuery({ year: String(p.year),
-        month: String(p.month),
-      });
+      const qs = databaseApiQuery(queryParams);
       const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
         cache: "no-store",
       });
@@ -73,7 +62,7 @@ export function ClientDetailShell({ clientSlug }) {
     } finally {
       setLoading(false);
     }
-  }, [clientSlug, period]);
+  }, [clientSlug, queryParams]);
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -176,7 +165,6 @@ export function ClientDetailShell({ clientSlug }) {
     const contract = CONTRACTS.find((row) => row.clientId === clientSlug) ?? null;
     const retainerHistory = RETAINER_HISTORY[clientSlug] ?? [];
     const clientTasks = TASKS.filter((t) => t.clientId === clientSlug);
-    const subtitle = formatReportPeriodSubtitle(period.year, period.month);
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -194,7 +182,7 @@ export function ClientDetailShell({ clientSlug }) {
           }
           trailing={
             <div className="flex flex-col items-end gap-1">
-              <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+              <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
               <span className="hidden text-right font-sans text-[10px] text-fg-quiet sm:inline">
                 Reference: {subtitle}
               </span>
@@ -221,7 +209,6 @@ export function ClientDetailShell({ clientSlug }) {
   if (dataSource === "database" && remote && typeof remote === "object" && remote.client) {
     /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */
     const c = /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (remote.client);
-    const subtitle = formatReportPeriodSubtitle(period.year, period.month);
 
     /** @type {import('@/lib/crm/pulse-types').PulseTeamMember | null} */
     const owner =
@@ -289,11 +276,7 @@ export function ClientDetailShell({ clientSlug }) {
               <div className="flex flex-wrap items-center justify-end gap-2">
                 {editActions}
                 {!editing ? (
-                  <ReportPeriodPicker
-                    year={period.year}
-                    month={period.month}
-                    onChange={handlePeriodChange}
-                  />
+                  <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
                 ) : null}
               </div>
               {!editing ? (
@@ -350,7 +333,7 @@ export function ClientDetailShell({ clientSlug }) {
           }}
           owner={null}
           trailing={
-            <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
           }
         />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
@@ -379,7 +362,7 @@ export function ClientDetailShell({ clientSlug }) {
           }}
           owner={null}
           trailing={
-            <ReportPeriodPicker year={period.year} month={period.month} onChange={handlePeriodChange} />
+            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
           }
         />
         <div className="space-y-3">

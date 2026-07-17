@@ -11,13 +11,13 @@ import { CrmDialog } from "@/components/crm/crm-dialog";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
+import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 export function ClientsPortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
-  const [period, setPeriod] = useState(() => getCurrentReportPeriod());
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {import('@/lib/crm/pulse-types').PulseBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,24 +39,17 @@ export function ClientsPortfolio() {
     setCreateError(null);
   }, []);
 
-  const handlePeriodChange = useCallback((next) => {
-    setPeriod(normalizeReportPeriod(next));
-  }, []);
-
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
     if (isInitial) setLoading(true);
     else setRefreshing(true);
     setError(null);
     try {
-      const p = normalizeReportPeriod(period);
       if (dataSource === "demo") {
-        setBundle(getPulseDemoBundle(p));
+        setBundle(getPulseDemoBundle(primaryPeriod));
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery({ year: String(p.year),
-          month: String(p.month),
-        });
+        const qs = databaseApiQuery(queryParams);
         const res = await fetch(`/api/pulse?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente data");
@@ -70,7 +63,7 @@ export function ClientsPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, period]);
+  }, [dataSource, primaryPeriod, queryParams]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -115,8 +108,9 @@ export function ClientsPortfolio() {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <ClientsPageHeader
-          period={period}
-          onPeriodChange={handlePeriodChange}
+          selection={selection}
+          onSelectionChange={setSelection}
+          subtitle={subtitle}
           loading
           clients={null}
           dataSource={dataSource}
@@ -134,7 +128,7 @@ export function ClientsPortfolio() {
   if (error || !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-        <ClientsPageHeader period={period} onPeriodChange={handlePeriodChange} clients={null} />
+        <ClientsPageHeader selection={selection} onSelectionChange={setSelection} subtitle={subtitle} clients={null} />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error ?? "Ingen data"}
         </p>
@@ -145,8 +139,9 @@ export function ClientsPortfolio() {
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
       <ClientsPageHeader
-        period={period}
-        onPeriodChange={handlePeriodChange}
+        selection={selection}
+        onSelectionChange={setSelection}
+        subtitle={subtitle}
         refreshing={refreshing}
         clients={bundle.clients}
         onOpenCreate={openCreateModal}
