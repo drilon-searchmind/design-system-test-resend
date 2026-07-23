@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
  *   currency: string;
  *   startedAt: string;
  *   renewalAt: string;
- *   accountStatus: 'active' | 'paused' | 'inactive';
+ *   accountStatus: 'active' | 'paused' | 'inactive' | 'pending_signature';
  *   health: 'ok' | 'warn' | 'bad';
  *   noticeDays: number;
  * }; renewalReferenceIso?: string }} props

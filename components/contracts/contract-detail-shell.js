@@ -4,24 +4,18 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import {
-  CONTRACT_DETAIL_TAB_IDS,
   ContractDetailTabbedBody,
 } from "@/components/contracts/contract-detail-tabbed-body";
+import { ContractDetailActions } from "@/components/contracts/contract-detail-actions";
 import { ContractDetailHeader } from "@/components/contracts/contract-detail-header";
-import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { useDataSource } from "@/components/crm/use-data-source";
-import { contractDaysUntilRenewal } from "@/lib/crm/contract-utils";
+import { contractDaysUntilRenewal, CONTRACT_DEMO_REF_DATE } from "@/lib/crm/contract-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { routes } from "@/config/routes";
-import { lastCalendarDayIsoOfReportMonth } from "@/lib/crm/report-period";
-import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import {
   CLIENTS,
-  CONTRACT_REVISION_LOG,
   CONTRACTS,
   RETAINER_HISTORY,
-  SMART_ALERTS,
-  TASKS,
   TEAM,
 } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
@@ -31,8 +25,6 @@ import { cn } from "@/lib/utils";
  */
 export function ContractDetailShell({ contractId }) {
   const dataSource = useDataSource();
-  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
-  const [detailTab, setDetailTab] = useState(CONTRACT_DETAIL_TAB_IDS[0]);
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
@@ -41,7 +33,7 @@ export function ContractDetailShell({ contractId }) {
     setLoading(true);
     setError(null);
     try {
-      const qs = databaseApiQuery(queryParams);
+      const qs = databaseApiQuery();
       const res = await fetch(`/api/contracts/${encodeURIComponent(contractId)}?${qs}`, {
         cache: "no-store",
       });
@@ -53,7 +45,7 @@ export function ContractDetailShell({ contractId }) {
     } finally {
       setLoading(false);
     }
-  }, [contractId, queryParams]);
+  }, [contractId]);
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -63,7 +55,7 @@ export function ContractDetailShell({ contractId }) {
   }, [dataSource, loadRemote]);
 
   const demoCtr = CONTRACTS.find((c) => c.id === contractId);
-  const renewalRefDemo = lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month);
+  const renewalRefDemo = CONTRACT_DEMO_REF_DATE;
 
   if (dataSource === "demo" && !demoCtr) {
     return (
@@ -89,8 +81,6 @@ export function ContractDetailShell({ contractId }) {
     }
 
     const owner = TEAM.find((t) => t.id === demoCtr.ownerId);
-    const revisions = CONTRACT_REVISION_LOG[demoCtr.id] ?? [];
-    const clientTasks = TASKS.filter((t) => t.clientId === demoCtr.clientId);
     const retainerHist = RETAINER_HISTORY[demoCtr.clientId] ?? [];
     const daysUntilRenewal = contractDaysUntilRenewal(demoCtr.renewalAt, renewalRefDemo);
 
@@ -119,52 +109,33 @@ export function ContractDetailShell({ contractId }) {
           daysUntilRenewal={daysUntilRenewal}
           industry={client.industry}
           renewalReferenceIso={renewalRefDemo}
-          trailing={
-            <div className="flex flex-col items-end gap-1">
-              <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-              <span className="hidden text-right font-sans text-[10px] text-fg-quiet sm:inline">
-                Reference: {subtitle}
-              </span>
-            </div>
-          }
         />
 
         <ContractDetailTabbedBody
-          tab={detailTab}
-          onTabChange={setDetailTab}
           contract={demoCtr}
           client={client}
           renewalReferenceIso={renewalRefDemo}
-          referenceChipLabel="Periodens slutdato"
+          referenceChipLabel="Reference"
           referenceChipValue={renewalRefDemo}
           retainerHistory={retainerHist}
-          revisionEntries={revisions}
-          tasks={clientTasks}
-          alerts={SMART_ALERTS}
         />
       </div>
     );
   }
 
   if (dataSource === "database" && remote && typeof remote === "object" && remote.contract && remote.client) {
-    /** @type {import('@/lib/crm/static-data').CONTRACTS[number]} */
-    const ctr = /** @type {import('@/lib/crm/static-data').CONTRACTS[number]} */ (remote.contract);
-    /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */
-    const client = /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (remote.client);
-    const renewalRef = String(remote.renewalReferenceIso ?? lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month));
+    /** @type {any} */
+    const ctr = remote.contract;
+    /** @type {any} */
+    const client = remote.client;
+    const renewalRef = String(remote.renewalReferenceIso ?? CONTRACT_DEMO_REF_DATE);
 
-    /** @type {import('@/lib/crm/pulse-types').PulseTeamMember | null} */
+    /** @type {any} */
     const owner =
-      remote.owner && typeof remote.owner === "object" && "name" in remote.owner
-        ? /** @type {import('@/lib/crm/pulse-types').PulseTeamMember} */ (remote.owner)
-        : null;
+      remote.owner && typeof remote.owner === "object" && "name" in remote.owner ? remote.owner : null;
 
     const daysUntilRenewal = contractDaysUntilRenewal(ctr.renewalAt, renewalRef);
-
-    const periodLabel =
-      remote.period && typeof remote.period === "object" && remote.period !== null && "label" in remote.period
-        ? String(/** @type {{ label?: string }} */ (remote.period).label)
-        : subtitle;
+    const actionId = ctr.mongoId || ctr.id;
 
     return (
       <div
@@ -173,11 +144,11 @@ export function ContractDetailShell({ contractId }) {
           loading && "opacity-65",
         )}
       >
-        {error ? (
+        {error ?
           <p className="rounded-lg border border-agency-warn-border bg-agency-warn-soft px-4 py-2 font-sans text-[12px] text-agency-warn">
             {error} — viser senest indlæste data.
           </p>
-        ) : null}
+        : null}
 
         <ContractDetailHeader
           contract={{
@@ -203,28 +174,26 @@ export function ContractDetailShell({ contractId }) {
           industry={client.industry}
           renewalReferenceIso={renewalRef}
           trailing={
-            <div className="flex flex-col items-end gap-1">
-              <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-              <span className="max-w-[240px] text-right font-sans text-[10px] text-fg-quiet">
-                Timer &amp; KPI for {periodLabel}
-                <span className="hidden sm:inline">{` (${subtitle})`}</span>
-              </span>
-            </div>
+            <ContractDetailActions
+              contractId={actionId}
+              accountStatus={ctr.accountStatus}
+              signingState={ctr.signingState}
+              onDone={() => void loadRemote()}
+            />
           }
         />
 
         <ContractDetailTabbedBody
-          tab={detailTab}
-          onTabChange={setDetailTab}
           contract={ctr}
           client={client}
           renewalReferenceIso={renewalRef}
-          referenceChipLabel={typeof remote.referenceChipLabel === "string" ? remote.referenceChipLabel : undefined}
-          referenceChipValue={typeof remote.referenceChipValue === "string" ? remote.referenceChipValue : undefined}
+          referenceChipLabel={
+            typeof remote.referenceChipLabel === "string" ? remote.referenceChipLabel : undefined
+          }
+          referenceChipValue={
+            typeof remote.referenceChipValue === "string" ? remote.referenceChipValue : undefined
+          }
           retainerHistory={Array.isArray(remote.retainerHistory) ? remote.retainerHistory : []}
-          revisionEntries={Array.isArray(remote.revisions) ? remote.revisions : []}
-          tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
-          alerts={Array.isArray(remote.alerts) ? remote.alerts : []}
         />
       </div>
     );
@@ -233,23 +202,6 @@ export function ContractDetailShell({ contractId }) {
   if (dataSource === "database" && error && !remote?.contract) {
     return (
       <div className="space-y-4">
-        <ContractDetailHeader
-          contract={{
-            id: contractId,
-            kind: "—",
-            clientName: "Kontrakt",
-            clientLogo: "?",
-            clientHue: 220,
-            accountStatus: "paused",
-            health: "ok",
-          }}
-          owner={null}
-          daysUntilRenewal={0}
-          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month)}
-          trailing={
-            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-          }
-        />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error}{" "}
           <Link href={routes.contracts} className="font-medium underline">
@@ -262,29 +214,10 @@ export function ContractDetailShell({ contractId }) {
 
   if (dataSource === "database") {
     return (
-      <div className="space-y-4">
-        <ContractDetailHeader
-          contract={{
-            id: contractId,
-            kind: "—",
-            clientName: "Indlæser…",
-            clientLogo: "?",
-            clientHue: 220,
-            accountStatus: "active",
-            health: "ok",
-          }}
-          owner={null}
-          daysUntilRenewal={0}
-          renewalReferenceIso={lastCalendarDayIsoOfReportMonth(primaryPeriod.year, primaryPeriod.month)}
-          trailing={
-            <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-          }
-        />
-        <div className="space-y-3">
-          <div className="h-8 animate-pulse rounded-lg bg-skeleton" />
-          <div className="h-24 animate-pulse rounded-2xl bg-skeleton" />
-          <div className="h-40 animate-pulse rounded-2xl bg-skeleton" />
-        </div>
+      <div className="space-y-3">
+        <div className="h-8 animate-pulse rounded-lg bg-skeleton" />
+        <div className="h-24 animate-pulse rounded-2xl bg-skeleton" />
+        <div className="h-40 animate-pulse rounded-2xl bg-skeleton" />
       </div>
     );
   }

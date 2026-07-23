@@ -1,13 +1,9 @@
 "use client";
 
-import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
-import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
 /**
  * @param {{
- *   selection: import('@/lib/crm/report-period').ReportPeriodSelection;
- *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
  *   subtitle?: string;
  *   refreshing?: boolean;
  *   loading?: boolean;
@@ -15,19 +11,20 @@ import { cn } from "@/lib/utils";
  *     total: number;
  *     renewalSoonCount: number;
  *     pausedCount: number;
+ *     pendingSignatureCount?: number;
  *     mrrOverlapActiveDkk: number;
  *   } | null;
+ *   actions?: import('react').ReactNode;
  * }} props
  */
 export function ContractsPageHeader({
-  selection,
-  onSelectionChange,
   subtitle: subtitleProp,
   refreshing = false,
   loading = false,
   summary = null,
+  actions = null,
 }) {
-  const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
+  const subtitle = subtitleProp ?? "Aftaleregister";
 
   /** @type {string} */
   let bodyLine = "";
@@ -36,13 +33,16 @@ export function ContractsPageHeader({
     bodyLine = "Indlæser aftaler…";
   } else if (summary != null && summary.total > 0) {
     bodyLine = `${summary.total} kontrakter i registeret`;
+    if (summary.pendingSignatureCount && summary.pendingSignatureCount > 0) {
+      bodyLine += ` · ${summary.pendingSignatureCount} afventer underskrift`;
+    }
     if (summary.renewalSoonCount > 0) {
-      bodyLine += ` · ${summary.renewalSoonCount} kræver fornyelsesfokus (≤90 d, ref. periodeslut)`;
+      bodyLine += ` · ${summary.renewalSoonCount} kræver fornyelsesfokus (≤90 d)`;
     }
     if (summary.pausedCount > 0) bodyLine += ` · ${summary.pausedCount} i pause/kladde`;
     bodyLine +=
       summary.mrrOverlapActiveDkk > 0
-        ? ` · ${summary.mrrOverlapActiveDkk.toLocaleString("da-DK")} kr. månedligt (aktive, overlap md.)`
+        ? ` · ${summary.mrrOverlapActiveDkk.toLocaleString("da-DK")} kr. månedligt (aktive)`
         : "";
   } else if (summary != null && summary.total === 0) {
     bodyLine = "Ingen kontrakter endnu";
@@ -68,7 +68,7 @@ export function ContractsPageHeader({
         </p>
       </div>
 
-      <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }

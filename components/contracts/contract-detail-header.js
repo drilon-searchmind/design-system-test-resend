@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
  *     clientName: string;
  *     clientLogo: string;
  *     clientHue: number;
- *     accountStatus: 'active' | 'paused' | 'inactive';
+ *     accountStatus: 'active' | 'paused' | 'inactive' | 'pending_signature';
  *     health: 'ok' | 'warn' | 'bad';
  *   };
  *   owner: { name: string; role: string; avatar: string; hue: number } | null;

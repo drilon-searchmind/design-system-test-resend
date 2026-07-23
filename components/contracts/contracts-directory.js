@@ -80,6 +80,7 @@ export function ContractsDirectory({
         return false;
       }
       if (filter === "active" && c.accountStatus !== "active") return false;
+      if (filter === "pending" && c.accountStatus !== "pending_signature") return false;
       if (filter === "renewal" && !contractNeedsRenewalSoon(c, 90, renewalReferenceIso)) return false;
       if (filter === "paused" && c.accountStatus !== "paused") return false;
       return true;
@@ -136,6 +137,11 @@ export function ContractsDirectory({
                 id: "active",
                 label: "Aktive",
                 count: roster.filter((c) => c.accountStatus === "active").length,
+              },
+              {
+                id: "pending",
+                label: "Underskrift",
+                count: roster.filter((c) => c.accountStatus === "pending_signature").length,
               },
               { id: "renewal", label: "Fornyelse", count: renewalCount },
               {
