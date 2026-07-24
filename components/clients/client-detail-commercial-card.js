@@ -78,6 +78,13 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
             </dd>
             <dd className="mt-1 text-[10px] text-fg-quiet">
               Compact: {formatCurrencyCompact(client.retainer, client.currency)}
+              {typeof client.retainerFromContracts === "number" && client.retainerFromContracts > 0 ? (
+                <>
+                  {" "}
+                  · Statisk {formatCurrencyCompact(client.retainerBase ?? 0, client.currency)} + kontrakter{" "}
+                  {formatCurrencyCompact(client.retainerFromContracts, client.currency)}
+                </>
+              ) : null}
             </dd>
           </div>
           <div>

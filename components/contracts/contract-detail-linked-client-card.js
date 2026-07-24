@@ -24,9 +24,13 @@ export function ContractDetailLinkedClientCard({
   const owner = TEAM.find((t) => t.id === client.owner);
   const util = client.hoursBudget > 0 ? client.hoursThisMonth / client.hoursBudget : 0;
 
-  const align =
-    Math.abs(contract.monthlyValue - client.retainer) < 1 ||
-    contract.monthlyValue === client.retainer;
+  const staticRetainer =
+    typeof client.retainerBase === "number" ? client.retainerBase : client.retainer;
+  const contractIncluded =
+    contract.signingState === "signed" &&
+    contract.accountStatus === "active" &&
+    typeof client.retainerFromContracts === "number" &&
+    client.retainerFromContracts > 0;
 
   const renewalDelta =
     contract.accountStatus === "active"
@@ -91,9 +95,12 @@ export function ContractDetailLinkedClientCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Retainer vs. kontrakt</dt>
           <dd className="text-right text-[11px] tabular-nums">
-            <span className={align ? "text-agency-ok" : "text-agency-warn"}>{align ? "✓ Stemmer" : "⚠ Tjek linjer"}</span>
+            <span className={contractIncluded ? "text-agency-ok" : "text-fg-muted"}>
+              {contractIncluded ? "✓ Med i total" : "Ikke med i total endnu"}
+            </span>
             <span className="mt-1 block text-[10px] font-normal text-fg-quiet">
-              Kunde CRM {formatCurrencyCompact(client.retainer, client.currency)} · Aftale{" "}
+              Total {formatCurrencyCompact(client.retainer, client.currency)} · Statisk{" "}
+              {formatCurrencyCompact(staticRetainer, client.currency)} · Denne aftale{" "}
               {formatCurrencyCompact(contract.monthlyValue, contract.currency)}
             </span>
           </dd>

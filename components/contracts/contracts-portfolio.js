@@ -115,14 +115,12 @@ export function ContractsPortfolio() {
           renewalReferenceIso={bundle.renewalReferenceIso}
         />
 
-        <div className="grid gap-[length:var(--ds-studio-stack)] xl:grid-cols-[minmax(0,1fr)_320px]">
-          <ContractsDirectory
-            contracts={bundle.contracts}
-            team={bundle.team}
-            renewalReferenceIso={bundle.renewalReferenceIso}
-          />
-          <ContractsTemplatesPanel />
-        </div>
+        <ContractsDirectory
+          contracts={bundle.contracts}
+          team={bundle.team}
+          renewalReferenceIso={bundle.renewalReferenceIso}
+        />
+        <ContractsTemplatesPanel />
       </div>
 
       <ContractsSendModal
