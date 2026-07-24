@@ -13,6 +13,7 @@ export const routes = {
   clients: "/clients",
   contracts: "/contracts",
   tasks: "/tasks",
+  calendar: "/calendar",
   templates: "/templates",
   time: "/time",
   workload: "/workload",

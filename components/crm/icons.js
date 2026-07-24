@@ -213,6 +213,7 @@ const ICONS = {
   clients: IconUsers,
   contracts: IconDoc,
   tasks: IconCheck,
+  calendar: IconCalendar,
   templates: IconSparkle,
   time: IconClock,
   timer: IconClock,

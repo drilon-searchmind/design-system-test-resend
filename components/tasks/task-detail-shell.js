@@ -36,9 +36,17 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @param {{ taskId: string; parentTaskId?: string; initialTab?: string; highlightCommentId?: string }} props
+ * @param {{ taskId: string; parentTaskId?: string; initialTab?: string; highlightCommentId?: string; embedded?: boolean; onClose?: () => void; onTaskMutated?: () => void }} props
  */
-export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", highlightCommentId = "" }) {
+export function TaskDetailShell({
+  taskId,
+  parentTaskId = "",
+  initialTab = "",
+  highlightCommentId = "",
+  embedded = false,
+  onClose,
+  onTaskMutated,
+}) {
   const router = useRouter();
   const dataSource = useDataSource();
   const defaultTab = TASK_DETAIL_TAB_IDS[0];
@@ -126,12 +134,13 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
       setDraft(null);
       await loadRemote();
       router.refresh();
+      onTaskMutated?.();
     } catch (e) {
       setEditNotice(e instanceof Error ? e.message : "Fejl ved gem");
     } finally {
       setSaving(false);
     }
-  }, [draft, loadRemote, router, taskId]);
+  }, [draft, embedded, loadRemote, onTaskMutated, router, taskId]);
 
   const deleteTask = useCallback(async () => {
     if (
@@ -155,13 +164,18 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
         currentTask?.isSubTask === true && typeof currentTask.parentTaskId === "string"
           ? currentTask.parentTaskId.trim()
           : "";
-      router.push(parentAfterDelete ? taskHref(parentAfterDelete) : routes.tasks);
+      if (embedded) {
+        onClose?.();
+        onTaskMutated?.();
+      } else {
+        router.push(parentAfterDelete ? taskHref(parentAfterDelete) : routes.tasks);
+      }
     } catch (e) {
       setEditNotice(e instanceof Error ? e.message : "Fejl ved sletning");
     } finally {
       setDeleting(false);
     }
-  }, [remote, router, taskId]);
+  }, [embedded, onClose, onTaskMutated, remote, router, taskId]);
 
   const updateStatus = useCallback(
     async (nextStatus) => {
@@ -178,13 +192,14 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke opdatere status");
         await loadRemote();
         router.refresh();
+        onTaskMutated?.();
       } catch (e) {
         setEditNotice(e instanceof Error ? e.message : "Fejl ved status");
       } finally {
         setStatusSaving(false);
       }
     },
-    [loadRemote, router, taskId],
+    [loadRemote, onTaskMutated, router, taskId],
   );
 
   /** @type {Record<string, unknown>[]} */
@@ -293,6 +308,8 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
           deptLabel={dep?.name ?? demoTask.dept}
           subtitle={subtitle}
           showExport
+          embedded={embedded}
+          onClose={onClose}
         />
 
         <TaskDetailStatusBar
@@ -557,6 +574,8 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
           deptLabel={deptName}
           subtitle={subtitle}
           showExport={false}
+          embedded={embedded}
+          onClose={onClose}
         />
 
         <TaskDetailStatusBar
@@ -660,6 +679,8 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
           deptLabel="—"
           subtitle="Kunne ikke indlæse opgaven."
           showExport={false}
+          embedded={embedded}
+          onClose={onClose}
         />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error}{" "}
@@ -688,6 +709,8 @@ export function TaskDetailShell({ taskId, parentTaskId = "", initialTab = "", hi
           deptLabel="—"
           subtitle="Vent på CRM-data."
           showExport={false}
+          embedded={embedded}
+          onClose={onClose}
         />
         <div className="space-y-3">
           <div className="h-8 animate-pulse rounded-lg bg-skeleton" />

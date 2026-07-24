@@ -26,6 +26,8 @@ import { cn } from "@/lib/utils";
  *   subtitle?: string;
  *   trailing?: import('react').ReactNode;
  *   showExport?: boolean;
+ *   embedded?: boolean;
+ *   onClose?: () => void;
  * }} props
  */
 export function TaskDetailHeader({
@@ -34,24 +36,33 @@ export function TaskDetailHeader({
   subtitle = "",
   trailing,
   showExport = true,
+  embedded = false,
+  onClose,
 }) {
   const isSubTask = task.isSubTask === true && Boolean(String(task.parentTaskId ?? "").trim());
   const subtitleTrimmed = subtitle.trim();
 
   return (
     <>
-      <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
-        <Link
-          href={routes.tasks}
-          className="text-fg-muted transition-colors hover:text-agency-brand hover:underline"
-        >
-          Opgaver
-        </Link>
-        <span className="mx-2 text-fg-quiet">/</span>
-        <span className="truncate text-fg">{task.title}</span>
-        <span className="mx-2 text-fg-quiet">/</span>
-        <span className="text-[11px] text-fg-muted">{task.id}</span>
-      </nav>
+      {embedded ?
+        <nav aria-label="Kontekst" className="font-sans text-[13px] text-fg-muted">
+          <span>Min kalender</span>
+          <span className="mx-2 text-fg-quiet">/</span>
+          <span className="truncate text-fg">{task.title}</span>
+        </nav>
+      : <nav aria-label="Brødkrummer" className="font-sans text-[13px] text-fg-muted">
+          <Link
+            href={routes.tasks}
+            className="text-fg-muted transition-colors hover:text-agency-brand hover:underline"
+          >
+            Opgaver
+          </Link>
+          <span className="mx-2 text-fg-quiet">/</span>
+          <span className="truncate text-fg">{task.title}</span>
+          <span className="mx-2 text-fg-quiet">/</span>
+          <span className="text-[11px] text-fg-muted">{task.id}</span>
+        </nav>
+      }
 
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
