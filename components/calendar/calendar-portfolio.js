@@ -173,7 +173,7 @@ export function CalendarPortfolio() {
       const currentRange = rangeRef.current;
       if (currentRange?.start) qs.set("timeMin", currentRange.start);
       if (currentRange?.end) qs.set("timeMax", currentRange.end);
-      qs.set("includeGoogle", showGoogleEvents ? "1" : "0");
+      qs.set("includeGoogle", "1");
 
       const res = await fetch(`/api/calendar?${qs.toString()}`, { cache: "no-store" });
       const data = await res.json();
@@ -194,7 +194,7 @@ export function CalendarPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, showGoogleEvents]);
+  }, [dataSource]);
 
   useEffect(() => {
     hasLoadedRef.current = false;

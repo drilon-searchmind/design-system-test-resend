@@ -30,7 +30,8 @@ export async function GET(req) {
     maxAge: 600,
   });
 
-  const redirectUri = `${env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
+  const appBase = String(env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin).replace(/\/$/, "");
+  const redirectUri = `${appBase}/api/calendar/google/callback`;
   const url = buildGoogleCalendarAuthUrl(redirectUri, state);
   return NextResponse.redirect(url);
 }
