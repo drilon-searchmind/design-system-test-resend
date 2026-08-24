@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Draggable } from "@fullcalendar/react/interaction";
 
@@ -11,6 +11,24 @@ import { CALENDAR_CARD_TEXT_COLOR, resolveTaskAssignees } from "@/lib/crm/calend
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { taskIsDone, taskIsOverdue } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
+
+const SIDEBAR_PREVIEW_LIMIT = 10;
+
+/**
+ * @param {{ total: number; expanded: boolean; onToggle: () => void }} props
+ */
+function SidebarViewAllButton({ total, expanded, onToggle }) {
+  if (total <= SIDEBAR_PREVIEW_LIMIT) return null;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="mt-1.5 w-full rounded-md border border-border bg-surface-muted px-2 py-1.5 font-sans text-[11px] font-medium text-agency-brand transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft"
+    >
+      {expanded ? "Vis færre" : `Se alle (${total})`}
+    </button>
+  );
+}
 
 /**
  * @param {{
@@ -146,6 +164,18 @@ export function CalendarTasksSidebar({
 }) {
   const dragRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const draggableInstanceRef = useRef(/** @type {Draggable | null} */ (null));
+  const [showAllDrag, setShowAllDrag] = useState(false);
+  const [showAllScheduled, setShowAllScheduled] = useState(false);
+
+  useEffect(() => {
+    setShowAllDrag(false);
+    setShowAllScheduled(false);
+  }, [dragTasks.length, scheduledSlots.length]);
+
+  const visibleDragTasks =
+    showAllDrag ? dragTasks : dragTasks.slice(0, SIDEBAR_PREVIEW_LIMIT);
+  const visibleScheduledSlots =
+    showAllScheduled ? scheduledSlots : scheduledSlots.slice(0, SIDEBAR_PREVIEW_LIMIT);
 
   useEffect(() => {
     draggableInstanceRef.current?.destroy();
@@ -172,15 +202,15 @@ export function CalendarTasksSidebar({
   }, [draggable]);
 
   return (
-    <aside className="tally-panel flex max-h-[720px] flex-col overflow-hidden">
-      <div className="border-b border-border px-3 py-2.5">
+    <aside className="tally-panel flex max-h-[90vh] flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-border px-3 py-2.5">
         <h2 className="font-sans text-[13px] font-semibold text-fg">Opgaver</h2>
         <p className="mt-0.5 font-sans text-[10px] leading-snug text-fg-muted">
           Træk samme opgave ind flere gange. Flyt blokke i kalenderen · hover og klik × for at fjerne.
         </p>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
         <section aria-labelledby="calendar-drag-heading">
           <div className="mb-1.5 flex items-center justify-between gap-2 px-0.5">
             <h3 id="calendar-drag-heading" className="font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
@@ -193,7 +223,7 @@ export function CalendarTasksSidebar({
           <div ref={dragRef}>
             {dragTasks.length === 0 ?
               <p className="px-1 py-3 text-center font-sans text-[11px] text-fg-quiet">Ingen opgaver med valgte filtre.</p>
-            : dragTasks.map((task) => (
+            : visibleDragTasks.map((task) => (
                 <DraggableTaskRow
                   key={task.id}
                   task={task}
@@ -204,6 +234,11 @@ export function CalendarTasksSidebar({
               ))
             }
           </div>
+          <SidebarViewAllButton
+            total={dragTasks.length}
+            expanded={showAllDrag}
+            onToggle={() => setShowAllDrag((v) => !v)}
+          />
         </section>
 
         <section aria-labelledby="calendar-scheduled-heading" className="mt-4 border-t border-border pt-3">
@@ -217,7 +252,7 @@ export function CalendarTasksSidebar({
           </div>
           {scheduledSlots.length === 0 ?
             <p className="px-1 py-3 text-center font-sans text-[11px] text-fg-quiet">Ingen planlagte tider endnu.</p>
-          : scheduledSlots.map(({ task, slot }) => {
+          : visibleScheduledSlots.map(({ task, slot }) => {
               const colors = calendarColorsForTaskStatus(task.status);
               const assignees = resolveTaskAssignees(task, teamById);
               const canRemove = draggable;
@@ -265,6 +300,11 @@ export function CalendarTasksSidebar({
               );
             })
           }
+          <SidebarViewAllButton
+            total={scheduledSlots.length}
+            expanded={showAllScheduled}
+            onToggle={() => setShowAllScheduled((v) => !v)}
+          />
         </section>
       </div>
     </aside>

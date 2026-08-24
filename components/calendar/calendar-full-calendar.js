@@ -16,6 +16,7 @@ import "@fullcalendar/react/themes/classic/palette.css";
 import { toLocalIsoDateTime } from "@/lib/crm/calendar-task-schedule";
 import { CALENDAR_CARD_TEXT_COLOR } from "@/lib/crm/calendar-task-assignees";
 import { CalendarCrmEventContent } from "@/components/calendar/calendar-crm-event-content";
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { cn } from "@/lib/utils";
 
 /**
@@ -52,6 +53,7 @@ function applyEventColors(info) {
 /**
  * @param {{
  *   viewMode: 'week' | 'month';
+ *   onViewModeChange: (mode: 'week' | 'month') => void;
  *   events: Array<Record<string, unknown>>;
  *   editable: boolean;
  *   highlightedSlotId?: string | null;
@@ -67,6 +69,7 @@ function applyEventColors(info) {
 export const CalendarFullCalendar = forwardRef(function CalendarFullCalendar(
   {
     viewMode,
+    onViewModeChange,
     events,
     editable,
     highlightedSlotId = null,
@@ -268,10 +271,15 @@ export const CalendarFullCalendar = forwardRef(function CalendarFullCalendar(
     [onScheduleDelete],
   );
 
+  const isMonth = viewMode === "month";
+
   return (
     <div
       className={cn(
-        "calendar-host min-h-[520px] [&_.fc]:font-sans",
+        "calendar-host relative min-h-[520px] [&_.fc]:font-sans",
+        isMonth && "calendar-host-month min-h-[640px]",
+        "[&_.fc-header-toolbar]:mb-2 [&_.fc-header-toolbar]:gap-2",
+        "[&_.fc-toolbar-chunk:last-child]:min-w-[7.5rem]",
         "[&_.fc-event]:cursor-pointer [&_.fc-event]:font-medium",
         "[&_.calendar-event-crm]:cursor-grab [&_.calendar-event-crm.fc-event-dragging]:cursor-grabbing",
         "[&_.calendar-event-crm_.fc-event-main]:pointer-events-none",
@@ -279,15 +287,42 @@ export const CalendarFullCalendar = forwardRef(function CalendarFullCalendar(
         "[&_.calendar-event-deadline]:border-dashed [&_.calendar-event-deadline]:text-[10px]",
       )}
     >
+      <div
+        className="pointer-events-none absolute right-2 top-2 z-10 sm:right-3 [&_*]:pointer-events-auto"
+        aria-label="Kalendervisning"
+      >
+        <PulseSegmentedControl
+          size="sm"
+          active={viewMode}
+          onChange={(id) => onViewModeChange(/** @type {"week" | "month"} */ (id))}
+          tabs={[
+            { id: "week", label: "Uge" },
+            { id: "month", label: "Måned" },
+          ]}
+        />
+      </div>
       <Calendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, classicThemePlugin]}
         locale={daLocale}
-        initialView={viewMode === "month" ? "dayGridMonth" : "timeGridWeek"}
+        initialView={isMonth ? "dayGridMonth" : "timeGridWeek"}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
           right: "",
+        }}
+        views={{
+          timeGridWeek: {
+            slotMinTime: "07:00:00",
+            slotMaxTime: "20:00:00",
+            allDaySlot: true,
+            allDaySlotHeight: 28,
+          },
+          dayGridMonth: {
+            dayMaxEvents: 4,
+            fixedWeekCount: false,
+            displayEventTime: true,
+          },
         }}
         weekends={false}
         hiddenDays={[0, 6]}

@@ -14,7 +14,6 @@ import {
   taskMatchesAssigneeFilter,
 } from "@/components/tasks/tasks-assignee-filter";
 import { TaskDetailShell } from "@/components/tasks/task-detail-shell";
-import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { calendarColorsForTaskStatus } from "@/lib/crm/calendar-task-colors";
 import {
   assigneesForEventProps,
@@ -262,7 +261,7 @@ export function CalendarPortfolio() {
       const dueDate = typeof task.dueDate === "string" ? task.dueDate.trim() : "";
       const dueOverdue = Boolean(dueDate && taskIsOverdue(task, bundle?.taskDueReferenceIso ?? ""));
       const canMutate = dataSource === "database" || dataSource === "demo";
-      const canDrag = canMutate && !taskIsDone(task.status);
+      const canEditSlot = canMutate;
 
       for (const slot of slots) {
         const slotIndex = typeof slot.index === "number" ? slot.index : 0;
@@ -274,16 +273,16 @@ export function CalendarPortfolio() {
           backgroundColor: colors.bg,
           borderColor: colors.border,
           textColor: colors.text,
-          editable: canDrag,
-          startEditable: canDrag,
-          durationEditable: canDrag,
+          editable: canEditSlot,
+          startEditable: canEditSlot,
+          durationEditable: canEditSlot,
           extendedProps: {
             source: "crm",
             taskId: task.id,
             slotId: slot.id,
             slotIndex,
             canEdit: canMutate,
-            canDrag,
+            canDrag: canEditSlot,
             status: task.status,
             clientName: task.clientName,
             dueDate,
@@ -506,15 +505,6 @@ export function CalendarPortfolio() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <PulseSegmentedControl
-            size="sm"
-            active={viewMode}
-            onChange={(id) => setViewMode(/** @type {"week" | "month"} */ (id))}
-            tabs={[
-              { id: "week", label: "Uge" },
-              { id: "month", label: "Måned" },
-            ]}
-          />
           {dataSource === "database" ?
             <CalendarGoogleSync
               status={bundle.googleCalendar}
@@ -552,7 +542,7 @@ export function CalendarPortfolio() {
 
       <div
         className={cn(
-          "grid gap-[length:var(--ds-studio-stack)] xl:grid-cols-[minmax(0,1fr)_280px]",
+          "grid gap-[length:var(--ds-studio-stack)] xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start",
           refreshing && "opacity-70",
         )}
       >
@@ -560,6 +550,7 @@ export function CalendarPortfolio() {
           <CalendarFullCalendar
             ref={calendarRef}
             viewMode={viewMode}
+            onViewModeChange={setViewMode}
             events={calendarEvents}
             editable={dataSource === "database" || dataSource === "demo"}
             highlightedSlotId={highlightedSlotId}
