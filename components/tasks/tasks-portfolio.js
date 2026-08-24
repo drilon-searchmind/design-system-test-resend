@@ -57,7 +57,7 @@ export function TasksPortfolio() {
     setError(null);
     try {
       if (dataSource === "demo") {
-        const nextBundle = getTasksDemoBundle(primaryPeriod);
+        const nextBundle = getTasksDemoBundle({ ...primaryPeriod, periods: selection.months });
         setBundle(nextBundle);
         if (!assigneeFilterInitializedRef.current) {
           setSelectedAssignees(
@@ -87,7 +87,7 @@ export function TasksPortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, primaryPeriod, queryParams]);
+  }, [dataSource, primaryPeriod, queryParams, selection.months]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
