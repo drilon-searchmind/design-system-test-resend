@@ -7,25 +7,8 @@ import { routes } from "@/config/routes";
 import { CRM_NAV_GROUPS, CRM_NAV_ITEMS } from "@/lib/crm/nav-config";
 import { cn } from "@/lib/utils";
 
+import { BRAND_LOGO_SIZE, BrandLogo } from "@/components/layout/brand-logo";
 import { CrmNavIcon, IconMenu, IconMenuL, IconSettings } from "./icons";
-
-function BrandMark({ size = 22 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="3" width="6" height="18" rx="1.5" fill="currentColor" />
-      <rect
-        x="11"
-        y="9"
-        width="6"
-        height="12"
-        rx="1.5"
-        fill="currentColor"
-        opacity="0.55"
-      />
-      <rect x="19" y="14" width="3" height="7" rx="1" fill="currentColor" opacity="0.3" />
-    </svg>
-  );
-}
 
 function isNavActive(pathname, href, itemId) {
   if (itemId === "time") {
@@ -80,7 +63,9 @@ export function CrmSidebar({
           onClick={onNavigate}
         >
           <span className="flex shrink-0 items-center justify-center">
-            <BrandMark size={collapsed ? 20 : 22} />
+            <BrandLogo
+              size={collapsed ? BRAND_LOGO_SIZE.sidebarCollapsed : BRAND_LOGO_SIZE.sidebarExpanded}
+            />
           </span>
           {!collapsed ? (
             <span className="min-w-0">

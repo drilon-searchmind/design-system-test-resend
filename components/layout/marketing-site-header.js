@@ -4,6 +4,7 @@ import { routes } from "@/config/routes";
 import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
+import { BRAND_LOGO_SIZE, BrandLogo } from "./brand-logo";
 import { SiteNav } from "./site-nav";
 
 /** Tally-inspired floating pill nav (Hallmark N5) — marketing routes only */
@@ -22,26 +23,7 @@ export function MarketingSiteHeader() {
           href={routes.home}
           className="flex w-fit shrink-0 items-center gap-2 font-semibold tracking-tight text-fg hover:opacity-90"
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
-            className="shrink-0"
-          >
-            <rect x="3" y="3" width="6" height="18" rx="1.5" fill="currentColor" />
-            <rect
-              x="11"
-              y="9"
-              width="6"
-              height="12"
-              rx="1.5"
-              fill="currentColor"
-              opacity="0.55"
-            />
-            <rect x="19" y="14" width="3" height="7" rx="1" fill="currentColor" opacity="0.3" />
-          </svg>
+          <BrandLogo size={BRAND_LOGO_SIZE.nav} />
           <span className="text-sm sm:text-base">{site.name}</span>
         </Link>
         <SiteNav variant="tally" />

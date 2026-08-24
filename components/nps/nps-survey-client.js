@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { BrandLogoMark } from "@/components/layout/brand-logo";
 import { cn } from "@/lib/utils";
 
 /**
@@ -198,6 +199,7 @@ export function NpsSurveyClient({ token }) {
 function SurveyShell({ children }) {
   return (
     <div className="mx-auto w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-sm md:p-8">
+      <BrandLogoMark />
       {children}
     </div>
   );

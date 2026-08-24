@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { BrandLogoMark } from "@/components/layout/brand-logo";
 import { cn } from "@/lib/utils";
 
 /**
@@ -292,6 +293,7 @@ function Shell({ children, wide = false }) {
         wide ? "max-w-2xl" : "max-w-lg",
       )}
     >
+      <BrandLogoMark />
       {children}
     </div>
   );

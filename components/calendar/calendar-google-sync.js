@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { HiCheckCircle } from "react-icons/hi2";
+import { SiGooglecalendar } from "react-icons/si";
 
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
@@ -45,15 +47,17 @@ export function CalendarGoogleSync({
   return (
     <div className="rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5">
       <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-sans text-[12px] font-semibold text-fg">Google Calendar</p>
-          {status.connected ?
-            <p className="mt-0.5 font-sans text-[11px] text-fg-muted">Synkroniseret med din konto</p>
-          : <p className="mt-0.5 font-sans text-[11px] text-fg-muted">Vis dine Google-møder i kalenderen</p>}
+        <div className="flex min-w-0 items-start gap-2">
+          <div className="min-w-0">
+            <p className="font-sans text-[12px] font-semibold text-fg">Google Calendar</p>
+            {status.connected ?
+              <p className="mt-0.5 font-sans text-[11px] text-fg-muted">Synkroniseret med din konto</p>
+            : <p className="mt-0.5 font-sans text-[11px] text-fg-muted">Vis dine Google-møder i kalenderen</p>}
+          </div>
         </div>
         {status.connected ?
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-agency-good-border bg-agency-good-soft px-2 py-0.5 font-sans text-[10px] font-medium text-agency-good">
-            <span className="size-1.5 rounded-full bg-agency-good" aria-hidden />
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-agency-ok-border bg-agency-ok-soft px-2 py-0.5 font-sans text-[10px] font-medium text-agency-ok">
+            <HiCheckCircle className="size-3.5 shrink-0" aria-hidden />
             Forbundet
           </span>
         : null}
@@ -99,10 +103,11 @@ export function CalendarGoogleSync({
         : <a
             href="/api/calendar/google/connect"
             className={cn(
-              "inline-flex items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-3 py-1.5",
+              "inline-flex items-center gap-1.5 rounded-lg border border-agency-brand-border bg-agency-brand-soft px-3 py-1.5",
               "font-sans text-[12px] font-semibold text-agency-brand transition-colors hover:bg-agency-brand-soft/80",
             )}
           >
+            <SiGooglecalendar className="size-3.5 shrink-0" aria-hidden />
             Forbind Google Calendar
           </a>
         }

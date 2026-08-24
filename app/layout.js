@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
+import { BRAND_LOGO_SRC } from "@/components/layout/brand-logo";
 import { themeInitScriptInnerHtml } from "@/components/theme/theme-init-script";
 import { site } from "@/config/site";
 
@@ -59,6 +60,11 @@ const displaySerif = Fraunces({
 export const metadata = {
   title: "1337-crm by Searchmind",
   description: site.description,
+  icons: {
+    icon: BRAND_LOGO_SRC,
+    shortcut: BRAND_LOGO_SRC,
+    apple: BRAND_LOGO_SRC,
+  },
 };
 
 export default function RootLayout({ children }) {
