@@ -29,6 +29,8 @@ export const routes = {
   chatDemo: "/chat/demo",
   privacy: "/privacy",
   terms: "/terms",
+  /** Public feature status — no login required */
+  featureStatus: "/status",
   api: {
     health: "/api/health",
     stripeWebhook: "/api/webhooks/stripe",
