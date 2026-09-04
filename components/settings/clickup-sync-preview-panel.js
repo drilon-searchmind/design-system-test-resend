@@ -61,6 +61,9 @@ const KIND_BADGE = {
  *   confirmApply?: (count: number) => string;
  *   renderMeta?: (preview: Record<string, unknown>) => React.ReactNode;
  *   selectableKinds?: SyncKind[];
+ *   previewOnly?: boolean;
+ *   getPreviewRequestBody?: () => Record<string, unknown>;
+ *   renderPreviewControls?: React.ReactNode;
  * }} props
  */
 export function ClickUpSyncPreviewPanel({
@@ -79,7 +82,11 @@ export function ClickUpSyncPreviewPanel({
   confirmApply,
   renderMeta,
   selectableKinds = ["new", "update"],
+  previewOnly = false,
+  getPreviewRequestBody,
+  renderPreviewControls,
 }) {
+  const effectiveSelectableKinds = previewOnly ? [] : selectableKinds;
   const plural = entityLabelPlural ?? `${entityLabel}r`;
   const [loading, setLoading] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -115,14 +122,19 @@ export function ClickUpSyncPreviewPanel({
     setError(null);
     setMessage(null);
     try {
-      const res = await fetch(previewPath, { method: "POST" });
+      const requestBody = getPreviewRequestBody?.();
+      const res = await fetch(previewPath, {
+        method: "POST",
+        headers: requestBody ? { "Content-Type": "application/json" } : undefined,
+        body: requestBody ? JSON.stringify(requestBody) : undefined,
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente preview");
 
       setPreview(data);
       const autoSelect = new Set(
         (Array.isArray(data.rows) ? data.rows : [])
-          .filter((row) => selectableKinds.includes(row.kind))
+          .filter((row) => effectiveSelectableKinds.includes(row.kind))
           .map((row) => row.id)
           .filter(Boolean),
       );
@@ -134,7 +146,7 @@ export function ClickUpSyncPreviewPanel({
     } finally {
       setLoading(false);
     }
-  }, [previewPath, selectableKinds]);
+  }, [previewPath, effectiveSelectableKinds, getPreviewRequestBody]);
 
   const filteredRows = useMemo(() => {
     if (filter === "all") return rows;
@@ -142,8 +154,8 @@ export function ClickUpSyncPreviewPanel({
   }, [filter, rows]);
 
   const selectableRows = useMemo(
-    () => filteredRows.filter((row) => selectableKinds.includes(row.kind)),
-    [filteredRows, selectableKinds],
+    () => filteredRows.filter((row) => effectiveSelectableKinds.includes(row.kind)),
+    [filteredRows, effectiveSelectableKinds],
   );
 
   const allSelectableChecked =
@@ -221,14 +233,17 @@ export function ClickUpSyncPreviewPanel({
             </p>
           : null}
         </div>
-        <button
-          type="button"
-          disabled={loading || applying}
-          onClick={() => void loadPreview()}
-          className="inline-flex h-9 shrink-0 items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-4 font-sans text-[12px] font-semibold text-agency-brand transition-colors hover:bg-agency-brand-soft/80 disabled:opacity-50"
-        >
-          {loading ? "Henter…" : preview ? "Opdater preview" : "Hent preview"}
-        </button>
+        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+          {renderPreviewControls}
+          <button
+            type="button"
+            disabled={loading || applying}
+            onClick={() => void loadPreview()}
+            className="inline-flex h-9 shrink-0 items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-4 font-sans text-[12px] font-semibold text-agency-brand transition-colors hover:bg-agency-brand-soft/80 disabled:opacity-50"
+          >
+            {loading ? "Henter…" : preview ? "Opdater preview" : "Hent preview"}
+          </button>
+        </div>
       </div>
 
       {error ?
@@ -276,14 +291,16 @@ export function ClickUpSyncPreviewPanel({
                 { id: "unchanged", label: "Uændrede", count: counts.unchanged },
               ]}
             />
-            <button
-              type="button"
-              disabled={!selected.size || applying}
-              onClick={() => void handleApply()}
-              className="inline-flex h-9 items-center rounded-lg border border-border bg-canvas px-4 font-sans text-[12px] font-semibold text-fg transition-colors hover:border-agency-brand-border hover:text-agency-brand disabled:opacity-50"
-            >
-              {applying ? "Importerer…" : `Importer valgte (${selected.size})`}
-            </button>
+            {!previewOnly ?
+              <button
+                type="button"
+                disabled={!selected.size || applying}
+                onClick={() => void handleApply()}
+                className="inline-flex h-9 items-center rounded-lg border border-border bg-canvas px-4 font-sans text-[12px] font-semibold text-fg transition-colors hover:border-agency-brand-border hover:text-agency-brand disabled:opacity-50"
+              >
+                {applying ? "Importerer…" : `Importer valgte (${selected.size})`}
+              </button>
+            : null}
           </div>
 
           <div className="tally-panel overflow-hidden">
@@ -291,16 +308,18 @@ export function ClickUpSyncPreviewPanel({
               <table className="w-full min-w-[720px] border-collapse font-sans text-[12px]">
                 <thead className="sticky top-0 z-10 border-b border-border bg-canvas">
                   <tr className="text-left text-[11px] uppercase tracking-[0.06em] text-fg-soft">
-                    <th className="w-10 px-2 py-2">
-                      <input
-                        type="checkbox"
-                        checked={allSelectableChecked}
-                        disabled={!selectableRows.length}
-                        onChange={toggleAllVisible}
-                        aria-label="Vælg alle synlige rækker"
-                        className="size-3.5 accent-agency-brand"
-                      />
-                    </th>
+                    {!previewOnly ?
+                      <th className="w-10 px-2 py-2">
+                        <input
+                          type="checkbox"
+                          checked={allSelectableChecked}
+                          disabled={!selectableRows.length}
+                          onChange={toggleAllVisible}
+                          aria-label="Vælg alle synlige rækker"
+                          className="size-3.5 accent-agency-brand"
+                        />
+                      </th>
+                    : null}
                     <th className="px-2 py-2">Navn</th>
                     <th className="px-2 py-2">Type</th>
                     <th className="px-2 py-2">{secondaryColumnLabel}</th>
@@ -311,28 +330,34 @@ export function ClickUpSyncPreviewPanel({
                 <tbody>
                   {filteredRows.length === 0 ?
                     <tr>
-                      <td colSpan={6} className="px-3 py-8 text-center text-fg-muted">
+                      <td colSpan={previewOnly ? 5 : 6} className="px-3 py-8 text-center text-fg-muted">
                         Ingen rækker i dette filter.
                       </td>
                     </tr>
                   : filteredRows.map((row) => {
-                      const selectable = selectableKinds.includes(row.kind);
+                      const selectable = effectiveSelectableKinds.includes(row.kind);
                       const isExpanded = expandedId === row.id;
                       const sub = rowSubLabel(row);
                       const rowKey = row.id || row.linkUrl;
+                      const previewFields =
+                        previewOnly && row.proposed ?
+                          Object.entries(row.proposed).filter(([, value]) => String(value ?? "").trim())
+                        : [];
                       return (
                         <Fragment key={rowKey}>
                           <tr className="border-b border-border/70 hover:bg-surface-muted/40">
-                            <td className="px-2 py-2 align-top">
-                              <input
-                                type="checkbox"
-                                checked={selected.has(row.id)}
-                                disabled={!selectable}
-                                onChange={() => toggleRow(row.id)}
-                                aria-label={`Vælg ${rowLabel(row)}`}
-                                className="size-3.5 accent-agency-brand disabled:opacity-30"
-                              />
-                            </td>
+                            {!previewOnly ?
+                              <td className="px-2 py-2 align-top">
+                                <input
+                                  type="checkbox"
+                                  checked={selected.has(row.id)}
+                                  disabled={!selectable}
+                                  onChange={() => toggleRow(row.id)}
+                                  aria-label={`Vælg ${rowLabel(row)}`}
+                                  className="size-3.5 accent-agency-brand disabled:opacity-30"
+                                />
+                              </td>
+                            : null}
                             <td className="px-2 py-2 align-top">
                               <div className="font-medium text-fg">{rowLabel(row)}</div>
                               {sub ?
@@ -359,6 +384,14 @@ export function ClickUpSyncPreviewPanel({
                                 >
                                   {row.changes.length} felt{row.changes.length === 1 ? "" : "er"}
                                 </button>
+                              : previewFields.length ?
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedId(isExpanded ? null : row.id)}
+                                  className="text-left text-agency-brand hover:underline"
+                                >
+                                  Detaljer
+                                </button>
                               : row.kind === "new" ?
                                 <span className="text-fg-quiet">Ny række</span>
                               : <span className="text-fg-quiet">—</span>}
@@ -376,22 +409,27 @@ export function ClickUpSyncPreviewPanel({
                               : "—"}
                             </td>
                           </tr>
-                          {isExpanded && row.changes.length ?
+                          {isExpanded && (row.changes.length || previewFields.length) ?
                             <tr className="border-b border-border/70 bg-surface-muted/30">
-                              <td colSpan={6} className="px-3 py-3">
+                              <td colSpan={previewOnly ? 5 : 6} className="px-3 py-3">
                                 <ul className="grid gap-1.5 sm:grid-cols-2">
-                                  {row.changes.map((change) => (
+                                  {(row.changes.length ? row.changes.map((change) => ({
+                                    key: change.field,
+                                    label: fieldLabels[change.field] ?? change.field,
+                                    value: change.to || "—",
+                                  })) : previewFields.map(([field, value]) => ({
+                                    key: field,
+                                    label: fieldLabels[field] ?? field,
+                                    value: String(value),
+                                  }))).map((item) => (
                                     <li
-                                      key={`${row.id}-${change.field}`}
+                                      key={`${row.id}-${item.key}`}
                                       className="rounded-md border border-border bg-canvas px-2 py-1.5"
                                     >
                                       <div className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">
-                                        {fieldLabels[change.field] ?? change.field}
+                                        {item.label}
                                       </div>
-                                      <div className="mt-0.5 truncate text-fg-muted">
-                                        {change.from || "—"}
-                                      </div>
-                                      <div className="truncate font-medium text-fg">→ {change.to || "—"}</div>
+                                      <div className="mt-0.5 font-medium text-fg">{item.value || "—"}</div>
                                     </li>
                                   ))}
                                 </ul>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ClickUpSyncPreviewPanel } from "@/components/settings/clickup-sync-preview-panel";
+import { ClickUpTasksPreviewPanel } from "@/components/settings/clickup-tasks-preview-panel";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
 const CUSTOMER_FIELD_LABELS = {
@@ -58,7 +59,7 @@ const DISCIPLINE_FIELD_LABELS = {
   disciplineKeys: "Discipliner",
 };
 
-/** @typedef {'customers' | 'users' | 'knowledge' | 'disciplines'} ClickUpSyncTab */
+/** @typedef {'customers' | 'users' | 'knowledge' | 'disciplines' | 'tasks'} ClickUpSyncTab */
 
 export function SettingsClickUpSyncSection() {
   const [tab, setTab] = useState(/** @type {ClickUpSyncTab} */ ("customers"));
@@ -81,6 +82,7 @@ export function SettingsClickUpSyncSection() {
           { id: "users", label: "Brugere" },
           { id: "knowledge", label: "Vidensbase" },
           { id: "disciplines", label: "Discipliner" },
+          { id: "tasks", label: "Opgaver" },
         ]}
       />
 
@@ -219,6 +221,8 @@ export function SettingsClickUpSyncSection() {
           )}
         />
       : null}
+
+      {tab === "tasks" ? <ClickUpTasksPreviewPanel /> : null}
     </div>
   );
 }
