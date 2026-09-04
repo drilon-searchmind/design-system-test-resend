@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientDetailKundeinfoPanel } from "@/components/clients/client-detail-kundeinfo-panel";
 import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
 import { ClientDetailCommercialCard } from "@/components/clients/client-detail-commercial-card";
 import { ClientDetailContactsCard } from "@/components/clients/client-detail-contacts-card";
@@ -16,6 +17,7 @@ import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-contro
 
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
   "overblik",
+  "kundeinfo",
   "okonomi",
   "kvalitet",
 ]);
@@ -23,6 +25,7 @@ export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
 /** Danish labels aligned with SETTINGS stamdata tab pattern (`PulseSegmentedControl`). */
 export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "overblik", label: "Overblik" },
+  { id: "kundeinfo", label: "Kundeinfo" },
   { id: "okonomi", label: "Økonomi & aftale" },
   { id: "kvalitet", label: "Kvalitet & risiko" },
 ];
@@ -66,6 +69,9 @@ export const CLIENT_DETAIL_TAB_DEFS = [
  *     dueDate: string;
  *   }>;
  *   kpiTimerLabel?: string;
+ *   infoMd?: string;
+ *   canEditKundeinfo?: boolean;
+ *   onKundeinfoSaved?: (infoMd: string) => void;
  * }} props
  */
 export function ClientDetailTabbedBody({
@@ -81,6 +87,9 @@ export function ClientDetailTabbedBody({
   team,
   tasks,
   kpiTimerLabel = "Timer denne md",
+  infoMd = "",
+  canEditKundeinfo = false,
+  onKundeinfoSaved,
 }) {
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
   /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */
@@ -126,6 +135,21 @@ export function ClientDetailTabbedBody({
                 <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} />
               </div>
             </div>
+          </section>
+        ) : null}
+
+        {resolvedTab === "kundeinfo" ? (
+          <section aria-labelledby="client-tab-kundeinfo" className={stack}>
+            <h2 id="client-tab-kundeinfo" className="sr-only">
+              Kundeinfo
+            </h2>
+            <ClientDetailKundeinfoPanel
+              clientSlug={client.id}
+              clientName={client.name}
+              infoMd={infoMd}
+              canEdit={canEditKundeinfo}
+              onSaved={onKundeinfoSaved}
+            />
           </section>
         ) : null}
 

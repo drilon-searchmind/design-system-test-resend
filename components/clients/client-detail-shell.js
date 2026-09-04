@@ -201,6 +201,8 @@ export function ClientDetailShell({ clientSlug }) {
           team={TEAM}
           tasks={clientTasks}
           kpiTimerLabel="Timer denne md"
+          infoMd={typeof demoClient.infoMd === "string" ? demoClient.infoMd : ""}
+          canEditKundeinfo={false}
         />
       </div>
     );
@@ -311,6 +313,17 @@ export function ClientDetailShell({ clientSlug }) {
             kpiTimerLabel={
               typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Timer i perioden"
             }
+            infoMd={typeof c.infoMd === "string" ? c.infoMd : ""}
+            canEditKundeinfo
+            onKundeinfoSaved={(nextInfoMd) => {
+              setRemote((prev) => {
+                if (!prev || typeof prev.client !== "object" || prev.client === null) return prev;
+                return {
+                  ...prev,
+                  client: { .../** @type {Record<string, unknown>} */ (prev.client), infoMd: nextInfoMd },
+                };
+              });
+            }}
           />
         )}
       </div>
