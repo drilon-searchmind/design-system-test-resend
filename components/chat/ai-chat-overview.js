@@ -184,13 +184,12 @@ const WRITE_C = "oklch(60% 0.15 150)"; // green "write-back" channel
 
 const W = 1240;
 const H = 880;
-// Vertically the visible content only spans ~y46..y838, so the canvas has ~80px
-// of empty top/bottom margin. Fit height to that content box (not the full 880)
-// so the diagram fills the stage taller; the empty margins are clipped by the
-// stage's overflow-hidden. Width keeps the full canvas (W) so the side-hugging
-// write-back rings are never clipped — min() still caps width on narrow screens.
+const WRITE_BACK_LINE_Y = 834;
+const API_CALLOUT_W = 520;
+const API_CALLOUT_H = 54;
+// Fit includes the bottom write-back ring + API callout (y≈834).
 const FIT_W = W;
-const FIT_H = 800;
+const FIT_H = 860;
 
 const srcCY = (i) => 169 + i * 70; // source-node centers (inside CRM enclosure)
 const entryY = (i) => 330 + i * (170 / 7); // entry points on Searchmind-MCP left edge
@@ -217,8 +216,8 @@ const FLOWS = [
 const STEPS = [
   { n: "1", t: "CRM-data", d: "Kunder, kontrakter, tid, opgaver, NPS, økonomi og viden — alt samlet i ét CRM (Searchmind Agency OS)." },
   { n: "2", t: "Apex MCP", d: "Al performance-data flyder fra Apex MCP direkte ind i Searchmind MCP." },
-  { n: "3", t: "Searchmind MCP", d: "Samler CRM + performance som tools og ressourcer med RBAC. Under opbygning." },
-  { n: "4", t: "2-vejs i chat", d: "Medarbejderne spørger i Slack og Claude — og skriver tilbage, fx opret opgave eller tidsregistrering." },
+  { n: "3", t: "Searchmind MCP", d: "Eksponerer CRM + performance som MCP-tools. Read (GET) på alle endpoints; mutating kald kun på whitelist med RBAC. Under opbygning." },
+  { n: "4", t: "2-vejs i chat", d: "Slack og Claude kan læse alt i CRM. Opret/opdater/slet er begrænset til whitelistede endpoints — pt. opgaver og tidsregistrering." },
 ];
 
 const EMPLOYEES = [
@@ -264,6 +263,46 @@ const CSS = `
 function NodeShell({ x, y, w, h, children, style }) {
   return (
     <div style={{ ...NODE_BASE, left: x, top: y, width: w, height: h, ...style }}>{children}</div>
+  );
+}
+
+function WriteBackApiCallout() {
+  return (
+    <foreignObject
+      x={W / 2 - API_CALLOUT_W / 2}
+      y={WRITE_BACK_LINE_Y - API_CALLOUT_H / 2}
+      width={API_CALLOUT_W}
+      height={API_CALLOUT_H}
+      style={{ overflow: "visible", pointerEvents: "none" }}
+    >
+      <div
+        xmlns="http://www.w3.org/1999/xhtml"
+        style={{
+          boxSizing: "border-box",
+          height: "100%",
+          padding: "10px 12px",
+          borderRadius: 12,
+          textAlign: "center",
+          background: `color-mix(in oklch, ${WRITE_C} 12%, var(--ds-surface-card))`,
+          border: `1.5px solid color-mix(in oklch, ${WRITE_C} 42%, var(--ds-border))`,
+          boxShadow: "var(--agency-shadow-raised)",
+          fontSize: 11.5,
+          lineHeight: 1.4,
+          color: "var(--ds-fg-muted)",
+          zIndex: 999999999
+        }}
+      >
+        <span style={{ fontWeight: 600, color: "var(--ds-fg)", zIndex: 999999 }}>CRM API via MCPP · </span>
+        <span className="font-mono" style={{ fontSize: 10.5, color: WRITE_C, fontWeight: 600 }}>
+          GET/read · alle endpoints
+        </span>
+        {" · "}
+        <span className="font-mono" style={{ fontSize: 10.5, color: WRITE_C, fontWeight: 600 }}>
+          POST/PATCH/DELETE · whitelist
+        </span>
+        {" — Opgaver, Tidsregistrering. Alt andet er read-only fra chat."}
+      </div>
+    </foreignObject>
   );
 }
 
@@ -371,9 +410,11 @@ export function AiChatOverview() {
           </h1>
           <p className="mt-1 max-w-[80ch] font-sans text-[12.5px] leading-snug text-fg-muted">
             Alt CRM-data fra Searchmind Agency OS — plus performance-data fra Apex MCP — samles i én
-            Searchmind MCP-server. Når den er bygget, kan medarbejderne chatte med dataene i Slack og
-            Claude, og <b className="font-semibold text-fg">skrive tilbage</b>: fx oprette en opgave eller
-            en tidsregistrering direkte fra chatten.
+            Searchmind MCP-server. Fra Slack og Claude kan medarbejderne{" "}
+            <b className="font-semibold text-fg">læse alle CRM-endpoints</b> (GET/read).{" "}
+            <b className="font-semibold text-fg">Opret, opdater og slet</b> (CREATE/UPDATE/DELETE) er kun
+            tilladt på whitelistede endpoints — i dag <b className="font-semibold text-fg">Opgaver</b> og{" "}
+            <b className="font-semibold text-fg">Tidsregistrering</b> (grøn returkanal i diagrammet).
           </p>
           </div>
         </div>
@@ -480,6 +521,7 @@ export function AiChatOverview() {
                 opacity={c.write ? 0.85 : 0.7}
               />
             ))}
+            <WriteBackApiCallout />
             <g ref={dotsRef} />
           </svg>
 
@@ -639,7 +681,7 @@ export function AiChatOverview() {
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5, justifyContent: "center", marginTop: 14 }}>
-                {["Tools", "Ressourcer", "Prompts", "Auth · RBAC"].map((t) => (
+                {["Read · alle", "CUD · whitelist", "Tools", "Auth · RBAC"].map((t) => (
                   <span
                     key={t}
                     className="text-fg-muted"

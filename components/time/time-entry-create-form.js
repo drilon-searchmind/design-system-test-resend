@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import { useCallback, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -166,11 +167,7 @@ export function TimeEntryCreateForm({
           )}
         >
           <option value="">Vælg kunde…</option>
-          {clientsPicklist.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
+          <ClientPicklistOptions items={clientsPicklist} />
         </select>
       </label>
 

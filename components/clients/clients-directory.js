@@ -17,7 +17,7 @@ import {
 } from "@/components/pulse/pulse-icons";
 import { PulseClientHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
-import { routes } from "@/config/routes";
+import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
 import { useDataSource } from "@/components/crm/use-data-source";
@@ -65,13 +65,27 @@ export function ClientsDirectory({
   const layoutDensity = useDensity();
   const showCvr = layoutDensity === "spacious";
 
-  const unhealthyCount = useMemo(() => CLIENTS.filter((c) => c.health !== "ok").length, [CLIENTS]);
+  // Koncerner (brands med samme CVR) vises som én kunde-række med udfoldelige brands.
+  const customers = useMemo(() => buildCustomerEntities(CLIENTS), [CLIENTS]);
+  const [expanded, setExpanded] = useState(() => new Set());
+  const toggleExpanded = (id) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const unhealthyCount = useMemo(() => customers.filter((c) => c.health !== "ok").length, [customers]);
 
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    const list = CLIENTS.filter((c) => {
+    const list = customers.filter((c) => {
       const industry = (c.industry ?? "").toLowerCase();
-      if (ql && !c.name.toLowerCase().includes(ql) && !industry.includes(ql)) {
+      const brandMatch = (c.brands ?? []).some(
+        (b) => b.name.toLowerCase().includes(ql) || (b.industry ?? "").toLowerCase().includes(ql),
+      );
+      if (ql && !c.name.toLowerCase().includes(ql) && !industry.includes(ql) && !brandMatch) {
         return false;
       }
       if (filter === "unhealthy" && c.health === "ok") return false;
@@ -91,7 +105,7 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, sort, CLIENTS]);
+  }, [q, filter, sort, customers]);
 
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
@@ -104,7 +118,7 @@ export function ClientsDirectory({
           {toolbarTitle}
         </h3>
         <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
-          {filtered.length} af {CLIENTS.length}
+          {filtered.length} af {customers.length}
         </span>
 
         <div className="flex min-w-0 flex-1 flex-col gap-2 md:ml-auto md:flex-row md:items-center md:justify-end">
@@ -159,8 +173,8 @@ export function ClientsDirectory({
           <div className={minW}>
             <div
               className={cn(
-                "sticky top-0 z-10 grid gap-3 border-b border-border bg-surface-muted px-3 py-2",
-                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+                "sticky top-0 z-10 grid gap-3 border-b border-border bg-surface-muted py-2 pl-7 pr-3",
+                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:pl-8 md:pr-4",
                 gridCols,
               )}
             >
@@ -196,99 +210,144 @@ export function ClientsDirectory({
             </div>
 
             {filtered.map((c, i) => {
-              const owner = TEAM.find((t) => t.id === c.owner);
-
+              const isOpen = Boolean(c.isGroup) && (expanded.has(c.id) || q.trim().length > 0);
+              const rowProps = { gridCols, variant, periodLabel, showCvr, team: TEAM };
               return (
-                <Link
-                  key={c.id}
-                  href={`${routes.clients}/${c.id}`}
-                  className={cn(
-                    "grid w-full gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-muted md:px-4 md:py-2.5",
-                    gridCols,
-                    i < filtered.length - 1 && "border-b border-border-soft",
-                  )}
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
-                      style={{ background: `oklch(62% 0.14 ${c.hue})` }}
-                    >
-                      {c.logo}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="truncate font-sans text-[13px] font-medium text-fg">{c.name}</div>
-                      <div className="truncate font-sans text-[11px] text-fg-quiet">
-                        {showCvr && c.cvr ? (
-                          <>
-                            <span className="tabular-nums">CVR {c.cvr}</span>
-                            <span className="mx-1">·</span>
-                          </>
-                        ) : null}
-                        {c.industry}
-                      </div>
-                    </div>
-                    <HealthChip health={c.health} palette="agency" compact />
-                  </div>
-
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    {owner ? (
-                      <>
-                        <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
-                        <span className="truncate font-sans text-[12px] text-fg-muted">{owner.name}</span>
-                      </>
+                <div key={c.id} className={cn(i < filtered.length - 1 && "border-b border-border-soft")}>
+                  <div className="flex items-stretch">
+                    {c.isGroup ? (
+                      <button
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-label={`${isOpen ? "Skjul" : "Vis"} brands for ${c.name}`}
+                        onClick={() => toggleExpanded(c.id)}
+                        className="flex w-7 shrink-0 items-center justify-center pl-1 text-fg-quiet hover:text-fg md:pl-2"
+                      >
+                        {isOpen ? <PulseIconChevronDown /> : <PulseIconChevronRight />}
+                      </button>
                     ) : (
-                      <span className="text-fg-quiet">—</span>
+                      <span className="w-7 shrink-0 md:w-8" aria-hidden />
                     )}
+                    <DirectoryRow client={c} {...rowProps} />
                   </div>
-
-                  {variant === "full" ? (
-                    <div className="flex items-center">
-                      <StatusChip status={c.status} palette="agency" className="scale-95 origin-left" />
+                  {isOpen ?
+                    <div className="border-t border-border-soft bg-surface-muted/40">
+                      {c.brands.map((b) => (
+                        <div key={b.id} className="flex items-stretch">
+                          <span className="w-7 shrink-0 md:w-8" aria-hidden />
+                          <DirectoryRow client={b} nested {...rowProps} />
+                        </div>
+                      ))}
                     </div>
-                  ) : null}
-
-                  <span className="text-[12.5px] tabular-nums text-fg">
-                    {formatCurrencyCompact(c.retainer, c.currency)}
-                  </span>
-
-                  <PulseClientHoursMetric
-                    hoursThisMonth={c.hoursThisMonth}
-                    hoursBudget={c.hoursBudget}
-                    estimatedHoursOpen={c.estimatedHoursOpen}
-                    periodLabel={periodLabel}
-                    clientName={c.name}
-                    clientHref={`${routes.clients}/${encodeURIComponent(c.id)}`}
-                    utilBarClassName="max-w-[120px]"
-                  />
-
-                  <span
-                    className={cn(
-                      "text-[12.5px] tabular-nums",
-                      c.monthlyProfitMargin < 0 && "text-agency-bad",
-                      c.monthlyProfitMargin >= 0 &&
-                        c.monthlyProfitMargin < 0.15 &&
-                        "text-agency-warn",
-                      c.monthlyProfitMargin >= 0.15 && "text-agency-ok",
-                    )}
-                  >
-                    {formatPercent(c.monthlyProfitMargin)}
-                  </span>
-
-                  <PulseAllocationBar allocation={c.allocation} height={6} />
-
-                  {variant === "full" ? (
-                    <span className="hidden truncate text-[11px] tabular-nums text-fg-muted sm:inline">
-                      {c.lastActivity}
-                    </span>
-                  ) : null}
-
-                  <PulseIconChevronRight className="justify-self-end text-fg-quiet" />
-                </Link>
+                  : null}
+                </div>
               );
             })}
           </div>
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * @param {{
+ *   client: Record<string, any>;
+ *   nested?: boolean;
+ *   gridCols: string;
+ *   variant: 'pulse' | 'full';
+ *   periodLabel: string;
+ *   showCvr: boolean;
+ *   team: import('@/lib/crm/pulse-types').PulseTeamMember[];
+ * }} props
+ */
+function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabel, showCvr, team }) {
+  const owner = team.find((t) => t.id === c.owner);
+
+  return (
+    <Link
+      href={customerHref(c)}
+      className={cn(
+        "grid min-w-0 flex-1 gap-3 py-2 pr-3 text-left transition-colors hover:bg-surface-muted md:py-2.5 md:pr-4",
+        gridCols,
+      )}
+    >
+      <div className={cn("flex min-w-0 items-center gap-2.5", nested && "pl-3")}>
+        <span
+          className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
+          style={{ background: `oklch(62% 0.14 ${c.hue})` }}
+        >
+          {c.logo}
+        </span>
+        <div className="min-w-0">
+          <div className="truncate font-sans text-[13px] font-medium text-fg">{c.name}</div>
+          <div className="truncate font-sans text-[11px] text-fg-quiet">
+            {c.isGroup ?
+              <span className="font-medium text-agency-brand">Koncern · {c.groupSize} brands</span>
+            : <>
+                {showCvr && c.cvr ?
+                  <>
+                    <span className="tabular-nums">CVR {c.cvr}</span>
+                    <span className="mx-1">·</span>
+                  </>
+                : null}
+                {c.industry}
+              </>
+            }
+          </div>
+        </div>
+        <HealthChip health={c.health} palette="agency" compact />
+      </div>
+
+      <div className="flex min-w-0 items-center gap-1.5">
+        {owner ?
+          <>
+            <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
+            <span className="truncate font-sans text-[12px] text-fg-muted">{owner.name}</span>
+          </>
+        : <span className="text-fg-quiet">—</span>}
+      </div>
+
+      {variant === "full" ?
+        <div className="flex items-center">
+          <StatusChip status={c.status} palette="agency" className="scale-95 origin-left" />
+        </div>
+      : null}
+
+      <span className="text-[12.5px] tabular-nums text-fg">
+        {formatCurrencyCompact(c.retainer, c.currency)}
+      </span>
+
+      <PulseClientHoursMetric
+        hoursThisMonth={c.hoursThisMonth}
+        hoursBudget={c.hoursBudget}
+        estimatedHoursOpen={c.estimatedHoursOpen}
+        periodLabel={periodLabel}
+        clientName={c.name}
+        clientHref={customerHref(c)}
+        utilBarClassName="max-w-[120px]"
+      />
+
+      <span
+        className={cn(
+          "text-[12.5px] tabular-nums",
+          c.monthlyProfitMargin < 0 && "text-agency-bad",
+          c.monthlyProfitMargin >= 0 && c.monthlyProfitMargin < 0.15 && "text-agency-warn",
+          c.monthlyProfitMargin >= 0.15 && "text-agency-ok",
+        )}
+      >
+        {formatPercent(c.monthlyProfitMargin)}
+      </span>
+
+      <PulseAllocationBar allocation={c.allocation} height={6} />
+
+      {variant === "full" ?
+        <span className="hidden truncate text-[11px] tabular-nums text-fg-muted sm:inline">
+          {c.lastActivity}
+        </span>
+      : null}
+
+      <PulseIconChevronRight className="justify-self-end text-fg-quiet" />
+    </Link>
   );
 }

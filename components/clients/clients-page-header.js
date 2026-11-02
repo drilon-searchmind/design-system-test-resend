@@ -1,6 +1,7 @@
 "use client";
 
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
+import { buildCustomerEntities } from "@/lib/crm/client-groups";
 import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
  *   loading?: boolean;
  *   clients?: import('@/lib/crm/pulse-types').PulseClient[] | null;
  *   onOpenCreate?: () => void;
+ *   onOpenGroup?: () => void;
  *   createModalOpen?: boolean;
  *   dataSource?: "demo" | "database";
  * }} props
@@ -25,6 +27,7 @@ export function ClientsPageHeader({
   loading = false,
   clients = null,
   onOpenCreate,
+  onOpenGroup,
   createModalOpen = false,
   dataSource = "demo",
 }) {
@@ -34,9 +37,13 @@ export function ClientsPageHeader({
   if (loading && !clients) {
     bodyLine = "Indlæser portefølje…";
   } else if (clients && clients.length > 0) {
-    const unhealthy = clients.filter((c) => c.health !== "ok").length;
-    const overBudget = clients.filter((c) => c.hoursBudget > 0 && c.hoursThisMonth > c.hoursBudget).length;
-    bodyLine = `${clients.length} kunder i porteføljen`;
+    // Koncerner (samme CVR) tæller som én kunde.
+    const customers = buildCustomerEntities(clients);
+    const groupCount = customers.filter((c) => c.isGroup).length;
+    const unhealthy = customers.filter((c) => c.health !== "ok").length;
+    const overBudget = customers.filter((c) => c.hoursBudget > 0 && c.hoursThisMonth > c.hoursBudget).length;
+    bodyLine = `${customers.length} kunder i porteføljen`;
+    if (groupCount > 0) bodyLine += ` (heraf ${groupCount} ${groupCount === 1 ? "koncern" : "koncerner"})`;
     if (unhealthy > 0) bodyLine += ` · ${unhealthy} med sundhedsadvarsler`;
     if (overBudget > 0) bodyLine += ` · ${overBudget} over timebudget`;
   } else if (clients?.length === 0) {
@@ -63,6 +70,16 @@ export function ClientsPageHeader({
 
       <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-start sm:justify-end">
         <div className="flex flex-wrap justify-end gap-2">
+          {onOpenGroup && dataSource === "database" ?
+            <button
+              type="button"
+              onClick={onOpenGroup}
+              aria-haspopup="dialog"
+              className="inline-flex h-[34px] items-center rounded-md border border-border bg-surface-muted px-4 font-sans text-[13px] font-medium text-fg-muted hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand"
+            >
+              Gruppér kunder
+            </button>
+          : null}
           {onOpenCreate && dataSource === "database" ?
             <button
               type="button"

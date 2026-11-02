@@ -17,6 +17,7 @@ import { HealthChip } from "@/components/crm/health-chip";
 import { StatusChip } from "@/components/crm/status-chip";
 import { NPS_INTERVAL_DA } from "@/lib/crm/nps-intervals-da";
 import { isNpsSendEnabled, resolveNpsRecipient } from "@/lib/crm/nps-recipient";
+import { aggregateBrandClients, clientGroupHref } from "@/lib/crm/client-groups";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { npsLatestEntry, npsPreviousEntry } from "@/lib/crm/nps-utils";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,71 @@ function NpsRecipientEmail({ email, clientId, clientName }) {
       </div>
       <NpsRecipientInfoIcon className={!hasEmail ? "mt-0.5 text-agency-brand" : undefined} />
       <span className="sr-only">Modtager for {clientName}</span>
+    </div>
+  );
+}
+
+/**
+ * @param {string} key
+ * @param {string} name
+ * @param {import('@/lib/crm/static-data').CLIENTS} brands
+ */
+function summarizeGroup(key, name, brands) {
+  const agg = /** @type {import('@/lib/crm/static-data').CLIENTS[number]} */ (
+    aggregateBrandClients(brands, { cvr: key, name })
+  );
+  const latest = npsLatestEntry(agg);
+  const prev = npsPreviousEntry(agg);
+  return {
+    brandCount: brands.length,
+    health: agg.health,
+    latest,
+    delta: latest && prev ? latest.score - prev.score : null,
+    spark: (agg.npsHistory ?? []).map((e) => e.score),
+  };
+}
+
+/** @param {{ entry: { key: string; name: string; summary: ReturnType<typeof summarizeGroup> } }} props */
+function NpsGroupHeaderRow({ entry }) {
+  const { summary } = entry;
+  return (
+    <div
+      className={cn(
+        "grid items-center gap-2 border-b border-border bg-agency-brand-soft/30 px-3 py-2 md:gap-3 md:px-4",
+        GRID,
+      )}
+    >
+      <div className="min-w-0">
+        <Link
+          href={clientGroupHref(entry.key)}
+          className="truncate font-sans text-[12px] font-semibold leading-snug text-fg hover:text-agency-brand hover:underline"
+        >
+          {entry.name}
+        </Link>
+        <span className="block text-[10px] text-agency-brand">Koncern · {summary.brandCount} brands</span>
+      </div>
+      <span className={cn("text-[13px] font-semibold tabular-nums", scoreToneClass(summary.latest?.score ?? null))}>
+        {summary.latest?.score ?? "—"}
+      </span>
+      <span
+        className={cn(
+          "text-[11px] tabular-nums",
+          summary.delta == null ? "text-fg-quiet" : summary.delta >= 0 ? "text-agency-ok" : "text-agency-bad",
+        )}
+      >
+        {summary.delta == null ? "—" : `${summary.delta > 0 ? "+" : ""}${summary.delta}`}
+      </span>
+      <div className="flex justify-center">
+        <HealthChip health={summary.health} palette="agency" compact />
+      </div>
+      <div className="flex min-h-[34px] items-center text-agency-brand">
+        {summary.spark.length > 2 ?
+          <PulseSparkline data={summary.spark} height={28} />
+        : <span className="text-[10px] text-fg-quiet">—</span>}
+      </div>
+      <span className="col-span-4 font-sans text-[10px] text-fg-quiet">
+        Samlet NPS for koncernen · udsendelse styres pr. brand nedenfor
+      </span>
     </div>
   );
 }
@@ -266,6 +332,36 @@ export function NpsClientsDirectory({
     return list;
   }, [rows, q, filter, sort]);
 
+  /** Flad liste: koncern-headere efterfulgt af deres brands (grupperet efter første forekomst). */
+  const flat = useMemo(() => {
+    /** @type {({ type: "header"; key: string; name: string; summary: ReturnType<typeof summarizeGroup> } | { type: "row"; row: (typeof filtered)[number]; nested: boolean })[]} */
+    const out = [];
+    /** @type {Map<string, (typeof filtered)[number][]>} */
+    const byGroup = new Map();
+    for (const r of filtered) {
+      const key = r.client.groupCvr;
+      if (!key) continue;
+      const list = byGroup.get(key);
+      if (list) list.push(r);
+      else byGroup.set(key, [r]);
+    }
+    const emitted = new Set();
+    for (const r of filtered) {
+      const key = r.client.groupCvr;
+      if (!key) {
+        out.push({ type: "row", row: r, nested: false });
+        continue;
+      }
+      if (emitted.has(key)) continue;
+      emitted.add(key);
+      const members = byGroup.get(key) ?? [];
+      const name = r.client.groupName ?? key;
+      out.push({ type: "header", key, name, summary: summarizeGroup(key, name, members.map((m) => m.client)) });
+      for (const m of members) out.push({ type: "row", row: m, nested: true });
+    }
+    return out;
+  }, [filtered]);
+
   return (
     <section className="tally-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
@@ -351,6 +447,14 @@ export function NpsClientsDirectory({
                 </Link>
                 <HealthChip health={r.client.health} palette="agency" compact />
               </div>
+              {r.client.groupCvr ?
+                <Link
+                  href={clientGroupHref(r.client.groupCvr)}
+                  className="mt-1 block font-sans text-[10px] font-medium text-agency-brand hover:underline"
+                >
+                  Koncern · {r.client.groupName}
+                </Link>
+              : null}
               <div className="mt-2">
                 <NpsRecipientEmail
                   email={r.recipient?.email}
@@ -420,19 +524,25 @@ export function NpsClientsDirectory({
               </span>
               {canSend ? <span>Handling</span> : null}
             </div>
-            {filtered.map((r, i) => (
+            {flat.map((entry, i) => {
+              if (entry.type === "header") {
+                return <NpsGroupHeaderRow key={`g-${entry.key}`} entry={entry} />;
+              }
+              const r = entry.row;
+              return (
               <div
                 key={r.client.id}
                 className={cn(
                   "grid gap-2 border-b border-border-soft px-3 py-2 md:gap-3 md:px-4 md:py-2.5",
                   GRID,
-                  i === filtered.length - 1 && "border-b-0",
+                  entry.nested && "border-l-2 border-l-agency-brand-border bg-surface-muted/20",
+                  i === flat.length - 1 && "border-b-0",
                   r.atRisk && "bg-agency-bad-soft/12",
                   r.noData && "opacity-85",
                   !r.sendEnabled && "opacity-55",
                 )}
               >
-                <div className="min-w-0">
+                <div className={cn("min-w-0", entry.nested && "pl-2")}>
                   <Link
                     href={`${routes.clients}/${r.client.id}`}
                     className="truncate font-sans text-[12px] font-semibold leading-snug text-fg hover:text-agency-brand hover:underline"
@@ -482,7 +592,8 @@ export function NpsClientsDirectory({
                   />
                 : null}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       }

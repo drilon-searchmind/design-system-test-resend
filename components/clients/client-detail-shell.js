@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { ClientGroupRename } from "@/components/clients/client-group-rename";
 import { ClientDetailEditActions } from "@/components/clients/client-detail-edit-actions";
 import { ClientDetailEditForm } from "@/components/clients/client-detail-edit-form";
 import {
@@ -14,6 +15,13 @@ import { ClientDetailHeader } from "@/components/clients/client-detail-header";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes } from "@/config/routes";
+import {
+  aggregateBrandClients,
+  annotateClientsWithGroups,
+  defaultGroupName,
+  clientGroupKey,
+  normalizeGroupKey,
+} from "@/lib/crm/client-groups";
 import { clientToEditDraft, editDraftToPatch } from "@/lib/crm/client-edit-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import {
@@ -25,13 +33,14 @@ import {
   TASKS,
   TEAM,
 } from "@/lib/crm/static-data";
+import { DEMO_CLIENT_GROUP_NAMES } from "@/lib/crm/pulse-demo-bundle";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 /**
- * @param {{ clientSlug: string }} props
+ * @param {{ clientSlug: string; groupCvr?: string }} props `groupCvr` = vis koncern (alle brands med samme CVR) i stedet for ét brand.
  */
-export function ClientDetailShell({ clientSlug }) {
+export function ClientDetailShell({ clientSlug, groupCvr }) {
   const router = useRouter();
   const dataSource = useDataSource();
   const { selection, setSelection, queryParams, subtitle } = useReportPeriodState();
@@ -46,23 +55,34 @@ export function ClientDetailShell({ clientSlug }) {
   const [saving, setSaving] = useState(false);
   const [editNotice, setEditNotice] = useState(/** @type {string | null} */ (null));
 
+  const apiBase = groupCvr ?
+      `/api/clients/koncern/${encodeURIComponent(groupCvr)}`
+    : `/api/clients/${encodeURIComponent(clientSlug)}`;
+
   const loadRemote = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const qs = databaseApiQuery(queryParams);
-      const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
+      const res = await fetch(`${apiBase}?${qs}`, {
         cache: "no-store",
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente kunde");
+      if (!res.ok) {
+        // Koncernen er opløst (kun ét brand tilbage) → gå til brandets egen side.
+        if (typeof data?.redirectSlug === "string" && data.redirectSlug) {
+          router.replace(`${routes.clients}/${encodeURIComponent(data.redirectSlug)}`);
+          return;
+        }
+        throw new Error(data?.error ?? "Kunne ikke hente kunde");
+      }
       setRemote(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Fejl");
     } finally {
       setLoading(false);
     }
-  }, [clientSlug, queryParams]);
+  }, [apiBase, queryParams, router]);
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -144,13 +164,30 @@ export function ClientDetailShell({ clientSlug }) {
     }
   }, [clientSlug, draft, loadRemote, remote, router]);
 
-  const demoClient = CLIENTS.find((c) => c.id === clientSlug);
+  // Demo: udled koncern/brand-kontekst fra static-data (samme CVR = samme koncern).
+  const demoAnnotated = annotateClientsWithGroups(CLIENTS, DEMO_CLIENT_GROUP_NAMES);
+  const demoBrands =
+    groupCvr ? demoAnnotated.filter((c) => clientGroupKey(c) === normalizeGroupKey(groupCvr)) : [];
+  const demoGroupClient =
+    groupCvr && demoBrands.length >= 2 ?
+      aggregateBrandClients(demoBrands, {
+        cvr: normalizeGroupKey(groupCvr),
+        name: DEMO_CLIENT_GROUP_NAMES[normalizeGroupKey(groupCvr)] ?? defaultGroupName(demoBrands),
+      })
+    : null;
+  const demoSingle = groupCvr ? null : demoAnnotated.find((c) => c.id === clientSlug);
+  const demoClient = demoGroupClient ?? demoSingle ?? undefined;
+  const demoGroupInfo =
+    demoSingle?.groupCvr ?
+      { cvr: demoSingle.groupCvr, name: demoSingle.groupName ?? "Koncern" }
+    : null;
+  const demoBrandIds = demoGroupClient ? demoGroupClient.brands.map((b) => b.id) : [clientSlug];
 
   if (dataSource === "demo" && !demoClient) {
     return (
       <div className="space-y-4">
         <p className="font-sans text-[13px] text-fg-muted">
-          Ingen kunde med id <span className="text-fg">{clientSlug}</span>.{" "}
+          Ingen kunde med id <span className="text-fg">{groupCvr ?? clientSlug}</span>.{" "}
           <Link href={routes.clients} className="text-agency-brand hover:underline">
             Tilbage til Kunder
           </Link>
@@ -161,15 +198,16 @@ export function ClientDetailShell({ clientSlug }) {
 
   if (dataSource === "demo" && demoClient) {
     const owner = TEAM.find((t) => t.id === demoClient.owner);
-    const notes = NOTES_BY_CLIENT[clientSlug] ?? [];
-    const contract = CONTRACTS.find((row) => row.clientId === clientSlug) ?? null;
-    const retainerHistory = RETAINER_HISTORY[clientSlug] ?? [];
-    const clientTasks = TASKS.filter((t) => t.clientId === clientSlug);
+    const notes = demoBrandIds.flatMap((id) => NOTES_BY_CLIENT[id] ?? []);
+    const contract = demoGroupClient ? null : (CONTRACTS.find((row) => row.clientId === clientSlug) ?? null);
+    const retainerHistory = demoGroupClient ? [] : (RETAINER_HISTORY[clientSlug] ?? []);
+    const clientTasks = TASKS.filter((t) => demoBrandIds.includes(t.clientId));
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <ClientDetailHeader
           client={demoClient}
+          group={demoGroupInfo}
           owner={
             owner
               ? {
@@ -233,15 +271,41 @@ export function ClientDetailShell({ clientSlug }) {
         }))
       : [];
 
-    const editActions = (
-      <ClientDetailEditActions
-        editing={editing}
-        saving={saving}
-        onEdit={startEdit}
-        onSave={() => void saveEdit()}
-        onCancel={cancelEdit}
-      />
-    );
+    /** @type {{ cvr: string; name: string; href?: string } | null} */
+    const groupInfo =
+      !groupCvr && remote.group && typeof remote.group === "object" ?
+        /** @type {{ cvr: string; name: string; href?: string }} */ (remote.group)
+      : null;
+    const isGroupPage = Boolean(groupCvr);
+
+    const editActions =
+      isGroupPage ?
+        <ClientGroupRename
+          cvr={String(groupCvr)}
+          name={c.name}
+          onRenamed={() => loadRemote()}
+        />
+      : <ClientDetailEditActions
+          editing={editing}
+          saving={saving}
+          onEdit={startEdit}
+          onSave={() => void saveEdit()}
+          onCancel={cancelEdit}
+        />;
+
+    const ungroupBrand = async (brandSlug) => {
+      const res = await fetch(`/api/clients/${encodeURIComponent(brandSlug)}?${databaseApiQuery()}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupKey: "-" }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEditNotice(typeof data?.error === "string" ? data.error : "Kunne ikke løsrive brand");
+        return;
+      }
+      await loadRemote();
+    };
 
     return (
       <div
@@ -263,6 +327,7 @@ export function ClientDetailShell({ clientSlug }) {
 
         <ClientDetailHeader
           client={c}
+          group={groupInfo}
           owner={
             owner
               ? {
@@ -315,6 +380,8 @@ export function ClientDetailShell({ clientSlug }) {
             }
             infoMd={typeof c.infoMd === "string" ? c.infoMd : ""}
             canEditKundeinfo
+            kundeinfoSaveUrl={isGroupPage ? apiBase : undefined}
+            onUngroupBrand={isGroupPage ? ungroupBrand : undefined}
             onKundeinfoSaved={(nextInfoMd) => {
               setRemote((prev) => {
                 if (!prev || typeof prev.client !== "object" || prev.client === null) return prev;

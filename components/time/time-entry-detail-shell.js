@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -410,11 +411,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
               className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !db && "opacity-65")}
             >
               <option value="">—</option>
-              {clientsPick.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
+              <ClientPicklistOptions items={clientsPick} />
             </select>
           </label>
 

@@ -6,6 +6,7 @@ import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { HealthChip } from "@/components/crm/health-chip";
 import { StatusChip } from "@/components/crm/status-chip";
 import { routes } from "@/config/routes";
+import { clientGroupHref } from "@/lib/crm/client-groups";
 import { CHURN_REASON_LABELS } from "@/lib/crm/client-utils";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { cn } from "@/lib/utils";
@@ -35,10 +36,12 @@ function ExternalLinkIcon({ className }) {
  * @param {{
  *   client: import('@/lib/crm/static-data').CLIENTS[number];
  *   owner: { name: string; role: string; avatar: string; hue: number } | null;
+
  *   trailing?: import('react').ReactNode;
+ *   group?: { cvr: string; name: string; href?: string } | null;
  * }} props
  */
-export function ClientDetailHeader({ client, owner, trailing }) {
+export function ClientDetailHeader({ client, owner, trailing, group = null }) {
   const showChurn = client.status === "inactive" && client.terminatedAt;
 
   return (
@@ -50,6 +53,17 @@ export function ClientDetailHeader({ client, owner, trailing }) {
         >
           Kunder
         </Link>
+        {group ?
+          <>
+            <span className="mx-2 text-fg-quiet">/</span>
+            <Link
+              href={group.href ?? clientGroupHref(group.cvr)}
+              className="text-fg-muted transition-colors hover:text-agency-brand hover:underline"
+            >
+              {group.name}
+            </Link>
+          </>
+        : null}
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="text-fg">{client.name}</span>
       </nav>
@@ -69,15 +83,15 @@ export function ClientDetailHeader({ client, owner, trailing }) {
           </span>
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-              Kunde
+              {client.isGroup ? `Koncern · ${client.groupSize} brands` : "Kunde"}
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">
                 {client.name}
               </h1>
-              {client.cvr ? (
+              {client.cvr || client.cvrs?.length ? (
                 <span className="font-sans text-[11px] tabular-nums text-fg-quiet">
-                  CVR {client.cvr}
+                  CVR {client.cvr ?? client.cvrs.join(", ")}
                 </span>
               ) : null}
               {client.googleDriveUrl ? (
@@ -97,7 +111,7 @@ export function ClientDetailHeader({ client, owner, trailing }) {
               ) : null}
             </div>
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-              {client.industry}
+              {client.isGroup ? (client.brands ?? []).map((b) => b.name).join(" · ") : client.industry}
               {owner ? (
                 <>
                   {" "}
@@ -116,9 +130,17 @@ export function ClientDetailHeader({ client, owner, trailing }) {
                 Sidst aktiv {client.lastActivity}
               </span>
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <StatusChip status={client.status} palette="agency" />
               <HealthChip health={client.health} palette="agency" />
+              {group ?
+                <Link
+                  href={group.href ?? clientGroupHref(group.cvr)}
+                  className="inline-flex items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2.5 py-0.5 font-sans text-[11px] font-medium text-agency-brand hover:underline"
+                >
+                  Del af koncern: {group.name}
+                </Link>
+              : null}
             </div>
 
             {showChurn ? (

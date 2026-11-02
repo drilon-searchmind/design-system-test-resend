@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { KbArticleBody } from "@/components/kb/kb-article-body";
 import { KbArticleRichEditor, readKbArticleEditorHtml } from "@/components/kb/kb-article-rich-editor";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
  *   infoMd?: string;
  *   canEdit?: boolean;
  *   onSaved?: (infoMd: string) => void;
+ *   saveUrl?: string;
  * }} props
  */
 export function ClientDetailKundeinfoPanel({
@@ -22,18 +23,15 @@ export function ClientDetailKundeinfoPanel({
   infoMd = "",
   canEdit = false,
   onSaved,
+  saveUrl,
 }) {
   const bodyRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
-  const [savedHtml, setSavedHtml] = useState(infoMd);
-
-  useEffect(() => {
-    if (!editing) setSavedHtml(infoMd);
-  }, [infoMd, editing]);
-
-  const displayHtml = savedHtml;
+  // Lokalt gemt version vinder indtil forælderen sender ny `infoMd` (afledt, ingen effect).
+  const [savedHtml, setSavedHtml] = useState(/** @type {{ base: string; html: string } | null} */ (null));
+  const displayHtml = savedHtml && savedHtml.base === infoMd ? savedHtml.html : infoMd;
 
   const startEdit = useCallback(() => {
     setError(null);
@@ -52,7 +50,8 @@ export function ClientDetailKundeinfoPanel({
     try {
       const nextInfoMd = readKbArticleEditorHtml(bodyRef.current);
       const qs = databaseApiQuery();
-      const res = await fetch(`/api/clients/${encodeURIComponent(clientSlug)}?${qs}`, {
+      const base = saveUrl ?? `/api/clients/${encodeURIComponent(clientSlug)}`;
+      const res = await fetch(`${base}?${qs}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ infoMd: nextInfoMd || null }),
@@ -60,7 +59,7 @@ export function ClientDetailKundeinfoPanel({
       const data = await res.json();
       if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Kunne ikke gemme");
 
-      setSavedHtml(nextInfoMd);
+      setSavedHtml({ base: infoMd, html: nextInfoMd });
       setEditing(false);
       onSaved?.(nextInfoMd);
     } catch (err) {
@@ -68,7 +67,7 @@ export function ClientDetailKundeinfoPanel({
     } finally {
       setSaving(false);
     }
-  }, [canEdit, clientSlug, onSaved]);
+  }, [canEdit, clientSlug, infoMd, onSaved, saveUrl]);
 
   return (
     <div className="flex flex-col gap-4">

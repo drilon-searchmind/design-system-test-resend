@@ -1,5 +1,7 @@
 "use client";
 
+import { annotateClientsWithGroups } from "@/lib/crm/client-groups";
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useDataSource } from "@/components/crm/use-data-source";
@@ -188,7 +190,11 @@ export function TimeTrackRunner() {
 
   const clientOptions = useMemo(() => {
     if (isDb) return clientsPick;
-    return CLIENTS.map((c) => ({ value: c.id, label: c.name }));
+    return annotateClientsWithGroups(CLIENTS).map((c) => ({
+      value: c.id,
+      label: c.name,
+      group: c.groupName,
+    }));
   }, [isDb, clientsPick]);
 
   const tasksForClient = useMemo(() => {
@@ -513,11 +519,7 @@ export function TimeTrackRunner() {
                 >
                   {noClients ?
                     <option value="">— Ingen kunder —</option>
-                  : clientOptions.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))
+                  : <ClientPicklistOptions items={clientOptions} />
                   }
                 </select>
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-quiet">

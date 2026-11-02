@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agency OS Metrics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0f1117; --panel:#171a23; --panel2:#1e2230; --line:#2a2f42;
+  --text:#eef0f6; --muted:#9aa2b8; --accent:#7c9cff; --accent2:#5eead4;
+  --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#07080c;color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+.deck{position:absolute;inset:0;margin:auto;width:100vw;height:100vh;background:var(--bg)}
+@media(min-width:769px){.deck{max-width:calc(100vh*16/9);max-height:calc(100vw*9/16)}}
+.slide{position:absolute;inset:0;padding:44px 56px 84px;opacity:0;visibility:hidden;transition:opacity .35s;overflow-y:auto;display:flex;flex-direction:column}
+.slide.active{opacity:1;visibility:visible}
+.slide>*{width:100%}
+.chip{display:inline-block;align-self:flex-start;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:rgba(124,156,255,.12);border:1px solid rgba(124,156,255,.3);padding:4px 10px;border-radius:999px;margin-bottom:14px;width:auto}
+h1{font-size:clamp(30px,5vw,64px);line-height:1.08;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:clamp(22px,2.9vw,36px);line-height:1.15;margin-bottom:8px}
+.sub{color:var(--muted);font-size:clamp(14px,1.3vw,18px);line-height:1.5;margin-bottom:18px;max-width:900px}
+.center{justify-content:center}
+table{border-collapse:collapse;width:100%;font-size:clamp(12px,1.05vw,14.5px);line-height:1.45}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+td.l{font-weight:600;color:var(--accent2);white-space:nowrap;width:1%}
+td.d{color:var(--text);width:30%}
+td.c{color:#cfd4e6}
+tr:hover td{background:rgba(255,255,255,.02)}
+.src{margin-top:14px;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.card h3{font-size:15px;margin-bottom:8px}
+.card p,.card li{font-size:14px;line-height:1.5;color:#cfd4e6}
+.card ul{padding-left:18px}
+.card.warn{border-color:rgba(251,191,36,.45)}
+.card.warn h3{color:var(--warn)}
+.card.bad{border-color:rgba(248,113,113,.45)}
+.card.bad h3{color:var(--bad)}
+.card.ok h3{color:var(--ok)}
+.big{font-size:clamp(20px,2.6vw,34px);font-weight:700;color:var(--accent2);line-height:1.3;margin:6px 0 14px}
+.formula{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px 20px;font-family:ui-monospace,Consolas,monospace;font-size:clamp(13px,1.3vw,17px);line-height:1.7;color:#fff;margin-bottom:14px}
+.formula b{color:var(--accent2)}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;font-weight:600;font-family:inherit}
+.pill.demo{background:rgba(251,191,36,.15);color:var(--warn)}
+.pill.manual{background:rgba(248,113,113,.15);color:var(--bad)}
+.pill.calc{background:rgba(74,222,128,.15);color:var(--ok)}
+.chartbox{height:clamp(200px,34vh,320px);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:1000;transition:width .3s}
+.nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;z-index:1000;background:rgba(15,17,23,.85);backdrop-filter:blur(6px);padding:6px 12px;border-radius:999px;border:1px solid var(--line)}
+.nav button{background:rgba(255,255,255,.08);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
+.nav button:hover{background:rgba(255,255,255,.18)}
+.nav select{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:12px;max-width:190px}
+.nav select option{background:#171a23;color:#fff}
+.count{color:var(--muted);font-size:13px;min-width:56px;text-align:center}
+.slide{padding-top:64px}
+.where{font-size:13px;color:var(--muted);margin:-4px 0 14px;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.where a,.on a{color:var(--accent2);cursor:pointer;text-decoration:none;border-bottom:1px dashed rgba(94,234,212,.5)}
+.where a:hover,.on a:hover{color:#fff}
+.where code{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;color:#fff}
+.where .menu{color:var(--muted)}
+.card .on{margin-top:10px;font-size:12px;color:var(--muted)}
+mark{background:rgba(251,191,36,.35);color:#fff;border-radius:3px;padding:0 2px}
+.search{position:fixed;top:12px;right:16px;z-index:1200;width:min(340px,calc(100vw - 32px))}
+.search input{width:100%;background:rgba(23,26,35,.95);border:1px solid var(--line);color:#fff;border-radius:10px;padding:9px 12px;font-size:14px;outline:none}
+.search input:focus{border-color:var(--accent)}
+.results{display:none;margin-top:6px;background:#171a23;border:1px solid var(--line);border-radius:12px;max-height:62vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.results.open{display:block}
+.res{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.res:last-child{border-bottom:none}
+.res:hover,.res.sel{background:rgba(124,156,255,.12)}
+.res b{display:block;font-size:13px;color:#fff;margin-bottom:2px}
+.res span{display:block;font-size:12px;color:var(--muted);line-height:1.4}
+.res em{font-style:normal;font-size:11px;color:var(--accent2);margin-left:6px}
+.nores{padding:12px;font-size:13px;color:var(--muted)}
+.rhead{padding:8px 12px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line)}
+@media(max-width:768px){
+  .slide{padding:62px 18px 84px}
+  td.l{white-space:normal}
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tr{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:6px 4px;background:var(--panel)}
+  td{border:none;padding:4px 10px}
+  td.d,td.l{width:100%}
+  td.c::before{content:"Beregning: ";color:var(--muted)}
+  td.d::before{content:"Definition: ";color:var(--muted)}
+  .nav select{max-width:110px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="search">
+  <input id="q" type="search" placeholder="Søg i rapporten (tryk /)" autocomplete="off" aria-label="Søg i rapporten">
+  <div class="results" id="results"></div>
+</div>
+<div class="deck" id="deck"></div>
+<div class="nav">
+  <button onclick="go(cur-1)" aria-label="Forrige">&#8592;</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot"></span></span>
+  <button onclick="go(cur+1)" aria-label="Næste">&#8594;</button>
+  <select id="jump" aria-label="Gå til side"></select>
+</div>
+
+<script>
+/* Tags: D = kun demo/hardcoded, M = manuelt felt, C = beregnet */
+const S = [];
+const title = (chip,h,sub)=>S.push({t:'title',chip,h,sub});
+const table = (chip,h,sub,rows,src)=>S.push({t:'table',chip,h,sub,rows,src});
+const cards = (chip,h,sub,cs,src)=>S.push({t:'cards',chip,h,sub,cs,src});
+const PAGES = {
+ 'Agency Pulse':{r:'/pulse',m:'Forretning'},
+ 'Kunder':{r:'/clients',m:'Forretning'},
+ 'Kontrakter':{r:'/contracts',m:'Forretning'},
+ 'Opgaver':{r:'/tasks',m:'Arbejde'},
+ 'Min kalender':{r:'/calendar',m:'Arbejde'},
+ 'Opgaveskabeloner':{r:'/templates',m:'Arbejde'},
+ 'Tidsregistrering':{r:'/time',m:'Arbejde'},
+ 'Belægning':{r:'/workload',m:'Arbejde'},
+ 'NPS':{r:'/nps',m:'Kunde'},
+ 'Knowledge Base':{r:'/kb',m:'Organisation'},
+ 'Team':{r:'/team',m:'Organisation'},
+ 'Brugerstyring':{r:'/users',m:'Organisation'}
+};
+const L = n => `<a data-page="${n}">${n}</a>`;
+const last = p => { S[S.length-1].pages = p; };
+
+title('Agency OS','Metrics og beregninger','Gennemgang af alle 12 sider i sidemenuen: hvad hvert tal betyder, hvordan det udregnes, og hvilke forbehold man skal kende. Baseret på kildekoden i design-system-test-resend.');
+
+cards('Fælles regler','Sådan læser du tallene','Gælder på tværs af alle sider.',[
+ {h:'Demo vs. database',cls:'warn',l:['Datakilden er som standard "demo" (statiske tal fra static-data.js). Skifter man til "database", hentes data fra MongoDB via /api.','Alle demo-tal er hardcodede, ikke beregnede.','Knowledge Base ignorerer vælgeren og læser altid databasen.']},
+ {h:'Periode',l:['Månedsvælger med presets: Denne måned, Sidste måned, I år til dato, Sidste 3/6/12 måneder, Sidste år.','Maks 4 år tilbage, ikke ind i fremtiden.','Valg af flere måneder: flere sider bruger kun den seneste valgte måned.']},
+ {h:'Test-data',l:['Poster med isTest = true filtreres altid fra i UI.']},
+ {h:'Formatering',l:['Procent: da-DK, maks 1 decimal.','Timer: oftest 1 decimal.','Beløb: kompakt, fx "1,1 mio. kr.". Alt der ikke er EUR vises som DKK.']},
+ {h:'Hardcodede konstanter',cls:'warn',l:['37 t/uge normuge, 4,33 uger pr. måned, 7,5 t/dag (450 min).','Tærskler for farver og status er skrevet direkte i koden.']},
+ {h:'Tre slags tal',l:['Beregnet fra tidsregistreringer, opgaver og kontrakter.','Manuelt felt på kunden (health, margin, allokering, timebudget).','Demo eller approksimation (markeres på sliden).']}
+]);
+last('all');
+
+S.push({t:'overhead'});
+
+table('Overhead-tid','Tre steder, tre definitioner','Der findes ingen separat "overhead"-markering. Overhead, intern og ikke-fakturerbar er samme ting: en tidsregistrering med billable = false.',[
+ ['Agency Pulse','KPI "Overhead-tid"','overhead timer / (billable + overhead). Kun poster der har en kunde. Intern tid uden kunde tæller ikke med.'],
+ ['Tidsregistrering','"Billable · intern"','Billable = billable ikke false OG kunde sat. Alt andet er intern. Advarsel (gul) hvis intern andel af dagen er over 25 %.'],
+ ['Belægning','Søjlen "Intern"','Intern = alle minutter minus billable minutter. En post uden billable-felt tæller som intern.']
+],'Kilde: pulse-data.js:255, time-portfolio.js:50, workload-data.js:167. Mål på 15 % for overhead findes kun som hardcodet tekst i demo-alerten, ikke i beregningen.');
+last(['Agency Pulse','Tidsregistrering','Belægning']);
+
+/* AGENCY PULSE */
+table('Agency Pulse','KPI-kortene','Månedligt ledelsesoverblik over MRR, udnyttelse, overhead og margin.',[
+ ['Retainer MRR','Samlet månedligt retainerbeløb for aktive kunder','Sum af kundens retainer for status "active". Retainer = fast retainerAmount plus sum af kontraktværdier (status active/notice, type retainer/subscription, signeret, værdi over 0). Ikke periodeafhængig. EUR summeres som DKK.'],
+ ['MRR delta <span class="pill demo">approksimation</span>','Ændring ift. forrige måned','Forrige MRR er sat til MRR x 0,96. Delta er derfor altid ca. +4,2 %. Det er ikke reel vækst.'],
+ ['Udnyttelse <span class="pill calc">beregnet</span>','Andel af teamets kapacitet brugt på fakturerbar tid','Billable timer i måneden / kapacitet. Kapacitet = sum af weeklyHours x 4,33 for aktive medlemmer (standard 37 t). Loft 120 %. Delta i procentpoint.'],
+ ['Overhead-tid <span class="pill calc">beregnet</span>','Andel af registreret tid der ikke er fakturerbar','Overhead timer / (billable + overhead) i måneden. Nævneren er registreret tid, ikke kapacitet. Delta er vendt om: fald er grønt.'],
+ ['Gns. margin <span class="pill manual">manuelt felt</span>','Gennemsnitlig månedlig profitmargin','Simpelt gennemsnit af monthlyProfitMargin for aktive kunder med margin over 0. Fallback 25 % hvis ingen. Delta er altid +2 procentpoint (forrige = nuværende minus 0,02).'],
+ ['Sparklines <span class="pill demo">hardcoded</span>','Små kurver i hvert kort','Faste talserier i pulse-fixtures.js. Hænger ikke sammen med kortets reelle værdi.']
+],'Kilde: lib/server/pulse-data.js:244-270, lib/crm/retainer-utils.js, lib/crm/pulse-fixtures.js');
+
+table('Agency Pulse','Resten af siden','',[
+ ['Rentabilitet pr. afdeling','Faktureret retainer-værdi mod leverede timer','Revenue = sum over aktive kunder af retainer x allokering % for afdelingen. Timer = alle registreringer (billable og overhead) i måneden. Budget = sum af hoursBudget x allokering %, ellers Department.capacityHours. Util = timer / budget: rød over 100 %, gul over 95 %, grøn ellers.'],
+ ['"+X t est."','Pipeline af åbne opgaver','Sum af estimateHours på åbne opgaver i afdelingen. Ikke periodefiltreret, påvirker ikke udnyttelsen.'],
+ ['Kundernes sundhed <span class="pill manual">manuelt felt</span>','Fordeling Sund, Advarsel, Kritisk','Antal aktive kunder med Client.health = ok, warn eller bad. Feltet sættes manuelt (eller ved ClickUp-import). Undertitlen "baseret på budget, aktivitet og NPS" er ikke sand i koden.'],
+ ['Tid fordelt pr. dag','Stablet søjle billable vs. overhead','Timer pr. kalenderdag, afrundet til 1 decimal. Kun registreringer med kunde.'],
+ ['Smart Alerts','Automatiske advarsler','Slået fra i UI (overlay). Regler: timer over budget x 1,05 (kritisk hvis over 20 %), samt health warn eller bad. Maks 12.'],
+ ['Latest','De 5 nyeste artikler','Publicerede, ikke arkiverede artikler fra '+L('Knowledge Base')+', sorteret på updatedAt.']
+],'Kilde: pulse-data.js:122-224, pulse-smart-alerts-card.js');
+
+cards('Agency Pulse','Forbehold man bør kende','',[
+ {h:'Flere måneder valgt',cls:'warn',l:['"Sidste 6 måneder" viser kun tal for den seneste måned, selvom teksten siger 6 måneder.']},
+ {h:'Overhead ekskluderer kundeløs tid',cls:'warn',l:['Rent intern tid uden kunde er ikke med i Pulses overhead.']},
+ {h:'Konstant kapacitet',l:['Ingen hensyn til ferie, helligdage eller fravær. Forrige måneds kapacitet sættes lig med nuværende.']},
+ {h:'Deltaer',cls:'bad',l:['MRR-delta og margin-delta er approksimationer. Præsenter dem ikke som vækst.']}
+]);
+
+/* KUNDER */
+table('Kunder','Porteføljen','Alle kunder med retainer, timeforbrug, margin og allokering. Bruger samme data som Pulse.',[
+ ['Kunder i alt','Antal kunder','Alle statusser (aktiv, pause, inaktiv).'],
+ ['Aktive konti','Antal aktive','status = active.'],
+ ['Retainer (aktive, DKK)','Samlet retainer','Sum for aktive kunder med valuta DKK. Pulse MRR summerer alle valutaer, så tallene kan afvige.'],
+ ['Kræver handling','Kunder med problemer','health er ikke ok ELLER timer denne måned over timebudget (budget over 0). Alle statusser tælles.'],
+ ['Timer denne md / i perioden','Forbrug mod timebudget','Sum af alle registreringer (billable og ikke billable) på kunden i måneden. hoursBudget er et manuelt felt. Util = timer / budget.'],
+ ['Margin <span class="pill manual">manuelt felt</span>','Månedlig profitmargin','Indtastet værdi. Farve: rød under 0, gul under 15 %, grøn derover.'],
+ ['Allokering <span class="pill manual">manuelt felt</span>','Fordeling på afdelinger','Procent pr. afdeling, uden Client Management.'],
+ ['Sidst aktiv','Seneste aktivitet','Fri tekst, ikke beregnet.']
+],'Kilde: clients-summary-strip.js, clients-directory.js, map-pulse-client.js');
+
+table('Kunder','Kundedetalje','Fire faner: Overblik, Kundeinfo, Økonomi og aftale, Kvalitet og risiko.',[
+ ['Timer (detalje)','Månedens timer','OBS: kun billable. Listen på Kunder og Pulse tæller alle. Samme kunde kan derfor vise to tal.'],
+ ['Udnyttelse','Timer mod budget','Rød over 100 %, gul over 90 %. Pulse bruger 95 %.'],
+ ['12 md trend <span class="pill manual">manuelt felt</span>','Udnyttelse over tid','Arrayet utilisationHistory på kunden, ikke beregnet fra tid.'],
+ ['Seneste NPS','Sidste score på 0 til 100','Grøn fra 60, gul fra 40, rød under 40. NPS-kortet bruger 50 og 40. Se '+L('NPS')+'.'],
+ ['Levetid','Kundeforhold i måneder','Kalendermåneder mellem start og opsigelse (eller i dag).'],
+ ['CLV <span class="pill demo">approksimation</span>','Livstidsværdi','Levetid i måneder x nuværende retainer. Ikke omsætning eller margin, ingen historik.'],
+ ['Tid / md (~)','Forventet tid pr. afdeling','hoursBudget x allokering %. Et budgettal, ikke faktisk tid.'],
+ ['Retainer-historik','Udvikling','I databasen kun ét punkt (nuværende). Ægte historik findes ikke endnu.'],
+ ['Dage til fornyelse','Nedtælling','Beregnes mod en fast reference, 2026-05-08, ikke dagens dato.']
+],'Kilde: client-detail-data.js, client-detail-kpi-strip.js, client-utils.js:120-140, contract-utils.js:2');
+
+/* KONTRAKTER */
+table('Kontrakter','Aftaleregisteret','Overblik over kundeaftaler, fornyelser og underskriftsstatus.',[
+ ['Kontrakter i alt','Antal rækker','Alle statusser, inkl. kladder og afsluttede.'],
+ ['Aktive aftaler','Antal aktive','Mongo-status active eller notice (opsagt tæller stadig som aktiv).'],
+ ['MRR, valgt måned','Månedlig værdi af aktive aftaler','Sum af Contract.value for kontrakter med status active/notice, der overlapper den aktuelle måned, og valuta DKK. EUR udelades.'],
+ ['Fornyelse inden 90 dage','Aftaler tæt på fornyelse','Aktive kontrakter hvor dage til fornyelse er 90 eller derunder. Forfaldne (negative dage) tæller med.'],
+ ['Status-chips','Livscyklus','ended giver Inaktiv, pending_signature giver Afventer underskrift, active/notice giver Aktiv, resten (inkl. draft) giver Pause.'],
+ ['Sundhed','Prik pr. kunde','Det manuelle felt Client.health. Hører til kunden, ikke kontrakten. Samme felt vises på '+L('Kunder')+' og '+L('Agency Pulse')+'.'],
+ ['Ejer','Ansvarlig','Kundens owner, ikke en kontraktejer.']
+],'Kilde: contracts-data.js:51-97, 378-395, contract-utils.js');
+
+cards('Kontrakter','Kontraktdetalje og forbehold','',[
+ {h:'Detalje',l:['Aftalt beløb / md = Contract.value (ellers kundens retainer).','Opsigelsesvarsling = noticeDays, standard 90 dage.','Retainer vs. kontrakt: en kontrakt indgår i total kun hvis signeret, aktiv og type retainer/subscription. Total = fast retainer + kontrakter.','Elektronisk underskrift: navn, e-mail, tidspunkt, IP, SHA-256 hash af dokumentet.']},
+ {h:'Forbehold',cls:'warn',l:['KPI hedder "valgt md.", men der er ingen månedsvælger. Det er altid indeværende måned.','Værdien antages månedlig, også for projekt og engangs.','Referencedato for fornyelse: i databasen sidste dag i måneden, i demo 2026-05-08.','Økonomi-snapshot er i databasen kun ét punkt.']},
+ {h:'Hardcodet tekst',cls:'warn',l:['"Dækningsnote" og faktureringsrytme er faste tekster, ens for alle kontrakter.']}
+]);
+
+/* OPGAVER */
+table('Opgaver','Opgavelisten','Opgaver pr. kunde med status, prioritet og deadline. Viser som standard dine egne opgaver.',[
+ ['Opgaver i alt','Antal efter ansvarlig-filter','Tæller også delopgaver.'],
+ ['Åbne','Ikke lukkede','Status ikke done og ikke cancelled.'],
+ ['Overskredet','Forsinkede','Har deadline, er åben, og deadline er før i dag. En opgave med deadline i dag er ikke overskredet.'],
+ ['Høj prio (åbne)','Vigtige åbne','Åbne med priority = high.'],
+ ['Deadline-tekst','Dage til/fra deadline','Dagsforskel mellem i dag og deadline. Rød ved overskredet, gul 0 til 7 dage.'],
+ ['Est.','Estimerede timer','Feltet estimateHours.'],
+ ['Scope','Hvilke opgaver vises','Opgaver med deadline i valgt måned, samt åbne opgaver uden deadline eller med deadline før måneden (backlog).']
+],'Kilde: task-utils.js, tasks-portfolio-filter.js:278, tasks-summary-strip.js');
+
+cards('Opgaver','Opgavedetalje og forbehold','',[
+ {h:'Status og prioritet',l:['Status: todo (Afventer), doing (Igangsat), review, done, blocked, cancelled.','Prioritet: high, medium, low. Delopgaver arver kunde og prioritet fra forælderen.']},
+ {h:'Registreret',l:['Sum af alle tidsregistreringer på opgaven, ikke periodefiltreret, billable og ikke billable. Maks 200 poster.','Feltet loggedHours på opgaven bruges ikke af UI.']},
+ {h:'Forbehold',cls:'warn',l:['KPI-kortene følger ansvarlig-filteret. Som standard er det dig, ikke hele porteføljen.','Aktivitetslog er kun 1 til 2 syntetiske linjer, ikke en rigtig audit-log.','Kundedetaljens opgavekort regner dage mod fast dato 2026-05-08.','Opgave uden deadline kan vise "Om NaN d" (udledt af koden, ikke testet).']}
+]);
+
+/* KALENDER */
+cards('Min kalender','Planlægning af opgaver','Ugevisning og månedsvisning. Der er ingen KPI-række, kun tællere og regler.',[
+ {h:'Tællere',l:['"X af Y": X er opgaver efter søgning og ansvarlig-filter, Y er alle indlæste opgaver.','Fanerne Åbne og Overskredet tæller over alle opgaver, ikke kun dine. Det afviger fra Opgaver-siden.','"Planlagte": antal tidsblokke, ikke opgaver. Samme opgave trukket ind 3 gange giver 3.']},
+ {h:'Varighed af en blok',l:['Træk fra sidebar: estimateHours begrænset til 0,5 til 8 timer, standard 1 time.','Weekender flyttes til næste mandag.','Hvis sluttid mangler: start plus estimat (maks 8 t), ellers 60 min.']},
+ {h:'Begivenheder',l:['Opgaveblokke farves efter status.','Deadline som heldagsbegivenhed hvis opgaven er åben og ikke har en blok den dag. Rød hvis overskredet.','Google Calendar-begivenheder (lilla, kun læsning) kun i database-tilstand.']},
+ {h:'Forbehold',cls:'warn',l:['Du ser kun dine egne blokke.','I demo gemmes ændringer kun i browseren og forsvinder ved genindlæsning.','Alle opgaver hentes, uden månedsgrænse.']}
+]);
+
+/* SKABELONER */
+table('Opgaveskabeloner','Biblioteket','Genbrugelige opgaveskabeloner, der kan forudfylde Ny opgave.',[
+ ['Skabeloner i alt','Antal','Alle, også arkiverede.'],
+ ['Aktive','Antal aktive','active er ikke false.'],
+ ['Discipliner repræsenteret (N / M)','Dækning','N = forskellige afdelinger brugt af skabeloner. M = alle afdelinger i databasen. Gul hvis N er under M. Lav dækning er ikke nødvendigvis en fejl.'],
+ ['Brugt i opgaver','Samlet brug','Sum af usedCount. I databasen: antal opgaver der peger på skabelonen via templateId, uanset status og dato. Stiger kun når opgaver oprettes via skabelon.'],
+ ['Deadline (+d)','Standard deadline','defaultDueOffsetDays: dage efter oprettelse.'],
+ ['Est.','Foreslåede timer','suggestedHours, vises som 0 t hvis ikke sat.'],
+ ['Kundetype','Hvor den bruges','retainer, project eller any.']
+],'Kilde: task-templates-data.js:127-162. I demo er "Brugt i opgaver" opfundne tal (243 i alt).');
+
+/* TIDSREGISTRERING */
+table('Tidsregistrering','Din egen tidslog','Viser kun dine egne registreringer for rapportmåneden.',[
+ ['Registreret i dag','Dine minutter i dag','Sum af durationMinutes for poster med dagens dato (UTC). Vist som "X t Y m".'],
+ ['Billable · intern','Fordeling i dag','Billable = billable ikke false og kunde sat. Intern = resten. Advarsel hvis intern er over 25 % af dagen.'],
+ ['Poster i dag','Antal','Antal registreringer i dag.'],
+ ['Måned vs. mål (arbejdsdage)','Månedens fremdrift','Loggede timer på hverdage / (450 min x antal hverdage i måneden). Helligdage ignoreres. Farve: rød over 100 %, gul over 92 %, grøn over 70 %.'],
+ ['Månedskalender','Dagsbjælker','Timer pr. dag mod dagsmål på 7,5 t. Bjælken er rød over 100 %, gul over 95 %.'],
+ ['Timer','Live registrering','Ved stop: minutter = max(1, afrundet). Kun én aktiv timer pr. bruger. Timer kræver altid en kunde, også når den markeres Intern.'],
+ ['Afdeling pr. post','Hvor tiden hører til','Prioritet: eksplicit afdeling, opgavens afdeling, medlemmets afdeling, første disciplin.']
+],'Kilde: time-portfolio.js, time-utils.js:67-81, timer-controller.js:349, resolve-time-entry-department.js:29-49');
+
+cards('Tidsregistrering','Forbehold','',[
+ {h:'Tidszoner',cls:'warn',l:['"I dag" og dagssummer bruger UTC, mens periodegrænser bruger serverens lokaltid. Poster nær midnat kan havne på en anden dag.']},
+ {h:'Flere måneder',cls:'warn',l:['Kalender og mål følger kun den første måned, mens poster hentes for hele intervallet.']},
+ {h:'Begrænsninger',l:['Maks 750 poster hentes.','Aktivitet på en post er kun oprettelse og seneste ændring.','Skift af medlems afdeling opdaterer ikke gamle poster.']},
+ {h:'Overhead',l:['Manuelle interne poster har ingen kunde. Timer-poster markeret Intern har kunde og billable = false.']}
+]);
+
+/* BELÆGNING */
+table('Belægning','Disciplin-matrixen','Kapacitet, tildelt arbejde og forbrug pr. disciplin.',[
+ ['Kap. (kapacitet)','Månedlig kapacitet','Department.capacityHours. Vedligeholdes manuelt, ingen hensyn til ferie.'],
+ ['Tild. (tildelt)','Planlagt arbejde','Sum af estimateHours for ALLE åbne opgaver i disciplinen, uanset deadline. Et backlog-estimat, ikke en månedsallokering. (Demo: budget x allokering.)'],
+ ['Forbr. (forbrug)','Brugte timer','Alle tidsregistreringer (billable og intern) fra hele bureauet i perioden, pr. departmentKey.'],
+ ['Delta','Forbrug minus tildelt','Grøn hvis negativ, gul hvis positiv.'],
+ ['Perf. util.','Udnyttelse','forbrug / kapacitet. Hvis kapacitet er 0: forbrug / tildelt. Er ikke billable-andel.'],
+ ['Status','Chip','1) Overforbrug: tildelt over 0 og forbrug over tildelt x 1,05. 2) Over-allokeret: tildelt over kapacitet x 0,98. 3) Stram kap.: perf. util. mellem 0,98 og 1,12. 4) Balanceret.'],
+ ['Fakturerbare timer','KPI','Sum af billable timer i perioden, alle afdelinger. Overhead forklares under '+L('Tidsregistrering')+' og '+L('Agency Pulse')+'.'],
+ ['Efterspørgsel fra board','Åbne, Høj prio, Overskr.','Antal åbne opgaver pr. disciplin, antal med prioritet high, antal med deadline før i dag.']
+],'Kilde: workload-data.js:47-57, 98-144, 259-292, workload-utils.js:50-67');
+
+S.push({t:'loadindex'});
+
+cards('Belægning','Forbehold','',[
+ {h:'Ulige størrelser sammenlignes',cls:'warn',l:['Forbrug (kalendermåned, hele bureauet) holdes op mod en manuel kapacitet og et estimat uden tidsafgrænsning.']},
+ {h:'Fejl i medlemssiden',cls:'bad',l:['Medlemsdetaljen læser feltet monthlyCapacityHours, men schemaet hedder capacityHours. Kapaciteten bliver 0, og indexet kan afvige fra tallet på oversigten.']},
+ {h:'Trendgrafen',l:['De seneste 14 dage der ender på månedens sidste dag. I indeværende måned er de sidste dage i fremtiden og viser 0.']},
+ {h:'Ikke med',l:['Ferie, helligdage og fravær. Task.loggedHours. Ingen "tilgængelige timer" pr. medlem.','Poster uden afdeling vises ikke i matrixen, men tæller i Fakturerbare timer.']}
+]);
+
+/* NPS */
+S.push({t:'nps'});
+
+table('NPS','Nøgletal','Kun database-tilstand viser rigtige tal. Demo er hardcodet (fx 184 svar af 262 invitationer).',[
+ ['Bureau NPS','Gennemsnit af kundernes seneste score','Sum af hver målt kontos seneste score (0 til 100) / antal målte konti. Grøn fra 50, gul fra 40, rød under 40. Kun aktive og pauserede kunder.'],
+ ['Delta vs. forrige','Ændring','Gennemsnit af seneste score minus gennemsnit af næstsidste score. De to gennemsnit kan være over forskellige konti.'],
+ ['Konti målt','Dækning','Konti med mindst ét svar / alle aktive og pauserede. Grøn fra 90 %, gul fra 70 %.'],
+ ['Svarfrekvens (rapportmåned)','Andel der svarer','Svar i måneden / invitationer i måneden (det største af svarenes sentAt og send-loggen). Altid indeværende måned. Kan teoretisk overstige 100 %.'],
+ ['Under 40 (kritisk)','Risikokonti','Konti med seneste score under 40. Rød hvis over 2.'],
+ ['Bureau-trend (12 mdr)','Udvikling','Pr. måned: gennemsnit af hver kontos seneste score til og med måneden. Måned uden data bruger forrige værdi, og indledende måneder uden data vises som 0.'],
+ ['Fordeling','Promoters, Passive, Detraktorer','Pr. konto på seneste score: promoter fra 60, passiv 40 til 59, detraktor under 40.'],
+ ['Median svartid','Hastighed','Median af (respondedAt minus sentAt) i timer for månedens svar.']
+],'Kilde: nps-utils.js:38-178, nps-data.js:102-266, nps-hero-metrics.js:382-417');
+
+cards('NPS','Udsendelse og forbehold','',[
+ {h:'Automatisk udsendelse',l:['Slået fra som standard. Bureau-globale datoer (standard 15. jan, 15. apr, 15. jul, 15. okt) og sendetid 09:00 (København).','Sendes til alle aktive og pauserede kunder med udsendelse aktiv. Én mail pr. kunde pr. dag.','Kundens "Cyklus"-felt bruges ikke af den automatiske udsendelse.','Cron-konfiguration findes ikke i repoet.']},
+ {h:'Surveylink',l:['Offentligt link, gyldigt 90 dage, ét svar pr. link.','Spørgsmål: hvor sandsynligt er det, at du vil anbefale Searchmind? Skala 1 til 10.']},
+ {h:'Forbehold',cls:'warn',l:['To tærskelsæt: 50 (sund) og 60 (promoter). Konto på 55 er grøn i listen, men passiv i fordelingen.','Kun de seneste 2000 svar medregnes.','Demo-skabelonen siger 0 til 10, systemet bruger 1 til 10.','UI-teksten om modtager er forældet: backend understøtter flere modtagertyper.']}
+]);
+
+/* KB */
+table('Knowledge Base','Interne wiki-artikler','10 faste sektioner. Læser altid databasen, uanset demo/database-valg.',[
+ ['Publiceret','Live artikler','published og ikke arkiveret.'],
+ ['Kladder','Ikke udgivet','Ikke published og ikke arkiveret.'],
+ ['Sektioner','Dækning','Antal forskellige sektioner blandt publicerede artikler.'],
+ ['Opdateret','Seneste ændring','updatedAt på den senest ændrede artikel, også kladder og arkiverede.'],
+ ['Sektionstal','Tællere pr. sektion','Publicerede og ikke arkiverede artikler pr. sektion.'],
+ ['Læsetid','Minutter','Antal ord / 180, afrundet, mindst 1.'],
+ ['Relaterede artikler','Forslag','Score: 4 for samme sektion, 3 for forælder/barn, plus antal fælles tags. Kun publicerede, top 5.'],
+ ['Faner','Alle, Live, Kladder, Arkiv','Alle viser ikke arkiverede. Kun Arkiv gør.']
+],'Kilde: knowledge-utils.js, knowledge-data.js, kb-directory.js');
+
+cards('Knowledge Base','Forbehold','',[
+ {h:'Adgang',cls:'warn',l:['Alle indloggede kan oprette, redigere og slette artikler. Feltet "Publikum" (Intern, Kunde, Offentlig) styrer ikke adgang.']},
+ {h:'Sikkerhed',cls:'bad',l:['HTML i brødtekst vises med dangerouslySetInnerHTML. Det er ikke verificeret, at den renses. Bør tjekkes.']},
+ {h:'Forfatter',l:['Sættes fra den indloggede bruger. Fallback er hardcodet til medlemmet "lm".']},
+ {h:'Ikke vist',l:['Flere komponenter (fx top bidragsydere, hurtige kategorier) findes i koden, men er ikke monteret på siden.']}
+]);
+
+/* TEAM */
+table('Team','Roster og belægning','Bureauets medarbejdere, kontrakttimer og belægning fra opgaveboardet.',[
+ ['Medarbejdere i roster','Headcount','Aktive TeamMembers.'],
+ ['Ugetimer Σ (FTE)','Kontrakteret tid','Sum af weeklyHours (standard 37). FTE = sum / 37.'],
+ ['Discipliner repræsenteret','Bredde','Antal forskellige discipliner blandt medlemmer.'],
+ ['Deltid','Under 37 t','Antal medlemmer med weeklyHours under 37. Gul hvis over 2.'],
+ ['Gns. ugentlige timer','Gennemsnit','Sum af weeklyHours / antal, 1 decimal.'],
+ ['Høj belægning (82 eller mere)','Pressede medlemmer','Antal med belægningsindex fra 82. Gul hvis over 4. Indexet beregnes som på '+L('Belægning')+'.'],
+ ['Åbne opgaver (Σ)','Samlet arbejde','Sum af åbne opgaver pr. medlem. En opgave med flere ansvarlige tælles for hver.'],
+ ['Discipliner, bemanding','Roster vs. loft','Σ weeklyHours / (Department.capacityHours / 4,33). Procenten er cappet ved 100, men farven bruger ucappet værdi.'],
+ ['Belægningswatch','Top 6','De seks medlemmer med højest index. Fremhævet fra 88.']
+],'Kilde: team-utils.js:10-59, team-capacity-watch-card.js. Index er det samme som på Belægning.');
+
+cards('Team','Forbehold','',[
+ {h:'Belægning er ikke tid',cls:'warn',l:['Belægningsindex er en opgavetrykscore (antal åbne, høj prio, overskredne), ikke timer eller kapacitet.']},
+ {h:'Medlemssiden',l:['Bruger samme data som Belægning-detaljen, inkl. kapacitetsfejlen. Tærskler: fra 92 rød, fra 82 gul, fra 70 grøn.','Opgavelisten viser kundens slug i stedet for navn.']},
+ {h:'Afdeling',l:['Ændring af disciplin sættes via dropdown og opdaterer departmentKey og disciplineKeys.']},
+ {h:'GDPR',cls:'warn',l:['Alle indloggede kan se alle medlemmers belægning og timer. Det bør vurderes ved deling af tal.']}
+]);
+
+/* BRUGERSTYRING */
+table('Brugerstyring','Konti og roller','Kun synlig for administratorer.',[
+ ['Konti i alt','Antal brugere','Alle dokumenter i User-collection (ingen test-filter).'],
+ ['Aktive','Antal aktive','status = active. I databasen er alle hardcodet "active".'],
+ ['Invitationer åbne','Antal inviterede','status = invited. I databasen altid 0.'],
+ ['Suspenderet','Antal suspenderede','status = suspended. I databasen altid 0.'],
+ ['Administratorer (aktive)','Antal admins','Aktive med isAdmin = true.'],
+ ['Aktive med MFA <span class="pill demo">viser altid 0</span>','Sikkerhedsdækning','Aktive med mfaEnabled / aktive. mfaEnabled er hardcodet false i databasen, så kortet viser 0 (0 %).'],
+ ['Sidst set','Aktivitet','Er User.updatedAt, altså sidste ændring af brugeren, ikke sidste login.']
+],'Kilde: users-utils.js:8-28, users-admin-data.js, user-detail-data.js');
+
+cards('Brugerstyring','Rettigheder og forbehold','',[
+ {h:'Rollemodel',l:['To roller: Admin (isAdmin) og Standard.','Adgangsniveau (intern fuld / ekstern begrænset) gemmes, men håndhæves ikke.','Kun /users og dets API kræver admin. Rollen slås op i databasen ved hvert kald.','Login: Google SSO, kun @searchmind.dk, og brugeren skal allerede findes.']},
+ {h:'Forbehold',cls:'warn',l:['Middleware er en no-op. Beskyttelse sker pr. API-rute (kræver login).','Alle indloggede kan sende NPS og redigere/slette KB.','Uden Google-nøgler får man en dev-session.','"Inviter bruger" er deaktiveret. Invitationer er ikke implementeret.','En admin kan fjerne sin egen admin-rolle. Intet tjek for sidste admin.']}
+]);
+
+/* FINAL */
+cards('Spørgsmål og svar','De svære spørgsmål','Korte svar til Q&A.',[
+ {h:'Hvad er overhead-tid?',on:['Agency Pulse','Tidsregistrering','Belægning'],l:['Andel af registreret tid, der er markeret ikke fakturerbar (billable = false). Udregnes som overhead / (billable + overhead).']},
+ {h:'Er NPS den klassiske NPS?',on:['NPS','Kunder'],l:['Nej. Det er et gennemsnit af scorer (1 til 10 gange 10), ikke promoters minus detraktorer.']},
+ {h:'Er sundhed automatisk?',cls:'warn',on:['Agency Pulse','Kunder','Kontrakter','NPS'],l:['Nej. Client.health er et manuelt felt.']},
+ {h:'Er MRR-ændringen reel?',cls:'warn',on:['Agency Pulse','Kontrakter'],l:['Nej. Forrige MRR er sat til 96 % af nuværende.']},
+ {h:'Hvorfor to timetal for samme kunde?',on:['Kunder','Agency Pulse'],l:['Kundelisten tæller alle timer, kundedetaljen kun billable.']},
+ {h:'Hvad er belægning?',on:['Belægning','Team'],l:['Et pressindeks (28 + 11 pr. åben + 8 pr. høj prio + 6 pr. overskredet + disciplin-tillæg, maks 100). Ikke timer.']},
+ {h:'Kan vi stole på demo-tal?',cls:'bad',on:['all'],l:['Nej. Demo er hardcodet og standard. Brug database-tilstand til rigtige tal.']},
+ {h:'Hvad mangler?',on:['Kunder','Kontrakter','NPS','Brugerstyring'],l:['Ægte historik for retainer, automatisk health, MFA-måling, invitationer, cron-konfiguration og rollehåndhævelse.']}
+]);
+last('all');
+
+/* ---------- Rendering ---------- */
+const deck=document.getElementById('deck');
+const esc=s=>s;
+function el(html){const d=document.createElement('div');d.className='slide';d.innerHTML=html;return d}
+function where(s){
+  let names=s.pages||(PAGES[s.chip]?[s.chip]:null);
+  if(!names)return '';
+  if(names==='all')return '<div class="where">Gælder: <b>alle sider</b> i sidemenuen</div>';
+  const one=names.length===1;
+  return '<div class="where">'+(one?'Findes på siden:':'Findes på siderne:')+' '+names.map(n=>`<a data-page="${n}">${n}</a> <code>${PAGES[n].r}</code>`).join(' &nbsp;·&nbsp; ')+(one?` <span class="menu">· menu: ${PAGES[names[0]].m}</span>`:'')+'</div>';
+}
+function head(s){return (s.chip?`<span class="chip">${s.chip}</span>`:'')+(s.h?`<h2>${s.h}</h2>`:'')+where(s)+(s.sub?`<p class="sub">${s.sub}</p>`:'')}
+function onLine(c){
+  if(!c.on)return '';
+  if(c.on[0]==='all')return '<p class="on">Gælder: alle sider</p>';
+  return '<p class="on">Findes på: '+c.on.map(L).join(', ')+'</p>';
+}
+const titles=[];
+S.forEach(s=>{
+  let d;
+  if(s.t==='title'){
+    d=el(`<div class="center" style="display:flex;flex-direction:column;justify-content:center;height:100%"><span class="chip">${s.chip}</span><h1>${s.h}</h1><p class="sub">${s.sub}</p></div>`);
+    titles.push(s.h);
+  }else if(s.t==='table'){
+    d=el(head(s)+`<table><thead><tr><th>Metric</th><th>Definition</th><th>Beregning</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td class="l">${r[0]}</td><td class="d">${r[1]}</td><td class="c">${r[2]}</td></tr>`).join('')}</tbody></table>${s.src?`<p class="src">${s.src}</p>`:''}`);
+    titles.push(s.chip+': '+(s.h||'Metrics'));
+  }else if(s.t==='cards'){
+    d=el(head(s)+`<div class="grid">${s.cs.map(c=>`<div class="card ${c.cls||''}"><h3>${c.h}</h3>${c.l.length>1?'<ul>'+c.l.map(x=>`<li>${x}</li>`).join('')+'</ul>':`<p>${c.l[0]}</p>`}${onLine(c)}</div>`).join('')}</div>${s.src?`<p class="src">${s.src}</p>`:''}`);
+    titles.push(s.chip+': '+(s.h||''));
+  }else if(s.t==='overhead'){
+    d=el(`<span class="chip">Nøglebegreb</span><h2>Hvad er "overhead-tid"?</h2>${where({pages:['Agency Pulse','Tidsregistrering','Belægning']})}<p class="big">Tid der er registreret, men ikke er fakturerbar.</p>
+    <div class="formula">Overhead-tid % = <b>overhead timer</b> / (<b>billable timer</b> + <b>overhead timer</b>)<br>Overhead = tidsregistrering med <b>billable = false</b></div>
+    <div class="grid"><div class="card"><h3>Hvad tæller som overhead</h3><ul><li>Poster hvor "Fakturerbar" er sat til Intern.</li><li>Standard for en ny post er billable = true.</li><li>Der findes ingen separat overhead-kategori eller internt projekt.</li></ul></div>
+    <div class="card warn"><h3>Vigtigt at vide</h3><ul><li>Nævneren er registreret tid, ikke kapacitet.</li><li>På Pulse indgår kun poster med en kunde.</li><li>Udnyttelse er noget andet: billable timer / kapacitet.</li></ul></div>
+    <div class="card bad"><h3>Mål på 15 %</h3><p>Findes kun som hardcodet tekst i demo-alerten. Der er ingen beregnet tærskel eller alert for overhead i koden.</p></div></div>`);
+    titles.push('Nøglebegreb: Overhead-tid');
+  }else if(s.t==='loadindex'){
+    d=el(`<span class="chip">Belægning</span><h2>Belægningsindex (load index)</h2>${where({pages:['Belægning','Team']})}<p class="sub">Pr. medlem, bruges på Belægning og Team. Det er et pressindeks, ikke timer.</p>
+    <div class="two"><div><div class="formula">index = min(100, round(<br>&nbsp;&nbsp;<b>28</b> + åbne x <b>11</b> + høj prio x <b>8</b> + overskredne x <b>6</b> + tillæg))<br><br>tillæg = <b>18</b> hvis afdelingens perf. util. over 1,02<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>8</b> hvis over 0,95, ellers <b>0</b></div>
+    <div class="card"><h3>Tolkning</h3><ul><li>Mindst 28, selv uden opgaver.</li><li>Bruger ikke weeklyHours, estimater eller loggede timer.</li><li>Høj: 82 og op (Team og Belægning). Medlemsside: rød fra 82, gul fra 65.</li></ul></div></div>
+    <div><div class="chartbox"><canvas id="liChart"></canvas></div><p class="src">Illustration udregnet med formlen og tillæg 0. Scenarier: 0 åbne, 2 åbne, 3 åbne med 1 høj prio, 4 åbne med 1 høj prio og 1 overskredet.</p></div></div>`);
+    titles.push('Belægning: Belægningsindex');
+  }else if(s.t==='nps'){
+    d=el(`<span class="chip">NPS</span><h2>Hvordan beregnes NPS her?</h2>${where({chip:'NPS'})}<p class="sub">Det er ikke klassisk NPS (procent promoters minus procent detraktorer).</p>
+    <div class="formula">Svar fra kunden: <b>1 til 10</b><br>Visningsscore = <b>svar x 10</b> (0 til 100)<br>Bureau NPS = <b>gennemsnit af hver kontos seneste score</b></div>
+    <div class="grid"><div class="card"><h3>Eksempel</h3><p>Svar 8 giver 80. Tre konti med seneste score 80, 60 og 40 giver Bureau NPS 60,0.</p></div>
+    <div class="card warn"><h3>To tærskelsæt</h3><p>Farve på score: grøn fra 50, gul fra 40, rød under 40. Fordeling: promoter fra 60, passiv 40 til 59, detraktor under 40.</p></div>
+    <div class="card"><h3>Én måling pr. konto</h3><p>Det er kontoens seneste svar der tæller. Ældre svar bruges til trend og delta.</p></div></div>`);
+    titles.push('NPS: Formel og skala');
+  }
+  deck.appendChild(d);
+});
+
+const slides=[...document.querySelectorAll('.slide')];
+const tot=slides.length;
+document.getElementById('tot').textContent=tot;
+const jump=document.getElementById('jump');
+titles.forEach((t,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+t.replace(/<[^>]+>/g,'');jump.appendChild(o)});
+jump.addEventListener('change',()=>go(+jump.value));
+let cur=0, chartDone=false;
+var go=function(n){
+  if(n<0)n=0; if(n>=tot)n=tot-1; cur=n;
+  slides.forEach((s,i)=>{s.classList.toggle('active',i===n); if(i===n)s.scrollTop=0});
+  document.getElementById('cur').textContent=n+1;
+  document.getElementById('progress').style.width=((n+1)/tot*100)+'%';
+  jump.value=n;
+  if(!chartDone && document.getElementById('liChart') && slides[n].contains(document.getElementById('liChart'))){initChart()}
+}
+function initChart(){
+  if(typeof Chart==='undefined')return;
+  chartDone=true;
+  const mk=(o,h,u)=>Math.min(100,28+o*11+h*8+u*6);
+  new Chart(document.getElementById('liChart'),{type:'bar',data:{labels:['0 åbne','2 åbne','3 åbne, 1 HP','4 åbne, 1 HP, 1 overskr.'],datasets:[{data:[mk(0,0,0),mk(2,0,0),mk(3,1,0),mk(4,1,1)],backgroundColor:['#4ade80','#4ade80','#fbbf24','#f87171'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,.06)'},ticks:{color:'#9aa2b8'}},x:{grid:{display:false},ticks:{color:'#9aa2b8'}}}}});
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(cur+1)}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1)}
+});
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>70)go(cur+(dx<0?1:-1));tx=null});
+
+/* ---------- Links til sider ---------- */
+const firstIdx={};
+S.forEach((x,i)=>{ if(x.chip && PAGES[x.chip] && firstIdx[x.chip]===undefined && !x.pages) firstIdx[x.chip]=i; });
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-page]');
+  if(a){e.preventDefault();const i=firstIdx[a.dataset.page];if(i!==undefined)go(i);}
+});
+
+/* ---------- Søgning ---------- */
+const q=document.getElementById('q'), resBox=document.getElementById('results');
+const norm=t=>t.toLowerCase();
+const index=slides.map((sl,i)=>({i,text:sl.textContent.replace(/\s+/g,' ').trim()}));
+let curQ='', hits=[], sel=-1;
+function clearMarks(root){
+  root.querySelectorAll('mark').forEach(m=>{const p=m.parentNode;p.replaceChild(document.createTextNode(m.textContent),m);p.normalize()});
+}
+function markAll(root,term){
+  if(!term)return null;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentNode.closest('script,style,mark')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[];let n;while(n=w.nextNode())nodes.push(n);
+  const lt=term.toLowerCase();let first=null;
+  nodes.forEach(node=>{
+    const t=node.nodeValue,lo=t.toLowerCase();let pos=lo.indexOf(lt);
+    if(pos<0)return;
+    const frag=document.createDocumentFragment();let last=0;
+    while(pos>=0){
+      frag.appendChild(document.createTextNode(t.slice(last,pos)));
+      const m=document.createElement('mark');m.textContent=t.slice(pos,pos+lt.length);frag.appendChild(m);
+      if(!first)first=m;last=pos+lt.length;pos=lo.indexOf(lt,last);
+    }
+    frag.appendChild(document.createTextNode(t.slice(last)));
+    node.parentNode.replaceChild(frag,node);
+  });
+  return first;
+}
+function snippet(text,term){
+  const lo=text.toLowerCase(),p=lo.indexOf(term.toLowerCase());
+  const a=Math.max(0,p-45),b=Math.min(text.length,p+term.length+75);
+  const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  return (a>0?'...':'')+esc(text.slice(a,p))+'<mark>'+esc(text.slice(p,p+term.length))+'</mark>'+esc(text.slice(p+term.length,b))+(b<text.length?'...':'');
+}
+function runSearch(){
+  const term=q.value.trim();
+  curQ=term;
+  slides.forEach(clearMarks);
+  if(term.length<2){resBox.classList.remove('open');resBox.innerHTML='';hits=[];return}
+  const lt=term.toLowerCase();
+  hits=index.filter(x=>x.text.toLowerCase().includes(lt));
+  sel=-1;
+  resBox.innerHTML=hits.length
+    ? `<div class="rhead">${hits.length} side${hits.length===1?'':'r'} i rapporten matcher</div>`+hits.map((h,k)=>{
+        const cnt=h.text.toLowerCase().split(lt).length-1;
+        return `<div class="res" data-k="${k}"><b>${(h.i+1)}. ${titles[h.i].replace(/</g,'&lt;')}<em>${cnt} træf</em></b><span>${snippet(h.text,term)}</span></div>`}).join('')
+    : `<div class="nores">Ingen resultater for "${term.replace(/</g,'&lt;')}"</div>`;
+  resBox.classList.add('open');
+}
+function openHit(k){
+  const h=hits[k];if(!h)return;
+  go(h.i);
+}
+const baseGo=go;
+go=function(n){
+  baseGo(n);
+  slides.forEach(clearMarks);
+  if(curQ.length>=2){const m=markAll(slides[cur],curQ);if(m)m.scrollIntoView({block:'center',behavior:'smooth'})}
+};
+q.addEventListener('input',runSearch);
+q.addEventListener('focus',()=>{if(hits.length||curQ)resBox.classList.add('open')});
+resBox.addEventListener('mousedown',e=>{
+  const r=e.target.closest('.res');if(!r)return;
+  e.preventDefault();openHit(+r.dataset.k);resBox.classList.remove('open');
+});
+q.addEventListener('keydown',e=>{
+  const items=[...resBox.querySelectorAll('.res')];
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();if(!items.length)return;
+    sel=(sel+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;
+    items.forEach((x,i)=>x.classList.toggle('sel',i===sel));items[sel].scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'){
+    e.preventDefault();openHit(sel>=0?sel:0);resBox.classList.remove('open');q.blur();
+  }else if(e.key==='Escape'){
+    q.value='';runSearch();q.blur();
+  }
+  e.stopPropagation();
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))resBox.classList.remove('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target===q)return;
+  if(e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')){e.preventDefault();q.focus();q.select()}
+});
+
+go(0);
+</script>
+</body>
+</html>

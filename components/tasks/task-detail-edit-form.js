@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import { clientEditInputClass } from "@/components/clients/client-detail-edit-actions";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { cn } from "@/lib/utils";
@@ -67,11 +68,7 @@ export function TaskDetailEditForm({
                 onChange={(e) => setField("clientSlug", e.target.value)}
                 className={clientEditInputClass}
               >
-                {clientsPicklist.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
+                <ClientPicklistOptions items={clientsPicklist} />
               </select>
             </Field>
           }

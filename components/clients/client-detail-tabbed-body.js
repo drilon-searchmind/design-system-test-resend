@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientDetailBrandsPanel } from "@/components/clients/client-detail-brands-panel";
 import { ClientDetailKundeinfoPanel } from "@/components/clients/client-detail-kundeinfo-panel";
 import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
 import { ClientDetailCommercialCard } from "@/components/clients/client-detail-commercial-card";
@@ -17,6 +18,7 @@ import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-contro
 
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
   "overblik",
+  "brands",
   "kundeinfo",
   "okonomi",
   "kvalitet",
@@ -29,6 +31,9 @@ export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "okonomi", label: "Økonomi & aftale" },
   { id: "kvalitet", label: "Kvalitet & risiko" },
 ];
+
+/** Kun for koncerner — indsættes efter "Overblik". */
+const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
 
 /**
  * @param {{
@@ -72,6 +77,8 @@ export const CLIENT_DETAIL_TAB_DEFS = [
  *   infoMd?: string;
  *   canEditKundeinfo?: boolean;
  *   onKundeinfoSaved?: (infoMd: string) => void;
+ *   kundeinfoSaveUrl?: string;
+ *   onUngroupBrand?: (brandSlug: string) => Promise<void>;
  * }} props
  */
 export function ClientDetailTabbedBody({
@@ -90,11 +97,28 @@ export function ClientDetailTabbedBody({
   infoMd = "",
   canEditKundeinfo = false,
   onKundeinfoSaved,
+  kundeinfoSaveUrl,
+  onUngroupBrand,
 }) {
+  const isGroup = Boolean(client.isGroup);
+  const tabDefs = isGroup ?
+      [CLIENT_DETAIL_TAB_DEFS[0], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(1)]
+    : CLIENT_DETAIL_TAB_DEFS;
+  // Alerts ligger pr. brand — vis dem under koncernens id.
+  const visibleAlerts =
+    isGroup ?
+      (() => {
+        const brandIds = new Set((client.brands ?? []).map((b) => b.id));
+        return alerts
+          .filter((a) => a.client && brandIds.has(a.client))
+          .map((a) => ({ ...a, client: client.id }));
+      })()
+    : alerts;
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
   /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */
   const resolvedTab =
-    CLIENT_DETAIL_TAB_IDS.includes(/** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)) ?
+    CLIENT_DETAIL_TAB_IDS.includes(/** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)) &&
+    (tab !== "brands" || isGroup) ?
       /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)
     : "overblik";
 
@@ -109,7 +133,7 @@ export function ClientDetailTabbedBody({
             size="sm"
             active={resolvedTab}
             onChange={onTabChange}
-            tabs={CLIENT_DETAIL_TAB_DEFS}
+            tabs={tabDefs}
             className="max-w-full"
           />
         </nav>
@@ -138,6 +162,21 @@ export function ClientDetailTabbedBody({
           </section>
         ) : null}
 
+        {resolvedTab === "brands" && isGroup ? (
+          <section aria-labelledby="client-tab-brands" className={stack}>
+            <h2 id="client-tab-brands" className="sr-only">
+              Brands
+            </h2>
+            <ClientDetailBrandsPanel
+              brands={client.brands ?? []}
+              groupName={client.name}
+              currency={client.currency}
+              totalRetainer={client.retainer}
+              onUngroup={onUngroupBrand}
+            />
+          </section>
+        ) : null}
+
         {resolvedTab === "kundeinfo" ? (
           <section aria-labelledby="client-tab-kundeinfo" className={stack}>
             <h2 id="client-tab-kundeinfo" className="sr-only">
@@ -149,6 +188,7 @@ export function ClientDetailTabbedBody({
               infoMd={infoMd}
               canEdit={canEditKundeinfo}
               onSaved={onKundeinfoSaved}
+              saveUrl={kundeinfoSaveUrl}
             />
           </section>
         ) : null}
@@ -176,7 +216,7 @@ export function ClientDetailTabbedBody({
               <ClientDetailNpsCard client={client} />
               <ClientDetailInsightsCard client={client} />
             </div>
-            <ClientDetailAlertsCard clientId={client.id} alerts={alerts} />
+            <ClientDetailAlertsCard clientId={client.id} alerts={visibleAlerts} />
           </section>
         ) : null}
       </div>

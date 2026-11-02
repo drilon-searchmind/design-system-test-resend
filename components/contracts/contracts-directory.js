@@ -87,7 +87,12 @@ export function ContractsDirectory({
     });
 
     list.sort((a, b) => {
-      if (sort === "name") return a.clientName.localeCompare(b.clientName, "da");
+      if (sort === "name") {
+        return (
+          (a.groupName ?? a.clientName).localeCompare(b.groupName ?? b.clientName, "da") ||
+          a.clientName.localeCompare(b.clientName, "da")
+        );
+      }
       if (sort === "value") return b.monthlyValue - a.monthlyValue;
       if (sort === "renewal") return a.renewalAt.localeCompare(b.renewalAt);
       return 0;
@@ -235,6 +240,7 @@ export function ContractsDirectory({
                         {row.clientName}
                       </div>
                       <div className="truncate text-[11px] text-fg-quiet">
+                        {row.groupName ? <span className="font-medium text-agency-brand">Koncern · {row.groupName} · </span> : null}
                         {row.kind}
                         {row.documentUrl ? (
                           <>

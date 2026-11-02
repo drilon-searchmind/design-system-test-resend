@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ClientsCreateForm } from "@/components/clients/clients-create-form";
 import { ClientsDirectory } from "@/components/clients/clients-directory";
+import { ClientsGroupForm } from "@/components/clients/clients-group-form";
 import { ClientsPageHeader } from "@/components/clients/clients-page-header";
 import { ClientsSummaryStrip } from "@/components/clients/clients-summary-strip";
 import { CrmDialog } from "@/components/crm/crm-dialog";
@@ -26,7 +27,15 @@ export function ClientsPortfolio() {
   const [createFormKey, setCreateFormKey] = useState(0);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState(/** @type {string | null} */ (null));
+  const [showGroup, setShowGroup] = useState(false);
+  const [groupSubmitting, setGroupSubmitting] = useState(false);
+  const [groupError, setGroupError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
+
+  const closeGroupModal = useCallback(() => {
+    setShowGroup(false);
+    setGroupError(null);
+  }, []);
 
   const openCreateModal = useCallback(() => {
     setCreateFormKey((n) => n + 1);
@@ -104,6 +113,32 @@ export function ClientsPortfolio() {
     [closeCreateModal, dataSource, load, router],
   );
 
+  const handleGroupSubmit = useCallback(
+    async (body) => {
+      if (dataSource !== "database") return;
+      setGroupSubmitting(true);
+      setGroupError(null);
+      try {
+        const qs = databaseApiQuery();
+        const res = await fetch(`/api/clients/koncern?${qs}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gruppere");
+        closeGroupModal();
+        await load();
+        if (typeof data?.href === "string" && data.href) router.push(data.href);
+      } catch (e) {
+        setGroupError(e instanceof Error ? e.message : "Fejl");
+      } finally {
+        setGroupSubmitting(false);
+      }
+    },
+    [closeGroupModal, dataSource, load, router],
+  );
+
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -145,6 +180,7 @@ export function ClientsPortfolio() {
         refreshing={refreshing}
         clients={bundle.clients}
         onOpenCreate={openCreateModal}
+        onOpenGroup={() => setShowGroup(true)}
         createModalOpen={showCreate}
         dataSource={dataSource}
       />
@@ -183,6 +219,44 @@ export function ClientsPortfolio() {
               onCancel={closeCreateModal}
               variant="modal"
             />
+          </div>
+        </div>
+      </CrmDialog>
+
+      <CrmDialog
+        open={showGroup && dataSource === "database"}
+        onClose={closeGroupModal}
+        ariaLabel="Gruppér kunder"
+        maxWidthClass="w-[min(100vw-1.5rem,600px)]"
+      >
+        <div className="flex max-h-[min(92vh,820px)] flex-col">
+          <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Koncern</p>
+              <h2 className="font-sans text-[17px] font-semibold leading-snug text-fg md:text-[18px]">
+                Gruppér kunder
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={closeGroupModal}
+              disabled={groupSubmitting}
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-lg leading-none text-fg-muted hover:border-agency-brand-border hover:text-fg disabled:opacity-40"
+              aria-label="Luk"
+            >
+              ×
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-4 md:px-6">
+            {showGroup ?
+              <ClientsGroupForm
+                clients={bundle.clients}
+                submitting={groupSubmitting}
+                error={groupError}
+                onSubmit={handleGroupSubmit}
+                onCancel={closeGroupModal}
+              />
+            : null}
           </div>
         </div>
       </CrmDialog>

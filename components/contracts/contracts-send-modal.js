@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
  *   open: boolean;
  *   onClose: () => void;
  *   onSent: () => void;
- *   clients: Array<{ id: string; mongoId: string; name: string; status: string }>;
+ *   clients: Array<{ id: string; mongoId: string; name: string; status: string; groupName?: string }>;
  * }} props
  */
 export function ContractsSendModal({ open, onClose, onSent, clients }) {
@@ -132,11 +133,9 @@ export function ContractsSendModal({ open, onClose, onSent, clients }) {
               className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-[13px] text-fg"
             >
               <option value="">Vælg kunde…</option>
-              {clients.map((c) => (
-                <option key={c.mongoId} value={c.mongoId}>
-                  {c.name}
-                </option>
-              ))}
+              <ClientPicklistOptions
+                items={clients.map((c) => ({ value: c.mongoId, label: c.name, group: c.groupName }))}
+              />
             </select>
           </label>
           <label className="block font-sans text-[12px] font-medium text-fg-muted">

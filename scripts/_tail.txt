@@ -1,0 +1,46 @@
+/**
+ * Opret/udvid en koncern ved at give valgte kunder samme CVR.
+ * @param {boolean} includeTest
+ * @param {Record<string, unknown>} body `{ cvr, name, memberSlugs: string[] }`
+ */
+export async function createClientGroupMongo(includeTest, body) {
+  const cvr = normalizeCvr(body.cvr);
+  if (!cvr) return { error: "CVR skal være 8 cifre (og ikke ens cifre)", status: 400 };
+
+  const name = String(body.name ?? "").trim();
+  if (!name) return { error: "Koncernnavn er påkrævet", status: 400 };
+
+  const slugs = Array.isArray(body.memberSlugs) ?
+      [...new Set(body.memberSlugs.map((s) => String(s).trim()).filter(Boolean))]
+    : [];
+  if (slugs.length < 2) return { error: "Vælg mindst to kunder at gruppere", status: 400 };
+
+  await connectDb();
+  const scope = /** @type {Record<string, unknown>} */ (
+    buildIsTestQuery(includeTest ? "all" : "production")
+  );
+
+  const docs = await Client.find(andQuery({ slug: { $in: slugs } }, scope))
+    .select("_id slug")
+    .lean();
+  if (docs.length !== slugs.length) {
+    return { error: "Én eller flere valgte kunder findes ikke", status: 404 };
+  }
+
+  await Client.updateMany({ _id: { $in: docs.map((d) => d._id) } }, { $set: { cvr } });
+  await ClientGroup.updateOne(
+    { cvr },
+    { $set: { name, ...testFlag(scope) } },
+    { upsert: true },
+  );
+
+  const members = await resolveGroupMemberDocs(cvr, scope);
+  return {
+    ok: /** @type {const} */ (true),
+    cvr,
+    name,
+    memberCount: members.length,
+    href: clientGroupHref(cvr),
+  };
+}
+

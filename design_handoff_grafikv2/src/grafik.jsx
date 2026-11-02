@@ -1,5 +1,5 @@
 // grafik.jsx — animated one-pager: how all CRM data + Apex performance data flow into the
-// Searchmind MCP server, powering 2-way chat in Slack & Claude. Scripted SVG particle flow + CSS.
+// Searchmind MCP server, powering chat in Slack & Claude. READ: all CRM endpoints; CUD: whitelisted only.
 
 // ---- Brand marks for the chat destinations ----
 const SlackMark = ({ size = 26 }) => (
@@ -64,13 +64,50 @@ const SLACK_BLUE = '#36C5F0';
 const CLAUDE_CLAY = '#D97757';
 const APEX_C = 'oklch(62% 0.16 200)';
 const WRITE_C = 'oklch(60% 0.15 150)';   // green "write-back" channel
+/** Bottom horizontal segment of the Slack/Claude → CRM write-back ring (1240×880 space). */
+const W = 1240;
+const H = 880;
+const WRITE_BACK_LINE_Y = 834;
+const API_CALLOUT_W = 520;
+const API_CALLOUT_H = 54;
+
+function WriteBackApiCallout() {
+  const box = {
+    boxSizing: 'border-box',
+    height: '100%',
+    padding: '7px 12px',
+    borderRadius: 12,
+    textAlign: 'center',
+    background: `color-mix(in oklch, ${WRITE_C} 12%, var(--bg-elev))`,
+    border: `1.5px solid color-mix(in oklch, ${WRITE_C} 42%, var(--border))`,
+    boxShadow: 'var(--sh-md)',
+    fontSize: 11.5,
+    lineHeight: 1.4,
+    color: 'var(--text-muted)',
+  };
+  return (
+    <foreignObject
+      x={W / 2 - API_CALLOUT_W / 2}
+      y={WRITE_BACK_LINE_Y - API_CALLOUT_H / 2}
+      width={API_CALLOUT_W}
+      height={API_CALLOUT_H}
+      style={{ overflow: 'visible', pointerEvents: 'none' }}
+    >
+      <div xmlns="http://www.w3.org/1999/xhtml" style={box}>
+        <span style={{ fontWeight: 600, color: 'var(--text)', zIndex: '99999' }}>CRM API via MCP · 1</span>
+        <span className="mono" style={{ fontSize: 10.5, color: WRITE_C, fontWeight: 600 }}>GET/read · alle endpoints</span>
+        {' · '}
+        <span className="mono" style={{ fontSize: 10.5, color: WRITE_C, fontWeight: 600 }}>POST/PATCH/DELETE · whitelist</span>
+        {' — Opgaver, Tidsregistrering. Alt andet er read-only fra chat.'}
+      </div>
+    </foreignObject>
+  );
+}
 
 function GrafikScreen() {
   const wrapRef = React.useRef(null);
   const dotsRef = React.useRef(null);
   const [scale, setScale] = React.useState(1);
-
-  const W = 1240, H = 880;
 
   // ---- geometry ----
   const srcCY = (i) => 169 + i * 70;          // source-node centers (inside CRM enclosure)
@@ -89,8 +126,8 @@ function GrafikScreen() {
   // Slack / Claude -> Employees
   flows.push({ d: 'M1005 396 C 1005 545, 1005 565, 1005 620', color: SLACK_BLUE });
   flows.push({ d: 'M1075 551 C 1075 585, 1075 600, 1075 620', color: CLAUDE_CLAY });
-  // 2-way WRITE-BACK: Slack & Claude route ALL the way around the outside (no crossings) back into CRM.
-  // Slack -> Opgaver (outer ring), Claude -> Tidsregistrering (inner ring).
+  // Whitelisted CUD (CREATE/UPDATE/DELETE only): chat → MCP → CRM on allowed endpoints.
+  // Slack → Opgaver (outer ring), Claude → Tidsregistrering (inner ring). All other CRM data is read-only via GET.
   flows.push({ d: 'M1165 348 C1200 348 1210 360 1210 392 L1210 800 C1210 824 1196 834 1170 834 L42 834 C18 834 6 822 6 798 L6 474 C6 457 16 449 32 449', color: WRITE_C, write: true });
   flows.push({ d: 'M1165 503 C1188 503 1196 514 1196 538 L1196 788 C1196 810 1184 820 1162 820 L44 820 C22 820 12 810 12 788 L12 404 C12 389 20 379 32 379', color: WRITE_C, write: true });
 
@@ -173,8 +210,9 @@ function GrafikScreen() {
       </h1>
       <p style={{ margin: '0 0 22px', color: 'var(--text-muted)', fontSize: 13.5, maxWidth: '80ch' }}>
         Alt CRM-data fra Searchmind Agency OS — plus performance-data fra Apex MCP — samles i én
-        Searchmind MCP-server. Når den er bygget, kan medarbejderne chatte med dataene i Slack og Claude,
-        og <b>skrive tilbage</b>: fx oprette en opgave eller en tidsregistrering direkte fra chatten.
+        Searchmind MCP-server. Fra Slack og Claude kan medarbejderne <b>læse alle CRM-endpoints</b>{' '}
+        (GET/read). <b>Opret, opdater og slet</b> (CREATE/UPDATE/DELETE) er kun tilladt på whitelistede
+        endpoints — i dag <b>Opgaver</b> og <b>Tidsregistrering</b> (grøn returkanal i diagrammet).
       </p>
 
       <div ref={wrapRef} style={{ width: '100%', height: H * scale, position: 'relative' }}>
@@ -215,6 +253,7 @@ function GrafikScreen() {
                 stroke={c.color} data-color={c.color} data-write={c.write ? '1' : '0'}
                 opacity={c.write ? 0.85 : 0.7} strokeDasharray={c.write ? '2 8' : '3 7'} />
             ))}
+            <WriteBackApiCallout />
             <g ref={dotsRef}></g>
           </svg>
 
@@ -251,7 +290,7 @@ function GrafikScreen() {
                     <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-faint)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.sub}</div>
                   </div>
                   {s.write && (
-                    <span title="Kan oprettes fra chat" style={{ marginLeft: 'auto', flexShrink: 0, color: WRITE_C, display: 'inline-flex' }}>
+                    <span title="Whitelisted CUD fra chat (opret/opdater/slet)" style={{ marginLeft: 'auto', flexShrink: 0, color: WRITE_C, display: 'inline-flex' }}>
                       <Icons.Edit size={13} />
                     </span>
                   )}
@@ -303,7 +342,7 @@ function GrafikScreen() {
               <div className="mono" style={{ fontSize: 10.5, color: 'var(--text-faint)', marginTop: 2 }}>Model Context Protocol</div>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, justifyContent: 'center', marginTop: 14 }}>
-                {['Tools', 'Ressourcer', 'Prompts', 'Auth · RBAC'].map((t) => (
+                {['Read · alle', 'CUD · whitelist', 'Tools', 'Auth · RBAC'].map((t) => (
                   <span key={t} style={{
                     fontSize: 10.5, fontWeight: 500, padding: '2px 8px', borderRadius: 999,
                     background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text-muted)',
@@ -375,8 +414,8 @@ function GrafikScreen() {
         {[
           { n: '1', t: 'CRM-data', d: 'Kunder, kontrakter, tid, opgaver, NPS, økonomi og viden — alt samlet i ét CRM (Searchmind Agency OS).' },
           { n: '2', t: 'Apex MCP', d: 'Al performance-data flyder fra Apex MCP direkte ind i Searchmind MCP.' },
-          { n: '3', t: 'Searchmind MCP', d: 'Samler CRM + performance som tools og ressourcer med RBAC. Under opbygning.' },
-          { n: '4', t: '2-vejs i chat', d: 'Medarbejderne spørger i Slack og Claude — og skriver tilbage, fx opret opgave eller tidsregistrering.' },
+          { n: '3', t: 'Searchmind MCP', d: 'Eksponerer CRM + performance som MCP-tools. Read (GET) på alle endpoints; mutating kald kun på whitelist med RBAC. Under opbygning.' },
+          { n: '4', t: '2-vejs i chat', d: 'Slack og Claude kan læse alt i CRM. Opret/opdater/slet er begrænset til whitelistede endpoints — pt. opgaver og tidsregistrering.' },
         ].map((s) => (
           <div key={s.n} className="card card-pad" style={{ padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>

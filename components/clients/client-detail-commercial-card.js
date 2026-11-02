@@ -105,8 +105,8 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-fg-soft">Kundenøgle</dt>
-            <dd className="mt-1 text-[13px] text-fg-muted">{client.id}</dd>
+            <dt className="text-fg-soft">{client.isGroup ? "Koncern (CVR)" : "Kundenøgle"}</dt>
+            <dd className="mt-1 text-[13px] text-fg-muted">{client.isGroup ? (client.cvrs?.join(", ") || "Manuel koncern") : client.id}</dd>
             {contract ? (
               <dd className="mt-2 text-[11px] text-fg-soft">
                 Kontrakt <span className="tabular-nums text-fg-muted">{contract.id}</span> · Opsigelse{" "}
@@ -156,7 +156,9 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-surface-muted/20 px-4 py-5 text-[13px] text-fg-muted">
-            Ingen matchet kontraktræk for denne kunde.
+            {client.isGroup ?
+              "Aftaler og kontrakter administreres pr. brand — åbn et brand for at se dets aftale. MRR og fornyelse her er samlet for koncernen."
+            : "Ingen matchet kontraktræk for denne kunde."}
           </div>
         )}
       </div>

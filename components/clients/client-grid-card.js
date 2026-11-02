@@ -5,7 +5,7 @@ import { HealthChip } from "@/components/crm/health-chip";
 import { StatusChip } from "@/components/crm/status-chip";
 import { PulseAllocationBar } from "@/components/pulse/pulse-allocation-bar";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
-import { routes } from "@/config/routes";
+import { customerHref } from "@/lib/crm/client-groups";
 import { formatCurrencyCompact, formatHoursBudgetPairDa, formatHoursCompactDa, formatPercent } from "@/lib/crm/format-da";
 import { TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
 
   return (
     <Link
-      href={`${routes.clients}/${client.id}`}
+      href={customerHref(client)}
       className={cn(
         "tally-panel flex flex-col p-3.5 transition-all",
         "hover:border-agency-brand-border md:p-4",
@@ -36,7 +36,9 @@ export function ClientGridCard({ client, variant = "pulse" }) {
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{client.name}</div>
-          <div className="truncate font-sans text-[11px] text-fg-quiet">{client.industry}</div>
+          <div className="truncate font-sans text-[11px] text-fg-quiet">
+            {client.isGroup ? `Koncern · ${client.groupSize} brands` : client.industry}
+          </div>
         </div>
         <HealthChip health={client.health} palette="agency" compact={variant === "full"} />
       </div>

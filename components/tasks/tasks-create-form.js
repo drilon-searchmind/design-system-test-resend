@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientPicklistOptions } from "@/components/crm/client-picklist-options";
 import { useCallback, useRef, useState } from "react";
 
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
@@ -211,11 +212,7 @@ export function TasksCreateForm({
                 "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
               )}
             >
-              {clientsPicklist.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
+              <ClientPicklistOptions items={clientsPicklist} />
             </select>
           </label>
         : (

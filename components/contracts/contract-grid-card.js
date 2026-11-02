@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
  *   accountStatus: 'active' | 'paused' | 'inactive' | 'pending_signature';
  *   health: 'ok' | 'warn' | 'bad';
  *   noticeDays: number;
+ *   groupName?: string;
  * }; renewalReferenceIso?: string }} props
  */
 export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_DATE }) {
@@ -46,7 +47,10 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{row.clientName}</div>
-          <div className="truncate text-[11px] text-fg-quiet">{row.kind}</div>
+          <div className="truncate text-[11px] text-fg-quiet">
+            {row.groupName ? <span className="font-medium text-agency-brand">Koncern · {row.groupName} · </span> : null}
+            {row.kind}
+          </div>
         </div>
         <HealthChip health={row.health} palette="agency" compact />
       </div>
