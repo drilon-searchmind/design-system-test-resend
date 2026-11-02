@@ -87,7 +87,7 @@ export function CrmShell({ children }) {
 
   return (
     <TimerModalProvider>
-      <div data-surface="marketing-tally" className="crm-agency-shell flex min-h-0 flex-1">
+      <div data-surface="marketing-tally" className="crm-agency-shell flex h-dvh max-h-dvh min-h-0 flex-none overflow-hidden">
         <CrmAgencyGridSpotlight scrollRef={mainScrollRef} />
         <CrmSidebar
           className="hidden md:flex"
