@@ -45,6 +45,16 @@ export function CrmNotificationBody({ item }) {
     );
   }
 
+  if (item.type === "contract_signed") {
+    return (
+      <p className="font-sans text-[11px] leading-snug text-fg-muted">
+        <span className="font-semibold text-fg">{actorName || "Kunden"}</span> accepterede{" "}
+        <span className="font-semibold text-fg">{contextTitle || "kontrakten"}</span>
+        {item.body.includes("oprettet som kunde") ? " — kunden er nu oprettet." : "."}
+      </p>
+    );
+  }
+
   if (item.type === "task_assigned") {
     return (
       <p className="font-sans text-[11px] leading-snug text-fg-muted">

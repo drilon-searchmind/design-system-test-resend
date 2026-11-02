@@ -130,6 +130,10 @@ export function ContractsPortfolio() {
           void load();
         }}
         clients={Array.isArray(bundle.clients) ? bundle.clients : []}
+        departments={
+          "departments" in bundle && Array.isArray(bundle.departments) ? bundle.departments : []
+        }
+        team={Array.isArray(bundle.team) ? bundle.team : []}
       />
     </div>
   );

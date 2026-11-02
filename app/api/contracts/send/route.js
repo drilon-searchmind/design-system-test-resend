@@ -38,6 +38,11 @@ export async function POST(req) {
     const result = await createAndSendContractForSignature({
       clientId: typeof body?.clientId === "string" ? body.clientId : undefined,
       clientSlug: typeof body?.clientSlug === "string" ? body.clientSlug : undefined,
+      newClient:
+        body?.newClient && typeof body.newClient === "object" && !Array.isArray(body.newClient) ?
+          body.newClient
+        : undefined,
+      servicesActive: Array.isArray(body?.servicesActive) ? body.servicesActive : undefined,
       templateKey: typeof body?.templateKey === "string" ? body.templateKey : undefined,
       templateId: typeof body?.templateId === "string" ? body.templateId : undefined,
       label: typeof body?.label === "string" ? body.label : undefined,

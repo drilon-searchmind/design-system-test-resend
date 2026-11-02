@@ -21,6 +21,27 @@ export function ContractDetailLinkedClientCard({
   contract,
   renewalReferenceIso = CONTRACT_DEMO_REF_DATE,
 }) {
+  if (/** @type {{ prospect?: boolean }} */ (client).prospect) {
+    return (
+      <div className="tally-panel p-4 md:p-5">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          Ny kunde
+        </h2>
+        <p className="mt-3 font-sans text-[16px] font-semibold text-fg">{client.name}</p>
+        {client.industry ? (
+          <p className="font-sans text-[12px] text-fg-muted">{client.industry}</p>
+        ) : null}
+        <p className="mt-3 rounded-lg border border-agency-warn-border bg-agency-warn-soft px-3 py-2 font-sans text-[12px] leading-relaxed text-agency-warn">
+          {client.name} er ikke kunde endnu. Kunden oprettes automatisk, når kontrakten
+          underskrives, og alle brugere får besked.
+        </p>
+        {client.cvr ? (
+          <p className="mt-3 font-sans text-[11px] text-fg-muted">CVR {client.cvr}</p>
+        ) : null}
+      </div>
+    );
+  }
+
   const owner = TEAM.find((t) => t.id === client.owner);
   const util = client.hoursBudget > 0 ? client.hoursThisMonth / client.hoursBudget : 0;
 
