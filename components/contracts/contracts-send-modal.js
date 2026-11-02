@@ -295,7 +295,7 @@ export function ContractsSendModal({ open, onClose, onSent, clients, departments
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className={INPUT_CLASS}
-                      placeholder="Fx Drilon ApS"
+                      placeholder="Fx Eksempel ApS"
                     />
                   </label>
                   <label className={LABEL_CLASS}>
@@ -304,7 +304,7 @@ export function ContractsSendModal({ open, onClose, onSent, clients, departments
                       value={domain}
                       onChange={(e) => setDomain(e.target.value)}
                       className={INPUT_CLASS}
-                      placeholder="drilon.dk"
+                      placeholder="eksempel.dk"
                     />
                   </label>
                   <label className={LABEL_CLASS}>
