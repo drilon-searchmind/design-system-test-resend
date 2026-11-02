@@ -7,9 +7,10 @@ const PARALLAX_RATE = 0.14;
 
 /**
  * Fixed grid spotlight with slow scroll parallax on the agency workspace canvas.
- * @param {{ scrollRef: import('react').RefObject<HTMLElement | null> }} props
+ * `variant="none"` (default) renders nothing; `variant="dots"` draws a dot at each grid intersection; `variant="lines"` is the original grid lines.
+ * @param {{ scrollRef: import('react').RefObject<HTMLElement | null>; variant?: "dots" | "lines" | "none" }} props
  */
-export function CrmAgencyGridSpotlight({ scrollRef }) {
+export function CrmAgencyGridSpotlight({ scrollRef, variant = "none" }) {
   const gridRef = useRef(/** @type {HTMLDivElement | null} */ (null));
 
   useEffect(() => {
@@ -34,5 +35,13 @@ export function CrmAgencyGridSpotlight({ scrollRef }) {
     };
   }, [scrollRef]);
 
-  return <div ref={gridRef} className="crm-agency-grid-spotlight" aria-hidden />;
+  if (variant === "none") return null;
+
+  return (
+    <div
+      ref={gridRef}
+      className={`crm-agency-grid-spotlight${variant === "dots" ? " crm-agency-grid-spotlight--dots" : ""}`}
+      aria-hidden
+    />
+  );
 }

@@ -692,6 +692,20 @@ html[data-density="spacious"] {
   -webkit-mask-image: radial-gradient(ellipse 78% 64% at 50% 50%, black 32%, transparent 78%);
 }
 
+/**
+ * Dots variant — a dot at every grid-line intersection instead of the lines.
+ * Same size, mask and parallax as the lines version. To go back to lines,
+ * set `variant="lines"` on <CrmAgencyGridSpotlight /> in crm-shell.js.
+ */
+.crm-agency-grid-spotlight--dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--tally-ink-0) 22%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+}
+
 [data-surface="marketing-tally"].crm-agency-shell > *:not(.crm-agency-grid-spotlight) {
   position: relative;
   z-index: 1;
