@@ -64,6 +64,9 @@ const KIND_BADGE = {
  *   previewOnly?: boolean;
  *   getPreviewRequestBody?: () => Record<string, unknown>;
  *   renderPreviewControls?: React.ReactNode;
+ *   getApplyRequestBody?: () => Record<string, unknown>;
+ *   showProposedDetails?: boolean;
+ *   rowImportable?: boolean;
  * }} props
  */
 export function ClickUpSyncPreviewPanel({
@@ -85,6 +88,9 @@ export function ClickUpSyncPreviewPanel({
   previewOnly = false,
   getPreviewRequestBody,
   renderPreviewControls,
+  getApplyRequestBody,
+  showProposedDetails = false,
+  rowImportable = false,
 }) {
   const effectiveSelectableKinds = previewOnly ? [] : selectableKinds;
   const plural = entityLabelPlural ?? `${entityLabel}r`;
@@ -183,8 +189,8 @@ export function ClickUpSyncPreviewPanel({
     });
   }
 
-  async function handleApply() {
-    const ids = [...selected];
+  async function handleApply(idsOverride) {
+    const ids = Array.isArray(idsOverride) ? idsOverride : [...selected];
     if (!ids.length) return;
 
     const confirmText =
@@ -200,14 +206,25 @@ export function ClickUpSyncPreviewPanel({
       const res = await fetch(applyPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [applyBodyKey]: ids }),
+        body: JSON.stringify({ ...(getApplyRequestBody?.() ?? {}), [applyBodyKey]: ids }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Import fejlede");
 
+      const extra = [
+        typeof data.created === "number" ? `${data.created} nye` : "",
+        typeof data.updated === "number" && data.updated ? `${data.updated} opdateret` : "",
+        data.customersCreated ? `${data.customersCreated} kunder oprettet/opdateret fra ClickUp` : "",
+        data.usersCreated ? `${data.usersCreated} brugere/teammedlemmer oprettet fra ClickUp` : "",
+        data.autoImportedParents ? `${data.autoImportedParents} forældre hentet automatisk` : "",
+        data.skipped ? `${data.skipped} sprunget over` : "",
+        Array.isArray(data.errors) && data.errors.length ?
+          `${data.errors.length} fejl: ${data.errors.slice(0, 3).join(" | ")}`
+        : "",
+      ].filter(Boolean);
       setMessage(
         `Importeret ${data.imported ?? 0} ${data.imported === 1 ? entityLabel : plural}${
-          data.skipped ? ` · ${data.skipped} sprunget over` : ""
+          extra.length ? ` · ${extra.join(" · ")}` : ""
         }.`,
       );
       await loadPreview();
@@ -340,7 +357,7 @@ export function ClickUpSyncPreviewPanel({
                       const sub = rowSubLabel(row);
                       const rowKey = row.id || row.linkUrl;
                       const previewFields =
-                        previewOnly && row.proposed ?
+                        (previewOnly || showProposedDetails) && row.proposed && !row.changes.length ?
                           Object.entries(row.proposed).filter(([, value]) => String(value ?? "").trim())
                         : [];
                       return (
@@ -397,16 +414,28 @@ export function ClickUpSyncPreviewPanel({
                               : <span className="text-fg-quiet">—</span>}
                             </td>
                             <td className="px-2 py-2 align-top">
-                              {row.linkUrl ?
-                                <a
-                                  href={row.linkUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-agency-brand hover:underline"
-                                >
-                                  Åbn
-                                </a>
-                              : "—"}
+                              <div className="flex flex-col items-start gap-1">
+                                {row.linkUrl ?
+                                  <a
+                                    href={row.linkUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-agency-brand hover:underline"
+                                  >
+                                    Åbn
+                                  </a>
+                                : "—"}
+                                {rowImportable && selectable ?
+                                  <button
+                                    type="button"
+                                    disabled={applying}
+                                    onClick={() => void handleApply([row.id])}
+                                    className="rounded-md border border-agency-brand-border bg-agency-brand-soft px-2 py-0.5 text-[10px] font-semibold text-agency-brand disabled:opacity-50"
+                                  >
+                                    {row.kind === "update" ? "Opdatér" : "Importér"}
+                                  </button>
+                                : null}
+                              </div>
                             </td>
                           </tr>
                           {isExpanded && (row.changes.length || previewFields.length) ?

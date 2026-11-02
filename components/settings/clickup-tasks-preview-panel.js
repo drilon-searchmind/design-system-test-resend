@@ -6,15 +6,30 @@ import { ClickUpSyncPreviewPanel } from "@/components/settings/clickup-sync-prev
 
 const TASK_FIELD_LABELS = {
   name: "Titel",
+  title: "Titel",
   status: "Status",
-  clientName: "Kunde",
-  customerFolder: "Kunde-mappe",
-  serviceLine: "Service line",
-  serviceLineList: "Liste",
-  assignees: "Ansvarlige",
+  priority: "Prioritet",
+  clientName: "Kunde (Agency OS)",
+  clientSlug: "Kunde",
+  clientCvr: "CVR",
+  customerFolder: "ClickUp-mappe",
+  department: "Afdeling (Agency OS)",
+  departmentKey: "Afdeling",
+  serviceLine: "Service line (ClickUp)",
+  serviceLineList: "ClickUp-liste",
+  assignees: "Ansvarlige (matchet i teamet)",
+  assigneeMemberKeys: "Ansvarlige",
+  creator: "Oprettet af",
   dueDate: "Deadline",
-  createdAt: "Oprettet",
+  estimateHours: "Estimat",
+  createdAt: "Oprettet i ClickUp",
+  closedAt: "Afsluttet",
   isSubtask: "Delopgave",
+  parentClickUpId: "Forælder",
+  description: "Beskrivelse",
+  notImported: "Findes i ClickUp, men importeres ikke endnu",
+  blockers: "Blokeret",
+  warnings: "Advarsler",
 };
 
 function defaultCreatedFrom() {
@@ -43,11 +58,17 @@ export function ClickUpTasksPreviewPanel() {
           Henter opgaver fra ClickUp&apos;s Delivery-struktur:{" "}
           <strong>[ZP] Delivery → kundemappe → service line → opgave</strong>. Interne mapper som{" "}
           <code className="rounded bg-surface-muted px-1 py-0.5 text-[11px]">01-Searchmind</code> filtreres fra.
-          Preview-only — import kommer senere.
+          Kunden kobles via mappenavn → kunde → CVR, ansvarlige via ClickUp-id/e-mail → team, og service line →
+          afdeling. Findes kunden ikke i CRM&apos;et, men er i ClickUp&apos;s kunde-oversigt, oprettes den automatisk
+          (som i kunde-sync) når opgaven importeres. Opgaver uden kunde i begge er blokeret. Importér valgte i bulk eller enkeltvis; en allerede
+          importeret opgave opdateres i stedet for at blive dubleret.
         </>
       }
       previewPath="/api/settings/clickup/tasks/preview"
-      applyPath="/api/settings/clickup/tasks/preview"
+      applyPath="/api/settings/clickup/tasks/apply"
+      showProposedDetails
+      rowImportable
+      getApplyRequestBody={() => ({ createdFrom, createdTo, limit })}
       applyBodyKey="clickUpTaskIds"
       entityLabel="opgave"
       entityLabelPlural="opgaver"
@@ -58,12 +79,16 @@ export function ClickUpTasksPreviewPanel() {
       }
       rowLabel={(row) => row.proposed?.name || row.id || "—"}
       rowSubLabel={(row) => {
-        const client = row.proposed?.clientName || row.proposed?.customerFolder;
-        const created = row.proposed?.createdAt;
-        if (client && created) return `${client} · ${created}`;
-        return client || created || null;
+        const p = row.proposed;
+        const client = p?.clientName || p?.customerFolder;
+        const parts = [
+          client ? `${client}${p?.clientCvr ? ` (CVR ${p.clientCvr})` : ""}` : "",
+          p?.assignees || "",
+          p?.createdAt || "",
+          p?.blockers ? "⛔ blokeret" : p?.warnings ? "⚠ advarsel" : "",
+        ].filter(Boolean);
+        return parts.length ? parts.join(" · ") : null;
       }}
-      previewOnly
       getPreviewRequestBody={() => ({
         createdFrom,
         createdTo,
