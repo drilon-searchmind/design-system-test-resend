@@ -43,6 +43,7 @@ export async function POST(req) {
           body.newClient
         : undefined,
       servicesActive: Array.isArray(body?.servicesActive) ? body.servicesActive : undefined,
+      serviceLines: Array.isArray(body?.serviceLines) ? body.serviceLines : undefined,
       templateKey: typeof body?.templateKey === "string" ? body.templateKey : undefined,
       templateId: typeof body?.templateId === "string" ? body.templateId : undefined,
       label: typeof body?.label === "string" ? body.label : undefined,

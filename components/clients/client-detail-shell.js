@@ -238,7 +238,7 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
           notes={notes}
           team={TEAM}
           tasks={clientTasks}
-          kpiTimerLabel="Timer denne md"
+          kpiTimerLabel="Tid brugt"
           infoMd={typeof demoClient.infoMd === "string" ? demoClient.infoMd : ""}
           canEditKundeinfo={false}
         />
@@ -376,10 +376,12 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
             team={Array.isArray(remote.team) ? remote.team : undefined}
             tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
             kpiTimerLabel={
-              typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Timer i perioden"
+              typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Tid brugt"
             }
             infoMd={typeof c.infoMd === "string" ? c.infoMd : ""}
             canEditKundeinfo
+            commercialLog={Array.isArray(remote.commercialLog) ? remote.commercialLog : []}
+            onClientChanged={() => void loadRemote()}
             kundeinfoSaveUrl={isGroupPage ? apiBase : undefined}
             onUngroupBrand={isGroupPage ? ungroupBrand : undefined}
             onKundeinfoSaved={(nextInfoMd) => {

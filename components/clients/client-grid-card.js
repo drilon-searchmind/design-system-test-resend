@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { HealthChip } from "@/components/crm/health-chip";
+import { IndeksValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
-import { PulseAllocationBar } from "@/components/pulse/pulse-allocation-bar";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { customerHref } from "@/lib/crm/client-groups";
 import { formatCurrencyCompact, formatHoursBudgetPairDa, formatHoursCompactDa, formatPercent } from "@/lib/crm/format-da";
@@ -40,7 +39,6 @@ export function ClientGridCard({ client, variant = "pulse" }) {
             {client.isGroup ? `Koncern · ${client.groupSize} brands` : client.industry}
           </div>
         </div>
-        <HealthChip health={client.health} palette="agency" compact={variant === "full"} />
       </div>
 
       {variant === "full" ? (
@@ -92,9 +90,19 @@ export function ClientGridCard({ client, variant = "pulse" }) {
         </p>
       : null}
 
-      <div className="mt-2.5">
-        <div className="mb-1 font-sans text-[11px] text-fg-muted">Allokering</div>
-        <PulseAllocationBar allocation={client.allocation} height={8} />
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+            Seneste NPS
+          </div>
+          <NpsValue value={client.latestNps} className="text-sm font-semibold" />
+        </div>
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
+            Indeks
+          </div>
+          <IndeksValue value={client.indeks} className="text-sm font-semibold" />
+        </div>
       </div>
 
       <div className="mt-2.5 flex items-center justify-between">

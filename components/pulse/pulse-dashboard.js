@@ -6,7 +6,7 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
 import { PulseClientsPanel } from "@/components/pulse/pulse-clients-panel";
 import { PulseDataProvider } from "@/components/pulse/pulse-data-context";
-import { PulseHealthDistribution } from "@/components/pulse/pulse-health-distribution";
+import { PulseClientRanking } from "@/components/pulse/pulse-client-ranking";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { PulsePageHeader } from "@/components/pulse/pulse-page-header";
 import { PulsePeriodProvider } from "@/components/pulse/pulse-period-context";
@@ -150,9 +150,11 @@ export function PulseDashboard() {
           </div>
 
           <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2">
-            <PulseHealthDistribution />
-            <PulseUtilTrendChart />
+            <PulseClientRanking kind="healthy" />
+            <PulseClientRanking kind="unhealthy" />
           </div>
+
+          <PulseUtilTrendChart />
 
           <PulseClientsPanel />
 

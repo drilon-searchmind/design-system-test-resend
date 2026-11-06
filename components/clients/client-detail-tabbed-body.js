@@ -3,7 +3,9 @@
 import { ClientDetailBrandsPanel } from "@/components/clients/client-detail-brands-panel";
 import { ClientDetailKundeinfoPanel } from "@/components/clients/client-detail-kundeinfo-panel";
 import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
+import { ClientDetailCommercialEditor } from "@/components/clients/client-detail-commercial-editor";
 import { ClientDetailCommercialCard } from "@/components/clients/client-detail-commercial-card";
+import { ClientDetailContractCard } from "@/components/clients/client-detail-contract-card";
 import { ClientDetailContactsCard } from "@/components/clients/client-detail-contacts-card";
 import { ClientDetailDeliveryCard } from "@/components/clients/client-detail-delivery-card";
 import { ClientDetailInsightsCard } from "@/components/clients/client-detail-insights-card";
@@ -17,6 +19,7 @@ import { ClientDetailTasksCard } from "@/components/clients/client-detail-tasks-
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
+  "opgaver",
   "overblik",
   "brands",
   "kundeinfo",
@@ -26,10 +29,11 @@ export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
 
 /** Danish labels aligned with SETTINGS stamdata tab pattern (`PulseSegmentedControl`). */
 export const CLIENT_DETAIL_TAB_DEFS = [
+  { id: "opgaver", label: "Opgaver" },
   { id: "overblik", label: "Overblik" },
   { id: "kundeinfo", label: "Kundeinfo" },
   { id: "okonomi", label: "Økonomi & aftale" },
-  { id: "kvalitet", label: "Kvalitet & risiko" },
+  { id: "kvalitet", label: "NPS & kvalitet" },
 ];
 
 /** Kun for koncerner — indsættes efter "Overblik". */
@@ -79,6 +83,8 @@ const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
  *   onKundeinfoSaved?: (infoMd: string) => void;
  *   kundeinfoSaveUrl?: string;
  *   onUngroupBrand?: (brandSlug: string) => Promise<void>;
+ *   commercialLog?: Array<{ at: string; by: string; note: string; changes: Record<string, { from: number | null; to: number | null }> }>;
+ *   onClientChanged?: () => void;
  * }} props
  */
 export function ClientDetailTabbedBody({
@@ -93,16 +99,18 @@ export function ClientDetailTabbedBody({
   notesTeamMembers,
   team,
   tasks,
-  kpiTimerLabel = "Timer denne md",
+  kpiTimerLabel = "Tid brugt",
   infoMd = "",
   canEditKundeinfo = false,
   onKundeinfoSaved,
   kundeinfoSaveUrl,
   onUngroupBrand,
+  commercialLog = [],
+  onClientChanged,
 }) {
   const isGroup = Boolean(client.isGroup);
   const tabDefs = isGroup ?
-      [CLIENT_DETAIL_TAB_DEFS[0], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(1)]
+      [CLIENT_DETAIL_TAB_DEFS[0], CLIENT_DETAIL_TAB_DEFS[1], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(2)]
     : CLIENT_DETAIL_TAB_DEFS;
   // Alerts ligger pr. brand — vis dem under koncernens id.
   const visibleAlerts =
@@ -115,12 +123,13 @@ export function ClientDetailTabbedBody({
       })()
     : alerts;
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
+  const openTaskCount = tasks.filter((t) => t.status !== "done").length;
   /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */
   const resolvedTab =
     CLIENT_DETAIL_TAB_IDS.includes(/** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)) &&
     (tab !== "brands" || isGroup) ?
       /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)
-    : "overblik";
+    : "opgaver";
 
   return (
     <div className="flex flex-col gap-6">
@@ -145,20 +154,30 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-overblik" className="sr-only">
               Overblik
             </h2>
-            <ClientDetailKpiStrip client={client} timerLabel={kpiTimerLabel} />
+            <ClientDetailKpiStrip
+              client={client}
+              timerLabel={kpiTimerLabel}
+              openTaskCount={openTaskCount}
+            />
             <ClientDetailMetaCard client={client} team={team ?? notesTeamMembers} />
-            <ClientDetailDeliveryCard client={client} />
-            <ClientDetailServiceMixCard client={client} />
-            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
-              <ClientDetailContactsCard
-                primaryContact={client.primaryContact}
-                secondaryContact={client.secondaryContact}
-              />
-              <div className={stack}>
-                <ClientDetailNotesCard notes={notes} teamMembers={notesTeamMembers} />
-                <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} />
-              </div>
+            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
+              <ClientDetailDeliveryCard client={client} />
+              <ClientDetailNotesCard notes={notes} teamMembers={notesTeamMembers} />
             </div>
+            <ClientDetailServiceMixCard
+              client={client}
+              canEdit={canEditKundeinfo && !isGroup}
+              onSaved={onClientChanged}
+            />
+          </section>
+        ) : null}
+
+        {resolvedTab === "opgaver" ? (
+          <section aria-labelledby="client-tab-opgaver" className={stack}>
+            <h2 id="client-tab-opgaver" className="sr-only">
+              Opgaver
+            </h2>
+            <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} />
           </section>
         ) : null}
 
@@ -182,6 +201,11 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-kundeinfo" className="sr-only">
               Kundeinfo
             </h2>
+            <ClientDetailContactsCard
+              primaryContact={client.primaryContact}
+              secondaryContact={client.secondaryContact}
+            />
+            <ClientDetailContractCard contract={contract} isGroup={isGroup} />
             <ClientDetailKundeinfoPanel
               clientSlug={client.id}
               clientName={client.name}
@@ -198,6 +222,12 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-okonomi" className="sr-only">
               Økonomi og aftale
             </h2>
+            <ClientDetailCommercialEditor
+              client={client}
+              commercialLog={commercialLog}
+              canEdit={canEditKundeinfo && !isGroup}
+              onSaved={onClientChanged}
+            />
             <ClientDetailCommercialCard
               client={client}
               contract={contract}
@@ -210,7 +240,7 @@ export function ClientDetailTabbedBody({
         {resolvedTab === "kvalitet" ? (
           <section aria-labelledby="client-tab-kvalitet" className={stack}>
             <h2 id="client-tab-kvalitet" className="sr-only">
-              Kvalitet og risiko
+              NPS og kvalitet
             </h2>
             <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <ClientDetailNpsCard client={client} />

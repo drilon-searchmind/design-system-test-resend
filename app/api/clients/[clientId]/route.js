@@ -51,7 +51,9 @@ export async function PATCH(req, ctx) {
 
   try {
     const body = await req.json();
-    const result = await updateClientMongo(clientId, includeTest, body);
+    const result = await updateClientMongo(clientId, includeTest, body, {
+      by: authResult.session.user?.name ?? authResult.session.user?.email ?? undefined,
+    });
     if (result?.error) {
       return NextResponse.json({ error: result.error }, { status: result.status ?? 400 });
     }

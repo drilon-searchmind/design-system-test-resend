@@ -5,9 +5,8 @@ import { useMemo, useState } from "react";
 
 import { ClientGridCard } from "@/components/clients/client-grid-card";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { HealthChip } from "@/components/crm/health-chip";
+import { IndeksValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
-import { PulseAllocationBar } from "@/components/pulse/pulse-allocation-bar";
 import {
   PulseIconChevronDown,
   PulseIconChevronRight,
@@ -26,9 +25,9 @@ import { CLIENTS as STATIC_CLIENTS, TEAM as STATIC_TEAM } from "@/lib/crm/static
 import { cn } from "@/lib/utils";
 
 const GRID_PULSE =
-  "grid-cols-[minmax(200px,2.2fr)_minmax(88px,1.1fr)_minmax(72px,1fr)_minmax(120px,1.45fr)_minmax(52px,0.65fr)_minmax(96px,1fr)_40px]";
+  "grid-cols-[minmax(200px,2.2fr)_minmax(88px,1.1fr)_minmax(72px,1fr)_minmax(120px,1.45fr)_minmax(52px,0.65fr)_minmax(72px,0.8fr)_minmax(56px,0.7fr)_40px]";
 const GRID_FULL =
-  "grid-cols-[minmax(160px,1.85fr)_minmax(68px,0.95fr)_minmax(76px,0.85fr)_minmax(64px,0.95fr)_minmax(108px,1.25fr)_minmax(44px,0.55fr)_minmax(84px,0.95fr)_minmax(72px,0.85fr)_36px]";
+  "grid-cols-[minmax(160px,1.85fr)_minmax(68px,0.95fr)_minmax(76px,0.85fr)_minmax(64px,0.95fr)_minmax(108px,1.25fr)_minmax(44px,0.55fr)_minmax(64px,0.7fr)_minmax(52px,0.6fr)_minmax(72px,0.85fr)_36px]";
 
 /**
  * @param {{
@@ -202,7 +201,8 @@ export function ClientsDirectory({
                 {hoursLabel}
               </button>
               <span>Margin</span>
-              <span>Allokering</span>
+              <span>Seneste NPS</span>
+              <span title="Apex YoY, seneste 30 dage">Indeks</span>
               {variant === "full" ? (
                 <span className="hidden sm:inline">Sidst aktiv</span>
               ) : null}
@@ -296,7 +296,6 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
             }
           </div>
         </div>
-        <HealthChip health={c.health} palette="agency" compact />
       </div>
 
       <div className="flex min-w-0 items-center gap-1.5">
@@ -339,7 +338,13 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         {formatPercent(c.monthlyProfitMargin)}
       </span>
 
-      <PulseAllocationBar allocation={c.allocation} height={6} />
+      <span className="text-[12.5px]">
+        <NpsValue value={c.latestNps} />
+      </span>
+
+      <span className="text-[12.5px]">
+        <IndeksValue value={c.indeks} />
+      </span>
 
       {variant === "full" ?
         <span className="hidden truncate text-[11px] tabular-nums text-fg-muted sm:inline">

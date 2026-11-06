@@ -1,0 +1,141 @@
+# Feedback implementation status
+
+Mirrors the colleague's list, item by item.
+
+**Legend:** ✅ done in code · 🟡 partly done / has a caveat · ⬜ still open
+
+**How to check:** run `npm run dev`, log in, and use the page under **Where**. Contract features need the database data source (not demo). Paths are relative to the repo root.
+
+> Nothing here has been checked visually in the browser yet. "Done" means it is in the code.
+
+---
+
+## Agency Pulse
+
+### ✅ Rentabilitet pr. afdeling = (medarbejdere × 180.000) / solgt MRR
+- **Where:** `/pulse`, the profitability chart
+- **Files:** `components/pulse/pulse-profitability-chart.js`, `lib/crm/dept-profitability.js`
+- 🟡 Sold MRR per department is mostly 0 in the real data, so the chart looks empty.
+
+### ✅ "Alle kunder": "Seneste NPS" column added
+- **Where:** `/pulse`, the "Alle kunder" table
+- **Files:** `components/pulse/pulse-dashboard.js`, `lib/crm/client-metrics.js`, `lib/server/pulse-data.js`
+
+### ✅ "Alle kunder": "Allokering" replaced by "Indeks"
+- **Where:** `/pulse`, the "Alle kunder" table
+- **Files:** same as above, plus `components/clients/client-metric-cells.js`
+- 🟡 Indeks is mock data until Apex YoY (last 30 days) is connected.
+- ⬜ Connect the real Apex Indeks.
+
+### ✅ "Top 10 sunde kunder" + "Top 10 usunde kunder", chart pushed down
+- **Where:** `/pulse`, the boxes above the chart
+- **Files:** `components/pulse/pulse-client-ranking.js`, `lib/crm/client-metrics.js`
+- Based on Indeks, NPS and time spent vs. MRR retainer (weights 0.35 / 0.35 / 0.3).
+
+---
+
+## Kunder
+
+### ✅ Same columns as Pulse (Seneste NPS, Indeks instead of Allokering)
+- **Where:** `/clients`
+- **Files:** `components/clients/clients-directory.js`, `client-grid-card.js`, `client-metric-cells.js`
+
+### ✅ Warning dots removed from the overview
+- **Where:** `/clients`
+- **Files:** `components/clients/clients-directory.js`, `client-grid-card.js`
+
+---
+
+## Under en kunde
+
+**Where (all items below):** `/clients/<clientId>`. Open any client from `/clients`. Main files are in `components/clients/`.
+
+### ✅ "Timer denne md" renamed "Tid brugt"
+- **Files:** `client-detail-kpi-strip.js`, `client-detail-shell.js`
+
+### ✅ NPS KPI card added
+- **Files:** `client-detail-kpi-strip.js`
+
+### ✅ "Fornyelse" is empty unless the contract actually renews
+- **Files:** `client-detail-contract-card.js`, `client-detail-commercial-card.js`
+
+### ✅ "Opgaver" is the first tab and the default
+- **Where:** tab bar at the top of the client page
+- **Files:** `client-detail-tabbed-body.js`
+
+### 🟡 Changing the amount under "Økonomi & aftale" (e.g. upsell)
+- **Where:** "Økonomi & aftale" card on the Overblik tab
+- **Files:** `client-detail-commercial-card.js`, `client-detail-commercial-editor.js`, `lib/server/client-update-data.js`
+- ✅ Retainer + web one-off + service agreement can sit side by side.
+- 🟡 For an upsell the recommended route is a new contract (see Kontrakter).
+- ⬜ Koncern pages (`/clients/koncern/<cvr>`) cannot edit amounts or services.
+
+### ✅ "Kvalitet & risiko" renamed "NPS & kvalitet"
+- **Files:** `client-detail-tabbed-body.js`
+
+### ✅ Add a service under "Aktive services & kapacitetsfordeling", with budget out of the total
+- **Files:** `client-detail-service-mix-card.js`, `client-detail-edit-form.js`
+
+### ✅ "Allokering pr. disciplin" box removed
+- **Where:** it should no longer appear on the Overblik tab.
+
+### ✅ "Kontakter" KPI moved under "Kundeinfo"
+- **Where:** Kundeinfo tab
+- **Files:** `client-detail-kundeinfo-panel.js`
+
+### ✅ "Seneste noter" placed where "Allokering pr. disciplin" was
+- **Files:** `client-detail-notes-card.js`, `client-detail-tabbed-body.js`
+
+### ✅ "Åbne & kommende opgaver" removed
+- **Where:** it should no longer appear on Overblik; tasks live in the Opgaver tab.
+
+### ✅ "Åbne opgaver" KPI under "Overblik"
+- **Files:** `client-detail-kpi-strip.js`
+
+### ✅ "Kundeinfo" tab completed, with the contract as PDF incl. signature info
+- **Where:** Kundeinfo tab; the PDF page is `/api/contracts/<contractId>/document`
+- **Files:** `client-detail-kundeinfo-panel.js`, `lib/contracts/contract-document-html.js`
+- 🟡 The "PDF" is a printable HTML page (save as PDF in the browser), not a generated PDF file.
+
+---
+
+## Kontrakter
+
+**Where (modal items below):** `/contracts` → open the send dialog → choose "Ny kunde" or "Eksisterende kunde". Main file: `components/contracts/contracts-send-modal.js`.
+
+### ✅ "Lead-kilde" is a dropdown with 8 predefined options
+- **Where:** send dialog, "Ny kunde" tab
+- **Files:** `lib/crm/client-utils.js` (`LEAD_SOURCES`)
+
+### ✅ Service lines can be filled in, summed under "Månedlig værdi"
+- **Where:** send dialog, "Aftale" section, then the total under "Økonomi og varighed"
+- **Files:** `contracts-send-modal.js`, `lib/server/contract-send-data.js`, `lib/contracts/contract-vars.js`, `lib/db/models/contract.js`
+- 🟡 "Web (engangs)" is included in the monthly total on recurring contracts. Decide whether to separate it.
+
+### ✅ One-off sale contract (web and service lines) for customers not yet in the system
+- **Where:** send dialog, "Ny kunde" tab, with a one-off template/type
+- **Files:** `contracts-send-modal.js`, `lib/server/contract-new-client.js`
+- The customer is created when the contract is signed (signing page `/contracts/s/<token>`).
+
+### ✅ Templates for new and existing customers
+- **Where:** `/templates`, and the template dropdown in the send dialog
+- **Files:** `lib/crm/contract-template-defaults.js`, `scripts/seed-contract-templates.js`
+- Four starter templates are in the database. Re-create them with `npm run seed-contract-templates`.
+
+### ✅ Existing customers get a new contract that recomputes the total (not an amendment)
+- **Where:** send dialog, "Eksisterende kunde" tab (a hint is shown under the service lines)
+- 🟡 Signing does not update the client's service budgets, only the contract value counts.
+
+### ✅ Live preview of the customer e-mail and the PDF while filling in
+- **Where:** right-hand panel of the send dialog, tabs "E-mail" and "Kontrakt (PDF)"
+- **Files:** `contracts-send-modal.js`, `lib/contracts/contract-document-html.js`, `lib/email/contract-template-render.js`
+- ⬜ A real send (Postmark) has not been tested end to end.
+
+---
+
+## Still open overall
+
+- ⬜ Visual check in the browser of Pulse, client detail and the contract dialog.
+- ⬜ Real Apex Indeks.
+- ⬜ Real PDF file generation.
+- ⬜ Two `owner: "Drilon"` entries remain in `feature-status-data.js`.

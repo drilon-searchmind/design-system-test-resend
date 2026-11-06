@@ -1,9 +1,6 @@
-import { PulseAllocationBar } from "@/components/pulse/pulse-allocation-bar";
 import { PulseSparkline } from "@/components/pulse/pulse-sparkline";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
-import { agencyDeptColor } from "@/lib/crm/dept-tokens";
 import { formatPercent } from "@/lib/crm/format-da";
-import { DEPARTMENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,12 +9,10 @@ import { cn } from "@/lib/utils";
 export function ClientDetailDeliveryCard({ client }) {
   const util =
     client.hoursBudget > 0 ? client.hoursThisMonth / client.hoursBudget : 0;
-  const entries = Object.entries(client.allocation ?? {}).filter(([, v]) => v > 0);
-
   return (
     <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-        Leverance & udnyttelse
+        Leverance & tid brugt
       </h2>
 
       <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
@@ -51,31 +46,6 @@ export function ClientDetailDeliveryCard({ client }) {
           ) : null}
         </div>
 
-        <div className="min-w-0 flex-1 lg:border-l lg:border-border lg:pl-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
-            Allokering pr. disciplin
-          </p>
-          <PulseAllocationBar allocation={client.allocation} height={12} className="mt-3" />
-          <ul className="mt-4 space-y-2 font-sans text-[12px]">
-            {[...entries]
-              .sort((a, b) => b[1] - a[1])
-              .map(([dept, pct]) => {
-                const d = DEPARTMENTS.find((x) => x.id === dept);
-                return (
-                  <li key={dept} className="flex items-center justify-between gap-3">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="size-2 shrink-0 rounded-full ring-1 ring-border/60"
-                        style={{ backgroundColor: agencyDeptColor(dept) }}
-                      />
-                      <span className="truncate text-fg-muted">{d?.name ?? dept}</span>
-                    </span>
-                    <span className="shrink-0 text-[11px] tabular-nums text-fg">{pct}%</span>
-                  </li>
-                );
-              })}
-          </ul>
-        </div>
       </div>
     </div>
   );

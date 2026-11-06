@@ -31,7 +31,9 @@ import { cn } from "@/lib/utils";
  */
 export function ClientDetailCommercialCard({ client, contract, contractDetailHref }) {
   const renewalIso = contract?.renewalAt ?? client.renewalAt;
-  const renewalDays = contractDaysUntilRenewal(renewalIso);
+  // De fleste aftaler er løbende uden fornyelse — så er feltet tomt.
+  const hasRenewal = Boolean(renewalIso);
+  const renewalDays = hasRenewal ? contractDaysUntilRenewal(renewalIso) : 0;
   const activeCommercially = contract?.accountStatus === "active" || (!contract && client.status === "active");
   const primaryContractHref =
     contractDetailHref === null
@@ -93,16 +95,20 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
           </div>
           <div>
             <dt className="text-fg-soft">Næste fornyelse</dt>
-            <dd className="mt-1 tabular-nums text-fg">{formatIsoDateDa(client.renewalAt)}</dd>
-            <dd className={cn("mt-1 text-[10px] tabular-nums", renewalSubTone)}>
-              {client.status !== "active" ? (
-                <span>Ingen aktiv nedtælling (konto: {client.status})</span>
-              ) : renewalDays < 0 ? (
-                <span>Fornyelse passeret ({Math.abs(renewalDays)} d siden vs. ref. {CONTRACT_DEMO_REF_DATE})</span>
-              ) : (
-                <span>Om ca. {renewalDays} d</span>
-              )}
+            <dd className="mt-1 tabular-nums text-fg">
+              {hasRenewal ? formatIsoDateDa(renewalIso) : ""}
             </dd>
+            {hasRenewal ?
+              <dd className={cn("mt-1 text-[10px] tabular-nums", renewalSubTone)}>
+                {client.status !== "active" ? (
+                  <span>Ingen aktiv nedtælling (konto: {client.status})</span>
+                ) : renewalDays < 0 ? (
+                  <span>Fornyelse passeret ({Math.abs(renewalDays)} d siden vs. ref. {CONTRACT_DEMO_REF_DATE})</span>
+                ) : (
+                  <span>Om ca. {renewalDays} d</span>
+                )}
+              </dd>
+            : null}
           </div>
           <div className="sm:col-span-2">
             <dt className="text-fg-soft">{client.isGroup ? "Koncern (CVR)" : "Kundenøgle"}</dt>
@@ -131,10 +137,12 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
                   {formatCurrency(contract.monthlyValue, contract.currency)}
                 </span>
               </li>
-              <li>
-                <span className="font-medium text-fg">Aftalt fornyelsesdato:</span>{" "}
-                <span className="tabular-nums">{formatIsoDateDa(contract.renewalAt)}</span>
-              </li>
+              {contract.renewalAt ?
+                <li>
+                  <span className="font-medium text-fg">Aftalt fornyelsesdato:</span>{" "}
+                  <span className="tabular-nums">{formatIsoDateDa(contract.renewalAt)}</span>
+                </li>
+              : null}
               {contract.signedBy ? (
                 <li>
                   <span className="font-medium text-fg">Underskrevet af:</span> {contract.signedBy}

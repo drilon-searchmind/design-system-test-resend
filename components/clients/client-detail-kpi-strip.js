@@ -2,9 +2,13 @@ import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 
 /**
- * @param {{ client: import('@/lib/crm/static-data').CLIENTS[number]; timerLabel?: string }} props
+ * @param {{
+ *   client: import('@/lib/crm/static-data').CLIENTS[number];
+ *   timerLabel?: string;
+ *   openTaskCount?: number;
+ * }} props
  */
-export function ClientDetailKpiStrip({ client, timerLabel = "Timer denne md" }) {
+export function ClientDetailKpiStrip({ client, timerLabel = "Tid brugt", openTaskCount = 0 }) {
   const utilRatio =
     client.hoursBudget > 0 ? client.hoursThisMonth / client.hoursBudget : 0;
   const timerTone = utilRatio > 1 ? "bad" : utilRatio > 0.9 ? "warn" : "ok";
@@ -19,7 +23,7 @@ export function ClientDetailKpiStrip({ client, timerLabel = "Timer denne md" }) 
     lastNps == null ? "brand" : lastNps >= 60 ? "ok" : lastNps >= 40 ? "warn" : "bad";
 
   return (
-    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-5">
       <PulseKpiCard
         label="Retainer"
         value={`${formatCurrencyCompact(client.retainer, client.currency)} / md`}
@@ -36,6 +40,7 @@ export function ClientDetailKpiStrip({ client, timerLabel = "Timer denne md" }) 
         value={lastNps != null ? String(lastNps) : "—"}
         tone={npsTone}
       />
+      <PulseKpiCard label="Åbne opgaver" value={String(openTaskCount)} tone="brand" />
     </section>
   );
 }

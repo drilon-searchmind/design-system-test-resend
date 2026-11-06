@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { TaskStatusChip } from "@/components/crm/task-status-chip";
@@ -20,7 +23,10 @@ import { cn } from "@/lib/utils";
  * }} props
  */
 export function ClientDetailTasksCard({ tasks, clientLabel }) {
-  const sorted = [...tasks].sort((a, b) => {
+  const [showDone, setShowDone] = useState(false);
+  const openCount = tasks.filter((t) => !taskIsDone(t.status)).length;
+  const visible = showDone ? tasks : tasks.filter((t) => !taskIsDone(t.status));
+  const sorted = [...visible].sort((a, b) => {
     const ad = taskIsDone(a.status) ? 1 : 0;
     const bd = taskIsDone(b.status) ? 1 : 0;
     if (ad !== bd) return ad - bd;
@@ -31,11 +37,22 @@ export function ClientDetailTasksCard({ tasks, clientLabel }) {
     <div className="tally-panel p-4 md:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-          Åbne & kommende opgaver
+          Opgaver · {openCount} åbne
         </h2>
-        <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
-          Hele opgavelisten →
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 font-sans text-[11px] text-fg-muted">
+            <input
+              type="checkbox"
+              checked={showDone}
+              onChange={(e) => setShowDone(e.target.checked)}
+              className="size-3.5 accent-[var(--agency-brand)]"
+            />
+            Vis afsluttede
+          </label>
+          <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
+            Hele opgavelisten →
+          </Link>
+        </div>
       </div>
 
       <ul className="mt-4 flex flex-col gap-2">
