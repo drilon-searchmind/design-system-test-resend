@@ -209,8 +209,7 @@ export function WorkloadDeptMatrix({ rows }) {
       </div>
 
       <div className="border-t border-border px-4 py-3 font-sans text-[11px] text-fg-quiet">
-        Σ kapacitet: <span className="tabular-nums text-fg-muted">{rows.reduce((s, r) => s + r.capacity, 0)}</span> · Σ
-        tildelt: <span className="tabular-nums text-fg-muted">{rows.reduce((s, r) => s + r.assigned, 0)}</span> · Σ forbrug:{" "}
+        Kapacitet i alt: <span className="tabular-nums text-fg-muted">{rows.reduce((s, r) => s + r.capacity, 0)}</span> · Tildelt i alt: <span className="tabular-nums text-fg-muted">{rows.reduce((s, r) => s + r.assigned, 0)}</span> · Forbrug i alt:{" "}
         <span className="tabular-nums text-fg-muted">{rows.reduce((s, r) => s + r.tracked, 0)}</span>{" "}
         <span className="text-[10px]">(kontrakttimer / måned)</span>
       </div>

@@ -25,7 +25,7 @@ export function TeamSummaryStrip({
   return (
     <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
       <PulseKpiCard label="Medarbejdere i roster" value={String(headcount)} tone="brand" />
-      <PulseKpiCard label={`Ugetimer Σ (≈${fteApprox.toFixed(1)} FTE)`} value={`${weeklyHoursSum} t`} tone="ok" />
+      <PulseKpiCard label="Ugetimer i alt" value={`${weeklyHoursSum} t · ≈${fteApprox.toFixed(1)} FTE`} tone="ok" />
       <PulseKpiCard label="Discipliner repræsenteret" value={String(disciplineCount)} tone="ok" />
       <PulseKpiCard
         label="Deltid (< 37 h)"
@@ -38,7 +38,7 @@ export function TeamSummaryStrip({
         value={String(highLoadCount)}
         tone={highLoadCount > 4 ? "warn" : highLoadCount > 0 ? "ok" : "brand"}
       />
-      <PulseKpiCard label="Åbne opgaver (Σ pr. roster)" value={String(openTasksTotal)} tone="brand" />
+      <PulseKpiCard label="Åbne opgaver (roster)" value={String(openTasksTotal)} tone="brand" />
     </section>
   );
 }

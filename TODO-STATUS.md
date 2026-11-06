@@ -142,7 +142,7 @@ Mirrors the colleague's list, item by item.
 - ⬜ **Postmark:** a real contract send (e-mail with signing link) has not been tested end to end.
 
 ### Decisions needed
-- ⬜ **180.000 per employee:** confirm with the colleague whether it is per month or per year, whether it is the same for every department, and which way the ratio should read (target / sold MRR, as written, or the reverse). See `lib/crm/dept-profitability.js`.
+- ⬜ **180.000 per employee:** (now adjustable in Indstillinger → Beregninger) confirm with the colleague whether it is per month or per year, whether it is the same for every department, and which way the ratio should read (target / sold MRR, as written, or the reverse). See `lib/crm/dept-profitability.js`.
 - ⬜ **"Web (engangs)" on recurring contracts:** it is currently added into the monthly total. Decide whether to keep it separate.
 - ⬜ **Upsell route:** we recommend a new contract for existing customers. Confirm that is what the colleague wants instead of an amendment.
 
@@ -156,3 +156,20 @@ Mirrors the colleague's list, item by item.
 - ⬜ **Lint errors in other files:** `components/templates` has existing `set-state-in-effect` lint errors that were not part of this work.
 - ⬜ **Drilon:** two `owner: "Drilon"` entries remain in `feature-status-data.js`.
 - ⬜ **Stray file:** `scripts/_tail.txt` is a leftover and can be deleted.
+
+## Adjustable calculation settings (Indstillinger → Beregninger)
+
+Admin only. Saved in the database (`AgencySettings` collection, one document). Defaults live in `lib/crm/agency-settings.js`. Demo data always uses the defaults.
+
+| Setting | Default | Used for |
+| --- | --- | --- |
+| Krav pr. medarbejder | 180.000 kr/md | Rentabilitet pr. afdeling (Pulse) |
+| Vægt: Indeks / NPS / Tid brugt | 35 / 35 / 30 | Kundesundhed score (Top sunde/usunde) |
+| Indeks-følsomhed | 1,25 | Scorepoint pr. Indeks-point |
+| Straf for overforbrug | 150 | Scorepoint pr. 100 % over timebudget |
+| Grænse: sund / advarsel | 70 / 50 | Farve på score i Top-listerne |
+| Antal i Top-lister | 10 | Top N sunde / usunde kunder |
+
+Check: `/settings`, tab "Beregninger" (admin). Files: `components/settings/settings-agency-section.js`, `app/api/settings/agency/route.js`, `lib/server/agency-settings-data.js`, `lib/db/models/agency-settings.js`.
+
+Still fixed in code (not adjustable): the mock Indeks values (`mockIndeks`), default annual price adjustment (3 %), default notice days (90), NPS "at risk" limit (40).

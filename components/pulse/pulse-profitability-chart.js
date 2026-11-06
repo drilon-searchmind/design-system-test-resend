@@ -5,20 +5,25 @@ import { PulseIconTrendUp } from "@/components/pulse/pulse-icons";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { routes } from "@/config/routes";
 import { agencyDeptColor } from "@/lib/crm/dept-tokens";
-import {
-  PROFITABILITY_PER_EMPLOYEE,
-  computeDeptProfitability,
-} from "@/lib/crm/dept-profitability";
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
+import { DEFAULT_AGENCY_SETTINGS } from "@/lib/crm/agency-settings";
+import { computeDeptProfitability } from "@/lib/crm/dept-profitability";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { usePulseData } from "@/components/pulse/pulse-data-context";
 import { cn } from "@/lib/utils";
 
 export function PulseProfitabilityChart() {
-  const { deptPerformance: rows, departments: DEPARTMENTS, team, period } = usePulseData();
+  const { deptPerformance: rows, departments: DEPARTMENTS, team, period, agencySettings } = usePulseData();
+  const PROFITABILITY_PER_EMPLOYEE =
+    agencySettings?.profitabilityPerEmployee ?? DEFAULT_AGENCY_SETTINGS.profitabilityPerEmployee;
 
   const computed = rows.map((r) => {
     const employees = team.filter((m) => m.dept === r.dept).length;
-    const { target, ratio } = computeDeptProfitability({ employees, soldMrr: r.revenue });
+    const { target, ratio } = computeDeptProfitability({
+      employees,
+      soldMrr: r.revenue,
+      perEmployee: PROFITABILITY_PER_EMPLOYEE,
+    });
     return { ...r, employees, target, ratio };
   });
   const maxBar = Math.max(...computed.map((r) => Math.max(r.revenue, r.target)), 1);
@@ -29,7 +34,7 @@ export function PulseProfitabilityChart() {
       <div id="pulse-profit-heading">
         <PulseCardHeader
           title="Rentabilitet per afdeling"
-          sub={`Medarbejdere × ${PROFITABILITY_PER_EMPLOYEE.toLocaleString("da-DK")} kr ÷ solgt MRR (${period.label.toLowerCase()})`}
+          sub={`Krav ift. solgt MRR (${period.label.toLowerCase()}). Hold musen over procenten for udregningen.`}
         />
       </div>
 
@@ -44,7 +49,7 @@ export function PulseProfitabilityChart() {
             return (
               <div
                 key={r.dept}
-                className="grid grid-cols-1 items-center gap-3 border-b border-border-muted pb-3 last:border-0 last:pb-0 sm:[grid-template-columns:minmax(5rem,7rem)_minmax(0,1fr)_7rem_4rem]"
+                className="grid grid-cols-1 items-center gap-3 border-b border-border-muted pb-3 last:border-0 last:pb-0 sm:[grid-template-columns:minmax(5rem,7rem)_minmax(0,1fr)_4rem]"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -70,22 +75,46 @@ export function PulseProfitabilityChart() {
                   </span>
                 </div>
 
-                <span className="text-[12px] tabular-nums text-fg-muted sm:text-right">
-                  {r.employees} × {formatCurrencyCompact(PROFITABILITY_PER_EMPLOYEE)} ={" "}
-                  {formatCurrencyCompact(r.target)}
-                </span>
-
-                <span
-                  className={cn(
-                    "text-[12px] font-semibold tabular-nums sm:text-right",
-                    r.ratio == null && "text-fg-muted",
-                    r.ratio != null && r.ratio > 1 && "text-agency-bad",
-                    r.ratio != null && r.ratio > 0.9 && r.ratio <= 1 && "text-agency-warn",
-                    r.ratio != null && r.ratio <= 0.9 && "text-agency-ok",
-                  )}
+                <CrmHoverPopover
+                  align="start"
+                  title={`Sådan beregnes ${d?.name ?? r.dept}`}
+                  content={
+                    <div className="space-y-1.5 text-[12px] leading-snug text-fg-muted">
+                      <p>
+                        Krav: {r.employees} medarbejdere ×{" "}
+                        {PROFITABILITY_PER_EMPLOYEE.toLocaleString("da-DK")} kr ={" "}
+                        <span className="font-semibold text-fg">
+                          {Math.round(r.target).toLocaleString("da-DK")} kr
+                        </span>
+                      </p>
+                      <p>
+                        Solgt MRR:{" "}
+                        <span className="font-semibold text-fg">
+                          {Math.round(r.revenue).toLocaleString("da-DK")} kr
+                        </span>
+                      </p>
+                      <p className="border-t border-border-muted pt-1.5">
+                        Rentabilitet = krav ÷ solgt MRR ={" "}
+                        <span className="font-semibold text-fg">
+                          {r.ratio == null ? "— (ingen solgt MRR)" : formatPercent(r.ratio)}
+                        </span>
+                      </p>
+                    </div>
+                  }
+                  className="sm:justify-end"
                 >
-                  {r.ratio == null ? "—" : formatPercent(r.ratio)}
-                </span>
+                  <span
+                    className={cn(
+                      "text-[12px] font-semibold tabular-nums underline decoration-dotted decoration-border underline-offset-2 sm:text-right",
+                      r.ratio == null && "text-fg-muted",
+                      r.ratio != null && r.ratio > 1 && "text-agency-bad",
+                      r.ratio != null && r.ratio > 0.9 && r.ratio <= 1 && "text-agency-warn",
+                      r.ratio != null && r.ratio <= 0.9 && "text-agency-ok",
+                    )}
+                  >
+                    {r.ratio == null ? "—" : formatPercent(r.ratio)}
+                  </span>
+                </CrmHoverPopover>
 
                 <div className="sm:hidden">
                   <PulseUtilBar hours={r.target} budget={Math.max(r.revenue, 1)} />
@@ -105,7 +134,7 @@ export function PulseProfitabilityChart() {
           Solgt MRR
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-3 rounded-sm bg-agency-brand" /> Medarbejdere × {PROFITABILITY_PER_EMPLOYEE.toLocaleString("da-DK")} kr
+          <span className="h-2.5 w-3 rounded-sm bg-agency-brand" /> Krav (medarbejdere)
         </span>
         <span className="inline-flex items-center gap-2 md:ml-auto">
           <PulseIconTrendUp className="text-agency-ok" size={12} />

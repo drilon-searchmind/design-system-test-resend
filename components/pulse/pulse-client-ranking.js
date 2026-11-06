@@ -5,11 +5,11 @@ import { IndeksValue, NpsValue } from "@/components/clients/client-metric-cells"
 import { PulseCardHeader } from "@/components/pulse/pulse-card-header";
 import { usePulseData } from "@/components/pulse/pulse-data-context";
 import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
-import { clientHealthScore } from "@/lib/crm/client-metrics";
+import { DEFAULT_AGENCY_SETTINGS } from "@/lib/crm/agency-settings";
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
+import { clientHealthBreakdown } from "@/lib/crm/client-metrics";
 import { formatHoursBudgetPairDa } from "@/lib/crm/format-da";
 import { cn } from "@/lib/utils";
-
-const TOP_N = 10;
 
 /**
  * Top 10 sunde / usunde kunder ud fra Indeks, NPS og tidsforbrug ift. retainer.
@@ -17,17 +17,19 @@ const TOP_N = 10;
  * @param {{ kind: 'healthy' | 'unhealthy' }} props
  */
 export function PulseClientRanking({ kind }) {
-  const { clients } = usePulseData();
+  const { clients, agencySettings } = usePulseData();
+  const settings = agencySettings ?? DEFAULT_AGENCY_SETTINGS;
+  const topN = settings.topClientsCount;
   const healthy = kind === "healthy";
 
   const rows = useMemo(() => {
     const scored = buildCustomerEntities(clients)
       .filter((c) => c.status === "active")
-      .map((c) => ({ client: c, score: clientHealthScore(c) }))
+      .map((c) => ({ client: c, ...clientHealthBreakdown(c, settings) }))
       .sort((a, b) => b.score - a.score || a.client.name.localeCompare(b.client.name, "da"));
-    const picked = healthy ? scored.slice(0, TOP_N) : scored.slice(-TOP_N).reverse();
+    const picked = healthy ? scored.slice(0, topN) : scored.slice(-topN).reverse();
     return picked;
-  }, [clients, healthy]);
+  }, [clients, healthy, settings, topN]);
 
   return (
     <section
@@ -36,8 +38,8 @@ export function PulseClientRanking({ kind }) {
     >
       <div id={`pulse-top-${kind}-heading`}>
         <PulseCardHeader
-          title={healthy ? "Top 10 sunde kunder" : "Top 10 usunde kunder"}
-          sub="Score ud fra Indeks, NPS og tid brugt i forhold til MRR retainer"
+          title={healthy ? `Top ${topN} sunde kunder` : `Top ${topN} usunde kunder`}
+          sub="Hold musen over scoren for udregningen."
         />
       </div>
 
@@ -53,7 +55,7 @@ export function PulseClientRanking({ kind }) {
               <span>Tid brugt</span>
               <span className="text-right">Score</span>
             </div>
-            {rows.map(({ client: c, score }, i) => (
+            {rows.map(({ client: c, total: score, parts }, i) => (
               <Link
                 key={c.id}
                 href={customerHref(c)}
@@ -71,16 +73,38 @@ export function PulseClientRanking({ kind }) {
                 >
                   {formatHoursBudgetPairDa(c.hoursThisMonth, c.hoursBudget)}
                 </span>
+                <CrmHoverPopover
+                  align="start"
+                  title={`Sundhedsscore · ${c.name}`}
+                  content={
+                    <div className="space-y-1.5 text-[12px] leading-snug text-fg-muted">
+                      {parts.map((p) => (
+                        <p key={p.label} className="flex justify-between gap-3">
+                          <span>
+                            {p.label} <span className="text-fg-quiet">({p.weightPct} %)</span>
+                          </span>
+                          <span className="font-semibold tabular-nums text-fg">{p.score}</span>
+                        </p>
+                      ))}
+                      <p className="border-t border-border-muted pt-1.5">
+                        Score = vægtet gennemsnit af Indeks, NPS og tid brugt ift. MRR retainer ={" "}
+                        <span className="font-semibold text-fg">{score}</span>
+                      </p>
+                    </div>
+                  }
+                  className="justify-end"
+                >
                 <span
                   className={cn(
-                    "text-right font-semibold tabular-nums",
-                    score >= 70 && "text-agency-ok",
-                    score >= 50 && score < 70 && "text-agency-warn",
-                    score < 50 && "text-agency-bad",
+                    "text-right font-semibold tabular-nums underline decoration-dotted decoration-border underline-offset-2",
+                    score >= settings.healthyThreshold && "text-agency-ok",
+                    score >= settings.warnThreshold && score < settings.healthyThreshold && "text-agency-warn",
+                    score < settings.warnThreshold && "text-agency-bad",
                   )}
                 >
                   {score}
                 </span>
+                </CrmHoverPopover>
               </Link>
             ))}
           </div>

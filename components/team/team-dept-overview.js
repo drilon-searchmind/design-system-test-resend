@@ -1,3 +1,4 @@
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { cn } from "@/lib/utils";
 
@@ -13,9 +14,6 @@ export function TeamDeptOverview({ snapshots }) {
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Discipliner · roster vs. referencetloft
         </h2>
-        <p className="font-sans text-[11px] text-fg-muted">
-          Σ kontrakteret uge / (månedskap. ÷ 4,33) — til capacity‑dialog.
-        </p>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -42,19 +40,33 @@ export function TeamDeptOverview({ snapshots }) {
                   {dept.short}
                 </span>
               </div>
-              <div className="text-[11px] tabular-nums text-fg-muted">
-                Σ <span className="text-fg">{weeklyHours}</span>{" "}
-                <span className="text-fg-quiet">/</span>{" "}
-                <span>{approxWeeklyDeptCapacity}</span>
-                {" h/uge "}·{" "}
+              <CrmHoverPopover
+                align="start"
+                title={`Bemanding · ${dept.name}`}
+                content={
+                  <div className="space-y-1.5 text-[12px] leading-snug text-fg-muted">
+                    <p>
+                      Kontrakteret tid: <span className="font-semibold text-fg">{weeklyHours} t/uge</span>
+                    </p>
+                    <p>
+                      Reference-loft (månedskapacitet ÷ 4,33):{" "}
+                      <span className="font-semibold text-fg">{approxWeeklyDeptCapacity} t/uge</span>
+                    </p>
+                    <p className="border-t border-border-muted pt-1.5">
+                      Bemanding = kontrakteret ÷ loft = <span className="font-semibold text-fg">{staffingPct}%</span>
+                    </p>
+                  </div>
+                }
+              >
                 <span
                   className={cn(
+                    "text-[11px] tabular-nums underline decoration-dotted decoration-border underline-offset-2",
                     ratio > 1 ? "font-semibold text-agency-warn" : ratio > 0.92 ? "text-agency-ok" : "text-fg-quiet",
                   )}
                 >
-                  {staffingPct}%
+                  {staffingPct}% bemandet
                 </span>
-              </div>
+              </CrmHoverPopover>
               {headcount > 0 ? (
                 <PulseUtilBar hours={weeklyHours} budget={approxWeeklyDeptCapacity} />
               ) : (

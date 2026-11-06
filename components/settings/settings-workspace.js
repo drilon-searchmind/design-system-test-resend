@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import { DataSourcePreference } from "@/components/settings/data-source-preference";
+import { SettingsAgencySection } from "@/components/settings/settings-agency-section";
 import { SettingsAdminSection } from "@/components/settings/settings-admin-section";
 import { SettingsClickUpSyncSection } from "@/components/settings/settings-clickup-sync-section";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
@@ -11,6 +12,7 @@ import { tallyEyebrow } from "@/lib/ui/tally-chrome";
 
 const SETTINGS_TABS = [
   { id: "general", label: "Generelt" },
+  { id: "beregninger", label: "Beregninger" },
   { id: "clickup", label: "ClickUp sync" },
 ];
 
@@ -38,7 +40,9 @@ export function SettingsWorkspace() {
         <PulseSegmentedControl active={tab} onChange={setTab} tabs={visibleTabs} className="max-w-md" />
       : null}
 
-      {tab === "clickup" && isAdmin ?
+      {tab === "beregninger" && isAdmin ?
+        <SettingsAgencySection />
+      : tab === "clickup" && isAdmin ?
         <SettingsClickUpSyncSection />
       : <>
           <DataSourcePreference />
