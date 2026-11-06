@@ -133,9 +133,26 @@ Mirrors the colleague's list, item by item.
 
 ---
 
-## Still open overall
+## Still missing / to do
 
-- ⬜ Visual check in the browser of Pulse, client detail and the contract dialog.
-- ⬜ Real Apex Indeks.
-- ⬜ Real PDF file generation.
-- ⬜ Two `owner: "Drilon"` entries remain in `feature-status-data.js`.
+### Data and integrations
+- ⬜ **Apex Indeks:** connect the real Apex YoY (last 30 days) figure. Indeks is mock data today (`mockIndeks`), so the health score and the Top 10 sunde/usunde lists are only partly real.
+- ⬜ **Sold MRR per department:** the profitability chart uses allocation % of each retainer. In the real database most allocations are empty, so the chart looks empty. Needs real sold-MRR data per department (or a decision to use service budgets instead).
+- ⬜ **Real database:** the new demo data is only in the demo data source. Loading it into the database needs `npm run reset-demo`, which wipes everything except users, so it has not been run.
+- ⬜ **Postmark:** a real contract send (e-mail with signing link) has not been tested end to end.
+
+### Decisions needed
+- ⬜ **180.000 per employee:** confirm with the colleague whether it is per month or per year, whether it is the same for every department, and which way the ratio should read (target / sold MRR, as written, or the reverse). See `lib/crm/dept-profitability.js`.
+- ⬜ **"Web (engangs)" on recurring contracts:** it is currently added into the monthly total. Decide whether to keep it separate.
+- ⬜ **Upsell route:** we recommend a new contract for existing customers. Confirm that is what the colleague wants instead of an amendment.
+
+### Features not done
+- ⬜ **Real PDF files:** the "PDF" is a printable HTML page (save as PDF in the browser). No generated PDF file.
+- ⬜ **Signing an upsell contract:** it does not update the existing client's service budgets or web / service-agreement amounts. Only the contract value counts.
+- ⬜ **Koncern pages:** group pages (`/clients/koncern/<cvr>`) cannot edit amounts or services.
+
+### Checks and cleanup
+- ⬜ **Visual check in the browser:** Pulse, Kunder list, client detail and the contract dialog have not been looked at.
+- ⬜ **Lint errors in other files:** `components/templates` has existing `set-state-in-effect` lint errors that were not part of this work.
+- ⬜ **Drilon:** two `owner: "Drilon"` entries remain in `feature-status-data.js`.
+- ⬜ **Stray file:** `scripts/_tail.txt` is a leftover and can be deleted.
