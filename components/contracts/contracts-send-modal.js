@@ -161,7 +161,7 @@ export function ContractsSendModal({
       services.map((key) => ({
         key,
         name:
-          key === "web"
+          key === "oneoff-web"
             ? "Web"
             : (departments.find((d) => d.key === key)?.name ?? key),
         amount: parseAmount(amounts[key] ?? "") ?? 0,
@@ -279,7 +279,7 @@ export function ContractsSendModal({
           templateId: templateId || undefined,
           label: label.trim() || undefined,
           type,
-          servicesActive: services.filter((k) => k !== "web"),
+          servicesActive: services.filter((k) => k !== "oneoff-web"),
           serviceLines: lines.map((l) => ({ key: l.key, amount: l.amount })),
           value: total > 0 ? total : parseAmount(value),
           currency,
@@ -584,7 +584,7 @@ export function ContractsSendModal({
                       Ingen afdelinger oprettet
                     </span>
                   ) : (
-                    [...departments, { key: "web", name: "Web (engangs)" }].map(
+                    [...departments, { key: "oneoff-web", name: "Web (engangs)" }].map(
                       (d) => {
                         const on = services.includes(d.key);
                         return (
@@ -616,7 +616,7 @@ export function ContractsSendModal({
                       >
                         <span className="min-w-0 flex-1 truncate">
                           {l.name}
-                          {l.key === "web" || !recurring
+                          {l.key === "oneoff-web" || !recurring
                             ? " (engang)"
                             : " (kr/md)"}
                         </span>

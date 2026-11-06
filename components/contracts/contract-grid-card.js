@@ -78,7 +78,7 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
             Fornyelse
           </div>
           <div className="text-[12px] tabular-nums text-fg">{formatIsoDateDa(row.renewalAt)}</div>
-          {row.accountStatus === "active" ? (
+          {row.accountStatus === "active" && Number.isFinite(days) ? (
             <div
               className={cn(
                 "mt-0.5 text-[10px] tabular-nums",

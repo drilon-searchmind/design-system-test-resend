@@ -288,7 +288,7 @@ export function ContractsDirectory({
                     <span className="text-[12px] tabular-nums text-fg">
                       {formatIsoDateDa(row.renewalAt)}
                     </span>
-                    {row.accountStatus === "active" ? (
+                    {row.accountStatus === "active" && Number.isFinite(days) ? (
                       <span
                         className={cn(
                           "text-[10px] tabular-nums",
