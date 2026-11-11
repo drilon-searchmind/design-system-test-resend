@@ -24,7 +24,7 @@ Mirrors the colleague's list, item by item.
 ### ✅ "Alle kunder": "Allokering" replaced by "Indeks"
 - **Where:** `/pulse`, the "Alle kunder" table
 - **Files:** same as above, plus `components/clients/client-metric-cells.js`
-- 🟡 Indeks is now synced from Apex (code done); live once the env vars are set and the first sync has run. Demo data still uses mock values.
+- ✅ Indeks is synced from Apex and working (env vars set, sync run). Demo data still uses mock values.
 - ✅ Apex Indeks sync built (`lib/server/apex-indeks-sync.js`, button in Indstillinger → Beregninger, cron via `/api/cron`).
 
 ### ✅ "Top 10 sunde kunder" + "Top 10 usunde kunder", chart pushed down
@@ -136,7 +136,7 @@ Mirrors the colleague's list, item by item.
 ## Still missing / to do
 
 ### Data and integrations
-- 🟡 **Apex Indeks:** code done. Still to do: set `APEX_BASE_URL` + `CRM_INDEKS_API_KEY`, schedule `/api/cron`, run the first sync, and fix the Apex customers with GA4 access errors.
+- ✅ **Apex Indeks:** connected and working (sync, storage, display, stale warning, manual sync button).`n- ⬜ **Apex Indeks follow-ups:** schedule `/api/cron` daily after 06:00 Copenhagen with `Authorization: Bearer <CRON_SECRET>`, set `APEX_BASE_URL` + `CRM_INDEKS_API_KEY` in production, and fix the Apex customers with GA4 access errors (they show "–").
 - ⬜ **Sold MRR per department:** the profitability chart uses allocation % of each retainer. In the real database most allocations are empty, so the chart looks empty. Needs real sold-MRR data per department (or a decision to use service budgets instead).
 - ⬜ **Real database:** the new demo data is only in the demo data source. Loading it into the database needs `npm run reset-demo`, which wipes everything except users, so it has not been run.
 - ⬜ **Postmark:** a real contract send (e-mail with signing link) has not been tested end to end.
@@ -172,4 +172,4 @@ Admin only. Saved in the database (`AgencySettings` collection, one document). D
 
 Check: `/settings`, tab "Beregninger" (admin). Files: `components/settings/settings-agency-section.js`, `app/api/settings/agency/route.js`, `lib/server/agency-settings-data.js`, `lib/db/models/agency-settings.js`.
 
-Still fixed in code (not adjustable): the mock Indeks values (`mockIndeks`), default annual price adjustment (3 %), default notice days (90), NPS "at risk" limit (40).
+Still fixed in code (not adjustable): the mock Indeks values (`mockIndeks`, demo data only), default annual price adjustment (3 %), default notice days (90), NPS "at risk" limit (40).
