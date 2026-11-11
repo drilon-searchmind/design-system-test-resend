@@ -7,7 +7,7 @@ import { defaultGroupName, normalizeCvr } from "@/lib/crm/client-groups";
 import { cn } from "@/lib/utils";
 
 /**
- * Gruppér eksisterende kunder: de valgte brands får samme CVR og bliver én koncern.
+ * Gruppér eksisterende kunder: de valgte brands får samme CVR og bliver én kundegruppe.
  *
  * @param {{
  *   clients: import('@/lib/crm/pulse-types').PulseClient[];
@@ -29,7 +29,7 @@ export function ClientsGroupForm({ clients, submitting = false, error = null, on
   );
 
   // Foreslå CVR/navn ud fra valget; brugerens egne rettelser vinder.
-  // Kun hvis ALLE valgte deler samme CVR; ellers laves en manuel koncern på tværs af CVR'er.
+  // Kun hvis ALLE valgte deler samme CVR; ellers laves en manuel kundegruppe på tværs af CVR'er.
   const suggestedCvr = useMemo(() => {
     if (selectedClients.length < 2) return "";
     const keys = new Set(selectedClients.map((c) => normalizeCvr(c.cvr)));
@@ -78,7 +78,7 @@ export function ClientsGroupForm({ clients, submitting = false, error = null, on
       }}
     >
       <p className="font-sans text-[12.5px] leading-snug text-fg-muted">
-        Vælg to eller flere kunder, der skal fungere som én kunde (koncern) med samlet MRR — hvert
+        Vælg to eller flere kunder, der skal fungere som én kunde (kundegruppe) med samlet MRR — hvert
         brand beholder sine egne opgaver, timer og kontrakter. Har de samme CVR, så udfyld det; har de
         forskellige CVR&apos;er (flere selskaber under samme kunde), så lad CVR stå tomt — hvert brand
         beholder sit eget CVR.
@@ -87,7 +87,7 @@ export function ClientsGroupForm({ clients, submitting = false, error = null, on
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
-            Koncernnavn
+            Kundegruppenavn
           </span>
           <input
             value={name}
@@ -181,7 +181,7 @@ export function ClientsGroupForm({ clients, submitting = false, error = null, on
           disabled={!canSubmit}
           className="inline-flex h-[34px] items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-4 font-sans text-[13px] font-medium text-agency-brand disabled:opacity-40"
         >
-          {submitting ? "Grupperer…" : "Opret koncern"}
+          {submitting ? "Grupperer…" : "Opret kundegruppe"}
         </button>
       </div>
     </form>

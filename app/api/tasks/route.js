@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { assigneeMemberKeyForDbUser } from "@/lib/server/session-team-member";
@@ -12,7 +13,7 @@ export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
@@ -34,7 +35,7 @@ export async function POST(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @type {Record<string, unknown>} */
   let body = {};

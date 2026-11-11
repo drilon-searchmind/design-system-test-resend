@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { deleteTaskMongo, fetchTaskDetailBundle, updateTaskMongo } from "@/lib/server/tasks-data";
@@ -13,7 +14,7 @@ export async function GET(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { taskId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
   const expectedParentTaskId = req.nextUrl.searchParams.get("parentTaskId")?.trim() ?? "";
 
@@ -47,7 +48,7 @@ export async function PATCH(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { taskId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @type {Record<string, unknown>} */
   let body = {};
@@ -78,7 +79,7 @@ export async function DELETE(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { taskId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const res = await deleteTaskMongo(taskId, includeTest);

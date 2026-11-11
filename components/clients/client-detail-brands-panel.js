@@ -10,8 +10,8 @@ import { routes } from "@/config/routes";
 import { formatCurrencyCompact, formatHoursBudgetPairDa } from "@/lib/crm/format-da";
 
 /**
- * Brands under en koncern. Hvert brand er en selvstændig kunde (opgaver, timer, kontrakter),
- * men MRR og nøgletal samles på koncernen.
+ * Brands under en kundegruppe. Hvert brand er en selvstændig kunde (opgaver, timer, kontrakter),
+ * men MRR og nøgletal samles på kundegruppen.
  *
  * @param {{
  *   brands: Array<Record<string, any>>;

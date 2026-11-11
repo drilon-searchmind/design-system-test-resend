@@ -6,7 +6,7 @@ import { formatCurrencyCompact } from "@/lib/crm/format-da";
  * @param {{ clients: import('@/lib/crm/pulse-types').PulseClient[] }} props
  */
 export function ClientsSummaryStrip({ clients: brands }) {
-  // Koncerner (brands med samme CVR) tæller som én kunde.
+  // Kundegrupper (brands med samme CVR) tæller som én kunde.
   const clients = buildCustomerEntities(brands);
   const activeClients = clients.filter((c) => c.status === "active");
   const activeRetainerDkk = activeClients.reduce((sum, c) => sum + (c.currency === "DKK" ? c.retainer : 0), 0);

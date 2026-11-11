@@ -240,7 +240,7 @@ export function ContractsDirectory({
                         {row.clientName}
                       </div>
                       <div className="truncate text-[11px] text-fg-quiet">
-                        {row.groupName ? <span className="font-medium text-agency-brand">Koncern · {row.groupName} · </span> : null}
+                        {row.groupName ? <span className="font-medium text-agency-brand">Kundegruppe · {row.groupName} · </span> : null}
                         {row.prospect ? <span className="font-medium text-agency-warn">Ny kunde · </span> : null}
                         {row.kind}
                         {row.documentUrl ? (

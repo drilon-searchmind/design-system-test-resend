@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { fetchClientGroupDetailBundle, updateClientGroupMongo } from "@/lib/server/client-groups-data";
@@ -13,7 +14,7 @@ export async function GET(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { cvr } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
@@ -28,7 +29,7 @@ export async function GET(req, ctx) {
     }
     return NextResponse.json(bundle);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Kunne ikke hente koncern";
+    const message = err instanceof Error ? err.message : "Kunne ikke hente kundegruppe";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -42,7 +43,7 @@ export async function PATCH(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { cvr } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const body = await req.json();
@@ -52,7 +53,7 @@ export async function PATCH(req, ctx) {
     }
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Kunne ikke opdatere koncern";
+    const message = err instanceof Error ? err.message : "Kunne ikke opdatere kundegruppe";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

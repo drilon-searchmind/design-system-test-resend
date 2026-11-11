@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { createClientGroupMongo } from "@/lib/server/client-groups-data";
@@ -11,7 +12,7 @@ export async function POST(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const body = await req.json();
@@ -21,7 +22,7 @@ export async function POST(req) {
     }
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Kunne ikke oprette koncern";
+    const message = err instanceof Error ? err.message : "Kunne ikke oprette kundegruppe";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -65,7 +65,7 @@ export function ClientsDirectory({
   const layoutDensity = useDensity();
   const showCvr = layoutDensity === "spacious";
 
-  // Koncerner (brands med samme CVR) vises som én kunde-række med udfoldelige brands.
+  // Kundegrupper (brands med samme CVR) vises som én kunde-række med udfoldelige brands.
   const customers = useMemo(() => buildCustomerEntities(CLIENTS), [CLIENTS]);
   const [expanded, setExpanded] = useState(() => new Set());
   const toggleExpanded = (id) =>
@@ -284,7 +284,7 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
           <div className="truncate font-sans text-[13px] font-medium text-fg">{c.name}</div>
           <div className="truncate font-sans text-[11px] text-fg-quiet">
             {c.isGroup ?
-              <span className="font-medium text-agency-brand">Koncern · {c.groupSize} brands</span>
+              <span className="font-medium text-agency-brand">Kundegruppe · {c.groupSize} brands</span>
             : <>
                 {showCvr && c.cvr ?
                   <>

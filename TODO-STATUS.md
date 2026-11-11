@@ -232,3 +232,10 @@ The four static sparkline images were replaced (`components/pulse/pulse-kpi-visu
 - Demo: one new client (Matr. Arkitekter), one churn (Blaa Planet) and one fixed MRR increase (Kystlinjen) in the current month.
 
 **Notes:** the bridge relies on `startedAt` / `terminatedAt` on clients. "Churn" = non-active clients terminated in the period (uses their retainer). Utilisation/overhead deltas were already real (previous-month hours).
+
+## Testkunde (new)
+
+- ✅ **Test customer Testkunde ApS** (slug c-testkunde-aps, all rows isTest=true): MRR 28.000 (retainer 12.000 + active contract 16.000), service budgets, web one-off 20.000, annual service agreement 24.000, 4 contracts (active / pending signature / ended project / one-off), 3 upsells (one-time, temporary, MRR increase), commercial log, Apex indeks, 3 contacts, owner + department assignees (real team members), 13 tasks (all statuses, sub-tasks, comments), 26 time entries, 4 NPS responses, 4 notes. NPS sending is disabled for it.
+- ✅ **Global toggle** in Indstillinger → Beregninger → *Testkunde* (switch, per browser via cookie crm_include_test). On = all API routes include test data (MRR, Pulse, tasks, time, contracts, NPS, calendar, workload …); off = hidden and not counted. Admin buttons: create / recreate / delete.
+- Test: open Indstillinger → Testkunde → (already created in the DB; click *Genopret* for fresh dates) → switch ON → Kunder list, Pulse MRR (+28.000), Opgaver, Kontrakter, NPS now include it → switch OFF → gone again.
+- Notes: the toggle is per browser, not global for colleagues. Demo (eksempeldata) mode is unaffected. Recreate refreshes the relative dates.

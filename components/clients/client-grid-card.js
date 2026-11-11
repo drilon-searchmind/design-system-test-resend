@@ -37,7 +37,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{client.name}</div>
           <div className="truncate font-sans text-[11px] text-fg-quiet">
-            {client.isGroup ? `Koncern · ${client.groupSize} brands` : client.industry}
+            {client.isGroup ? `Kundegruppe · ${client.groupSize} brands` : client.industry}
           </div>
         </div>
       </div>

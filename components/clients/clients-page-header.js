@@ -37,13 +37,13 @@ export function ClientsPageHeader({
   if (loading && !clients) {
     bodyLine = "Indlæser portefølje…";
   } else if (clients && clients.length > 0) {
-    // Koncerner (samme CVR) tæller som én kunde.
+    // Kundegrupper (samme CVR) tæller som én kunde.
     const customers = buildCustomerEntities(clients);
     const groupCount = customers.filter((c) => c.isGroup).length;
     const unhealthy = customers.filter((c) => c.health !== "ok").length;
     const overBudget = customers.filter((c) => c.hoursBudget > 0 && c.hoursThisMonth > c.hoursBudget).length;
     bodyLine = `${customers.length} kunder i porteføljen`;
-    if (groupCount > 0) bodyLine += ` (heraf ${groupCount} ${groupCount === 1 ? "koncern" : "koncerner"})`;
+    if (groupCount > 0) bodyLine += ` (heraf ${groupCount} ${groupCount === 1 ? "kundegruppe" : "kundegrupper"})`;
     if (unhealthy > 0) bodyLine += ` · ${unhealthy} med sundhedsadvarsler`;
     if (overBudget > 0) bodyLine += ` · ${overBudget} over timebudget`;
   } else if (clients?.length === 0) {

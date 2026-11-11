@@ -49,7 +49,7 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{row.clientName}</div>
           <div className="truncate text-[11px] text-fg-quiet">
-            {row.groupName ? <span className="font-medium text-agency-brand">Koncern · {row.groupName} · </span> : null}
+            {row.groupName ? <span className="font-medium text-agency-brand">Kundegruppe · {row.groupName} · </span> : null}
             {row.prospect ? <span className="font-medium text-agency-warn">Ny kunde · </span> : null}
             {row.kind}
           </div>

@@ -37,7 +37,7 @@ export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "kvalitet", label: "NPS & kvalitet" },
 ];
 
-/** Kun for koncerner — indsættes efter "Overblik". */
+/** Kun for kundegrupper — indsættes efter "Overblik". */
 const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
 
 /**
@@ -113,7 +113,7 @@ export function ClientDetailTabbedBody({
   const tabDefs = isGroup ?
       [CLIENT_DETAIL_TAB_DEFS[0], CLIENT_DETAIL_TAB_DEFS[1], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(2)]
     : CLIENT_DETAIL_TAB_DEFS;
-  // Alerts ligger pr. brand — vis dem under koncernens id.
+  // Alerts ligger pr. brand — vis dem under kundegruppens id.
   const visibleAlerts =
     isGroup ?
       (() => {

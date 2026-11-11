@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { fetchContractsPortfolio } from "@/lib/server/contracts-data";
@@ -11,7 +12,7 @@ export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {

@@ -232,7 +232,7 @@ export function ClientsPortfolio() {
         <div className="flex max-h-[min(92vh,820px)] flex-col">
           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Koncern</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kundegruppe</p>
               <h2 className="font-sans text-[17px] font-semibold leading-snug text-fg md:text-[18px]">
                 Gruppér kunder
               </h2>

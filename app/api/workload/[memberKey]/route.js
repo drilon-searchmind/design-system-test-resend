@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { requireSession } from "@/lib/server/require-session";
@@ -15,7 +16,7 @@ export async function GET(req, ctx) {
   const { memberKey: memberKeyEncoded } = await ctx.params;
   const memberKey = decodeURIComponent(memberKeyEncoded ?? "");
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {

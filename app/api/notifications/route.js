@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import {
@@ -13,7 +14,7 @@ export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const limitRaw = req.nextUrl.searchParams.get("limit");
   const limit = limitRaw != null ? Number.parseInt(limitRaw, 10) : undefined;
 
@@ -36,7 +37,7 @@ export async function PATCH(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @type {Record<string, unknown>} */
   let body = {};

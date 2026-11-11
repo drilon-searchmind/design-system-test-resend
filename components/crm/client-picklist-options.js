@@ -1,5 +1,5 @@
 /**
- * `<option>`-liste til kunde-vælgere: brands med koncern vises under `<optgroup label="Koncern · …">`.
+ * `<option>`-liste til kunde-vælgere: brands med kundegruppe vises under `<optgroup label="Kundegruppe · …">`.
  * Valget er stadig ét brand (opgaver, tid og kontrakter hører til brandet).
  *
  * @param {{ items: { value: string; label: string; group?: string | null; disabled?: boolean }[] }} props
@@ -29,7 +29,7 @@ export function ClientPicklistOptions({ items }) {
       <option key={entry.item.value} value={entry.item.value} disabled={entry.item.disabled}>
         {entry.item.label}
       </option>
-    : <optgroup key={`g-${entry.name}`} label={`Koncern · ${entry.name}`}>
+    : <optgroup key={`g-${entry.name}`} label={`Kundegruppe · ${entry.name}`}>
         {(groups.get(entry.name) ?? []).map((item) => (
           <option key={item.value} value={item.value} disabled={item.disabled}>
             {item.label}

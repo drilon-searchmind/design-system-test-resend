@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { SettingsApexIndeksPanel } from "@/components/settings/settings-apex-indeks-panel";
+import { SettingsTestCustomerPanel } from "@/components/settings/settings-test-customer-panel";
 import {
   AGENCY_SETTING_FIELDS,
   DEFAULT_AGENCY_SETTINGS,
@@ -121,6 +122,8 @@ export function SettingsAgencySection() {
           workspacet (database-kilden). Eksempeldata bruger altid standardværdierne.
         </p>
       </div>
+
+      <SettingsTestCustomerPanel />
 
       <SettingsApexIndeksPanel />
 

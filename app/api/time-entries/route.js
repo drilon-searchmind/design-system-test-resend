@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { createTimeEntryMongo, fetchTimeEntriesPortfolio } from "@/lib/server/time-entries-data";
@@ -26,7 +27,7 @@ export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @typedef {{ year: number; month: number }} RP */
   /** @type {RP | null} */
@@ -187,7 +188,7 @@ export async function POST(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @type {Record<string, unknown>} */
   let body = {};

@@ -135,7 +135,7 @@ function NpsGroupHeaderRow({ entry }) {
         >
           {entry.name}
         </Link>
-        <span className="block text-[10px] text-agency-brand">Koncern · {summary.brandCount} brands</span>
+        <span className="block text-[10px] text-agency-brand">Kundegruppe · {summary.brandCount} brands</span>
       </div>
       <span className={cn("text-[13px] font-semibold tabular-nums", scoreToneClass(summary.latest?.score ?? null))}>
         {summary.latest?.score ?? "—"}
@@ -157,7 +157,7 @@ function NpsGroupHeaderRow({ entry }) {
         : <span className="text-[10px] text-fg-quiet">—</span>}
       </div>
       <span className="col-span-4 font-sans text-[10px] text-fg-quiet">
-        Samlet NPS for koncernen · udsendelse styres pr. brand nedenfor
+        Samlet NPS for kundegruppen · udsendelse styres pr. brand nedenfor
       </span>
     </div>
   );
@@ -332,7 +332,7 @@ export function NpsClientsDirectory({
     return list;
   }, [rows, q, filter, sort]);
 
-  /** Flad liste: koncern-headere efterfulgt af deres brands (grupperet efter første forekomst). */
+  /** Flad liste: kundegruppe-headere efterfulgt af deres brands (grupperet efter første forekomst). */
   const flat = useMemo(() => {
     /** @type {({ type: "header"; key: string; name: string; summary: ReturnType<typeof summarizeGroup> } | { type: "row"; row: (typeof filtered)[number]; nested: boolean })[]} */
     const out = [];
@@ -452,7 +452,7 @@ export function NpsClientsDirectory({
                   href={clientGroupHref(r.client.groupCvr)}
                   className="mt-1 block font-sans text-[10px] font-medium text-agency-brand hover:underline"
                 >
-                  Koncern · {r.client.groupName}
+                  Kundegruppe · {r.client.groupName}
                 </Link>
               : null}
               <div className="mt-2">

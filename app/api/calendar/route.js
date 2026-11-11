@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import {
@@ -13,7 +14,7 @@ export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const includeGoogle = req.nextUrl.searchParams.get("includeGoogle") !== "0";
   const timeMin = req.nextUrl.searchParams.get("timeMin") ?? "";
   const timeMax = req.nextUrl.searchParams.get("timeMax") ?? "";

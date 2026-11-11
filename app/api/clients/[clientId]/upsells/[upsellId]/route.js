@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { deleteUpsell } from "@/lib/server/upsell-data";
@@ -13,7 +14,7 @@ export async function DELETE(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { clientId, upsellId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   try {
     const result = await deleteUpsell(clientId, includeTest, upsellId);
     if ("error" in result) return NextResponse.json({ error: result.error }, { status: result.status ?? 400 });

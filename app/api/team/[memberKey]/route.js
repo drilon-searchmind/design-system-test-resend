@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { patchTeamMemberDepartment } from "@/lib/server/team-member-dept-data";
@@ -13,7 +14,7 @@ export async function PATCH(req, ctx) {
 
   const { memberKey: memberKeyEncoded } = await ctx.params;
   const memberKey = decodeURIComponent(memberKeyEncoded ?? "");
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const body = await req.json();

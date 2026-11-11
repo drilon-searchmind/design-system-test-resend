@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import {
@@ -15,7 +16,7 @@ export async function PATCH(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { templateId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const body = await req.json();
@@ -43,7 +44,7 @@ export async function DELETE(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { templateId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const result = await deleteContractTemplate({ templateId, includeTest });

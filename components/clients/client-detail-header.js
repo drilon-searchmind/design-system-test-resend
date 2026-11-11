@@ -83,7 +83,7 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
           </span>
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-              {client.isGroup ? `Koncern · ${client.groupSize} brands` : "Kunde"}
+              {client.isGroup ? `Kundegruppe · ${client.groupSize} brands` : "Kunde"}
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">
@@ -138,7 +138,7 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
                   href={group.href ?? clientGroupHref(group.cvr)}
                   className="inline-flex items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2.5 py-0.5 font-sans text-[11px] font-medium text-agency-brand hover:underline"
                 >
-                  Del af koncern: {group.name}
+                  Del af kundegruppe: {group.name}
                 </Link>
               : null}
             </div>

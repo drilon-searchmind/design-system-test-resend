@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { fetchClientDetailBundle } from "@/lib/server/client-detail-data";
@@ -14,7 +15,7 @@ export async function GET(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { clientId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
@@ -47,7 +48,7 @@ export async function PATCH(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { clientId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const body = await req.json();

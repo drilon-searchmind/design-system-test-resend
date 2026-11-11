@@ -6,7 +6,7 @@ import { clientEditInputClass } from "@/components/clients/client-detail-edit-ac
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 
 /**
- * Omdøb en koncern (hovedkundens navn). Gemmes i `ClientGroup`.
+ * Omdøb en kundegruppe (hovedkundens navn). Gemmes i `ClientGroup`.
  * @param {{ cvr: string; name: string; onRenamed: () => void | Promise<void> }} props
  */
 export function ClientGroupRename({ cvr, name, onRenamed }) {
@@ -50,7 +50,7 @@ export function ClientGroupRename({ cvr, name, onRenamed }) {
         }}
         className="inline-flex h-9 items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[12px] font-semibold text-agency-brand transition-colors hover:bg-agency-brand-soft/80"
       >
-        Omdøb koncern
+        Omdøb kundegruppe
       </button>
     );
   }
@@ -66,7 +66,7 @@ export function ClientGroupRename({ cvr, name, onRenamed }) {
             if (e.key === "Escape") setEditing(false);
           }}
           autoFocus
-          aria-label="Koncernnavn"
+          aria-label="Kundegruppenavn"
           className={clientEditInputClass}
         />
         <button

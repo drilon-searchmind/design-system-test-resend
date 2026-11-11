@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { createUpsell } from "@/lib/server/upsell-data";
@@ -13,7 +14,7 @@ export async function POST(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { clientId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
   try {
     const body = await req.json();
     const result = await createUpsell(clientId, includeTest, body, {

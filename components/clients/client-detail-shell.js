@@ -38,7 +38,7 @@ import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 /**
- * @param {{ clientSlug: string; groupCvr?: string }} props `groupCvr` = vis koncern (alle brands med samme CVR) i stedet for ét brand.
+ * @param {{ clientSlug: string; groupCvr?: string }} props `groupCvr` = vis kundegruppe (alle brands med samme CVR) i stedet for ét brand.
  */
 export function ClientDetailShell({ clientSlug, groupCvr }) {
   const router = useRouter();
@@ -69,7 +69,7 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        // Koncernen er opløst (kun ét brand tilbage) → gå til brandets egen side.
+        // Kundegruppen er opløst (kun ét brand tilbage) → gå til brandets egen side.
         if (typeof data?.redirectSlug === "string" && data.redirectSlug) {
           router.replace(`${routes.clients}/${encodeURIComponent(data.redirectSlug)}`);
           return;
@@ -179,7 +179,7 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
   const demoClient = demoGroupClient ?? demoSingle ?? undefined;
   const demoGroupInfo =
     demoSingle?.groupCvr ?
-      { cvr: demoSingle.groupCvr, name: demoSingle.groupName ?? "Koncern" }
+      { cvr: demoSingle.groupCvr, name: demoSingle.groupName ?? "Kundegruppe" }
     : null;
   const demoBrandIds = demoGroupClient ? demoGroupClient.brands.map((b) => b.id) : [clientSlug];
 

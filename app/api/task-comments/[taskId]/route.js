@@ -1,3 +1,4 @@
+import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { createTaskComment, fetchTaskComments } from "@/lib/server/task-comments-data";
@@ -12,7 +13,7 @@ export async function GET(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { taskId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   try {
     const res = await fetchTaskComments(taskId, includeTest);
@@ -35,7 +36,7 @@ export async function POST(req, ctx) {
   if ("response" in authResult) return authResult.response;
 
   const { taskId } = await ctx.params;
-  const includeTest = req.nextUrl.searchParams.get("includeTest") === "1";
+  const includeTest = readIncludeTest(req);
 
   /** @type {Record<string, unknown>} */
   let body = {};
