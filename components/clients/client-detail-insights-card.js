@@ -1,4 +1,4 @@
-import { formatPercent } from "@/lib/crm/format-da";
+import { formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
 import { cn } from "@/lib/utils";
 
 function collectInsights(client, utilRatio) {
@@ -23,7 +23,7 @@ function collectInsights(client, utilRatio) {
     list.push({
       severity: "bad",
       label: "Timebudget",
-      body: `Tidsforbruget overstiger aftalt månedbudget (${client.hoursThisMonth} / ${client.hoursBudget} t · ${formatPercent(utilRatio)} udnyttelse).`,
+      body: `Tidsforbruget overstiger aftalt månedbudget (${formatHoursCompactDa(client.hoursThisMonth)} / ${formatHoursCompactDa(client.hoursBudget)} t · ${formatPercent(utilRatio)} udnyttelse).`,
     });
   }
   if (client.monthlyProfitMargin < 0) {

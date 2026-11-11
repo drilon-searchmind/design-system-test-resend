@@ -18,6 +18,7 @@ const TONE_TEXT = {
  *   deltaFormat?: (v: number) => string;
  *   sparkData?: number[];
  *   tone?: 'brand' | 'ok' | 'warn' | 'bad';
+ *   visual?: import('react').ReactNode;
  *   className?: string;
  * }} props
  */
@@ -29,6 +30,7 @@ export function PulseKpiCard({
   deltaFormat,
   sparkData,
   tone = "brand",
+  visual,
   className,
 }) {
   const accent = TONE_TEXT[tone] ?? TONE_TEXT.brand;
@@ -46,7 +48,8 @@ export function PulseKpiCard({
           <PulseDeltaChip value={delta} invert={deltaInvert} format={deltaFormat} />
         ) : null}
       </div>
-      {sparkData?.length ? (
+      {visual ? <div className="mt-3">{visual}</div> : null}
+      {!visual && sparkData?.length ? (
         <div className={cn("mt-3 text-current", accent)}>
           <PulseSparkline data={sparkData} height={30} />
         </div>

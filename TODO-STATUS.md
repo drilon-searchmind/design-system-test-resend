@@ -206,3 +206,23 @@ MRR and upsell are kept apart but shown together: `20 t kr. (+5 t kr. (i))`. Hov
 - Koncern pages show the combined "+" but cannot add upsells (open a brand).
 - Upsells are not yet linked to a contract document.
 - The Pulse MRR card adds all upsells active in the period (one-off and temporary) after the fixed MRR; the leaderboard counts by sold date, including fixed MRR increases.
+
+---
+
+## Pulse KPI cards — real visuals (new)
+
+The four static sparkline images were replaced (`components/pulse/pulse-kpi-visuals.js`):
+
+| Card | Now shows |
+|---|---|
+| Retainer MRR | MRR bridge pills: Nye / Opsalg (fast MRR-stigning) / Churn (+ Justeringer), "fra X ved periodens start". Hover a pill for the clients. |
+| Udnyttelse | Real daily sparkline of billable hours in the period (+ total and peak day). |
+| Overhead-tid | Stacked bar billable vs overhead hours. |
+| Gns. margin | Histogram of active clients per margin band (<0, 0–15, 15–30, >30 %). Hover a bar for the clients. |
+
+**Real "previous month" values:** the delta chips used made-up numbers (`MRR × 0.96`, `margin − 2 pp`). Now:
+- MRR prev = stored monthly snapshot (`PulseSnapshot`, saved whenever Pulse is opened on the current month) or, without a snapshot, derived from new/churn/upsell changes.
+- Margin prev = snapshot only; no chip until a snapshot for last month exists (so the margin chip appears from next month).
+- Demo: one new client (Matr. Arkitekter), one churn (Blaa Planet) and one fixed MRR increase (Kystlinjen) in the current month.
+
+**Notes:** the bridge relies on `startedAt` / `terminatedAt` on clients. "Churn" = non-active clients terminated in the period (uses their retainer). Utilisation/overhead deltas were already real (previous-month hours).

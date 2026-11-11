@@ -1,5 +1,6 @@
 "use client";
 
+import { formatHoursCompactDa } from "@/lib/crm/format-da";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -236,8 +237,8 @@ export function WorkloadMemberPortfolio() {
           </p>
           <PulseUtilBar hours={loadIndex} budget={100} className="mt-3 max-w-full" />
         </div>
-        <PulseKpiCard label="Timer (periode)" value={`${hoursMonth} t`} tone="brand" />
-        <PulseKpiCard label="Fakturerbare timer" value={`${billableHoursMonth} t`} tone="ok" />
+        <PulseKpiCard label="Timer (periode)" value={`${formatHoursCompactDa(hoursMonth)} t`} tone="brand" />
+        <PulseKpiCard label="Fakturerbare timer" value={`${formatHoursCompactDa(billableHoursMonth)} t`} tone="ok" />
       </section>
 
       <p className="font-sans text-[11px] text-fg-quiet">

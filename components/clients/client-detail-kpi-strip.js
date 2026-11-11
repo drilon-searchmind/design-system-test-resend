@@ -1,5 +1,5 @@
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
-import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
 
 /**
  * @param {{
@@ -31,7 +31,7 @@ export function ClientDetailKpiStrip({ client, timerLabel = "Tid brugt", openTas
       />
       <PulseKpiCard
         label={timerLabel}
-        value={`${client.hoursThisMonth} / ${client.hoursBudget} t`}
+        value={`${formatHoursCompactDa(client.hoursThisMonth)} / ${formatHoursCompactDa(client.hoursBudget)} t`}
         tone={timerTone}
       />
       <PulseKpiCard label="Margin (md)" value={formatPercent(client.monthlyProfitMargin)} tone={marginTone} />

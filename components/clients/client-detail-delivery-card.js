@@ -1,6 +1,6 @@
 import { PulseSparkline } from "@/components/pulse/pulse-sparkline";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
-import { formatPercent } from "@/lib/crm/format-da";
+import { formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
 import { cn } from "@/lib/utils";
 
 /**
@@ -34,7 +34,7 @@ export function ClientDetailDeliveryCard({ client }) {
               </p>
             </div>
             <p className="text-[11px] tabular-nums text-fg-muted">
-              {client.hoursThisMonth} / {client.hoursBudget} t
+              {formatHoursCompactDa(client.hoursThisMonth)} / {formatHoursCompactDa(client.hoursBudget)} t
             </p>
           </div>
           <PulseUtilBar hours={client.hoursThisMonth} budget={client.hoursBudget} className="mt-2" />

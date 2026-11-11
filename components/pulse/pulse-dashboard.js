@@ -18,11 +18,11 @@ import { PulseUtilTrendChart } from "@/components/pulse/pulse-util-trend-chart";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import {
-  PULSE_KPI_SPARK_MARGIN,
-  PULSE_KPI_SPARK_MRR,
-  PULSE_KPI_SPARK_OVERHEAD,
-  PULSE_KPI_SPARK_UTIL,
-} from "@/lib/crm/pulse-fixtures";
+  MarginBandsVisual,
+  MrrBridgeVisual,
+  OverheadSplitVisual,
+  UtilDailyVisual,
+} from "@/components/pulse/pulse-kpi-visuals";
 import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
@@ -97,7 +97,10 @@ export function PulseDashboard() {
   const mrrDelta = m.retainerMRRPrev > 0 ? (m.retainerMRR - m.retainerMRRPrev) / m.retainerMRRPrev : 0;
   const utilDelta = m.utilisation - m.utilisationPrev;
   const overheadDelta = m.overheadPct - m.overheadPctPrev;
-  const marginDelta = m.avgMargin - m.avgMarginPrev;
+  const marginDelta = typeof m.avgMarginPrev === "number" ? m.avgMargin - m.avgMarginPrev : null;
+  const overheadHours =
+    m.overheadHoursMonth ??
+    Math.round((m.billableHoursMonth * m.overheadPct) / Math.max(1 - m.overheadPct, 0.01));
 
   return (
     <PulsePeriodProvider selection={selection} onSelectionChange={setSelection} refreshing={refreshing}>
@@ -119,7 +122,7 @@ export function PulseDashboard() {
                 : formatCurrencyCompact(m.retainerMRR)
               }
               delta={mrrDelta}
-              sparkData={PULSE_KPI_SPARK_MRR}
+              visual={bundle.mrrBridge ? <MrrBridgeVisual bridge={bundle.mrrBridge} /> : undefined}
               tone="brand"
             />
             <PulseKpiCard
@@ -127,7 +130,7 @@ export function PulseDashboard() {
               value={formatPercent(m.utilisation)}
               delta={utilDelta}
               deltaFormat={(v) => formatPercent(v)}
-              sparkData={PULSE_KPI_SPARK_UTIL}
+              visual={<UtilDailyVisual data={bundle.utilTrend} />}
               tone="ok"
             />
             <PulseKpiCard
@@ -136,7 +139,7 @@ export function PulseDashboard() {
               delta={overheadDelta}
               deltaFormat={(v) => formatPercent(v)}
               deltaInvert
-              sparkData={PULSE_KPI_SPARK_OVERHEAD}
+              visual={<OverheadSplitVisual billableHours={m.billableHoursMonth} overheadHours={overheadHours} />}
               tone="warn"
             />
             <PulseKpiCard
@@ -144,7 +147,7 @@ export function PulseDashboard() {
               value={formatPercent(m.avgMargin)}
               delta={marginDelta}
               deltaFormat={(v) => formatPercent(v)}
-              sparkData={PULSE_KPI_SPARK_MARGIN}
+              visual={<MarginBandsVisual clients={bundle.clients} />}
               tone="ok"
             />
           </section>

@@ -5,7 +5,7 @@ import { HealthChip } from "@/components/crm/health-chip";
 import { StatusChip } from "@/components/crm/status-chip";
 import { routes } from "@/config/routes";
 import { CONTRACT_DEMO_REF_DATE, contractDaysUntilRenewal } from "@/lib/crm/contract-utils";
-import { formatCurrencyCompact, formatIsoDateDa, formatPercent } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatIsoDateDa, formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
 import { TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
@@ -129,7 +129,7 @@ export function ContractDetailLinkedClientCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <dt className="text-fg-soft">Timer (md)</dt>
           <dd className="text-[11px] tabular-nums text-fg">
-            {client.hoursThisMonth} / {client.hoursBudget} t · {formatPercent(util)}
+            {formatHoursCompactDa(client.hoursThisMonth)} / {formatHoursCompactDa(client.hoursBudget)} t · {formatPercent(util)}
           </dd>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
