@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import { DEPARTMENTS } from "@/lib/crm/static-data";
@@ -41,6 +42,8 @@ function currentMonth() {
  * }} props
  */
 export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, onSaved }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const upsells = /** @type {import("@/lib/crm/upsell-utils").UpsellItem[]} */ (client.upsells ?? []);
   const currency = client.currency ?? "DKK";
   const activeIds = new Set((client.upsellMonth?.items ?? []).map((u) => u.id));
@@ -310,7 +313,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
                 {u.soldAt ? ` den ${formatIsoDateDa(u.soldAt)}` : ""}
               </div>
               {u.description ? <p className="text-[12px] text-fg-muted">{u.description}</p> : null}
-              {canEdit ?
+              {canEdit && isAdmin ?
                 <div>
                   <button
                     type="button"

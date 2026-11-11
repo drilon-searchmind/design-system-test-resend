@@ -1,7 +1,7 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { NextResponse } from "next/server";
 
 import { createAdminResource, isAdminResource, listAdminResource } from "@/lib/server/crm-crud";
-import { requireSession } from "@/lib/server/require-session";
 import { parseTestFilter } from "@/lib/server/test-data-filter";
 
 /**
@@ -9,7 +9,7 @@ import { parseTestFilter } from "@/lib/server/test-data-filter";
  * @param {{ params: Promise<{ resource: string }> }} ctx
  */
 export async function GET(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { resource } = await ctx.params;
@@ -30,7 +30,7 @@ export async function GET(req, ctx) {
  * @param {{ params: Promise<{ resource: string }> }} ctx
  */
 export async function POST(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { resource } = await ctx.params;

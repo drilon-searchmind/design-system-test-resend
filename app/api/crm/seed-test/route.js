@@ -1,10 +1,10 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { NextResponse } from "next/server";
 
 import { seedTestData } from "@/lib/server/seed-test-data";
-import { requireSession } from "@/lib/server/require-session";
 
 export async function POST() {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   try {

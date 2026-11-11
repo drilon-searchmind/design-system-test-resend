@@ -1,11 +1,11 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { NextResponse } from "next/server";
 
 import { clearMongoExceptUsers } from "@/lib/server/clear-mongo-except-users";
-import { requireSession } from "@/lib/server/require-session";
 import { seedDemoFromStatic } from "@/lib/server/seed-demo-from-static";
 
 export async function POST() {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   try {

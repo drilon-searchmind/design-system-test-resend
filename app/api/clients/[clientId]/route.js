@@ -1,3 +1,4 @@
+import { sessionUserIsAdmin } from "@/lib/auth/session-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -53,6 +54,7 @@ export async function PATCH(req, ctx) {
   try {
     const body = await req.json();
     const result = await updateClientMongo(clientId, includeTest, body, {
+      isAdmin: await sessionUserIsAdmin(authResult.session),
       by: authResult.session.user?.name ?? authResult.session.user?.email ?? undefined,
     });
     if (result?.error) {

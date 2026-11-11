@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import { ClientDetailUpsellsCard } from "@/components/clients/client-detail-upsells-card";
 import { ClientDetailBrandsPanel } from "@/components/clients/client-detail-brands-panel";
 import { ClientDetailKundeinfoPanel } from "@/components/clients/client-detail-kundeinfo-panel";
@@ -109,6 +111,8 @@ export function ClientDetailTabbedBody({
   commercialLog = [],
   onClientChanged,
 }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const isGroup = Boolean(client.isGroup);
   const tabDefs = isGroup ?
       [CLIENT_DETAIL_TAB_DEFS[0], CLIENT_DETAIL_TAB_DEFS[1], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(2)]
@@ -226,7 +230,7 @@ export function ClientDetailTabbedBody({
             <ClientDetailCommercialEditor
               client={client}
               commercialLog={commercialLog}
-              canEdit={canEditKundeinfo && !isGroup}
+              canEdit={canEditKundeinfo && !isGroup && isAdmin}
               onSaved={onClientChanged}
             />
             <ClientDetailUpsellsCard

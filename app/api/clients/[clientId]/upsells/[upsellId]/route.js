@@ -1,8 +1,8 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { deleteUpsell } from "@/lib/server/upsell-data";
-import { requireSession } from "@/lib/server/require-session";
 
 /**
  * Slet opsalg.
@@ -10,7 +10,7 @@ import { requireSession } from "@/lib/server/require-session";
  * @param {{ params: Promise<{ clientId: string; upsellId: string }> }} ctx
  */
 export async function DELETE(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { clientId, upsellId } = await ctx.params;

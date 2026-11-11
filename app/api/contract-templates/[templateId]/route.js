@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -5,14 +6,13 @@ import {
   deleteContractTemplate,
   updateContractTemplate,
 } from "@/lib/server/contract-templates-data";
-import { requireSession } from "@/lib/server/require-session";
 
 /**
  * @param {import('next/server').NextRequest} req
  * @param {{ params: Promise<{ templateId: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { templateId } = await ctx.params;
@@ -40,7 +40,7 @@ export async function PATCH(req, ctx) {
  * @param {{ params: Promise<{ templateId: string }> }} ctx
  */
 export async function DELETE(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { templateId } = await ctx.params;

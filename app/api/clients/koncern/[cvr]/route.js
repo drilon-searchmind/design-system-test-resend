@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -39,7 +40,7 @@ export async function GET(req, ctx) {
  * @param {{ params: Promise<{ cvr: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { cvr } = await ctx.params;

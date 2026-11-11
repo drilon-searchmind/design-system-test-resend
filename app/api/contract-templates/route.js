@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -31,7 +32,7 @@ export async function GET(req) {
  * @param {import('next/server').NextRequest} req
  */
 export async function POST(req) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const includeTest = readIncludeTest(req);

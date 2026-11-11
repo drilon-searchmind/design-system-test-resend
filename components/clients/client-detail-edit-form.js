@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import {
   CHURN_REASON_LABELS,
   CHURN_REASONS,
@@ -23,6 +25,9 @@ const ALLOCATION_KEYS = [...DEPARTMENTS.map((d) => d.id), "clientMgmt"];
  * }} props
  */
 export function ClientDetailEditForm({ draft, onChange, team }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
+
   /** @param {Partial<ClientEditDraft>} patch */
   function patchDraft(patch) {
     onChange({ ...draft, ...patch });
@@ -105,6 +110,8 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
           <Field label="Status">
             <select
               value={draft.status}
+              disabled={!isAdmin}
+              title={isAdmin ? undefined : "Kun administratorer kan ændre status (arkivere/genaktivere)"}
               onChange={(e) =>
                 patchDraft({ status: /** @type {ClientEditDraft['status']} */ (e.target.value) })
               }

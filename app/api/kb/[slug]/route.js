@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -70,7 +71,7 @@ export async function PATCH(req, ctx) {
  * @param {{ params: Promise<{ slug: string }> }} ctx
  */
 export async function DELETE(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { slug } = await ctx.params;

@@ -1,14 +1,14 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
-import { requireSession } from "@/lib/server/require-session";
 import { createNpsTemplate } from "@/lib/server/nps-send-data";
 
 /**
  * @param {import('next/server').NextRequest} req
  */
 export async function POST(req) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const includeTest = readIncludeTest(req);

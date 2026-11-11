@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { NextResponse } from "next/server";
 
 import {
@@ -6,14 +7,13 @@ import {
   isAdminResource,
   updateAdminResource,
 } from "@/lib/server/crm-crud";
-import { requireSession } from "@/lib/server/require-session";
 
 /**
  * @param {import('next/server').NextRequest} _req
  * @param {{ params: Promise<{ resource: string; id: string }> }} ctx
  */
 export async function GET(_req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { resource, id } = await ctx.params;
@@ -33,7 +33,7 @@ export async function GET(_req, ctx) {
  * @param {{ params: Promise<{ resource: string; id: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { resource, id } = await ctx.params;
@@ -54,7 +54,7 @@ export async function PATCH(req, ctx) {
  * @param {{ params: Promise<{ resource: string; id: string }> }} ctx
  */
 export async function DELETE(_req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { resource, id } = await ctx.params;

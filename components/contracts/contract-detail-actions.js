@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCallback, useState } from "react";
 
 import { useDataSource } from "@/components/crm/use-data-source";
@@ -21,6 +22,8 @@ export function ContractDetailActions({
   signingState,
   onDone,
 }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const dataSource = useDataSource();
   const router = useRouter();
   const [busy, setBusy] = useState(/** @type {string | null} */ (null));
@@ -106,7 +109,7 @@ export function ContractDetailActions({
             {busy === "resend" ? "Sender…" : "Send til underskrift"}
           </button>
         : null}
-        {accountStatus === "active" || accountStatus === "notice" ?
+        {isAdmin && (accountStatus === "active" || accountStatus === "notice") ?
           <button
             type="button"
             className={btn}
@@ -116,7 +119,7 @@ export function ContractDetailActions({
             Pause
           </button>
         : null}
-        {accountStatus === "paused" && signingState === "signed" ?
+        {isAdmin && accountStatus === "paused" && signingState === "signed" ?
           <button
             type="button"
             className={btn}
@@ -126,7 +129,7 @@ export function ContractDetailActions({
             Genaktiver
           </button>
         : null}
-        {accountStatus !== "inactive" ?
+        {isAdmin && accountStatus !== "inactive" ?
           <button
             type="button"
             className={btn}

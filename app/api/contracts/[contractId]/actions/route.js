@@ -5,6 +5,7 @@ import {
   renewContract,
   updateContractLifecycle,
 } from "@/lib/server/contract-signing-data";
+import { requireAdmin } from "@/lib/server/require-admin";
 import { requireSession } from "@/lib/server/require-session";
 
 /**
@@ -37,6 +38,9 @@ export async function POST(req, ctx) {
     }
 
     if (action === "pause" || action === "close" || action === "activate") {
+      // Kun administratorer må pause, afslutte eller genaktivere kontrakter
+      const adminResult = await requireAdmin();
+      if ("response" in adminResult) return adminResult.response;
       const result = await updateContractLifecycle({
         contractId,
         action,

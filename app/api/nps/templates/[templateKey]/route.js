@@ -1,7 +1,7 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
-import { requireSession } from "@/lib/server/require-session";
 import { patchNpsTemplate } from "@/lib/server/nps-send-data";
 
 /**
@@ -9,7 +9,7 @@ import { patchNpsTemplate } from "@/lib/server/nps-send-data";
  * @param {{ params: Promise<{ templateKey: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { templateKey: templateKeyEncoded } = await ctx.params;

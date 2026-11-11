@@ -239,3 +239,13 @@ The four static sparkline images were replaced (`components/pulse/pulse-kpi-visu
 - ✅ **Global toggle** in Indstillinger → Beregninger → *Testkunde* (switch, per browser via cookie crm_include_test). On = all API routes include test data (MRR, Pulse, tasks, time, contracts, NPS, calendar, workload …); off = hidden and not counted. Admin buttons: create / recreate / delete.
 - Test: open Indstillinger → Testkunde → (already created in the DB; click *Genopret* for fresh dates) → switch ON → Kunder list, Pulse MRR (+28.000), Opgaver, Kontrakter, NPS now include it → switch OFF → gone again.
 - Notes: the toggle is per browser, not global for colleagues. Demo (eksempeldata) mode is unaffected. Recreate refreshes the relative dates.
+
+## Brugerstyring / admin vs standard (new)
+
+- ✅ **Permissions defined** in `lib/auth/permissions.js` (single source for enforcement + the list in Indstillinger → Generelt → *Roller og rettigheder*).
+- ✅ **Server-enforced admin-only:** Indstillinger (Beregninger, ClickUp, Apex, Testkunde), Stamdata CRUD + seed/reset (were open to all users before), user list/edit incl. making admins, archive/pause/reactivate customers + change MRR / service budgets / web / service agreement / CVR / keys (only *changed* fields are blocked, so the normal edit form still works), customer groups, contract pause/close/activate, contract templates, delete upsells, edit team members, NPS settings + templates, delete KB articles / task templates.
+- ✅ **Safety rules:** you cannot remove your own admin role or deactivate yourself; the last admin cannot be removed. Admin role is set under Brugere → user → Rolle.
+- ✅ **UI hidden for standard users:** Stamdata panel, status select, commercial editor, upsell delete, contract pause/close/activate, 'Gruppér kunder'.
+- ⬜ Still visible (but rejected by the server with an error) for standard users: edit buttons on contract templates, NPS settings/templates, team roster edit, KB delete.
+- Note: login is Google SSO only — there are no passwords to reset. Name/e-mail/role/team profile are editable by admins.
+- Test: log in as a standard user (or set yourself/another user to Standard under Brugere) → no Brugere menu, Indstillinger shows only Generelt + the permission list, status/MRR fields locked, 403 from admin APIs. Then promote that user to Admin and the above appears.

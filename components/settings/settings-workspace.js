@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DataSourcePreference } from "@/components/settings/data-source-preference";
 import { SettingsAgencySection } from "@/components/settings/settings-agency-section";
 import { SettingsAdminSection } from "@/components/settings/settings-admin-section";
+import { SettingsPermissionsPanel } from "@/components/settings/settings-permissions-panel";
 import { SettingsClickUpSyncSection } from "@/components/settings/settings-clickup-sync-section";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { tallyEyebrow } from "@/lib/ui/tally-chrome";
@@ -14,6 +15,7 @@ const SETTINGS_TABS = [
   { id: "general", label: "Generelt" },
   { id: "beregninger", label: "Beregninger" },
   { id: "clickup", label: "ClickUp sync" },
+  { id: "roller", label: "Roller og rettigheder" },
 ];
 
 export function SettingsWorkspace() {
@@ -21,7 +23,7 @@ export function SettingsWorkspace() {
   const isAdmin = session?.user?.isAdmin === true;
   const [tab, setTab] = useState("general");
 
-  const visibleTabs = isAdmin ? SETTINGS_TABS : SETTINGS_TABS.filter((t) => t.id === "general");
+  const visibleTabs = isAdmin ? SETTINGS_TABS : SETTINGS_TABS.filter((t) => t.id === "general" || t.id === "roller");
 
   return (
     <div className="flex flex-col gap-8">
@@ -37,16 +39,18 @@ export function SettingsWorkspace() {
       </header>
 
       {visibleTabs.length > 1 ?
-        <PulseSegmentedControl active={tab} onChange={setTab} tabs={visibleTabs} className="max-w-md" />
+        <PulseSegmentedControl active={tab} onChange={setTab} tabs={visibleTabs} className="max-w-xl" />
       : null}
 
       {tab === "beregninger" && isAdmin ?
         <SettingsAgencySection />
       : tab === "clickup" && isAdmin ?
         <SettingsClickUpSyncSection />
+      : tab === "roller" ?
+        <SettingsPermissionsPanel />
       : <>
           <DataSourcePreference />
-          <SettingsAdminSection />
+          {isAdmin ? <SettingsAdminSection /> : null}
         </>
       }
     </div>

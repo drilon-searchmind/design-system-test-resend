@@ -1,15 +1,15 @@
+import { requireAdmin } from "@/lib/server/require-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
 import { patchTeamMemberDepartment } from "@/lib/server/team-member-dept-data";
-import { requireSession } from "@/lib/server/require-session";
 
 /**
  * @param {import('next/server').NextRequest} req
  * @param {{ params: Promise<{ memberKey: string }> }} ctx
  */
 export async function PATCH(req, ctx) {
-  const authResult = await requireSession();
+  const authResult = await requireAdmin();
   if ("response" in authResult) return authResult.response;
 
   const { memberKey: memberKeyEncoded } = await ctx.params;

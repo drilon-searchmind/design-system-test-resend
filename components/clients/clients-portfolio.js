@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -16,6 +17,8 @@ import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
 
 export function ClientsPortfolio() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const dataSource = useDataSource();
   const router = useRouter();
   const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
@@ -180,7 +183,7 @@ export function ClientsPortfolio() {
         refreshing={refreshing}
         clients={bundle.clients}
         onOpenCreate={openCreateModal}
-        onOpenGroup={() => setShowGroup(true)}
+        onOpenGroup={isAdmin ? () => setShowGroup(true) : undefined}
         createModalOpen={showCreate}
         dataSource={dataSource}
       />
