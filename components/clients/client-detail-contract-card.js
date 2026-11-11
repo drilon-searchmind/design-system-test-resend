@@ -82,12 +82,12 @@ export function ClientDetailContractCard({ contract, isGroup = false }) {
                   Se kontrakt →
                 </a>
                 <a
-                  href={`/api/contracts/${encodeURIComponent(String(docId))}/document?print=1`}
+                  href={`/api/contracts/${encodeURIComponent(String(docId))}/document?format=pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-sans text-[12px] font-medium text-agency-brand hover:underline"
                 >
-                  Hent som PDF →
+                  Download PDF →
                 </a>
               </div>
             : null}

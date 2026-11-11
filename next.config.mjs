@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
-  serverExternalPackages: ["mongoose"],
+  serverExternalPackages: ["mongoose", "pdfkit"],
   experimental: {
     optimizePackageImports: ["react-icons"],
   },

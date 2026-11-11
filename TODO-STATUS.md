@@ -147,8 +147,14 @@ Mirrors the colleague's list, item by item.
 - ✅ **Upsell route:** colleague: "Pt. laver vi en ny, som enten er gældende for opsalget og dermed som tillæg, eller også laves der en ny, hvor ændring tilføjes i den samlede. Begge dele fungerer juridisk OK."
 
 ### Features not done
-- ⬜ **Real PDF files:** the "PDF" is a printable HTML page (save as PDF in the browser). No generated PDF file.
-- ⬜ **Signing an upsell contract:** it does not update the existing client's service budgets or web / service-agreement amounts. Only the contract value counts.
+- ✅ **Real PDF files:** `/api/contracts/<id>/document?format=pdf` returns a generated A4 PDF (pdfkit; contract text + signature block). The HTML view still exists (`/document`, `?print=1`). Buttons: "Download PDF" on client detail (contract card) and contract detail (Vilkår). Not attached to the e-mail yet.
+- ✅ **Signing an upsell contract:** signing a contract for an existing client now adds its lines to the client: recurring lines → `serviceBudgets`, "Web (engangs)" → `oneOffWebAmount`, a "Serviceaftale (årlig)" template → `serviceAgreementAnnual` (+ contract value). `retainerAmount` is untouched (contract value already counts in MRR), a `commercialLog` entry is written, applied once (`commercialAppliedAt`).
+
+**How to test (PDF + signing):**
+1. Restart `npm run dev` (new schema field + `pdfkit` in `serverExternalPackages`).
+2. PDF: open a client with a contract with text → Kundeinfo → "Download PDF" (or `/api/contracts/<id>/document?format=pdf`). Check æøå, headings, lists and the signature block.
+3. Signing: Kontrakter → send a new contract to an EXISTING client with e.g. SEO 5.000 + Web (engangs) 20.000 → sign via the link. On the client: Økonomi shows higher SEO budget and web amount, the change history lists "Underskrevet kontrakt: …", MRR is raised only by the contract value (not doubled).
+Note: contracts signed before this change are not back-filled.
 - ⬜ **Koncern pages:** group pages (`/clients/koncern/<cvr>`) cannot edit amounts or services.
 
 ### Checks and cleanup

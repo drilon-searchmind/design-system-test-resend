@@ -82,6 +82,19 @@ export function ContractDetailTermsCard({ contract }) {
                 {billingCadence(contract.kind)}
               </dd>
             </div>
+            {typeof contract.documentBodyMd === "string" && contract.documentBodyMd.trim() ?
+              <div className="sm:col-span-2">
+                <dt className="text-fg-soft">Kontrakt som PDF</dt>
+                <dd className="mt-1">
+                  <a
+                    href={`/api/contracts/${encodeURIComponent(String(contract.id))}/document?format=pdf`}
+                    className="font-sans text-[13px] font-medium text-agency-brand hover:underline"
+                  >
+                    Download PDF
+                  </a>
+                </dd>
+              </div>
+            : null}
             {contract.documentUrl ?
               <div className="sm:col-span-2">
                 <dt className="text-fg-soft">Eksternt dokument</dt>
