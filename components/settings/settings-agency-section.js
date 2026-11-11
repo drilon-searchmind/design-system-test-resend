@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { SettingsApexIndeksPanel } from "@/components/settings/settings-apex-indeks-panel";
 import {
   AGENCY_SETTING_FIELDS,
   DEFAULT_AGENCY_SETTINGS,
@@ -120,6 +121,8 @@ export function SettingsAgencySection() {
           workspacet (database-kilden). Eksempeldata bruger altid standardværdierne.
         </p>
       </div>
+
+      <SettingsApexIndeksPanel />
 
       {GROUPS.map((g) => (
         <section key={g.id} className="tally-panel p-5 md:p-6">

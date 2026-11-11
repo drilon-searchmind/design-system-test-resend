@@ -101,7 +101,13 @@ export function ClientGridCard({ client, variant = "pulse" }) {
           <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
             Indeks
           </div>
-          <IndeksValue value={client.indeks} className="text-sm font-semibold" />
+          <IndeksValue
+            value={client.indeks}
+            status={client.indeksStatus}
+            computedAt={client.indeksComputedAt}
+            partial={client.indeksPartial}
+            className="text-sm font-semibold"
+          />
         </div>
       </div>
 

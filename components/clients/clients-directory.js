@@ -343,7 +343,12 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
       </span>
 
       <span className="text-[12.5px]">
-        <IndeksValue value={c.indeks} />
+        <IndeksValue
+          value={c.indeks}
+          status={c.indeksStatus}
+          computedAt={c.indeksComputedAt}
+          partial={c.indeksPartial}
+        />
       </span>
 
       {variant === "full" ?

@@ -64,7 +64,12 @@ export function PulseClientRanking({ kind }) {
                 <span className="text-[11px] tabular-nums text-fg-quiet">{i + 1}</span>
                 <span className="truncate font-medium text-fg">{c.name}</span>
                 <NpsValue value={c.latestNps} />
-                <IndeksValue value={c.indeks} />
+                <IndeksValue
+                  value={c.indeks}
+                  status={c.indeksStatus}
+                  computedAt={c.indeksComputedAt}
+                  partial={c.indeksPartial}
+                />
                 <span
                   className={cn(
                     "tabular-nums",

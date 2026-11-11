@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
+import { syncApexIndeks } from "@/lib/server/apex-indeks-sync";
 import { processNpsScheduledSends } from "@/lib/server/nps-scheduled-send";
 
 /**
@@ -21,7 +22,12 @@ export async function GET(request) {
 
   try {
     const nps = await processNpsScheduledSends();
-    return NextResponse.json({ ok: true, nps });
+    // Apex Indeks: fejl her må ikke vælte resten af cron-jobbet.
+    const apexIndeks = await syncApexIndeks().catch((err) => ({
+      ok: false,
+      error: err instanceof Error ? err.message : "Apex Indeks-sync fejlede",
+    }));
+    return NextResponse.json({ ok: true, nps, apexIndeks });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Cron failed";
     return NextResponse.json({ error: message }, { status: 500 });

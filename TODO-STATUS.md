@@ -24,8 +24,8 @@ Mirrors the colleague's list, item by item.
 ### ✅ "Alle kunder": "Allokering" replaced by "Indeks"
 - **Where:** `/pulse`, the "Alle kunder" table
 - **Files:** same as above, plus `components/clients/client-metric-cells.js`
-- 🟡 Indeks is mock data until Apex YoY (last 30 days) is connected.
-- ⬜ Connect the real Apex Indeks.
+- 🟡 Indeks is now synced from Apex (code done); live once the env vars are set and the first sync has run. Demo data still uses mock values.
+- ✅ Apex Indeks sync built (`lib/server/apex-indeks-sync.js`, button in Indstillinger → Beregninger, cron via `/api/cron`).
 
 ### ✅ "Top 10 sunde kunder" + "Top 10 usunde kunder", chart pushed down
 - **Where:** `/pulse`, the boxes above the chart
@@ -136,7 +136,7 @@ Mirrors the colleague's list, item by item.
 ## Still missing / to do
 
 ### Data and integrations
-- ⬜ **Apex Indeks:** connect the real Apex YoY (last 30 days) figure. Indeks is mock data today (`mockIndeks`), so the health score and the Top 10 sunde/usunde lists are only partly real.
+- 🟡 **Apex Indeks:** code done. Still to do: set `APEX_BASE_URL` + `CRM_INDEKS_API_KEY`, schedule `/api/cron`, run the first sync, and fix the Apex customers with GA4 access errors.
 - ⬜ **Sold MRR per department:** the profitability chart uses allocation % of each retainer. In the real database most allocations are empty, so the chart looks empty. Needs real sold-MRR data per department (or a decision to use service budgets instead).
 - ⬜ **Real database:** the new demo data is only in the demo data source. Loading it into the database needs `npm run reset-demo`, which wipes everything except users, so it has not been run.
 - ⬜ **Postmark:** a real contract send (e-mail with signing link) has not been tested end to end.
