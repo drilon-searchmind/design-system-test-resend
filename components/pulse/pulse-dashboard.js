@@ -12,6 +12,7 @@ import { PulsePageHeader } from "@/components/pulse/pulse-page-header";
 import { PulsePeriodProvider } from "@/components/pulse/pulse-period-context";
 import { PulseLatestArticlesCard } from "@/components/pulse/pulse-latest-articles-card";
 import { PulseProfitabilityChart } from "@/components/pulse/pulse-profitability-chart";
+import { PulseUpsellLeaderboard } from "@/components/pulse/pulse-upsell-leaderboard";
 import { PulseSmartAlertsCard } from "@/components/pulse/pulse-smart-alerts-card";
 import { PulseUtilTrendChart } from "@/components/pulse/pulse-util-trend-chart";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
@@ -112,7 +113,11 @@ export function PulseDashboard() {
           <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
             <PulseKpiCard
               label="Retainer MRR"
-              value={formatCurrencyCompact(m.retainerMRR)}
+              value={
+                m.upsellMrr > 0 ?
+                  `${formatCurrencyCompact(m.retainerMRR)} (+${formatCurrencyCompact(m.upsellMrr)})`
+                : formatCurrencyCompact(m.retainerMRR)
+              }
               delta={mrrDelta}
               sparkData={PULSE_KPI_SPARK_MRR}
               tone="brand"
@@ -153,6 +158,8 @@ export function PulseDashboard() {
             <PulseClientRanking kind="healthy" />
             <PulseClientRanking kind="unhealthy" />
           </div>
+
+          <PulseUpsellLeaderboard />
 
           <PulseUtilTrendChart />
 

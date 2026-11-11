@@ -93,6 +93,16 @@ export function PulseProfitabilityChart() {
                           {Math.round(r.revenue).toLocaleString("da-DK")} kr
                         </span>
                       </p>
+                      {r.soldMrrBreakdown ?
+                        <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-fg-quiet">
+                          <li>Afdelingsbudgetter: {r.soldMrrBreakdown.fromBudgets.toLocaleString("da-DK")} kr</li>
+                          <li>
+                            Retainer × allokering (kunder uden budgetter):{" "}
+                            {r.soldMrrBreakdown.fromAllocation.toLocaleString("da-DK")} kr
+                          </li>
+                          <li>Tillæg i perioden: {r.soldMrrBreakdown.fromUpsells.toLocaleString("da-DK")} kr</li>
+                        </ul>
+                      : null}
                       <p className="border-t border-border-muted pt-1.5">
                         Rentabilitet = krav ÷ solgt MRR ={" "}
                         <span className="font-semibold text-fg">

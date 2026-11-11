@@ -1,3 +1,5 @@
+import { UpsellDetails } from "@/components/clients/retainer-with-upsell";
+import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import Link from "next/link";
 
 import { routes } from "@/config/routes";
@@ -77,6 +79,22 @@ export function ClientDetailCommercialCard({ client, contract, contractDetailHre
             <dd className="mt-1 text-lg tabular-nums text-fg">
               {formatCurrency(client.retainer, client.currency)}
               <span className="font-sans text-sm font-normal text-fg-muted"> / md</span>
+              {client.upsellMonth?.amount > 0 ?
+                <span className="ml-2 text-sm text-fg-muted">
+                  (+{formatCurrency(client.upsellMonth.amount, client.currency)}{" "}
+                  <CrmHoverPopover
+                    align="start"
+                    title="Opsalg i denne periode"
+                    content={<UpsellDetails items={client.upsellMonth.items} currency={client.currency} />}
+                    triggerClassName="inline-flex"
+                  >
+                    <span className="inline-flex size-4 items-center justify-center rounded-full border border-border text-[10px] font-semibold text-fg-soft">
+                      i
+                    </span>
+                  </CrmHoverPopover>
+                  )
+                </span>
+              : null}
             </dd>
             <dd className="mt-1 text-[10px] text-fg-quiet">
               Compact: {formatCurrencyCompact(client.retainer, client.currency)}

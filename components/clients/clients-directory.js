@@ -1,5 +1,6 @@
 "use client";
 
+import { RetainerWithUpsell } from "@/components/clients/retainer-with-upsell";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -314,7 +315,7 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
       : null}
 
       <span className="text-[12.5px] tabular-nums text-fg">
-        {formatCurrencyCompact(c.retainer, c.currency)}
+        <RetainerWithUpsell client={c} />
       </span>
 
       <PulseClientHoursMetric

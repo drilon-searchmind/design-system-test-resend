@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientDetailUpsellsCard } from "@/components/clients/client-detail-upsells-card";
 import { ClientDetailBrandsPanel } from "@/components/clients/client-detail-brands-panel";
 import { ClientDetailKundeinfoPanel } from "@/components/clients/client-detail-kundeinfo-panel";
 import { ClientDetailAlertsCard } from "@/components/clients/client-detail-alerts-card";
@@ -225,6 +226,12 @@ export function ClientDetailTabbedBody({
             <ClientDetailCommercialEditor
               client={client}
               commercialLog={commercialLog}
+              canEdit={canEditKundeinfo && !isGroup}
+              onSaved={onClientChanged}
+            />
+            <ClientDetailUpsellsCard
+              client={client}
+              team={team ?? notesTeamMembers}
               canEdit={canEditKundeinfo && !isGroup}
               onSaved={onClientChanged}
             />

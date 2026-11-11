@@ -1,3 +1,4 @@
+import { RetainerWithUpsell } from "@/components/clients/retainer-with-upsell";
 import Link from "next/link";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
@@ -54,7 +55,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
             Retainer
           </div>
           <div className="text-sm font-semibold tabular-nums text-fg">
-            {formatCurrencyCompact(client.retainer, client.currency)}
+            <RetainerWithUpsell client={client} />
           </div>
         </div>
         <div>

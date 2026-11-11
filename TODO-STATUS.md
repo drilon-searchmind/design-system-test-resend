@@ -15,7 +15,7 @@ Mirrors the colleague's list, item by item.
 ### ✅ Rentabilitet pr. afdeling = (medarbejdere × 180.000) / solgt MRR
 - **Where:** `/pulse`, the profitability chart
 - **Files:** `components/pulse/pulse-profitability-chart.js`, `lib/crm/dept-profitability.js`
-- 🟡 Sold MRR per department is mostly 0 in the real data, so the chart looks empty.
+- ✅ Sold MRR per department now uses the client's service budgets first (allocation % only as fallback), plus period upsells.
 
 ### ✅ "Alle kunder": "Seneste NPS" column added
 - **Where:** `/pulse`, the "Alle kunder" table
@@ -67,7 +67,7 @@ Mirrors the colleague's list, item by item.
 - **Where:** "Økonomi & aftale" card on the Overblik tab
 - **Files:** `client-detail-commercial-card.js`, `client-detail-commercial-editor.js`, `lib/server/client-update-data.js`
 - ✅ Retainer + web one-off + service agreement can sit side by side.
-- 🟡 For an upsell the recommended route is a new contract (see Kontrakter).
+- ✅ Upsell route confirmed by the colleague: both a new add-on contract (tillæg) and a new combined contract are legally OK. Upsells are also registered in the new "Opsalg" card (see below).
 - ⬜ Koncern pages (`/clients/koncern/<cvr>`) cannot edit amounts or services.
 
 ### ✅ "Kvalitet & risiko" renamed "NPS & kvalitet"
@@ -137,14 +137,14 @@ Mirrors the colleague's list, item by item.
 
 ### Data and integrations
 - ✅ **Apex Indeks:** connected and working (sync, storage, display, stale warning, manual sync button).`n- ⬜ **Apex Indeks follow-ups:** schedule `/api/cron` daily after 06:00 Copenhagen with `Authorization: Bearer <CRON_SECRET>`, set `APEX_BASE_URL` + `CRM_INDEKS_API_KEY` in production, and fix the Apex customers with GA4 access errors (they show "–").
-- ⬜ **Sold MRR per department:** the profitability chart uses allocation % of each retainer. In the real database most allocations are empty, so the chart looks empty. Needs real sold-MRR data per department (or a decision to use service budgets instead).
+- ✅ **Sold MRR per department:** decision made — use service budgets (`serviceBudgets`, kr/md per department) per client; clients without budgets fall back to retainer × allocation %. Temporary upsells with a department are added for the selected month. One-off upsells are not counted (not MRR). Hover on the % in Pulse shows the split. **Still needed in the real data:** fill in service budgets per client (Kunde → Økonomi, or via signed contracts with service lines).
 - ⬜ **Real database:** the new demo data is only in the demo data source. Loading it into the database needs `npm run reset-demo`, which wipes everything except users, so it has not been run.
 - ⬜ **Postmark:** a real contract send (e-mail with signing link) has not been tested end to end.
 
 ### Decisions needed
 - ⬜ **180.000 per employee:** (now adjustable in Indstillinger → Beregninger) confirm with the colleague whether it is per month or per year, whether it is the same for every department, and which way the ratio should read (target / sold MRR, as written, or the reverse). See `lib/crm/dept-profitability.js`.
 - ⬜ **"Web (engangs)" on recurring contracts:** it is currently added into the monthly total. Decide whether to keep it separate.
-- ⬜ **Upsell route:** we recommend a new contract for existing customers. Confirm that is what the colleague wants instead of an amendment.
+- ✅ **Upsell route:** colleague: "Pt. laver vi en ny, som enten er gældende for opsalget og dermed som tillæg, eller også laves der en ny, hvor ændring tilføjes i den samlede. Begge dele fungerer juridisk OK."
 
 ### Features not done
 - ⬜ **Real PDF files:** the "PDF" is a printable HTML page (save as PDF in the browser). No generated PDF file.
@@ -173,3 +173,36 @@ Admin only. Saved in the database (`AgencySettings` collection, one document). D
 Check: `/settings`, tab "Beregninger" (admin). Files: `components/settings/settings-agency-section.js`, `app/api/settings/agency/route.js`, `lib/server/agency-settings-data.js`, `lib/db/models/agency-settings.js`.
 
 Still fixed in code (not adjustable): the mock Indeks values (`mockIndeks`, demo data only), default annual price adjustment (3 %), default notice days (90), NPS "at risk" limit (40).
+---
+
+## Opsalg (upsells) — new
+
+MRR and upsell are kept apart but shown together: `20 t kr. (+5 t kr. (i))`. Hover the (i) to see exactly what was sold.
+
+**Types** (`lib/crm/upsell-utils.js`)
+
+| Type | Meaning | Counts as |
+|---|---|---|
+| Engangsbeløb | one amount in one month (e.g. video, 15.000) | "+" in that month |
+| Tillæg i periode | amount per month from–to (e.g. +8.000/md until January) | "+" in each month of the period |
+| Fast MRR-stigning | permanent (e.g. +7.000 Meta) | added directly to the client's MRR (and the department budget if set) and logged in the change history — not shown as "+" |
+
+**Fields per upsell:** client, who sold it, sold date, month(s) it is contracted for, amount, short description (max 200 words), plus type and department (department feeds the profitability chart).
+
+**Where it shows:** Kunder list and cards (MRR column), Kunde → Økonomi (amount line + "Opsalg" card with history, add and delete), Pulse → "Retainer MRR" card (`fast MRR (+opsalg i perioden)`), and Pulse → "Opsalg pr. sælger" leaderboard (`components/pulse/pulse-upsell-leaderboard.js`: sold in the selected month by sold date, hover a seller for the individual upsells).
+
+**Files:** `lib/db/models/upsell.js`, `lib/server/upsell-data.js`, `app/api/clients/[clientId]/upsells/**`, `components/clients/client-detail-upsells-card.js`, `components/clients/retainer-with-upsell.js`, demo data `UPSELLS` in `lib/crm/static-data.js`.
+
+### How to test
+
+1. **Demo data** (data source = Eksempeldata): open Kunder. Nordvig & Partners shows `72 t kr. (+5 t kr. (i))`, Værftet Hotels `(+15 t kr.)`, Bryggeriet Sort `(+27,5 t kr.)`. Hover the (i) for who/when/period/amount/description. Open Nordvig → Økonomi: the "Opsalg" card lists them (read-only in demo). Kystlinjen Rejser has a "Fast MRR-stigning" (shown as "Indgår i MRR"). Helio Solar has an old one-off that is not active.
+2. **Pulse (demo):** "Retainer MRR" shows `1,09 mio. kr. (+77,5 t kr.)`. Scroll to "Opsalg pr. sælger": Louise Madsen 29 t, Jonas Lindberg 27,5 t, Rasmus Nielsen 15 t, Mikkel Kragh 6 t — hover a name for the upsells. Change the report period to another month to see it change. **Pulse → Rentabilitet per afdeling:** hover a % — the popover shows budgets / allocation / period upsells. SEO and PPC include the demo temporary upsells.
+3. **Database:** switch to Database, run `reset-demo` (**wipes everything except users — ask before doing it**), or just use a real client. Open a client → Økonomi → "Tilføj opsalg". Try each type; the list updates and the MRR column shows `(+…)`. For a temporary upsell choose a "til og med" month and step the report period in Pulse to see it appear/disappear per month.
+4. **Fast MRR-stigning:** add one — "MRR retainer" under Aftalebeløb rises and a line appears in Ændringshistorik.
+5. Description over 200 words is rejected.
+
+### Not done / notes
+- Deleting a "Fast MRR-stigning" does not roll the MRR back (fix the amount under Aftalebeløb).
+- Koncern pages show the combined "+" but cannot add upsells (open a brand).
+- Upsells are not yet linked to a contract document.
+- The Pulse MRR card adds all upsells active in the period (one-off and temporary) after the fixed MRR; the leaderboard counts by sold date, including fixed MRR increases.

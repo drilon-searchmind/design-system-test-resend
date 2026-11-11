@@ -115,7 +115,7 @@ export function ClientDetailCommercialEditor({ client, commercialLog = [], canEd
       <p className="mt-2 text-[11px] text-fg-quiet">
         Samlet MRR: <span className="tabular-nums text-fg-muted">{formatCurrency(client.retainer ?? 0, currency)}</span>
         {" · "}
-        Nyt opsalg på en eksisterende kunde? Opret helst en ny kontrakt — den lægges automatisk til MRR.
+        Opsalg registreres i kortet &quot;Opsalg&quot; herunder. Større tilkøb kan også laves som ny kontrakt (tillæg, lægges automatisk til MRR) eller som en ny samlet kontrakt — begge dele er juridisk OK.
       </p>
 
       {editing ?
