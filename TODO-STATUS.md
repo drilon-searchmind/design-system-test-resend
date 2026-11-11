@@ -143,7 +143,7 @@ Mirrors the colleague's list, item by item.
 
 ### Decisions needed
 - ⬜ **180.000 per employee:** (now adjustable in Indstillinger → Beregninger) confirm with the colleague whether it is per month or per year, whether it is the same for every department, and which way the ratio should read (target / sold MRR, as written, or the reverse). See `lib/crm/dept-profitability.js`.
-- ⬜ **"Web (engangs)" on recurring contracts:** it is currently added into the monthly total. Decide whether to keep it separate.
+- ✅ **"Web (engangs)" on recurring contracts:** kept separate AND counted once. The contract's monthly value (MRR) now excludes the web line; on signing it goes to `oneOffWebAmount` and is registered as a one-time upsell for the signing month (so it shows as `20k (+ X (i))` that month only, and counts in Pulse / the seller leaderboard). Test: send a retainer with SEO 5.000 + Web 20.000, sign it → MRR +5.000, upsell "Web (engangs) via kontrakt…" of 20.000 this month. Older contracts keep the old value.
 - ✅ **Upsell route:** colleague: "Pt. laver vi en ny, som enten er gældende for opsalget og dermed som tillæg, eller også laves der en ny, hvor ændring tilføjes i den samlede. Begge dele fungerer juridisk OK."
 
 ### Features not done

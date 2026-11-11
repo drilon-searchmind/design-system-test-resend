@@ -168,8 +168,20 @@ export function ContractsSendModal({
       })),
     [services, amounts, departments],
   );
-  const total = useMemo(() => lines.reduce((s, l) => s + l.amount, 0), [lines]);
   const recurring = type === "retainer" || type === "subscription";
+  /** Løbende aftale: Web (engangs) holdes uden for den månedlige værdi. */
+  const total = useMemo(
+    () =>
+      lines.reduce(
+        (s, l) => (recurring && l.key === "oneoff-web" ? s : s + l.amount),
+        0,
+      ),
+    [lines, recurring],
+  );
+  const oneOffWebTotal = useMemo(
+    () => lines.filter((l) => l.key === "oneoff-web").reduce((s, l) => s + l.amount, 0),
+    [lines],
+  );
 
   const selectedTemplate = templates.find((t) => t.id === templateId);
 
@@ -636,6 +648,13 @@ export function ContractsSendModal({
                       </label>
                     ))}
                   </div>
+                ) : null}
+                {recurring && oneOffWebTotal > 0 ? (
+                  <p className="mt-2 font-sans text-[11px] leading-relaxed text-fg-quiet">
+                    Web (engangs) på {oneOffWebTotal.toLocaleString("da-DK")} kr indgår ikke
+                    i den månedlige værdi. Det registreres som et engangsopsalg i den måned
+                    aftalen underskrives.
+                  </p>
                 ) : null}
                 {mode === "existing" ? (
                   <p className="mt-2 font-sans text-[11px] leading-relaxed text-fg-quiet">
