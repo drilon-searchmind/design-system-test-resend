@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { TaskGridCard } from "@/components/tasks/task-grid-card";
+import { usePersistedState } from "@/lib/use-persisted-state";
+import { TasksKanban } from "@/components/tasks/tasks-kanban";
 import {
   TasksAssigneeFilter,
   taskMatchesAssigneeFilter,
@@ -32,6 +33,13 @@ import {
   taskPriorityRank,
 } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
+
+/** @param {unknown} v */
+const validateScope = (v) => (v === "all" || v === "open" || v === "overdue" ? v : null);
+/** @param {unknown} v */
+const validateSort = (v) => (v === "due" || v === "prio" || v === "title" ? v : null);
+/** @param {unknown} v */
+const validateDensity = (v) => (v === "list" || v === "cards" ? v : null);
 
 const GRID =
   "grid-cols-[minmax(200px,2.2fr)_minmax(120px,1fr)_minmax(92px,0.92fr)_minmax(40px,0.38fr)_minmax(70px,0.68fr)_minmax(72px,0.7fr)_minmax(58px,0.55fr)_minmax(80px,0.78fr)_36px]";
@@ -90,6 +98,7 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
         GRID,
         showBorder && "border-b border-border-soft",
         taskIsSubTaskRow(row) && "bg-surface-muted/35",
+        overdue && "bg-agency-bad-soft/20 shadow-[inset_3px_0_0_var(--agency-bad)] hover:bg-agency-bad-soft/35",
       )}
     >
       <div className="min-w-0">
@@ -161,7 +170,7 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
         <span
           className={cn(
             "text-[12px] tabular-nums text-fg",
-            overdue && "text-agency-bad",
+            overdue && "font-semibold text-agency-bad",
             !overdue && daysLeft !== null && daysLeft <= 7 && daysLeft >= 0 && "text-agency-warn",
             taskIsDone(row.status) && "text-fg-muted",
           )}
@@ -214,6 +223,8 @@ function TaskTableRow({ row, teamById, deptById, taskDueReferenceIso, showBorder
  *   mineAssigneeKey: string;
  *   selectedAssignees: Set<string>;
  *   onSelectedAssigneesChange: (next: Set<string>) => void;
+ *   onStatusChange?: (task: any, nextStatus: string) => void;
+ *   periodLabel?: string;
  *   headingId?: string;
  *   toolbarTitle?: string;
  * }} props
@@ -226,13 +237,19 @@ export function TasksDirectory({
   mineAssigneeKey,
   selectedAssignees,
   onSelectedAssigneesChange,
+  onStatusChange,
+  periodLabel = "",
   headingId = "tasks-directory-heading",
   toolbarTitle = "Alle opgaver",
 }) {
   const [q, setQ] = useState("");
-  const [scopeFilter, setScopeFilter] = useState(/** @type {"all" | "open" | "overdue"} */ ("all"));
-  const [sort, setSort] = useState("due");
-  const [density, setDensity] = useState("list");
+  const [scopeFilter, setScopeFilter] = usePersistedState(
+    "crm:tasks:scope:v1",
+    /** @type {"all" | "open" | "overdue"} */ ("all"),
+    { validate: validateScope },
+  );
+  const [sort, setSort] = usePersistedState("crm:tasks:sort:v1", "due", { validate: validateSort });
+  const [density, setDensity] = usePersistedState("crm:tasks:density:v1", "list", { validate: validateDensity });
 
   const deptById = useMemo(() => {
     /** @type {Record<string, (typeof departments)[number]>} */
@@ -341,6 +358,11 @@ export function TasksDirectory({
         <h3 id={headingId} className="font-sans text-sm font-semibold text-fg">
           {toolbarTitle}
         </h3>
+        {periodLabel ?
+          <span className="inline-flex h-[22px] items-center rounded-md border border-border bg-surface-muted px-2 text-[11px] font-medium capitalize text-fg-muted">
+            {periodLabel}
+          </span>
+        : null}
         <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {filtered.length} af {tasks.length}
         </span>
@@ -397,26 +419,12 @@ export function TasksDirectory({
       </div>
 
       {density === "cards" ?
-        <div className="flex flex-col gap-6 p-3 md:p-4">
-          {groupedByStatus.map((group) => (
-            <div key={group.status}>
-              <div className="mb-3 flex items-center gap-2">
-                <TaskStatusChip status={group.status} />
-                <span className="text-[11px] tabular-nums text-fg-quiet">{group.tasks.length}</span>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
-                {group.tasks.map((row) => (
-                  <TaskGridCard
-                    key={row.id}
-                    row={row}
-                    dueReferenceIso={taskDueReferenceIso}
-                    departments={departments}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <TasksKanban
+          tasks={filtered}
+          departments={departments}
+          taskDueReferenceIso={taskDueReferenceIso}
+          onStatusChange={onStatusChange}
+        />
       : <div className="overflow-x-auto">
           <div className="min-w-[1080px]">
             <div

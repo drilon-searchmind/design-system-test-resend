@@ -44,10 +44,12 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
   return (
     <Link
       href={taskHref(row)}
+      draggable={false}
       className={cn(
         "tally-panel flex flex-col p-3.5 transition-all",
         "hover:border-agency-brand-border md:p-4",
         taskIsSubTaskRow(row) && "border-dashed",
+        overdue && "task-overdue",
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -88,7 +90,7 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
           <div
             className={cn(
               "mt-0.5 tabular-nums text-fg",
-              overdue && "text-agency-bad",
+              overdue && "font-semibold text-agency-bad",
               !overdue &&
                 daysLeft !== null &&
                 daysLeft <= 7 &&
@@ -97,6 +99,11 @@ export function TaskGridCard({ row, dueReferenceIso, departments = [] }) {
             )}
           >
             {formatIsoDateDa(row.dueDate)}
+            {overdue ?
+              <span className="ml-1.5 text-[10px] font-medium">
+                · {Math.abs(taskDaysUntilDue(row.dueDate, dueReferenceIso))} d over
+              </span>
+            : null}
           </div>
         </div>
         <div>

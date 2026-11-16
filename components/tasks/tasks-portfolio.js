@@ -17,16 +17,23 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { getTasksDemoBundle } from "@/lib/crm/tasks-demo-bundle";
 import { computeTasksSummary } from "@/lib/crm/task-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { usePersistedState } from "@/lib/use-persisted-state";
+import { taskStatusPatch } from "@/lib/crm/task-edit-utils";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { taskHref } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
 /** @typedef {ReturnType<typeof getTasksDemoBundle>} TasksPortfolioBundle */
 
+/** @param {unknown} v */
+function validateAssignees(v) {
+  return Array.isArray(v) && v.every((x) => typeof x === "string") ? /** @type {string[]} */ (v) : null;
+}
+
 export function TasksPortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
-  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState(undefined, "crm:tasks:period:v1");
   const [bundle, setBundle] = useState(/** @type {TasksPortfolioBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -35,8 +42,23 @@ export function TasksPortfolio() {
   const [createFormKey, setCreateFormKey] = useState(0);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState(/** @type {string | null} */ (null));
-  const [selectedAssignees, setSelectedAssignees] = useState(/** @type {Set<string>} */ (new Set()));
+  const [defaultAssignees, setSelectedAssignees] = useState(/** @type {Set<string>} */ (new Set()));
+  const [persistedAssignees, setPersistedAssignees] = usePersistedState(
+    "crm:tasks:assignees:v1",
+    /** @type {string[] | null} */ (null),
+    { validate: validateAssignees },
+  );
+  const selectedAssignees = useMemo(
+    () => (persistedAssignees ? new Set(persistedAssignees) : defaultAssignees),
+    [persistedAssignees, defaultAssignees],
+  );
+  const handleAssigneesChange = useCallback(
+    (/** @type {Set<string>} */ next) => setPersistedAssignees([...next]),
+    [setPersistedAssignees],
+  );
+  const [moveError, setMoveError] = useState(/** @type {string | null} */ (null));
   const hasLoadedRef = useRef(false);
+  const loadSeqRef = useRef(0);
   const assigneeFilterInitializedRef = useRef(false);
 
   const openCreateModal = useCallback(() => {
@@ -51,6 +73,7 @@ export function TasksPortfolio() {
   }, []);
 
   const load = useCallback(async () => {
+    const reqId = ++loadSeqRef.current;
     const isInitial = !hasLoadedRef.current;
     if (isInitial) setLoading(true);
     else setRefreshing(true);
@@ -71,6 +94,7 @@ export function TasksPortfolio() {
         const res = await fetch(`/api/tasks?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaver");
+        if (reqId !== loadSeqRef.current) return;
         setBundle(data);
         if (!assigneeFilterInitializedRef.current) {
           setSelectedAssignees(
@@ -84,8 +108,10 @@ export function TasksPortfolio() {
       setError(e instanceof Error ? e.message : "Fejl");
       if (isInitial) setBundle(null);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (reqId === loadSeqRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [dataSource, primaryPeriod, queryParams, selection.months]);
 
@@ -166,6 +192,36 @@ export function TasksPortfolio() {
       }
     },
     [closeCreateModal, dataSource, load, router],
+  );
+
+  /** Drag-and-drop / select status change: optimistic, rolled back on failure. */
+  const handleStatusChange = useCallback(
+    async (task, nextStatus) => {
+      const prevStatus = task.status;
+      setMoveError(null);
+      /** @param {string} status */
+      const apply = (status) =>
+        setBundle((b) =>
+          b ? { ...b, tasks: b.tasks.map((t) => (t.id === task.id ? { ...t, status } : t)) } : b,
+        );
+      apply(nextStatus);
+      if (dataSource !== "database") return;
+      try {
+        const qs = databaseApiQuery();
+        const res = await fetch(`/api/tasks/${encodeURIComponent(task.id)}?${qs}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskStatusPatch(nextStatus)),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error ?? "Kunne ikke opdatere status");
+        void load();
+      } catch (e) {
+        apply(prevStatus);
+        setMoveError(e instanceof Error ? e.message : "Kunne ikke opdatere status");
+      }
+    },
+    [dataSource, load],
   );
 
   if (loading && !bundle) {
@@ -279,8 +335,15 @@ export function TasksPortfolio() {
           taskDueReferenceIso={bundle.taskDueReferenceIso}
           mineAssigneeKey={bundle.mineAssigneeKey}
           selectedAssignees={selectedAssignees}
-          onSelectedAssigneesChange={setSelectedAssignees}
+          onSelectedAssigneesChange={handleAssigneesChange}
+          periodLabel={subtitle}
+          onStatusChange={handleStatusChange}
         />
+        {moveError ?
+          <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
+            {moveError}
+          </p>
+        : null}
 
       </div>
     </div>
