@@ -18,6 +18,7 @@ export const routes = {
   time: "/time",
   workload: "/workload",
   nps: "/nps",
+  tov: "/tov",
   kb: "/kb",
   kbNew: "/kb/new",
   team: "/team",

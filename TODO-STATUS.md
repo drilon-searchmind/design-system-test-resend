@@ -10,6 +10,19 @@ Mirrors the colleague's list, item by item.
 
 ---
 
+## Tone of Voice (TOV)
+
+### 🟡 WORK IN PROGRESS: Tone of Voice pr. kunde (stays open until the owner is satisfied)
+- **Where:** sidebar → Kunde → "Tone of Voice" (`/tov`, `/tov/[kunde]`) and the "Tone of Voice" tab on each client card
+- **Files:** `lib/tov/*`, `lib/server/tov-data.js`, `lib/db/models/tov-*.js`, `app/api/clients/[clientId]/tov/**`, `app/api/tov/route.js`, `components/tov/*`
+- Upload PDFs / images / text / mails / md, multiple URLs (with font and colour hints) and a comment; files are stored in MongoDB only (`TovSource`).
+- Model choice locked to Claude Sonnet 5.5 (medium) and Claude Opus 5.5 (medium) via `CLAUDE_API_KEY`.
+- One standardized JSON schema (`lib/tov/schema.js`, versioned) for every client; re-analysis refines the existing profile.
+- Saved HTML preview (regenerated only on request), JSON view/edit/download, rewrite-in-tone playground, version history with restore, overview page with confidence.
+- ⬜ Not yet tested end-to-end with a real analysis in the browser.
+
+---
+
 ## Agency Pulse
 
 ### ✅ Rentabilitet pr. afdeling = (medarbejdere × 180.000) / solgt MRR

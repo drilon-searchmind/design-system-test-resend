@@ -14,6 +14,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   routes.time,
   routes.workload,
   routes.nps,
+  routes.tov,
   routes.kb,
   routes.team,
   routes.users,

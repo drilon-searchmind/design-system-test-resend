@@ -24,6 +24,20 @@ export function IconChart({ className, size = 15 }) {
   );
 }
 
+export function IconVoice({ className, size = 15 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M5 5.5h14a1.5 1.5 0 011.5 1.5v8a1.5 1.5 0 01-1.5 1.5h-7l-4.5 3.5V16.5H5A1.5 1.5 0 013.5 15V7A1.5 1.5 0 015 5.5zM8 10h8M8 13h5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function IconUsers({ className, size = 15 }) {
   return (
     <svg {...svgProps(size)} className={cn("shrink-0", className)}>
@@ -219,6 +233,7 @@ const ICONS = {
   timer: IconClock,
   workload: IconChart,
   nps: IconSparkle,
+  tov: IconVoice,
   kb: IconDoc,
   team: IconUser,
   users: IconShield,

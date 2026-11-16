@@ -19,6 +19,7 @@ import { ClientDetailNpsCard } from "@/components/clients/client-detail-nps-card
 import { ClientDetailRetainerTrendCard } from "@/components/clients/client-detail-retainer-trend-card";
 import { ClientDetailServiceMixCard } from "@/components/clients/client-detail-service-mix-card";
 import { ClientDetailTasksCard } from "@/components/clients/client-detail-tasks-card";
+import { TovWorkspace } from "@/components/tov/tov-workspace";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
@@ -28,6 +29,7 @@ export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
   "kundeinfo",
   "okonomi",
   "kvalitet",
+  "tov",
 ]);
 
 /** Danish labels aligned with SETTINGS stamdata tab pattern (`PulseSegmentedControl`). */
@@ -37,6 +39,7 @@ export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "kundeinfo", label: "Kundeinfo" },
   { id: "okonomi", label: "Økonomi & aftale" },
   { id: "kvalitet", label: "NPS & kvalitet" },
+  { id: "tov", label: "Tone of Voice" },
 ];
 
 /** Kun for kundegrupper — indsættes efter "Overblik". */
@@ -258,6 +261,15 @@ export function ClientDetailTabbedBody({
               <ClientDetailInsightsCard client={client} />
             </div>
             <ClientDetailAlertsCard clientId={client.id} alerts={visibleAlerts} />
+          </section>
+        ) : null}
+
+        {resolvedTab === "tov" ? (
+          <section aria-labelledby="client-tab-tov" className={stack}>
+            <h2 id="client-tab-tov" className="sr-only">
+              Tone of Voice
+            </h2>
+            <TovWorkspace clientKey={client.id} />
           </section>
         ) : null}
       </div>
