@@ -19,6 +19,8 @@ Mirrors the colleague's list, item by item.
 - Model choice locked to Claude Sonnet 5.5 (medium) and Claude Opus 5.5 (medium) via `CLAUDE_API_KEY`.
 - One standardized JSON schema (`lib/tov/schema.js`, versioned) for every client; re-analysis refines the existing profile.
 - Saved HTML preview (regenerated only on request), JSON view/edit/download, rewrite-in-tone playground, version history with restore, overview page with confidence.
+- Progress UI for analyze / preview / rewrite; cancel analysis; Materiale vs Resultat stages.
+- MCP tools: `tov_list`, `tov_get`, `tov_update`, `tov_sources_add`, `tov_sources_delete`, `tov_analyze`, `tov_analyze_cancel`, `tov_preview`, `tov_rewrite`.
 - ⬜ Not yet tested end-to-end with a real analysis in the browser.
 
 ---

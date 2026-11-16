@@ -40,6 +40,29 @@ export async function POST(req, ctx) {
     }
 
     const body = await req.json();
+    // MCP / JSON clients: { file: { name, base64, mimeType? } } — one file per request
+    if (body?.file && typeof body.file === "object") {
+      const name = String(body.file.name ?? "upload.bin");
+      const b64 = String(body.file.base64 ?? "").replace(/^data:[^;]+;base64,/, "");
+      if (!b64) return NextResponse.json({ error: "file.base64 mangler" }, { status: 400 });
+      let buffer;
+      try {
+        buffer = Buffer.from(b64, "base64");
+      } catch {
+        return NextResponse.json({ error: "Ugyldig base64" }, { status: 400 });
+      }
+      const result = await addFileSources(
+        clientId,
+        includeTest,
+        [{ name, type: String(body.file.mimeType ?? ""), size: buffer.length, buffer }],
+        meta,
+      );
+      if ("error" in result) return NextResponse.json({ error: result.error }, { status: result.status ?? 400 });
+      if (result.added === 0 && result.errors.length) {
+        return NextResponse.json({ error: result.errors.join(" · ") }, { status: 400 });
+      }
+      return NextResponse.json(result);
+    }
     const result =
       typeof body?.url === "string" ? await addUrlSource(clientId, includeTest, body.url, meta)
       : await addTextSource(clientId, includeTest, body ?? {}, meta);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { TovPreviewProgress, TovRewriteProgress } from "@/components/tov/tov-progress";
 import { TovCard, formatTovDate, tovBtn, tovBtnPrimary, tovFetch, tovTextarea } from "@/components/tov/tov-ui";
 import { cn } from "@/lib/utils";
 
@@ -38,31 +39,33 @@ export function TovPreviewPanel({ clientKey, preview, model, onChanged }) {
       title="Eksempel (HTML-preview)"
       hint="Genereres med modellen ud fra profilen og gemmes i databasen. Den genereres kun når du beder om det."
       actions={
-        <>
-          {preview ?
-            <div className="inline-flex overflow-hidden rounded-md border border-border">
-              {[
-                ["100%", "Desktop"],
-                ["390px", "Mobil"],
-              ].map(([w, label]) => (
-                <button
-                  key={w}
-                  type="button"
-                  onClick={() => setWidth(w)}
-                  className={cn(
-                    "h-8 px-3 font-sans text-[12px]",
-                    width === w ? "bg-agency-brand-soft text-agency-brand" : "bg-surface-muted text-fg-muted",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          : null}
-          <button type="button" onClick={generate} disabled={busy} className={preview ? tovBtn : tovBtnPrimary}>
-            {busy ? "Genererer… (op til 1-2 min)" : preview ? "Generér nyt eksempel" : "Generér eksempel"}
-          </button>
-        </>
+        busy ? null : (
+          <>
+            {preview ?
+              <div className="inline-flex overflow-hidden rounded-md border border-border">
+                {[
+                  ["100%", "Desktop"],
+                  ["390px", "Mobil"],
+                ].map(([w, label]) => (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => setWidth(w)}
+                    className={cn(
+                      "h-8 px-3 font-sans text-[12px]",
+                      width === w ? "bg-agency-brand-soft text-agency-brand" : "bg-surface-muted text-fg-muted",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            : null}
+            <button type="button" onClick={generate} className={preview ? tovBtn : tovBtnPrimary}>
+              {preview ? "Generér nyt eksempel" : "Generér eksempel"}
+            </button>
+          </>
+        )
       }
     >
       {error ?
@@ -70,7 +73,9 @@ export function TovPreviewPanel({ clientKey, preview, model, onChanged }) {
           {error}
         </p>
       : null}
-      {preview ?
+      {busy ?
+        <TovPreviewProgress modelLabel={model} />
+      : preview ?
         <>
           <p className="mb-2 font-sans text-[11px] text-fg-quiet">
             {preview.title ? `${preview.title} · ` : ""}Genereret {formatTovDate(preview.generatedAt)} · {preview.model}
@@ -211,40 +216,48 @@ export function TovPlaygroundPanel({ clientKey, model }) {
       title="Omskriv i kundens tone"
       hint="Indsæt en vilkårlig tekst (udkast, mail, annonce) og få den omskrevet i kundens Tone of Voice. Resultatet gemmes ikke."
       actions={
-        <button type="button" className={tovBtnPrimary} onClick={run} disabled={busy || !text.trim()}>
-          {busy ? "Omskriver…" : "Omskriv"}
-        </button>
+        busy ? null : (
+          <button type="button" className={tovBtnPrimary} onClick={run} disabled={!text.trim()}>
+            Omskriv
+          </button>
+        )
       }
     >
-      <div className="grid gap-4 lg:grid-cols-2">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={10}
-          placeholder="Indsæt tekst her…"
-          className={tovTextarea}
-        />
-        <div className="min-h-[200px] rounded-md border border-border bg-surface-muted/40 p-3">
-          {error ? <p className="text-[12px] text-agency-bad">{error}</p> : null}
-          {result ?
-            <>
-              <p className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-fg">{result.rewritten}</p>
-              {result.changes.length ?
-                <ul className="mt-3 list-disc space-y-1 border-t border-border-soft pt-3 pl-4 font-sans text-[11px] text-fg-muted">
-                  {result.changes.map((c, i) => (
-                    <li key={i}>{c}</li>
-                  ))}
-                </ul>
-              : null}
-              <button type="button" className={cn(tovBtn, "mt-3")} onClick={() => navigator.clipboard.writeText(result.rewritten)}>
-                Kopiér tekst
-              </button>
-            </>
-          : !error ?
-            <p className="font-sans text-[12px] text-fg-quiet">Resultatet vises her.</p>
-          : null}
-        </div>
-      </div>
+      {busy ?
+        <TovRewriteProgress modelLabel={model} />
+      : <div className="grid gap-4 lg:grid-cols-2">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={10}
+            placeholder="Indsæt tekst her…"
+            className={tovTextarea}
+          />
+          <div className="min-h-[200px] rounded-md border border-border bg-surface-muted/40 p-3">
+            {error ? <p className="text-[12px] text-agency-bad">{error}</p> : null}
+            {result ?
+              <>
+                <p className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-fg">{result.rewritten}</p>
+                {result.changes.length ?
+                  <ul className="mt-3 list-disc space-y-1 border-t border-border-soft pt-3 pl-4 font-sans text-[11px] text-fg-muted">
+                    {result.changes.map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
+                : null}
+                <button
+                  type="button"
+                  className={cn(tovBtn, "mt-3")}
+                  onClick={() => navigator.clipboard.writeText(result.rewritten)}
+                >
+                  Kopiér tekst
+                </button>
+              </>
+            : !error ?
+              <p className="font-sans text-[12px] text-fg-quiet">Resultatet vises her.</p>
+            : null}
+          </div>
+        </div>}
     </TovCard>
   );
 }
