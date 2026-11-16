@@ -249,3 +249,12 @@ The four static sparkline images were replaced (`components/pulse/pulse-kpi-visu
 - ⬜ Still visible (but rejected by the server with an error) for standard users: edit buttons on contract templates, NPS settings/templates, team roster edit, KB delete.
 - Note: login is Google SSO only — there are no passwords to reset. Name/e-mail/role/team profile are editable by admins.
 - Test: log in as a standard user (or set yourself/another user to Standard under Brugere) → no Brugere menu, Indstillinger shows only Generelt + the permission list, status/MRR fields locked, 403 from admin APIs. Then promote that user to Admin and the above appears.
+
+## MCP server for Claude (new)
+- Lives in the Next app at `/api/mcp` (streamable HTTP, JSON-RPC). ~95 tools mirror all REST endpoints (read + write); see `lib/mcp/tools.js`.
+- Auth: OAuth 2.1 with Google login (`/.well-known/*`, `/api/mcp-oauth/{register,authorize,token}`), PKCE, consent screen.
+- Access: allowlist only (`dbr@searchmind.dk`, `brian@searchmind.dk`, override with env `MCP_ALLOWED_EMAILS`); allowlisted users act as admins. Everyone else is blocked. Admin-role based access: not built yet.
+- Railway env: `AUTH_SECRET` (already set, used to sign tokens), optional `MCP_ALLOWED_EMAILS`, `MCP_PUBLIC_URL` (e.g. https://your-app.up.railway.app).
+- Test: Claude -> Settings -> Connectors -> Add custom connector -> `https://<app-url>/api/mcp`; log in with Google, click Tillad. Then ask "list my clients". An unlisted user sees "Ingen adgang".
+- `crm_reset_demo` needs `body.confirm = "RESET DEMO"`. Test data hidden unless `query.includeTest=1`.
+- Not done: a revoke UI (remove an email from the allowlist to cut access instantly), rate limiting.

@@ -10,6 +10,7 @@ import { ACCESS_TIERS } from "@/lib/constants/access-tiers";
 import User from "@/lib/db/models/user";
 import { connectDb } from "@/lib/db/mongoose";
 import { env } from "@/lib/env";
+import { getMcpAuth } from "@/lib/mcp/auth-context";
 
 /** When set, demo dev-session auth returns null (Log ud). */
 const DEMO_SIGNED_OUT_COOKIE = "apex-demo-signed-out";
@@ -239,6 +240,8 @@ export const handlers = {
 };
 
 export async function auth() {
+  const mcp = getMcpAuth();
+  if (mcp) return mcp.session;
   if (!hasGoogleOAuth) {
     return getDevSessionPayload();
   }
