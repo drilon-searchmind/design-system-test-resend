@@ -33,7 +33,8 @@ function validateAssignees(v) {
 export function TasksPortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
-  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState(undefined, "crm:tasks:period:v1");
+  // Month selection is shared app-wide (see REPORT_PERIOD_STORAGE_KEY).
+  const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
   const [bundle, setBundle] = useState(/** @type {TasksPortfolioBundle | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

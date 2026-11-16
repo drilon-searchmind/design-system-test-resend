@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useDataSource } from "@/components/crm/use-data-source";
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
+import { KPI_INFO } from "@/components/pulse/pulse-kpi-info";
 import { PulseClientsPanel } from "@/components/pulse/pulse-clients-panel";
 import { PulseDataProvider } from "@/components/pulse/pulse-data-context";
 import { PulseClientRanking } from "@/components/pulse/pulse-client-ranking";
@@ -116,6 +117,7 @@ export function PulseDashboard() {
           <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
             <PulseKpiCard
               label="Retainer MRR"
+              info={KPI_INFO.mrr}
               value={
                 m.upsellMrr > 0 ?
                   `${formatCurrencyCompact(m.retainerMRR)} (+${formatCurrencyCompact(m.upsellMrr)})`
@@ -127,6 +129,7 @@ export function PulseDashboard() {
             />
             <PulseKpiCard
               label="Udnyttelse"
+              info={KPI_INFO.utilisation}
               value={formatPercent(m.utilisation)}
               delta={utilDelta}
               deltaFormat={(v) => formatPercent(v)}
@@ -135,6 +138,7 @@ export function PulseDashboard() {
             />
             <PulseKpiCard
               label="Overhead-tid"
+              info={KPI_INFO.overhead}
               value={formatPercent(m.overheadPct)}
               delta={overheadDelta}
               deltaFormat={(v) => formatPercent(v)}
@@ -144,6 +148,7 @@ export function PulseDashboard() {
             />
             <PulseKpiCard
               label="Gns. margin"
+              info={KPI_INFO.margin}
               value={formatPercent(m.avgMargin)}
               delta={marginDelta}
               deltaFormat={(v) => formatPercent(v)}
