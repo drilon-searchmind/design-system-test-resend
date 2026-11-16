@@ -258,3 +258,4 @@ The four static sparkline images were replaced (`components/pulse/pulse-kpi-visu
 - Test: Claude -> Settings -> Connectors -> Add custom connector -> `https://<app-url>/api/mcp`; log in with Google, click Tillad. Then ask "list my clients". An unlisted user sees "Ingen adgang".
 - `crm_reset_demo` needs `body.confirm = "RESET DEMO"`. Test data hidden unless `query.includeTest=1`.
 - Not done: a revoke UI (remove an email from the allowlist to cut access instantly), rate limiting.
+- Admin-role access is built but OFF: set Railway env MCP_ADMIN_ACCESS=1 to let every CRM admin (User.isAdmin) use the MCP with admin rights. Until then only the allowlist works.

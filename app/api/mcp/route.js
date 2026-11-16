@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { buildMcpSession, isMcpEmailAllowed } from "@/lib/mcp/access";
+import { buildMcpSession, canUseMcp } from "@/lib/mcp/access";
 import { runWithMcpAuth } from "@/lib/mcp/auth-context";
 import { dispatchTool } from "@/lib/mcp/dispatch";
 import { CORS_HEADERS, optionsCors } from "@/lib/mcp/http";
@@ -96,7 +96,7 @@ export async function POST(req) {
   const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
   const claims = verifyToken(token, "access");
   if (!claims) return unauthorized(req, "Missing, invalid or expired access token");
-  if (!isMcpEmailAllowed(claims.sub)) return unauthorized(req, "User is not allowed to use the MCP server");
+  if (!(await canUseMcp(claims.sub))) return unauthorized(req, "User is not allowed to use the MCP server");
 
   let payload;
   try {

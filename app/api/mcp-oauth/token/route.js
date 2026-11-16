@@ -1,4 +1,4 @@
-import { isMcpEmailAllowed } from "@/lib/mcp/access";
+import { canUseMcp } from "@/lib/mcp/access";
 import { jsonCors, optionsCors } from "@/lib/mcp/http";
 import { consumeOnce, pkceMatches, signToken, verifyToken } from "@/lib/mcp/tokens";
 
@@ -42,14 +42,14 @@ export async function POST(req) {
     }
     if (!pkceMatches(p.code_verifier, code.cc)) return err("invalid_grant", "PKCE verification failed");
     if (!consumeOnce(code.jti)) return err("invalid_grant", "Code already used");
-    if (!isMcpEmailAllowed(code.sub)) return err("access_denied", "User not allowed", 403);
+    if (!(await canUseMcp(code.sub))) return err("access_denied", "User not allowed", 403);
     return issue(code.sub);
   }
 
   if (p.grant_type === "refresh_token") {
     const rt = verifyToken(p.refresh_token, "refresh");
     if (!rt) return err("invalid_grant", "Invalid or expired refresh token");
-    if (!isMcpEmailAllowed(rt.sub)) return err("access_denied", "User not allowed", 403);
+    if (!(await canUseMcp(rt.sub))) return err("access_denied", "User not allowed", 403);
     return issue(rt.sub);
   }
 

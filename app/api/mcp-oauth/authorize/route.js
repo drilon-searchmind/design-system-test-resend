@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { isMcpEmailAllowed } from "@/lib/mcp/access";
+import { canUseMcp } from "@/lib/mcp/access";
 import { escapeHtml, htmlPage } from "@/lib/mcp/http";
 import { signToken, verifyToken } from "@/lib/mcp/tokens";
 
@@ -37,7 +37,7 @@ export async function GET(req) {
     const back = `${req.nextUrl.pathname}${req.nextUrl.search}`;
     return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(back)}`, req.nextUrl.origin), 302);
   }
-  if (!isMcpEmailAllowed(email)) {
+  if (!(await canUseMcp(email))) {
     return htmlPage(
       "Ingen adgang",
       `<h1>Ingen adgang</h1><p><code>${escapeHtml(email)}</code> har ikke adgang til CRM'ets MCP-server. Kontakt en administrator.</p>`,
@@ -69,7 +69,7 @@ export async function POST(req) {
 
   const session = await auth();
   const email = session?.user?.email;
-  if (!email || email.toLowerCase() !== String(ctx.sub).toLowerCase() || !isMcpEmailAllowed(email)) {
+  if (!email || email.toLowerCase() !== String(ctx.sub).toLowerCase() || !(await canUseMcp(email))) {
     return htmlPage("Ingen adgang", "<h1>Ingen adgang</h1><p>Sessionen matcher ikke anmodningen.</p>", 403);
   }
 
