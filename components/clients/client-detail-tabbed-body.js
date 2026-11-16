@@ -182,7 +182,7 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-opgaver" className="sr-only">
               Opgaver
             </h2>
-            <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} />
+            <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} team={team ?? notesTeamMembers ?? []} />
           </section>
         ) : null}
 

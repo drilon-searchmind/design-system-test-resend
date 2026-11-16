@@ -54,6 +54,13 @@ export function ClientDetailServiceMixCard({ client, canEdit = false, onSaved })
     : Object.values(budgets).reduce((s, v) => s + Number(v || 0), 0);
   const remaining = mrr - allocated;
   const over = remaining < -0.5;
+  // Slider spans 0 → total MRR (or the largest typed amount if that exceeds MRR).
+  const sliderMax = Math.max(
+    mrr,
+    ...services.map((k) => toNum(amounts[k])),
+    0,
+  );
+  const sliderStep = sliderMax > 100000 ? 500 : sliderMax > 20000 ? 250 : 100;
 
   const save = async () => {
     setSaving(true);
@@ -175,13 +182,28 @@ export function ClientDetailServiceMixCard({ client, canEdit = false, onSaved })
                   </td>
                   <td className="py-2.5 pr-3 tabular-nums text-fg">
                     {editing && isActive ?
-                      <input
-                        inputMode="decimal"
-                        value={amounts[d.id] ?? ""}
-                        placeholder="0"
-                        onChange={(e) => setAmounts((cur) => ({ ...cur, [d.id]: e.target.value }))}
-                        className="h-8 w-28 rounded-md border border-border bg-surface-muted px-2 text-[12px] text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand"
-                      />
+                      <div className="flex min-w-[200px] items-center gap-3">
+                        <input
+                          inputMode="decimal"
+                          value={amounts[d.id] ?? ""}
+                          placeholder="0"
+                          aria-label={`Budget for ${d.name}`}
+                          onChange={(e) => setAmounts((cur) => ({ ...cur, [d.id]: e.target.value }))}
+                          className="h-8 w-24 shrink-0 rounded-md border border-border bg-surface-muted px-2 text-[12px] text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand"
+                        />
+                        <input
+                          type="range"
+                          min={0}
+                          max={sliderMax}
+                          step={sliderStep}
+                          value={Math.min(budget, sliderMax)}
+                          aria-label={`Budget-slider for ${d.name}`}
+                          onChange={(e) =>
+                            setAmounts((cur) => ({ ...cur, [d.id]: String(Number(e.target.value)) }))
+                          }
+                          className="h-1.5 min-w-[90px] flex-1 cursor-pointer accent-[var(--agency-brand)]"
+                        />
+                      </div>
                     : budget > 0 ?
                       formatCurrency(budget, currency)
                     : "—"}
