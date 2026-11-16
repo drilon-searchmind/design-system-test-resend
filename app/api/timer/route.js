@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
+import { readIncludeTest } from "@/lib/server/include-test";
 import { getTimerForSession, startTimer, stopTimer } from "@/lib/server/timer-controller";
 
-export async function GET() {
+export async function GET(req) {
   const session = await auth();
-  const r = await getTimerForSession(session);
+  const r = await getTimerForSession(session, readIncludeTest(req));
   return NextResponse.json({
     active: r.active ?? null,
     clientsPicklist: Array.isArray(r.clientsPicklist) ? r.clientsPicklist : [],
@@ -20,7 +21,7 @@ export async function POST(req) {
   const action = body.action;
 
   if (action === "start") {
-    const r = await startTimer(session, body);
+    const r = await startTimer(session, body, readIncludeTest(req));
     if ("error" in r && r.error) return NextResponse.json({ error: r.error }, { status: r.status ?? 400 });
     return NextResponse.json({ active: r.active });
   }
