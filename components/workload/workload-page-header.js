@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconChart } from "@/components/crm/icons";
 import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
@@ -28,8 +29,8 @@ export function WorkloadPageHeader({
   const hasMine = typeof mineLabel === "string" && mineLabel.trim();
 
   return (
-    <div className="flex flex-col gap-3">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+    <>
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconChart size={14} className="text-agency-brand" aria-hidden />
@@ -57,7 +58,7 @@ export function WorkloadPageHeader({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
           <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
         </div>
-      </header>
-    </div>
+      </StickyPageHeader>
+    </>
   );
 }

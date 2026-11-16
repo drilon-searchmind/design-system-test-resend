@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import Link from "next/link";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
@@ -68,11 +69,11 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
         <span className="text-fg">{client.name}</span>
       </nav>
 
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
-              "flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
+              "sph-hide flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
               "text-sm font-semibold text-white md:size-[60px] md:text-[15px]",
             )}
             style={{
@@ -130,7 +131,7 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
                 Sidst aktiv {client.lastActivity}
               </span>
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="sph-hide mt-3 flex flex-wrap items-center gap-2">
               <StatusChip status={client.status} palette="agency" />
               <HealthChip health={client.health} palette="agency" />
               {group ?
@@ -144,7 +145,7 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
             </div>
 
             {showChurn ? (
-              <div className="mt-3 space-y-2">
+              <div className="sph-hide mt-3 space-y-2">
                 <p className="font-sans text-[12px] text-fg-muted">
                   Opsagt{" "}
                   <span className="tabular-nums text-fg">
@@ -174,7 +175,7 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
         </div>
 
         {trailing ? <div className="flex flex-wrap items-start justify-end gap-2">{trailing}</div> : null}
-      </header>
+      </StickyPageHeader>
     </>
   );
 }

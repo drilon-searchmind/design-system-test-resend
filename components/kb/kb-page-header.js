@@ -1,3 +1,4 @@
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { IconDoc } from "@/components/crm/icons";
 import { KbPageActions } from "@/components/kb/kb-page-actions";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
@@ -14,7 +15,7 @@ import { formatIsoDateDa } from "@/lib/crm/format-da";
  */
 export function KbPageHeader({ stats }) {
   return (
-    <header className="flex flex-col gap-3 border-b border-border/70 pb-4 md:flex-row md:items-start md:justify-between">
+    <StickyPageHeader className="flex flex-col gap-3 border-b border-border/70 pb-4 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           <IconDoc size={14} className="text-agency-brand" aria-hidden />
@@ -47,6 +48,6 @@ export function KbPageHeader({ stats }) {
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <KbPageActions />
       </div>
-    </header>
+    </StickyPageHeader>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
@@ -27,7 +28,7 @@ export function SettingsWorkspace() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="border-b border-border pb-6">
+      <StickyPageHeader className="border-b border-border pb-6">
         <p className={tallyEyebrow}>◇ settings</p>
         <h1 className="mt-2 text-[clamp(1.75rem,3vw,2.25rem)] font-semibold tracking-[-0.03em] text-fg">
           Indstillinger
@@ -36,7 +37,7 @@ export function SettingsWorkspace() {
           Vælg hvordan dashboards og moduler henter data — fra den tilsluttede database eller den indbyggede
           eksempelpakke.
         </p>
-      </header>
+      </StickyPageHeader>
 
       {visibleTabs.length > 1 ?
         <PulseSegmentedControl active={tab} onChange={setTab} tabs={visibleTabs} className="max-w-xl" />

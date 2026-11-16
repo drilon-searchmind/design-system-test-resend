@@ -908,3 +908,24 @@ html[data-density="spacious"] {
 @media (prefers-reduced-motion: reduce) {
   .confetti-piece { display: none; }
 }
+
+/* Sticky page header (components/crm/sticky-page-header.js) - compact state */
+.sph[data-stuck="true"] {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  gap: 0.5rem;
+  border-bottom-color: transparent;
+  align-items: center;
+}
+.sph[data-stuck="true"] > p,
+.sph[data-stuck="true"] > :first-child p,
+.sph[data-stuck="true"] .sph-hide {
+  display: none;
+}
+.sph[data-stuck="true"] > h1,
+.sph[data-stuck="true"] > :first-child h1 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}

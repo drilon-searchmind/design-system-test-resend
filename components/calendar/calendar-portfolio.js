@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CrmDialog } from "@/components/crm/crm-dialog";
@@ -494,7 +495,7 @@ export function CalendarPortfolio() {
 
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-      <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Arbejde</p>
           <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg md:text-[24px]">
@@ -514,7 +515,7 @@ export function CalendarPortfolio() {
             />
           : null}
         </div>
-      </header>
+      </StickyPageHeader>
 
       <CalendarFiltersBar
         taskCount={sidebarTasks.length}

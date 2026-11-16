@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { formatHoursCompactDa } from "@/lib/crm/format-da";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -184,7 +185,7 @@ export function WorkloadMemberPortfolio() {
         <span className="truncate text-fg">{member.name}</span>
       </nav>
 
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <CrmAvatar
@@ -218,7 +219,7 @@ export function WorkloadMemberPortfolio() {
         <div className="flex flex-wrap gap-2">
           <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
         </div>
-      </header>
+      </StickyPageHeader>
 
       <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
         <PulseKpiCard label="Åbne opgaver" value={String(openStats.total)} tone={backlogTone} />

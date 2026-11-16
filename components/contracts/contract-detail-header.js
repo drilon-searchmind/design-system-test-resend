@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import Link from "next/link";
 
 import { HealthChip } from "@/components/crm/health-chip";
@@ -58,7 +59,7 @@ export function ContractDetailHeader({
         <span className="text-[11px] text-fg-muted">{contract.id}</span>
       </nav>
 
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
@@ -96,7 +97,7 @@ export function ContractDetailHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 md:justify-end">{trailing}</div>
-      </header>
+      </StickyPageHeader>
     </>
   );
 }

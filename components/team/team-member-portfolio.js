@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { TeamMemberHeader } from "@/components/team/team-member-header";
@@ -163,12 +164,12 @@ export function TeamMemberPortfolio() {
 
   return (
     <div className={cn("flex flex-col gap-[length:var(--ds-studio-stack)] transition-opacity", refreshing && "opacity-65")}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <StickyPageHeader className="flex flex-wrap items-center justify-between gap-3 pb-3">
         <Link href={routes.team} className="font-sans text-[13px] font-medium text-agency-brand hover:underline">
           ← Team
         </Link>
         <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-      </div>
+      </StickyPageHeader>
 
       <TeamMemberHeader member={member} department={department} />
 

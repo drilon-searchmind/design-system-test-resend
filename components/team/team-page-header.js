@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { IconUsers } from "@/components/crm/icons";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { TEAM } from "@/lib/crm/static-data";
@@ -38,7 +39,7 @@ export function TeamPageHeader({
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconUsers size={14} className="text-agency-brand" aria-hidden />
@@ -59,7 +60,7 @@ export function TeamPageHeader({
         </div>
 
         <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
-      </header>
-    </div>
+      </StickyPageHeader>
+    </>
   );
 }

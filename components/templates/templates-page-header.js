@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,7 +37,7 @@ export function TemplatesPageHeader({
   }
 
   return (
-    <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+    <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
           Bibliotek
@@ -72,6 +73,6 @@ export function TemplatesPageHeader({
           </button>
         : null}
       </div>
-    </header>
+    </StickyPageHeader>
   );
 }

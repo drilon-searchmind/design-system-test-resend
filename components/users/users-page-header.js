@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { IconShield } from "@/components/crm/icons";
 import { TEAM } from "@/lib/crm/static-data";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
@@ -25,8 +26,8 @@ export function UsersPageHeader({
     : "—";
 
   return (
-    <div className="flex flex-col gap-3">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+    <>
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconShield size={14} className="text-agency-brand" aria-hidden />
@@ -48,7 +49,7 @@ export function UsersPageHeader({
             Inviter bruger
           </button>
         </div>
-      </header>
-    </div>
+      </StickyPageHeader>
+    </>
   );
 }

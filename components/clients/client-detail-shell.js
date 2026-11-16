@@ -221,7 +221,7 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
           trailing={
             <div className="flex flex-col items-end gap-1">
               <ReportPeriodPicker selection={selection} onSelectionChange={setSelection} />
-              <span className="hidden text-right font-sans text-[10px] text-fg-quiet sm:inline">
+              <span className="sph-hide hidden text-right font-sans text-[10px] text-fg-quiet sm:inline">
                 Reference: {subtitle}
               </span>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { usePulseData } from "@/components/pulse/pulse-data-context";
 import { usePulsePeriod } from "@/components/pulse/pulse-period-context";
@@ -10,7 +11,7 @@ export function PulsePageHeader() {
   const { selection, onSelectionChange, refreshing, subtitle } = usePulsePeriod();
 
   return (
-    <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
+    <StickyPageHeader className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <p className="text-xs uppercase tracking-[0.08em] text-fg-soft">
           ◇ pulse
@@ -32,6 +33,6 @@ export function PulsePageHeader() {
       </div>
 
       <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
-    </header>
+    </StickyPageHeader>
   );
 }

@@ -43,9 +43,8 @@ export function CrmTopbar({ title, onOpenNav, className }) {
           >
             <IconMenu size={18} />
           </button>
-          <h1 className="truncate text-base font-semibold leading-tight tracking-[-0.02em] text-fg md:text-lg">
-            {title}
-          </h1>
+          {/* Page headings render their own title; keep this for screen readers only. */}
+          <span className="sr-only">{title}</span>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 md:gap-3">

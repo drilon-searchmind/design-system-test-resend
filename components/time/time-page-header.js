@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { useTimerModal } from "@/components/crm/timer-modal-context";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconClock } from "@/components/crm/icons";
@@ -42,8 +43,8 @@ export function TimePageHeader({
   const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
 
   return (
-    <div className="flex flex-col gap-3">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+    <>
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconClock size={14} className="text-agency-brand" aria-hidden />
@@ -89,7 +90,7 @@ export function TimePageHeader({
             <ReportPeriodPicker selection={selection} onSelectionChange={onSelectionChange} />
           </div>
         </div>
-      </header>
-    </div>
+      </StickyPageHeader>
+    </>
   );
 }

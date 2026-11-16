@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import { IconSparkle } from "@/components/crm/icons";
 import { formatReportPeriodSubtitle } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,8 @@ export function NpsPageHeader({ reportPeriod, loading = false, refreshing = fals
   const subtitle = formatReportPeriodSubtitle(reportPeriod.year, reportPeriod.month);
 
   return (
-    <div className="flex flex-col gap-3">
-      <header className="border-b border-border/70 pb-6">
+    <>
+      <StickyPageHeader className="border-b border-border/70 pb-6">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
             <IconSparkle size={14} className="text-agency-brand" aria-hidden />
@@ -37,7 +38,7 @@ export function NpsPageHeader({ reportPeriod, loading = false, refreshing = fals
             : null}
           </p>
         </div>
-      </header>
-    </div>
+      </StickyPageHeader>
+    </>
   );
 }

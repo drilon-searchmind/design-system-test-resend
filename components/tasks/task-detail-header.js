@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import Link from "next/link";
 
 import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
@@ -64,7 +65,7 @@ export function TaskDetailHeader({
         </nav>
       }
 
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
+      <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           <span
             className={cn(
@@ -108,7 +109,7 @@ export function TaskDetailHeader({
             </button>
           : null}
         </div>
-      </header>
+      </StickyPageHeader>
     </>
   );
 }
