@@ -1,6 +1,7 @@
 import { KbWorkspace } from "@/components/kb/kb-workspace";
 import { shellMainStudio } from "@/config/shell";
 import { KNOWLEDGE_SECTIONS } from "@/lib/crm/knowledge-data";
+import { readIncludeTestCookie } from "@/lib/server/include-test";
 import { fetchKnowledgeBundle } from "@/lib/server/knowledge-data";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
     typeof sp.author === "string" ? sp.author : Array.isArray(sp.author) ? sp.author[0] : undefined;
   const validSection = KNOWLEDGE_SECTIONS.some((s) => s.id === sectionRaw) ? sectionRaw : undefined;
 
-  const bundle = await fetchKnowledgeBundle();
+  const bundle = await fetchKnowledgeBundle({ includeTest: await readIncludeTestCookie() });
 
   return (
     <main className={cn(shellMainStudio)}>

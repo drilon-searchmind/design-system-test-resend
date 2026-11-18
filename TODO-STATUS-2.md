@@ -17,10 +17,11 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Files:** `config/site.js`, `components/crm/crm-sidebar.js`, `lib/crm/workspace-title.js`, page `metadata` in `app/**`, `components/layout/site-nav.js`, `components/marketing/*`
 - Code comments and internal names still say "Agency OS"; only visible text is renamed.
 
-### ✅ Timer fjernet generelt
-- **Where:** top bar (stopwatch chip gone), `/time` (no "Start timer"), task detail ("Timer" button logs hours)
-- **Files:** `components/crm/crm-topbar.js`, `components/crm/crm-timer-modal.js`, deleted `components/crm/crm-timer-chip.js`, `lib/crm/timer-client.js`, `components/time/open-timer-button.js`
-- The time window is now "Registrér tid" and is manual only. `/api/timer` and the `TimerSession` model are still in the code but nothing in the UI uses them.
+### ✅ Timer: hedder "Timer" og bliver i toppen (rettet)
+- **Correction:** the note meant "call it Timer and keep it at the top", not "remove the timer". The first implementation removed the stopwatch; that has been reverted to the earlier version.
+- **Where:** top bar (timer chip with running time), `/time` ("Timer" button + "Ny registrering"), task detail ("Timer" button: click starts the timer, hover shows "Start timer" / "Manuel registrering")
+- **Files:** restored from commit `0337840`: `components/crm/crm-timer-chip.js`, `crm-topbar.js`, `crm-timer-modal.js`, `timer-modal-context.js`, `lib/crm/timer-client.js`, `components/time/open-timer-button.js`, `time-track-runner.js`, `time-track-page-header.js`, `time-quick-log-panel.js`, `components/tasks/task-detail-timer-menu.js`
+- Kept from this round: the admin person filter on `/time` and inline editing on tasks.
 
 ### ✅ "Timer i perioden" fjernet/skjult
 - **Where:** `/clients` list (column removed), client view KPI is now "Tid brugt"
@@ -40,10 +41,16 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Where:** sidebar (hidden for non-admins); direct URLs redirect non-admins to `/pulse`
 - **Files:** `lib/crm/nav-config.js`, `app/(dashboard)/templates/layout.js`, `app/(dashboard)/workload/layout.js`
 
-### ✅ Toolbox tilføjet under Organisation
+### ✅ Toolbox: hub for bureauets interne værktøjer (admins vedligeholder)
 - **Where:** sidebar → Organisation → Toolbox (`/toolbox`)
-- **Files:** `app/(dashboard)/toolbox/page.js`, `components/crm/icons.js`, `config/routes.js`
-- Grouped shortcut cards to the internal tools (Brand Core, NPS, Kontrakter, Knowledge base, Opgaveskabeloner for admins, AI Chat, Indstillinger, Status). ❓ Q3
+- Admins add, edit and remove tools (name, URL, short description, category, "kun synlig for admins"). Everyone else sees the cards. Cards show the tool's favicon, open in a new tab and are grouped by category, with search.
+- **Files:** `app/(dashboard)/toolbox/page.js`, `components/toolbox/toolbox-hub.js`, `app/api/toolbox/**`, `lib/server/toolbox-data.js`, `lib/db/models/toolbox-tool.js`
+- Replaces the first version (shortcut cards to the app's own pages). ✅ Q3
+
+### ✅ MCP opdateret med de nye endpoints
+- New tools: `clients_directory_meta`, `client_notes_list/create/update/delete`, `contract_services_list/create/update/delete`, `kb_summary`, `toolbox_list/create/update/delete`
+- Updated descriptions: `kb_create`/`kb_update` (fields + AI summary), `time_entries_list/update/delete` (admins see and edit everyone's entries)
+- **Files:** `lib/mcp/tools.js`
 
 ---
 
@@ -196,7 +203,7 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - One page: fields, description, delopgaver, tidslog, aktivitet. Comments stay in the sidebar.
 
 ### ✅ Knappen hedder "Timer"
-- Opens "Registrér tid" with client and task filled in. ❓ Q17
+- The old timer menu is back, with the button labelled "Timer": click starts the timer on the task; hover shows "Start timer" and "Manuel registrering" (opens the timer window with client and task filled in). ❓ Q17
 
 ### ✅ Ingen "Rediger"-knap; redigér direkte
 - Each field saves on its own and shows "Gemt ✓"; reverts with an error message on failure. "Slet opgave" is a small red button at the bottom. ❓ Q18
@@ -211,8 +218,8 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Files:** `app/api/time-entries/route.js`, `lib/server/time-entries-data.js`, `components/time/time-page-header.js`
 - Checked on the server. Admins can open, edit and delete colleagues' entries. ❓ Q19
 
-### ✅ Fjern timer og "start timer"
-- See "Timer fjernet generelt".
+### ✅ Timer og "start timer" beholdes (rettet)
+- Misread at first as "remove". The timer (start/stop and manual registration) is back as before. See "Timer: hedder Timer og bliver i toppen".
 
 ---
 
@@ -247,6 +254,10 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 ### 🟡 Knowledge base generelt
 - Light layout tidy-up only (summary moved up, full-width sections, cleaner cards, "Nulstil filtre", empty-state CTA). ❓ Q23
 - **Files (whole section):** `components/kb/*`, `app/(dashboard)/kb/**`, `app/api/kb/**`, `lib/server/knowledge-data.js`
+
+### ✅ Artikler fra Pulse gav 404 (rettet)
+- With "vis testdata" on, Pulse listed test articles, but the article page only looked up production articles. The list, article and edit pages now follow the same test-data setting as the rest of the app.
+- **Files:** `lib/server/include-test.js` (`readIncludeTestCookie`), `app/(dashboard)/kb/page.js`, `app/(dashboard)/kb/[slug]/page.js`, `app/(dashboard)/kb/[slug]/edit/page.js`
 
 ---
 
@@ -285,7 +296,7 @@ Each question has the solution that was picked and implemented. ✅ = changed in
 2. **12-måneders grafer:** which other KPI boxes should have one (NPS page, contracts, time)?
    - ➖ **Solution:** Pulse and the client view only for now. NPS already has a 12-month trend chart and time registration has the week strip. Add more when someone misses one.
 3. **Toolbox:** what should be on the page?
-   - ✅ **Solution:** grouped shortcut cards to the existing internal tools (Kunder og brand · Viden og skabeloner · AI og integrationer). Admin-only tools only show for admins. Real tools can replace the cards later.
+   - ✅ **Answered:** a hub where admins add the agency's other tools. Built as an admin-managed list with categories, favicons and search.
 
 **Pulse**
 4. Clients scoring 50–69 (yellow) land in "Usunde". Should they get their own list?
@@ -322,8 +333,8 @@ Each question has the solution that was picked and implemented. ✅ = changed in
     - ➖ **Solution:** kept. "One-off web" only means web projects.
 
 **Opgaver**
-17. Should "Timer" (log hours) work in demo mode?
-    - ➖ **Solution:** stays disabled in demo; there is nowhere to save the time.
+17. Should "Timer" work in demo mode?
+    - ➖ **Solution:** stays disabled in demo, as it was before; there is nowhere to save the time.
 18. Is the bottom of the page right for "Slet opgave"?
     - ➖ **Solution:** kept at the bottom: it's rare and destructive, so it shouldn't sit next to everyday actions.
 

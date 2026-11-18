@@ -8,7 +8,7 @@ import { TaskDetailCreatedBy } from "@/components/tasks/task-detail-created-by";
 import { TaskDetailHeader } from "@/components/tasks/task-detail-header";
 import { TaskDetailOverview } from "@/components/tasks/task-detail-overview";
 import { TaskDetailStatusBar } from "@/components/tasks/task-detail-status-bar";
-import { TaskDetailTimeButton } from "@/components/tasks/task-detail-time-button";
+import { TaskDetailTimerMenu } from "@/components/tasks/task-detail-timer-menu";
 import { useTaskFieldSave } from "@/components/tasks/use-task-field-save";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes, taskHref } from "@/config/routes";
@@ -235,13 +235,7 @@ export function TaskDetailShell({
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TaskDetailHeader
           trailing={
-            <TaskDetailTimeButton
-              clientSlug={task.clientId}
-              taskKey={task.id}
-              billable={task.billable}
-              disabled
-              disabledHint="Timeregistrering kræver database-tilstand."
-            />
+            <TaskDetailTimerMenu clientSlug={task.clientId} taskKey={task.id} taskTitle={task.title} billable={task.billable} disabled />
           }
           task={{
             ...task,
@@ -400,7 +394,7 @@ export function TaskDetailShell({
 
         <TaskDetailHeader
           trailing={
-            <TaskDetailTimeButton clientSlug={clientSlug} taskKey={task.id} billable={task.billable} />
+            <TaskDetailTimerMenu clientSlug={clientSlug} taskKey={task.id} taskTitle={task.title} billable={task.billable} />
           }
           task={{
             ...task,

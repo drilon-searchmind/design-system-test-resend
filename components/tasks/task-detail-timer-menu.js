@@ -113,7 +113,7 @@ export function TaskDetailTimerMenu({
           )}
         >
           <IconClock size={14} className="shrink-0" />
-          {busy ? "Starter…" : "Start timer"}
+          {busy ? "Starter…" : "Timer"}
           <PulseIconChevronDown
             size={10}
             className={cn("shrink-0 opacity-70 transition", menuOpen && "rotate-180")}

@@ -6,6 +6,7 @@ import { KbArticleHero } from "@/components/kb/kb-article-hero";
 import { KbArticleMetaCard } from "@/components/kb/kb-article-meta-card";
 import { KbRelatedArticles } from "@/components/kb/kb-related-articles";
 import { shellMainStudio } from "@/config/shell";
+import { readIncludeTestCookie } from "@/lib/server/include-test";
 import {
   fetchKnowledgeArticleBySlug,
   fetchKnowledgeArticles,
@@ -15,8 +16,8 @@ import { cn } from "@/lib/utils";
 
 /** @param {{ params: Promise<{ slug: string }> }} props */
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const article = await fetchKnowledgeArticleBySlug(slug);
+  const [{ slug }, includeTest] = await Promise.all([params, readIncludeTestCookie()]);
+  const article = await fetchKnowledgeArticleBySlug(slug, { includeTest });
   if (!article) return { title: "Knowledge base · Searchmind 1337 OS" };
   const draft = article.published ? "" : " (kladde)";
   return { title: `${article.title}${draft} · Knowledge base · Searchmind 1337 OS` };
@@ -29,8 +30,15 @@ export async function generateMetadata({ params }) {
  * }} props
  */
 export default async function KnowledgeArticlePage({ params, searchParams }) {
-  const [{ slug }, sp] = await Promise.all([params, Promise.resolve(searchParams ?? {})]);
-  const [article, allArticles] = await Promise.all([fetchKnowledgeArticleBySlug(slug), fetchKnowledgeArticles()]);
+  const [{ slug }, sp, includeTest] = await Promise.all([
+    params,
+    Promise.resolve(searchParams ?? {}),
+    readIncludeTestCookie(),
+  ]);
+  const [article, allArticles] = await Promise.all([
+    fetchKnowledgeArticleBySlug(slug, { includeTest }),
+    fetchKnowledgeArticles({ includeTest }),
+  ]);
   if (!article) notFound();
 
   const related = relatedKnowledgeArticles(article, allArticles, 5);
