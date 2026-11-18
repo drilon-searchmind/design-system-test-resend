@@ -3,6 +3,9 @@
 import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import Link from "next/link";
 
+import { ClientLogo } from "@/components/clients/client-logo";
+import { LastActivityValue } from "@/components/clients/client-metric-cells";
+import { patchClient, QuickEditPopover } from "@/components/clients/client-quick-edit";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { HealthChip } from "@/components/crm/health-chip";
 import { StatusChip } from "@/components/crm/status-chip";
@@ -33,17 +36,52 @@ function ExternalLinkIcon({ className }) {
   );
 }
 
+const STATUS_OPTIONS = [
+  { value: "active", label: "Aktiv" },
+  { value: "paused", label: "Pause" },
+  { value: "inactive", label: "Inaktiv" },
+];
+
+const HEALTH_OPTIONS = [
+  { value: "ok", label: "Sund" },
+  { value: "warn", label: "Advarsel" },
+  { value: "bad", label: "Kritisk" },
+];
+
 /**
  * @param {{
  *   client: import('@/lib/crm/static-data').CLIENTS[number];
- *   owner: { name: string; role: string; avatar: string; hue: number } | null;
-
+ *   owner: { name: string; role: string; avatar: string; hue: number; image?: string } | null;
  *   trailing?: import('react').ReactNode;
  *   group?: { cvr: string; name: string; href?: string } | null;
- * }} props
+ *   latestActivity?: import('@/lib/crm/client-activity').ClientActivity | null;
+ *   fallbackDomains?: Array<{ domain?: string; isPrimary?: boolean }>;
+ *   team?: Array<{ id: string; name: string }>;
+ *   canEdit?: boolean;
+ *   isAdmin?: boolean;
+ *   onClientChanged?: () => void;
+ * }} props `canEdit` = kundeansvarlig kan redigeres inline; status/sundhed kræver også `isAdmin`.
  */
-export function ClientDetailHeader({ client, owner, trailing, group = null }) {
+export function ClientDetailHeader({
+  client,
+  owner,
+  trailing,
+  group = null,
+  latestActivity,
+  fallbackDomains,
+  team = [],
+  canEdit = false,
+  isAdmin = false,
+  onClientChanged,
+}) {
   const showChurn = client.status === "inactive" && client.terminatedAt;
+  const canEditOwner = canEdit && team.length > 0;
+  const canEditAdmin = canEdit && isAdmin;
+  /** @param {Record<string, unknown>} patch */
+  const saveField = async (patch) => {
+    await patchClient(client.id, patch);
+    onClientChanged?.();
+  };
 
   return (
     <>
@@ -71,17 +109,11 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
 
       <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
-          <span
-            className={cn(
-              "sph-hide flex size-14 shrink-0 items-center justify-center rounded-xl border border-border",
-              "text-sm font-semibold text-white md:size-[60px] md:text-[15px]",
-            )}
-            style={{
-              background: `linear-gradient(135deg, oklch(62% 0.15 ${client.hue}), oklch(52% 0.18 ${client.hue + 28}))`,
-            }}
-          >
-            {client.logo}
-          </span>
+          <ClientLogo
+            client={client}
+            fallbackDomains={fallbackDomains}
+            className="sph-hide size-14 rounded-xl text-sm md:size-[60px] md:text-[15px]"
+          />
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               {client.isGroup ? `Kundegruppe · ${client.groupSize} brands` : "Kunde"}
@@ -111,29 +143,65 @@ export function ClientDetailHeader({ client, owner, trailing, group = null }) {
                 </a>
               ) : null}
             </div>
-            <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
+            <div className="sph-hide mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {client.isGroup ? (client.brands ?? []).map((b) => b.name).join(" · ") : client.industry}
-              {owner ? (
+              {owner || canEditOwner ? (
                 <>
                   {" "}
-                  · Account:{" "}
-                  <span className="inline-flex items-center gap-1.5 text-fg">
-                    <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
-                    <span>
-                      {owner.name}
-                      <span className="text-fg-muted"> ({owner.role})</span>
-                    </span>
-                  </span>
+                  · Kundeansvarlig:{" "}
+                  <QuickEditPopover
+                    title="Kundeansvarlig"
+                    canEdit={canEditOwner}
+                    className="align-middle"
+                    fields={[
+                      {
+                        name: "ownerMemberKey",
+                        label: "Teammedlem",
+                        type: "select",
+                        options: [{ value: "", label: "— Ingen —" }, ...team.map((m) => ({ value: m.id, label: m.name }))],
+                      },
+                    ]}
+                    initialValues={{ ownerMemberKey: client.owner ?? "" }}
+                    onSubmit={(v) => saveField({ ownerMemberKey: v.ownerMemberKey || null })}
+                    onRemove={owner ? () => saveField({ ownerMemberKey: null }) : undefined}
+                  >
+                    {owner ?
+                      <span className="inline-flex items-center gap-1.5 px-0.5 text-fg">
+                        <CrmAvatar label={owner.avatar} src={owner.image} hue={owner.hue} className="size-5 text-[9px]" />
+                        <span>
+                          {owner.name}
+                          {owner.role ? <span className="text-fg-muted"> ({owner.role})</span> : null}
+                        </span>
+                      </span>
+                    : <span className="px-1 text-agency-brand">+ Tildel</span>}
+                  </QuickEditPopover>
                 </>
               ) : null}
               {" · "}
               <span className="text-[12px] tabular-nums text-fg-quiet">
-                Sidst aktiv {client.lastActivity}
+                Seneste aktivitet{" "}
+                <LastActivityValue activity={latestActivity} fallback={client.lastActivity} />
               </span>
-            </p>
+            </div>
             <div className="sph-hide mt-3 flex flex-wrap items-center gap-2">
-              <StatusChip status={client.status} palette="agency" />
-              <HealthChip health={client.health} palette="agency" />
+              <QuickEditPopover
+                title="Status"
+                canEdit={canEditAdmin}
+                fields={[{ name: "status", label: "Status", type: "select", options: STATUS_OPTIONS }]}
+                initialValues={{ status: client.status }}
+                onSubmit={(v) => saveField({ status: v.status })}
+              >
+                <StatusChip status={client.status} palette="agency" />
+              </QuickEditPopover>
+              <QuickEditPopover
+                title="Sundhed"
+                canEdit={canEditAdmin}
+                fields={[{ name: "health", label: "Sundhed", type: "select", options: HEALTH_OPTIONS }]}
+                initialValues={{ health: client.health }}
+                onSubmit={(v) => saveField({ health: v.health })}
+              >
+                <HealthChip health={client.health} palette="agency" />
+              </QuickEditPopover>
               {group ?
                 <Link
                   href={group.href ?? clientGroupHref(group.cvr)}

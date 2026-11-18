@@ -1,17 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CrmDialog } from "@/components/crm/crm-dialog";
 import { TimeEntriesDirectory } from "@/components/time/time-entries-directory";
 import { TimeEntryCreateForm } from "@/components/time/time-entry-create-form";
-import { TimePageHeader } from "@/components/time/time-page-header";
+import {
+  TIME_MEMBER_FILTER_ALL,
+  TIME_MEMBER_FILTER_ME,
+  TimePageHeader,
+} from "@/components/time/time-page-header";
 import { TimeQuickLogPanel } from "@/components/time/time-quick-log-panel";
 import { TimeSummaryStrip } from "@/components/time/time-summary-strip";
 import { TimeMonthCalendar } from "@/components/time/time-month-calendar";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes } from "@/config/routes";
+import { TEAM } from "@/lib/crm/static-data";
+import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 import { getTimeEntriesDemoBundle } from "@/lib/crm/time-entries-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatIsoWeekdayLongDa } from "@/lib/crm/format-da";
@@ -74,10 +81,41 @@ function weekdayWorkedMinutesSum(cells) {
   }, 0);
 }
 
+/**
+ * Demo: alle fixtures tilhører demo-brugeren — andre medarbejdere har ingen poster.
+ * @param {Record<string, unknown>} bundle
+ * @param {string} memberFilter
+ */
+function applyDemoMemberFilter(bundle, memberFilter) {
+  const teamMembers = TEAM.map((m) => ({ key: m.id, name: m.name }));
+  if (memberFilter === TIME_MEMBER_FILTER_ME) return { ...bundle, teamMembers };
+
+  const demoName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "";
+  const ownEntries = Array.isArray(bundle.entries) ? bundle.entries : [];
+  const showOwn = memberFilter === TIME_MEMBER_FILTER_ALL || memberFilter === TASK_DEMO_USER_ID;
+  const viewLabel =
+    memberFilter === TIME_MEMBER_FILTER_ALL ? "Alle medarbejdere" : (
+      TEAM.find((m) => m.id === memberFilter)?.name ?? memberFilter
+    );
+
+  return {
+    ...bundle,
+    teamMembers,
+    viewLabel,
+    entries: showOwn ? ownEntries.map((e) => ({ ...e, memberKey: TASK_DEMO_USER_ID, memberName: demoName })) : [],
+    ...(showOwn ? {} : { calendarCells: undefined }),
+  };
+}
+
 export function TimePortfolio() {
   const dataSource = useDataSource();
   const router = useRouter();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const { selection, setSelection, primaryPeriod, queryParams, subtitle } = useReportPeriodState();
+  const [memberFilterRaw, setMemberFilter] = useState(TIME_MEMBER_FILTER_ME);
+  const memberFilter = isAdmin ? memberFilterRaw : TIME_MEMBER_FILTER_ME;
+  const viewingOthers = memberFilter !== TIME_MEMBER_FILTER_ME;
 
   const [bundle, setBundle] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(true);
@@ -111,10 +149,12 @@ export function TimePortfolio() {
       if (dataSource === "demo") {
         /** @type {Record<string, unknown>} */
         const b = getTimeEntriesDemoBundle(primaryPeriod);
-        setBundle(b);
+        setBundle(isAdmin ? applyDemoMemberFilter(b, memberFilter) : b);
         hasLoadedRef.current = true;
       } else {
-        const qs = databaseApiQuery(queryParams);
+        const qs = databaseApiQuery(
+          memberFilter === TIME_MEMBER_FILTER_ME ? queryParams : { ...queryParams, memberKey: memberFilter },
+        );
         const res = await fetch(`/api/time-entries?${qs}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente tidsdata");
@@ -128,7 +168,7 @@ export function TimePortfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dataSource, primaryPeriod, queryParams]);
+  }, [dataSource, primaryPeriod, queryParams, isAdmin, memberFilter]);
 
   useEffect(() => {
     hasLoadedRef.current = false;
@@ -294,6 +334,17 @@ export function TimePortfolio() {
 
   const headerSelectionMemo = selection;
 
+  const teamMembers =
+    isAdmin && bundle && Array.isArray(bundle.teamMembers) ?
+      /** @type {{ key: string; name: string }[]} */ (bundle.teamMembers)
+    : isAdmin ? []
+    : null;
+  const viewLabel = bundle && typeof bundle.viewLabel === "string" ? bundle.viewLabel : null;
+  const memberFilterProps =
+    isAdmin ?
+      { memberFilter, onMemberFilterChange: setMemberFilter, teamMembers, viewLabel }
+    : {};
+
   if (loading && !bundle) {
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -303,6 +354,7 @@ export function TimePortfolio() {
           subtitle={subtitle}
           mineLabel={null}
           dataSource={dataSource}
+          {...memberFilterProps}
           loading
         />
         <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
@@ -328,6 +380,7 @@ export function TimePortfolio() {
           subtitle={subtitle}
           mineLabel={null}
           dataSource={dataSource}
+          {...memberFilterProps}
         />
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
           {error ?? "Ingen data"}
@@ -363,6 +416,7 @@ export function TimePortfolio() {
         subtitle={subtitle}
         mineLabel={mineLabel}
         dataSource={dataSource}
+        {...memberFilterProps}
         refreshing={refreshing}
         onOpenCreate={openHeaderCreate}
         createModalOpen={showCreate}
@@ -434,6 +488,7 @@ export function TimePortfolio() {
               entriesToday={stampListEntries}
               todayTotalCount={stampListEntries.length}
               stampsHeading={stampsHeading}
+              showMember={viewingOthers}
             />
           </div>
           <TimeQuickLogPanel

@@ -13,7 +13,7 @@ export function KbStarterCard() {
         <div className="min-w-0">
           <h2 className="font-sans text-sm font-semibold text-fg">Start med hubben</h2>
           <p className="mt-1 font-sans text-[12px] leading-snug text-fg-muted">
-            Kort intro til navigation, roller og daglig rytme i Agency OS — god første læsning for nye specialister.
+            Kort intro til navigation, roller og daglig rytme i 1337 OS — god første læsning for nye specialister.
           </p>
           <Link
             href={`${routes.kb}/agency-os-hub`}

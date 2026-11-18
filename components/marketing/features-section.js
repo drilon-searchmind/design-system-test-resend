@@ -7,7 +7,7 @@ const FEATURES = [
   {
     title: "Google workspace SSO",
     description:
-      "Internal users authenticate with 1337-crm’s Google integration. Sessions are JWT-based; user profiles sync to MongoDB on every sign-in.",
+      "Internal users authenticate with 1337 OS’s Google integration. Sessions are JWT-based; user profiles sync to MongoDB on every sign-in.",
   },
   {
     title: "Performance-minded defaults",

@@ -9,9 +9,24 @@ import {
   DEFAULT_AGENCY_SETTINGS,
   validateAgencySettings,
 } from "@/lib/crm/agency-settings";
+import { ALL_KNOWN_DEPARTMENTS } from "@/lib/crm/dept-keys";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-border bg-canvas px-3 py-2 text-[13px] tabular-nums text-fg";
+
+/** @param {Record<string, unknown>} settings */
+function numericValues(settings) {
+  return /** @type {Record<string, string>} */ (
+    Object.fromEntries(AGENCY_SETTING_FIELDS.map((f) => [f.key, String(settings[f.key] ?? "")]))
+  );
+}
+
+/** @param {Record<string, unknown>} settings */
+function excludedDepartments(settings) {
+  return Array.isArray(settings.teamLowUtilExcludedDepartments) ?
+      settings.teamLowUtilExcludedDepartments.map(String)
+    : [];
+}
 
 const GROUPS = [
   {
@@ -22,7 +37,7 @@ const GROUPS = [
   {
     id: "health",
     title: "Kundesundhed (score)",
-    sub: "Score 0–100 ud fra Indeks, NPS og tid brugt ift. retainer. Bruges i Top sunde/usunde kunder.",
+    sub: "Score 0–100 ud fra Indeks, NPS og tid brugt ift. retainer. Kræver data for mindst to af de tre. Bruges i Top sunde/usunde kunder.",
   },
   {
     id: "lists",
@@ -33,13 +48,8 @@ const GROUPS = [
 
 /** Admin: justér de beregningsparametre der ellers var faste tal i koden. */
 export function SettingsAgencySection() {
-  const [values, setValues] = useState(
-    /** @type {Record<string, string>} */ (
-      Object.fromEntries(
-        Object.entries(DEFAULT_AGENCY_SETTINGS).map(([k, v]) => [k, String(v)]),
-      )
-    ),
-  );
+  const [values, setValues] = useState(() => numericValues(DEFAULT_AGENCY_SETTINGS));
+  const [excluded, setExcluded] = useState(/** @type {string[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(/** @type {{ ok: boolean; text: string } | null} */ (null));
@@ -51,9 +61,8 @@ export function SettingsAgencySection() {
         const res = await fetch("/api/settings/agency", { cache: "no-store" });
         const data = await res.json();
         if (!cancelled && res.ok && data.settings) {
-          setValues(
-            Object.fromEntries(Object.entries(data.settings).map(([k, v]) => [k, String(v)])),
-          );
+          setValues(numericValues(data.settings));
+          setExcluded(excludedDepartments(data.settings));
         }
       } catch {
         /* behold standardværdier */
@@ -68,11 +77,17 @@ export function SettingsAgencySection() {
 
   /** @param {Record<string, unknown>} settings */
   function applySettings(settings) {
-    setValues(Object.fromEntries(Object.entries(settings).map(([k, v]) => [k, String(v)])));
+    setValues(numericValues(settings));
+    setExcluded(excludedDepartments(settings));
+  }
+
+  /** @param {string} key */
+  function toggleExcluded(key) {
+    setExcluded((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key]));
   }
 
   async function save() {
-    const local = validateAgencySettings(values);
+    const local = validateAgencySettings({ ...values, teamLowUtilExcludedDepartments: excluded });
     if ("error" in local) {
       setMessage({ ok: false, text: local.error });
       return;
@@ -88,7 +103,7 @@ export function SettingsAgencySection() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gemme");
       applySettings(data.settings);
-      setMessage({ ok: true, text: "Gemt. Pulse bruger de nye værdier ved næste indlæsning." });
+      setMessage({ ok: true, text: "Gemt. Pulse og Team bruger de nye værdier ved næste indlæsning." });
     } catch (err) {
       setMessage({ ok: false, text: err instanceof Error ? err.message : "Fejl" });
     } finally {
@@ -118,7 +133,7 @@ export function SettingsAgencySection() {
       <div>
         <h2 className="font-sans text-base font-semibold text-fg">Beregninger</h2>
         <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-          Tal der styrer nøgletal og lister i Pulse. Ændringer gemmes i databasen og gælder for hele
+          Tal der styrer nøgletal og lister i Pulse og Team. Ændringer gemmes i databasen og gælder for hele
           workspacet (database-kilden). Eksempeldata bruger altid standardværdierne.
         </p>
       </div>
@@ -155,6 +170,44 @@ export function SettingsAgencySection() {
           </div>
         </section>
       ))}
+
+      <section className="tally-panel p-5 md:p-6">
+        <h3 className="font-sans text-[14px] font-semibold text-fg">Team: profiler med mindst belægning</h3>
+        <p className="mt-1 font-sans text-[12px] text-fg-muted">
+          Afdelinger der ikke skal med på listen over profiler med mindst belægning på Team-siden — fx MarTech, hvis
+          deres arbejde ikke ligger som opgaver på boardet.
+        </p>
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ...ALL_KNOWN_DEPARTMENTS.map((d) => ({ id: d.id, name: d.name })),
+            ...excluded
+              .filter((k) => !ALL_KNOWN_DEPARTMENTS.some((d) => d.id === k))
+              .map((k) => ({ id: k, name: k })),
+          ].map((d) => {
+            const checked = excluded.includes(d.id);
+            return (
+              <li key={d.id}>
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border-soft px-3 py-2 font-sans text-[12px] text-fg transition-colors hover:bg-surface-muted">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={loading || busy}
+                    onChange={() => toggleExcluded(d.id)}
+                    className="size-3.5 shrink-0 rounded border-border accent-agency-brand"
+                  />
+                  <span className="min-w-0 flex-1 truncate">{d.name}</span>
+                  {checked ?
+                    <span className="text-[10px] font-medium text-fg-quiet">Skjult</span>
+                  : null}
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-2 font-sans text-[11px] text-fg-quiet">
+          Kan også ændres direkte på kortet på Team-siden. Standard: ingen skjulte afdelinger.
+        </p>
+      </section>
 
       {message ?
         <p className={`font-sans text-[12px] ${message.ok ? "text-agency-ok" : "text-agency-bad"}`}>

@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { TeamCapacityWatchCard } from "@/components/team/team-capacity-watch-card";
 import { TeamDeptOverview } from "@/components/team/team-dept-overview";
-import { TeamHubLinksCard } from "@/components/team/team-hub-links-card";
 import { TeamPageHeader } from "@/components/team/team-page-header";
 import { TeamRosterDirectory, UNASSIGNED_DISCIPLINE_ID } from "@/components/team/team-roster-directory";
 import { TeamSummaryStrip } from "@/components/team/team-summary-strip";
@@ -156,10 +155,7 @@ export function TeamPortfolio() {
 
         <TeamDeptOverview snapshots={snapshots} />
 
-        <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
-          <TeamHubLinksCard />
-          <TeamCapacityWatchCard teamRows={teamRows} />
-        </div>
+        <TeamCapacityWatchCard teamRows={teamRows} departments={departments} dataSource={dataSource} />
 
         <TeamRosterDirectory
           key={validDept ?? "all"}

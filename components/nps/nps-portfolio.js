@@ -16,6 +16,7 @@ import { NpsTemplatesDirectory } from "@/components/nps/nps-templates-directory"
 import { NpsTrendAndDistributionCard } from "@/components/nps/nps-trend-distribution-card";
 import { getNpsDemoBundle } from "@/lib/crm/nps-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { getCurrentReportPeriod, normalizeReportPeriod } from "@/lib/crm/report-period";
 import { cn } from "@/lib/utils";
 
@@ -94,12 +95,21 @@ export function NpsPortfolio() {
   const responseRateLabel =
     bundle && bundle.lastRoundCaptionDemo === true
       ? "Svarfrekvens (seneste runde)"
-      : "Svarfrekvens (rapportmåned)";
+      : "Svarfrekvens (2 mdr.)";
 
   const invitationsLabel =
     bundle && bundle.lastRoundCaptionDemo === true ?
       "Invitationer sidste runde"
-    : "Invitationer (måned)";
+    : "Invitationer (2 mdr.)";
+
+  const kpiWindow =
+    bundle && bundle.kpiWindow && typeof bundle.kpiWindow === "object" ?
+      /** @type {{ fromIso?: string; toIso?: string; label?: string }} */ (bundle.kpiWindow)
+    : null;
+  const kpiWindowLabel =
+    kpiWindow?.label ?
+      `${kpiWindow.label}${kpiWindow.fromIso && kpiWindow.toIso ? ` · ${formatIsoDateDa(kpiWindow.fromIso)}–${formatIsoDateDa(kpiWindow.toIso)}` : ""}`
+    : "Seneste 2 måneder";
 
   const headerPeriodMemo = normalizedPeriod;
 
@@ -162,7 +172,18 @@ export function NpsPortfolio() {
       <div className={cn("flex flex-col gap-[length:var(--ds-studio-stack)] transition-opacity", refreshing && "opacity-65")}>
         {section === "overblik" ?
           <>
+            <NpsSecondaryMetrics
+              improving={typeof bundle.improving === "number" ? bundle.improving : 0}
+              invitations={typeof lr.invitations === "number" ? lr.invitations : 0}
+              responses={typeof lr.responses === "number" ? lr.responses : 0}
+              medianHoursToRespond={
+                typeof lr.medianHoursToRespond === "number" ? lr.medianHoursToRespond : 0
+              }
+              invitationsLabel={invitationsLabel}
+              windowLabel={kpiWindowLabel}
+            />
             <NpsHeroMetrics
+              windowLabel={kpiWindowLabel}
               avgLatest={typeof bundle.avgLatest === "number" ? bundle.avgLatest : null}
               avgPrev={typeof bundle.avgPrev === "number" ? bundle.avgPrev : null}
               measured={typeof bundle.measured === "number" ? bundle.measured : 0}
@@ -178,15 +199,6 @@ export function NpsPortfolio() {
               passive={typeof dist.passive === "number" ? dist.passive : 0}
               detractors={typeof dist.detractors === "number" ? dist.detractors : 0}
               withData={typeof dist.withData === "number" ? dist.withData : 0}
-            />
-            <NpsSecondaryMetrics
-              improving={typeof bundle.improving === "number" ? bundle.improving : 0}
-              invitations={typeof lr.invitations === "number" ? lr.invitations : 0}
-              responses={typeof lr.responses === "number" ? lr.responses : 0}
-              medianHoursToRespond={
-                typeof lr.medianHoursToRespond === "number" ? lr.medianHoursToRespond : 0
-              }
-              invitationsLabel={invitationsLabel}
             />
             <NpsRecentResponsesCard responses={recentResponses} />
           </>

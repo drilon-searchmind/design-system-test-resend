@@ -33,8 +33,8 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
     <Link
       href={`${routes.contracts}/${row.id}`}
       className={cn(
-        "tally-panel flex flex-col p-3.5 transition-all",
-        "hover:border-agency-brand-border md:p-4",
+        "tally-panel flex h-full flex-col p-3.5 transition-colors",
+        "hover:border-agency-brand-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:p-4",
       )}
     >
       <div className="mb-2.5 flex items-start gap-2.5">
@@ -57,11 +57,8 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         <HealthChip health={row.health} palette="agency" compact />
       </div>
 
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <StatusChip status={row.accountStatus} palette="agency" />
-        <span className="text-[10px] tabular-nums text-fg-muted">
-          Opsigelse {row.noticeDays} d
-        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
@@ -93,9 +90,12 @@ export function ContractGridCard({ row, renewalReferenceIso = CONTRACT_DEMO_REF_
         </div>
       </div>
 
-      <p className="mt-3 text-[10px] text-fg-quiet">
-        Start {formatIsoDateDa(row.startedAt)}
-      </p>
+      <div className="mt-auto pt-3">
+        <p className="flex items-center justify-between gap-2 border-t border-border-soft pt-2.5 text-[10.5px] tabular-nums text-fg-quiet">
+          <span>Start {row.startedAt ? formatIsoDateDa(row.startedAt) : "—"}</span>
+          <span>Opsigelse {row.noticeDays} d</span>
+        </p>
+      </div>
     </Link>
   );
 }

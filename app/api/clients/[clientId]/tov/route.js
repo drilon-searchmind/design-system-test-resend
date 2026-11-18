@@ -7,7 +7,7 @@ import { getTovState, restoreHistory, saveProfileEdit, updateTovSettings } from 
 /** @param {{ error: string; status?: number }} r */
 const fail = (r) => NextResponse.json({ error: r.error }, { status: r.status ?? 400 });
 
-/** Tone of Voice-arbejdsrum for én kunde. */
+/** Brand Core-arbejdsrum for én kunde. */
 export async function GET(req, ctx) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
@@ -23,7 +23,7 @@ export async function GET(req, ctx) {
 
 /**
  * Body (ét af):
- *  - { comment?, model? }   gem indstillinger
+ *  - { comment?, model?, contactName?, contactTitle?, accountOwnerKey? }   gem brief/indstillinger
  *  - { profile }            gem manuelt redigeret profil
  *  - { restoreIndex }       gendan tidligere version
  */

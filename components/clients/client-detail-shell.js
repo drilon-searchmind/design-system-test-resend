@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -22,8 +23,12 @@ import {
   clientGroupKey,
   normalizeGroupKey,
 } from "@/lib/crm/client-groups";
+import { demoClientActivity, demoClientTrends } from "@/lib/crm/client-activity";
 import { clientToEditDraft, editDraftToPatch } from "@/lib/crm/client-edit-utils";
+import { demoNoteItems } from "@/lib/crm/client-notes";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { domainsForClient } from "@/lib/crm/domains-data";
+import { lastMonths } from "@/lib/crm/month-series";
 import {
   CLIENTS,
   CONTRACTS,
@@ -43,6 +48,8 @@ import { cn } from "@/lib/utils";
 export function ClientDetailShell({ clientSlug, groupCvr }) {
   const router = useRouter();
   const dataSource = useDataSource();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const { selection, setSelection, queryParams, subtitle } = useReportPeriodState();
   const [detailTab, setDetailTab] = useState(CLIENT_DETAIL_TAB_DEFS[0].id);
 
@@ -198,16 +205,23 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
 
   if (dataSource === "demo" && demoClient) {
     const owner = TEAM.find((t) => t.id === demoClient.owner);
-    const notes = demoBrandIds.flatMap((id) => NOTES_BY_CLIENT[id] ?? []);
+    const notes = demoNoteItems(demoBrandIds.flatMap((id) => NOTES_BY_CLIENT[id] ?? []));
     const contract = demoGroupClient ? null : (CONTRACTS.find((row) => row.clientId === clientSlug) ?? null);
     const retainerHistory = demoGroupClient ? [] : (RETAINER_HISTORY[clientSlug] ?? []);
     const clientTasks = TASKS.filter((t) => demoBrandIds.includes(t.clientId));
+    const demoTrends = demoClientTrends(demoClient, retainerHistory, lastMonths());
+    const demoActivity = demoClientActivity(demoClient, {
+      tasks: clientTasks,
+      notes: NOTES_BY_CLIENT[demoBrandIds[0]] ?? [],
+    });
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <ClientDetailHeader
           client={demoClient}
           group={demoGroupInfo}
+          latestActivity={demoActivity}
+          fallbackDomains={demoBrandIds.flatMap((id) => domainsForClient(id))}
           owner={
             owner
               ? {
@@ -238,6 +252,8 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
           notes={notes}
           team={TEAM}
           tasks={clientTasks}
+          trends={demoTrends}
+          periodLabel={subtitle}
           kpiTimerLabel="Tid brugt"
           infoMd={typeof demoClient.infoMd === "string" ? demoClient.infoMd : ""}
           canEditKundeinfo={false}
@@ -328,6 +344,15 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
         <ClientDetailHeader
           client={c}
           group={groupInfo}
+          latestActivity={
+            remote.latestActivity && typeof remote.latestActivity === "object" ?
+              /** @type {import('@/lib/crm/client-activity').ClientActivity} */ (remote.latestActivity)
+            : null
+          }
+          team={teamPicklist}
+          canEdit={!isGroupPage && !editing}
+          isAdmin={isAdmin}
+          onClientChanged={() => void loadRemote()}
           owner={
             owner
               ? {
@@ -375,6 +400,9 @@ export function ClientDetailShell({ clientSlug, groupCvr }) {
             notesTeamMembers={Array.isArray(remote.team) ? remote.team : undefined}
             team={Array.isArray(remote.team) ? remote.team : undefined}
             tasks={Array.isArray(remote.tasks) ? remote.tasks : []}
+            departments={Array.isArray(remote.departments) ? remote.departments : undefined}
+            trends={remote.trends && typeof remote.trends === "object" ? remote.trends : null}
+            periodLabel={periodLabel}
             kpiTimerLabel={
               typeof remote.kpiTimerLabel === "string" ? remote.kpiTimerLabel : "Tid brugt"
             }

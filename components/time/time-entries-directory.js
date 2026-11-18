@@ -22,6 +22,12 @@ function rowBillableWire(row) {
   return row.billable !== false && slug.length > 0;
 }
 
+/** @param {Record<string, unknown>} row */
+function memberNameOf(row) {
+  if (typeof row.memberName === "string" && row.memberName.trim()) return row.memberName.trim();
+  return typeof row.memberKey === "string" && row.memberKey.trim() ? row.memberKey.trim() : "Ukendt";
+}
+
 /** @param {unknown} dur */
 function durNum(dur) {
   const n = typeof dur === "number" ? dur : Number(dur);
@@ -34,6 +40,7 @@ function durNum(dur) {
  *   todayTotalCount?: number;
  *   headingId?: string;
  *   stampsHeading?: string;
+ *   showMember?: boolean;
  * }} props
  */
 export function TimeEntriesDirectory({
@@ -41,6 +48,7 @@ export function TimeEntriesDirectory({
   todayTotalCount,
   headingId = "time-entries-heading",
   stampsHeading = "Stempler i dag",
+  showMember = false,
 }) {
   const [q, setQ] = useState("");
   const [scope, setScope] = useState("all");
@@ -62,6 +70,7 @@ export function TimeEntriesDirectory({
             raw.id,
             raw.clientSlug,
             raw.taskKey,
+            raw.memberName,
           ]
             .map((x) => (typeof x === "string" ? x : x != null ? String(x) : ""))
             .join(" ")
@@ -119,7 +128,7 @@ export function TimeEntriesDirectory({
             </span>
             <input
               type="search"
-              placeholder="Søg note, kunde, opgave…"
+              placeholder={showMember ? "Søg note, kunde, opgave, person…" : "Søg note, kunde, opgave…"}
               value={q}
               onChange={(ev) => setQ(ev.target.value)}
               className={cn(
@@ -171,6 +180,7 @@ export function TimeEntriesDirectory({
             const id = typeof row.id === "string" ? row.id : "unknown";
             const dm = durNum(row.durationMinutes);
             const desc = typeof row.desc === "string" ? row.desc : "";
+            const memberName = showMember ? memberNameOf(row) : "";
             return (
               <article
                 key={id}
@@ -181,7 +191,12 @@ export function TimeEntriesDirectory({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-[11px] tabular-nums text-fg-muted">{at}</p>
+                    <p className="text-[11px] tabular-nums text-fg-muted">
+                      {at}
+                      {memberName ?
+                        <span className="font-sans font-semibold text-fg"> · {memberName}</span>
+                      : null}
+                    </p>
                     <p className="mt-1 text-[18px] font-semibold tabular-nums text-agency-brand">
                       {dm} <span className="text-[12px] font-medium text-fg-soft">min</span>
                     </p>
@@ -286,6 +301,7 @@ export function TimeEntriesDirectory({
               const dm = durNum(row.durationMinutes);
               const desc = typeof row.desc === "string" ? row.desc : "";
               const detailId = typeof row.mongoId === "string" && row.mongoId.trim() ? row.mongoId.trim() : id;
+              const memberName = showMember ? memberNameOf(row) : "";
               return (
                 <div
                   key={`${id}-${i}`}
@@ -296,7 +312,14 @@ export function TimeEntriesDirectory({
                     !bill && "bg-surface-muted/15",
                   )}
                 >
-                  <span className="text-[12px] tabular-nums text-fg">{at}</span>
+                  <span className="flex min-w-0 flex-col text-[12px] tabular-nums text-fg">
+                    {at}
+                    {memberName ?
+                      <span className="truncate font-sans text-[10px] font-semibold text-fg-muted" title={memberName}>
+                        {memberName}
+                      </span>
+                    : null}
+                  </span>
                   <span className="text-[12px] font-semibold tabular-nums text-agency-brand">{dm}</span>
                   <div className="min-w-0">
                     {clientSlug && clientName ?

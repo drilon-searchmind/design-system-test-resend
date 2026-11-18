@@ -17,13 +17,13 @@ export function KbSectionOverview({ sections, articles, featured, activeSectionI
   const published = articles.filter((a) => a.published && !a.archived);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <div className={cn("grid gap-3", featured.length > 0 && "lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]")}>
       <section className="tally-panel p-3 md:p-4">
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="font-sans text-[11px] font-semibold uppercase tracking-wide text-fg-soft">Sektioner</h2>
           <p className="font-sans text-[10px] text-fg-quiet">Klik for at filtrere artikler</p>
         </div>
-        <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+        <ul className={cn("mt-2 grid gap-2 sm:grid-cols-2", featured.length === 0 && "xl:grid-cols-3")}>
           {sections.map((section) => {
             const count = published.filter((a) => a.sectionId === section.id).length;
             const active = activeSectionId === section.id;

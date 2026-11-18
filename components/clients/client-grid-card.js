@@ -1,8 +1,9 @@
 import { RetainerWithUpsell } from "@/components/clients/retainer-with-upsell";
 import Link from "next/link";
 
+import { ClientLogo } from "@/components/clients/client-logo";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { IndeksValue, NpsValue } from "@/components/clients/client-metric-cells";
+import { IndeksValue, LastActivityValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { customerHref } from "@/lib/crm/client-groups";
@@ -26,14 +27,7 @@ export function ClientGridCard({ client, variant = "pulse" }) {
       )}
     >
       <div className="mb-2.5 flex items-start gap-2.5">
-        <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-[13px] font-semibold text-white"
-          style={{
-            background: `linear-gradient(135deg, oklch(62% 0.15 ${client.hue}), oklch(52% 0.18 ${client.hue + 30}))`,
-          }}
-        >
-          {client.logo}
-        </span>
+        <ClientLogo client={client} className="size-9 rounded-lg text-[13px]" />
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13.5px] font-semibold text-fg">{client.name}</div>
           <div className="truncate font-sans text-[11px] text-fg-quiet">
@@ -45,7 +39,11 @@ export function ClientGridCard({ client, variant = "pulse" }) {
       {variant === "full" ? (
         <div className="mb-2 flex flex-wrap gap-2">
           <StatusChip status={client.status} palette="agency" />
-          <span className="text-[10px] tabular-nums text-fg-quiet">{client.lastActivity}</span>
+          <LastActivityValue
+            activity={client.latestActivity}
+            fallback={client.lastActivity}
+            className="text-[10px] text-fg-quiet"
+          />
         </div>
       ) : null}
 
@@ -122,7 +120,11 @@ export function ClientGridCard({ client, variant = "pulse" }) {
           <span />
         )}
         {variant === "pulse" ? (
-          <span className="text-[10.5px] text-fg-quiet">{client.lastActivity}</span>
+          <LastActivityValue
+            activity={client.latestActivity}
+            fallback={client.lastActivity}
+            className="text-[10.5px] text-fg-quiet"
+          />
         ) : null}
       </div>
     </Link>

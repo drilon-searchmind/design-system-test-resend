@@ -10,7 +10,6 @@ import { useDataSource } from "@/components/crm/use-data-source";
 import { TeamMemberHeader } from "@/components/team/team-member-header";
 import { TeamMemberKpiStrip } from "@/components/team/team-member-kpi-strip";
 import { TeamMemberOpenTasksCard } from "@/components/team/team-member-open-tasks-card";
-import { TeamMemberQuickLinksCard } from "@/components/team/team-member-quick-links-card";
 import { getWorkloadMemberDemoBundle } from "@/lib/crm/workload-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
@@ -76,7 +75,7 @@ export function TeamMemberPortfolio() {
     if (!bundle || typeof bundle.member !== "object" || !bundle.member) return;
     const m = /** @type {{ name?: string }} */ (bundle.member);
     if (typeof m.name === "string" && m.name.trim()) {
-      document.title = `${m.name} · Team · 1337-crm`;
+      document.title = `${m.name} · Team · 1337 OS`;
     }
   }, [bundle]);
 
@@ -186,14 +185,7 @@ export function TeamMemberPortfolio() {
         overdueCount={overdueCount}
       />
 
-      <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.12fr)_minmax(260px,0.88fr)] lg:items-start">
-        <TeamMemberOpenTasksCard tasks={tasksForCard} dueRefIso={calendarTodayIso.slice(0, 10)} />
-        <div className="flex min-w-0 flex-col gap-[length:var(--ds-studio-stack)]">
-          {department ?
-            <TeamMemberQuickLinksCard deptId={department.id} deptName={department.name} />
-          : null}
-        </div>
-      </div>
+      <TeamMemberOpenTasksCard tasks={tasksForCard} dueRefIso={calendarTodayIso.slice(0, 10)} />
     </div>
   );
 }

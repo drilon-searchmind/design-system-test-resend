@@ -43,7 +43,7 @@ export function HeroSection() {
             aria-hidden
           />
           <span>
-            LIVE · PULSE · <strong className="font-medium text-fg">1337-crm</strong>
+            LIVE · PULSE · <strong className="font-medium text-fg">1337 OS</strong>
           </span>
         </div>
 

@@ -19,6 +19,8 @@ import { NPS_INTERVAL_DA } from "@/lib/crm/nps-intervals-da";
 import { isNpsSendEnabled, resolveNpsRecipient } from "@/lib/crm/nps-recipient";
 import { aggregateBrandClients, clientGroupHref } from "@/lib/crm/client-groups";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { formatIsoDateDa } from "@/lib/crm/format-da";
+import { npsClientAgeStatus } from "@/lib/crm/nps-cadence";
 import { npsLatestEntry, npsPreviousEntry } from "@/lib/crm/nps-utils";
 import { cn } from "@/lib/utils";
 
@@ -279,6 +281,12 @@ export function NpsClientsDirectory({
       const noData = !latest;
       const recipient = resolveNpsRecipient(/** @type {import('@/lib/crm/nps-recipient').NpsRecipientClientShape} */ (c));
       const sendEnabled = isNpsSendEnabled(/** @type {import('@/lib/crm/nps-recipient').NpsRecipientClientShape} */ (c));
+      const ageClient = /** @type {{ npsTooNew?: boolean; startedAt?: string }} */ (c);
+      const age =
+        typeof ageClient.npsTooNew === "boolean" ?
+          { tooNew: ageClient.npsTooNew, since: ageClient.startedAt ?? "" }
+        : npsClientAgeStatus(ageClient);
+      const tooNewLabel = age.tooNew ? `For ny (startet ${formatIsoDateDa(age.since)})` : null;
 
       return {
         client: c,
@@ -292,6 +300,7 @@ export function NpsClientsDirectory({
         templateId,
         recipient,
         sendEnabled,
+        tooNewLabel,
       };
     });
   }, [clients]);
@@ -466,6 +475,9 @@ export function NpsClientsDirectory({
                 <StatusChip status={r.client.status} palette="agency" />
               </div>
               <p className="mt-2 font-sans text-[11px] text-fg-muted">{r.cadence}</p>
+              {r.tooNewLabel ?
+                <p className="mt-1 font-sans text-[11px] font-medium text-agency-warn">{r.tooNewLabel}</p>
+              : null}
               <div className="mt-3 flex items-baseline gap-3">
                 <span className={cn("text-[26px] font-semibold tabular-nums leading-none", scoreToneClass(r.latest?.score ?? null))}>
                   {r.latest?.score ?? "—"}
@@ -570,7 +582,14 @@ export function NpsClientsDirectory({
                     <PulseSparkline data={r.spark} height={28} />
                   : <span className="text-[10px] text-fg-quiet">—</span>}
                 </div>
-                <p className="line-clamp-2 font-sans text-[11px] leading-snug text-fg-muted">{r.cadence}</p>
+                <div className="min-w-0">
+                  <p className="line-clamp-2 font-sans text-[11px] leading-snug text-fg-muted">{r.cadence}</p>
+                  {r.tooNewLabel ?
+                    <p className="mt-0.5 font-sans text-[10px] font-medium leading-snug text-agency-warn">
+                      {r.tooNewLabel}
+                    </p>
+                  : null}
+                </div>
                 <StatusChip status={r.client.status} palette="agency" />
                 <NpsRecipientEmail
                   email={r.recipient?.email}
@@ -608,6 +627,7 @@ export function NpsClientsDirectory({
  *     templateId: string | null;
  *     sendEnabled: boolean;
  *     recipient: { email: string } | null;
+ *     tooNewLabel?: string | null;
  *   };
  *   defaultTemplateId: string;
  *   templates: { id: string; name: string }[];
@@ -632,7 +652,8 @@ function NpsRowActions({
   savingSettings = false,
   variant,
 }) {
-  const canSendNow = row.sendEnabled && Boolean(row.recipient?.email);
+  const tooNew = Boolean(row.tooNewLabel);
+  const canSendNow = row.sendEnabled && !tooNew && Boolean(row.recipient?.email);
 
   if (variant === "card") {
     return (
@@ -664,9 +685,13 @@ function NpsRowActions({
           type="button"
           disabled={sending || !canSendNow}
           onClick={onSend}
+          title={tooNew ? row.tooNewLabel ?? undefined : undefined}
           className="w-full rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 py-1.5 font-sans text-[11px] font-medium text-agency-brand disabled:opacity-50"
         >
-          {sending ? "Sender…" : row.sendEnabled ? "Send NPS" : "Send deaktiveret"}
+          {sending ? "Sender…"
+          : tooNew ? "For ny til NPS"
+          : row.sendEnabled ? "Send NPS"
+          : "Send deaktiveret"}
         </button>
       </div>
     );
@@ -702,9 +727,10 @@ function NpsRowActions({
         type="button"
         disabled={sending || !canSendNow}
         onClick={onSend}
+        title={tooNew ? row.tooNewLabel ?? undefined : undefined}
         className="rounded-md border border-agency-brand-border bg-agency-brand-soft px-2 py-1 font-sans text-[10px] font-medium text-agency-brand disabled:opacity-50"
       >
-        {sending ? "Sender…" : "Send NPS"}
+        {sending ? "Sender…" : tooNew ? "For ny" : "Send NPS"}
       </button>
     </div>
   );

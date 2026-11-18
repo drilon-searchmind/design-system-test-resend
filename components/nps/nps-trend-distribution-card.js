@@ -37,9 +37,9 @@ export function NpsTrendAndDistributionCard({ trend, trendLabels = [], promoters
 
       <div className="flex flex-col tally-panel p-4 md:p-5">
         <div>
-          <h2 className="font-sans text-sm font-semibold text-fg">Fordeling — seneste score</h2>
+          <h2 className="font-sans text-sm font-semibold text-fg">Fordeling — seneste 2 måneder</h2>
           <p className="mt-1 font-sans text-[11px] text-fg-muted">
-            Promoter ≥60 · passiv 40–59 · detraktor &lt;40 pr. konto.
+            Promoter ≥60 · passiv 40–59 · detraktor &lt;40 pr. konto med svar i perioden.
           </p>
         </div>
         <div className="mt-4 space-y-3">

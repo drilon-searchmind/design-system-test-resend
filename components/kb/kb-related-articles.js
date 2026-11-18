@@ -17,7 +17,7 @@ export function KbRelatedArticles({ articles, className }) {
   return (
     <div className={cn("tally-panel p-4", className)}>
       <h2 className="font-sans text-sm font-semibold text-fg">Relaterede artikler</h2>
-      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme sektion eller emne.</p>
+      <p className="mt-1 font-sans text-[12px] text-fg-muted">Samme sektion, underemner eller forfatter.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {articles.map((a) => {
           const section = getKnowledgeSectionById(a.sectionId);

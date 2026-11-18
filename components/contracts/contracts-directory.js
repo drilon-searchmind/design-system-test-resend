@@ -56,7 +56,10 @@ export function ContractsDirectory({
   toolbarTitle = "Alle kontrakter",
 }) {
   const dataSource = useDataSource();
-  const roster = contracts ?? (dataSource === "demo" ? CONTRACTS : []);
+  const roster = useMemo(
+    () => contracts ?? (dataSource === "demo" ? CONTRACTS : []),
+    [contracts, dataSource],
+  );
   const memberRoster = team ?? (dataSource === "demo" ? TEAM : []);
 
   const [q, setQ] = useState("");
@@ -169,7 +172,30 @@ export function ContractsDirectory({
         </div>
       </div>
 
-      {density === "cards" ? (
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
+          <p className="font-sans text-[13px] font-medium text-fg">
+            {roster.length === 0 ? "Ingen kontrakter endnu" : "Ingen kontrakter matcher"}
+          </p>
+          <p className="max-w-sm font-sans text-[12px] text-fg-muted">
+            {roster.length === 0
+              ? "Send den første kontrakt via «Ny kontrakt / send» øverst."
+              : "Prøv en anden søgning eller et andet filter."}
+          </p>
+          {roster.length > 0 && (q || filter !== "all") ? (
+            <button
+              type="button"
+              onClick={() => {
+                setQ("");
+                setFilter("all");
+              }}
+              className="mt-1 inline-flex h-8 items-center rounded-full border border-border px-3 font-sans text-[12px] font-medium text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
+            >
+              Nulstil filtre
+            </button>
+          ) : null}
+        </div>
+      ) : density === "cards" ? (
         <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] md:p-4">
           {filtered.map((row) => (
             <ContractGridCard key={row.id} row={row} renewalReferenceIso={renewalReferenceIso} />
@@ -246,15 +272,25 @@ export function ContractsDirectory({
                         {row.documentUrl ? (
                           <>
                             {" · "}
-                            <a
-                              href={row.documentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-agency-brand hover:underline"
-                              onClick={(e) => e.stopPropagation()}
+                            {/* Ingen <a> i rækkens <Link> (ugyldig indlejring) — åbnes via JS */}
+                            <span
+                              role="link"
+                              tabIndex={0}
+                              className="cursor-pointer text-agency-brand hover:underline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(row.documentUrl, "_blank", "noopener,noreferrer");
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key !== "Enter") return;
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(row.documentUrl, "_blank", "noopener,noreferrer");
+                              }}
                             >
                               Se kontrakt
-                            </a>
+                            </span>
                           </>
                         ) : null}
                       </div>

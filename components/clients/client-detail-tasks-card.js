@@ -6,13 +6,17 @@ import { useMemo, useState } from "react";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { TaskPriorityChip } from "@/components/crm/task-priority-chip";
 import { TaskStatusChip } from "@/components/crm/task-status-chip";
+import { useDataSource } from "@/components/crm/use-data-source";
 import { PulseIconChevronRight } from "@/components/pulse/pulse-icons";
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
 import { routes, taskHref } from "@/config/routes";
 import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import { DEPARTMENTS } from "@/lib/crm/static-data";
 import {
+  TASK_DEMO_REF_DATE,
   taskDaysUntilDue,
+  taskDueReferenceTodayIso,
   taskIsDone,
   taskIsOverdue,
   taskIsSubTaskRow,
@@ -39,28 +43,45 @@ const GRID =
  * }} ClientTask
  */
 
+/** @typedef {{ id: string; name: string; short?: string }} ClientTaskDepartment */
+
+const NO_DEPT = "__none";
+
+/** Statiske klassenavne så Tailwind kan se dem. */
+const DEPT_DOT = /** @type {Record<string, string>} */ ({
+  seo: "bg-agency-dep-seo",
+  ppc: "bg-agency-dep-ppc",
+  social: "bg-agency-dep-social",
+  email: "bg-agency-dep-email",
+  geo: "bg-agency-dep-geo",
+  creative: "bg-agency-dep-creative",
+  content: "bg-agency-dep-content",
+  martech: "bg-agency-dep-martech",
+  web: "bg-agency-dep-web",
+  cro: "bg-agency-dep-cro",
+});
+
 /**
  * @param {{
  *   row: ClientTask;
  *   teamById: Record<string, { id: string; name: string; avatar?: string; hue?: number; image?: string }>;
+ *   deptById: Map<string, ClientTaskDepartment>;
+ *   refDateIso: string;
  *   showBorder: boolean;
  * }} props
  */
-function ClientTaskRow({ row, teamById, showBorder }) {
+function ClientTaskRow({ row, teamById, deptById, refDateIso, showBorder }) {
   const keys =
     Array.isArray(row.assigneeIds) && row.assigneeIds.length ? row.assigneeIds
     : row.assigneeId ? [row.assigneeId]
     : [];
   const assignees = keys.map((id) => teamById[id]).filter(Boolean);
   const primary = assignees[0] ?? null;
-  const dept = DEPARTMENTS.find((d) => d.id === row.dept);
-  const deptShort =
-    typeof dept?.short === "string" ? dept.short
-    : dept ? dept.id.slice(0, 4).toUpperCase()
-    : "—";
+  const dept = row.dept ? deptById.get(row.dept) : undefined;
+  const deptShort = dept?.short ?? (row.dept ? row.dept.slice(0, 4).toUpperCase() : "—");
   const done = taskIsDone(row.status);
-  const overdue = taskIsOverdue(row);
-  const daysLeft = !done ? taskDaysUntilDue(row.dueDate) : null;
+  const overdue = taskIsOverdue(row, refDateIso);
+  const daysLeft = !done && row.dueDate ? taskDaysUntilDue(row.dueDate, refDateIso) : null;
 
   return (
     <Link
@@ -77,6 +98,11 @@ function ClientTaskRow({ row, teamById, showBorder }) {
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-sans text-[13px] font-medium leading-snug text-fg">{row.title}</div>
           {taskIsSubTaskRow(row) ? <TaskSubtaskBadge compact /> : null}
+          {overdue ?
+            <span className="rounded-md border border-agency-bad-border bg-agency-bad-soft px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-agency-bad">
+              Overskredet
+            </span>
+          : null}
         </div>
         {taskIsSubTaskRow(row) && row.parentTaskTitle ?
           <div className="mt-0.5 line-clamp-1 font-sans text-[10px] text-fg-quiet">Under {row.parentTaskTitle}</div>
@@ -105,7 +131,8 @@ function ClientTaskRow({ row, teamById, showBorder }) {
         : <span className="text-fg-quiet">—</span>}
       </div>
 
-      <div className="hidden items-center justify-center sm:flex">
+      <div className="hidden items-center justify-center gap-1 sm:flex" title={dept?.name}>
+        {row.dept ? <span className={cn("size-1.5 rounded-full", DEPT_DOT[row.dept] ?? "bg-fg-quiet")} /> : null}
         <span className="text-[10px] font-semibold text-fg-muted">{deptShort}</span>
       </div>
 
@@ -159,18 +186,52 @@ function ClientTaskRow({ row, teamById, showBorder }) {
   );
 }
 
+const TABLE_HEAD = (
+  <div
+    className={cn(
+      "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
+      "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
+      GRID,
+    )}
+  >
+    <span>Opgave</span>
+    <span>Ansvarlig</span>
+    <span className="hidden sm:inline">Afd.</span>
+    <span>Prio</span>
+    <span>Status</span>
+    <span className="text-agency-brand">Est.</span>
+    <span>Deadline</span>
+    <span />
+  </div>
+);
+
 /**
  * @param {{
  *   tasks: ClientTask[];
  *   clientLabel: string;
  *   team?: Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>;
- * }} props
+ *   departments?: ClientTaskDepartment[];
+ * }} props `departments` fra databasen (navne); demo/fallback = static DEPARTMENTS.
  */
-export function ClientDetailTasksCard({ tasks, clientLabel, team = [] }) {
+export function ClientDetailTasksCard({ tasks, clientLabel, team = [], departments }) {
+  const dataSource = useDataSource();
+  const refDateIso = dataSource === "demo" ? TASK_DEMO_REF_DATE : taskDueReferenceTodayIso();
   const [showDone, setShowDone] = useState(false);
+  const [deptFilter, setDeptFilter] = useState("all");
+  const [grouped, setGrouped] = useState(true);
   const openCount = tasks.filter((t) => !taskIsDone(t.status)).length;
+  const overdueCount = tasks.filter((t) => taskIsOverdue(t, refDateIso)).length;
 
   const teamById = useMemo(() => Object.fromEntries(team.map((m) => [m.id, m])), [team]);
+  const deptById = useMemo(() => {
+    /** @type {Map<string, ClientTaskDepartment>} */
+    const map = new Map(DEPARTMENTS.map((d) => [d.id, { id: d.id, name: d.name, short: d.short }]));
+    for (const d of departments ?? []) {
+      const prev = map.get(d.id);
+      map.set(d.id, { id: d.id, name: d.name || prev?.name || d.id, short: d.short ?? prev?.short });
+    }
+    return map;
+  }, [departments]);
 
   const sorted = useMemo(() => {
     const visible = showDone ? tasks : tasks.filter((t) => !taskIsDone(t.status));
@@ -182,6 +243,31 @@ export function ClientDetailTasksCard({ tasks, clientLabel, team = [] }) {
     });
   }, [tasks, showDone]);
 
+  /** Afdelinger med opgaver (i den aktuelle visning), med antal — sorteret efter antal. */
+  const deptGroups = useMemo(() => {
+    /** @type {Map<string, ClientTask[]>} */
+    const byDept = new Map();
+    for (const t of sorted) {
+      const key = t.dept && t.dept !== "—" ? t.dept : NO_DEPT;
+      const list = byDept.get(key);
+      if (list) list.push(t);
+      else byDept.set(key, [t]);
+    }
+    return [...byDept.entries()]
+      .map(([key, rows]) => ({
+        key,
+        label: key === NO_DEPT ? "Uden afdeling" : (deptById.get(key)?.name ?? key),
+        rows,
+      }))
+      .sort((a, b) => (a.key === NO_DEPT ? 1 : b.key === NO_DEPT ? -1 : b.rows.length - a.rows.length));
+  }, [sorted, deptById]);
+
+  const activeFilter = deptFilter === "all" || deptGroups.some((g) => g.key === deptFilter) ? deptFilter : "all";
+  const sections =
+    activeFilter !== "all" ? deptGroups.filter((g) => g.key === activeFilter)
+    : grouped ? deptGroups
+    : [{ key: "all", label: "", rows: sorted }];
+
   return (
     <section className="tally-panel overflow-hidden" aria-label="Opgaver">
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
@@ -189,7 +275,21 @@ export function ClientDetailTasksCard({ tasks, clientLabel, team = [] }) {
         <span className="inline-flex h-[22px] items-center rounded-full border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium tabular-nums text-agency-brand">
           {openCount} åbne
         </span>
+        {overdueCount > 0 ?
+          <span className="inline-flex h-[22px] items-center rounded-full border border-agency-bad-border bg-agency-bad-soft px-2 text-[11px] font-medium tabular-nums text-agency-bad">
+            {overdueCount} overskredet
+          </span>
+        : null}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 md:ml-auto">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 font-sans text-[11px] text-fg-muted">
+            <input
+              type="checkbox"
+              checked={grouped}
+              onChange={(e) => setGrouped(e.target.checked)}
+              className="size-3.5 accent-[var(--agency-brand)]"
+            />
+            Gruppér pr. afdeling
+          </label>
           <label className="inline-flex cursor-pointer items-center gap-1.5 font-sans text-[11px] text-fg-muted">
             <input
               type="checkbox"
@@ -205,28 +305,51 @@ export function ClientDetailTasksCard({ tasks, clientLabel, team = [] }) {
         </div>
       </div>
 
+      {deptGroups.length > 1 ?
+        <div className="overflow-x-auto border-b border-border-soft px-3 py-2 md:px-4">
+          <PulseSegmentedControl
+            size="sm"
+            active={activeFilter}
+            onChange={setDeptFilter}
+            tabs={[
+              { id: "all", label: "Alle", count: sorted.length },
+              ...deptGroups.map((g) => ({
+                id: g.key,
+                label: g.key === NO_DEPT ? "Uden afd." : (deptById.get(g.key)?.short ?? g.label),
+                count: g.rows.length,
+              })),
+            ]}
+          />
+        </div>
+      : null}
+
       {sorted.length === 0 ?
         <p className="px-4 py-8 text-center text-[13px] text-fg-muted">Ingen opgaver for {clientLabel}.</p>
       : <div className="overflow-x-auto">
           <div className="min-w-[900px]">
-            <div
-              className={cn(
-                "grid gap-3 border-b border-border bg-surface-muted/90 px-3 py-2",
-                "text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft md:px-4",
-                GRID,
-              )}
-            >
-              <span>Opgave</span>
-              <span>Ansvarlig</span>
-              <span className="hidden sm:inline" />
-              <span>Prio</span>
-              <span>Status</span>
-              <span className="text-agency-brand">Est.</span>
-              <span>Deadline</span>
-              <span />
-            </div>
-            {sorted.map((t, i) => (
-              <ClientTaskRow key={t.id} row={t} teamById={teamById} showBorder={i < sorted.length - 1} />
+            {TABLE_HEAD}
+            {sections.map((section) => (
+              <div key={section.key}>
+                {section.label ?
+                  <div className="flex items-center gap-2 border-b border-border-soft bg-surface-muted/50 px-3 py-1.5 md:px-4">
+                    <span className={cn("size-2 rounded-full", DEPT_DOT[section.key] ?? "bg-fg-quiet")} />
+                    <span className="font-sans text-[11.5px] font-semibold text-fg">{section.label}</span>
+                    <span className="font-sans text-[11px] tabular-nums text-fg-quiet">
+                      {section.rows.length} {section.rows.length === 1 ? "opgave" : "opgaver"}
+                    </span>
+                  </div>
+                : null}
+                {section.rows.map((t, i) => (
+                  <ClientTaskRow
+                    key={t.id}
+                    row={t}
+                    teamById={teamById}
+                    deptById={deptById}
+                    refDateIso={refDateIso}
+                    showBorder={i < section.rows.length - 1}
+                  />
+                ))}
+              </div>
             ))}
           </div>
         </div>

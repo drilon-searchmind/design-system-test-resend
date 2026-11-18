@@ -32,7 +32,8 @@ export function NpsPageHeader({ reportPeriod, loading = false, refreshing = fals
           >
             <span className="capitalize">{loading ? "…" : subtitle}</span>
             {" — "}
-            Bureauoversigt over bølger, skabeloner og konti-score ud fra seneste målinger (0–100 som på kundekortene).
+            Bureauoversigt over bølger, skabeloner og konti-score (0–100 som på kundekortene). Målinger kører i et
+            rullende 2-måneders cyklus — KPI&apos;er viser de seneste 2 måneder.
             {refreshing ?
               <span className="text-[11px] text-fg-quiet"> · Opdaterer…</span>
             : null}

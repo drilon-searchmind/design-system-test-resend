@@ -1,12 +1,16 @@
 "use client";
 
 import { StickyPageHeader } from "@/components/crm/sticky-page-header";
-import { useTimerModal } from "@/components/crm/timer-modal-context";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconClock } from "@/components/crm/icons";
+import { PulseIconChevronDown } from "@/components/pulse/pulse-icons";
 import { TASK_DEMO_USER_ID } from "@/lib/crm/task-utils";
 import { formatReportPeriodSelectionSubtitle } from "@/lib/crm/report-period";
 import { TEAM } from "@/lib/crm/static-data";
+
+/** Admin-filter: egne poster (`me`), alle (`all`) eller én medarbejders `key`. */
+export const TIME_MEMBER_FILTER_ME = "me";
+export const TIME_MEMBER_FILTER_ALL = "all";
 
 /**
  * @param {{
@@ -14,11 +18,15 @@ import { TEAM } from "@/lib/crm/static-data";
  *   onSelectionChange: (selection: import('@/lib/crm/report-period').ReportPeriodSelection) => void;
  *   subtitle?: string;
  *   mineLabel?: string | null;
+ *   viewLabel?: string | null;
  *   dataSource?: "demo" | "database";
  *   refreshing?: boolean;
  *   loading?: boolean;
  *   onOpenCreate?: () => void;
  *   createModalOpen?: boolean;
+ *   memberFilter?: string;
+ *   onMemberFilterChange?: (next: string) => void;
+ *   teamMembers?: { key: string; name: string }[] | null;
  * }} props
  */
 export function TimePageHeader({
@@ -26,21 +34,28 @@ export function TimePageHeader({
   onSelectionChange,
   subtitle: subtitleProp,
   mineLabel = null,
+  viewLabel = null,
   dataSource = "demo",
   refreshing = false,
   loading = false,
   onOpenCreate,
   createModalOpen = false,
+  memberFilter = TIME_MEMBER_FILTER_ME,
+  onMemberFilterChange,
+  teamMembers = null,
 }) {
-  const { openTimer, open: timerModalOpen } = useTimerModal();
   const demoFallbackName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "Medarbejder";
-  const displayName =
+  const ownName =
     typeof mineLabel === "string" && mineLabel.trim() ? mineLabel.trim()
     : dataSource === "demo" ?
       demoFallbackName
     : "Dig";
+  const viewingOthers = memberFilter !== TIME_MEMBER_FILTER_ME;
+  const displayName =
+    viewingOthers && typeof viewLabel === "string" && viewLabel.trim() ? viewLabel.trim() : ownName;
 
   const subtitle = subtitleProp ?? formatReportPeriodSelectionSubtitle(selection);
+  const showMemberFilter = typeof onMemberFilterChange === "function" && Array.isArray(teamMembers);
 
   return (
     <>
@@ -65,15 +80,27 @@ export function TimePageHeader({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={openTimer}
-              aria-haspopup="dialog"
-              aria-expanded={timerModalOpen}
-              className="inline-flex h-[26px] items-center rounded-md border border-agency-brand-border bg-agency-brand px-3 font-sans text-[11px] font-semibold text-white transition-colors hover:bg-agency-brand/90"
-            >
-              Timer
-            </button>
+            {showMemberFilter ?
+              <label className="relative inline-flex items-center">
+                <span className="sr-only">Vis registreringer for</span>
+                <select
+                  value={memberFilter}
+                  onChange={(e) => onMemberFilterChange(e.target.value)}
+                  className="h-[26px] appearance-none rounded-md border border-border bg-surface-muted py-0 pl-2.5 pr-7 font-sans text-[11px] font-semibold text-fg outline-none transition-colors hover:border-agency-brand-border focus-visible:ring-2 focus-visible:ring-agency-brand"
+                >
+                  <option value={TIME_MEMBER_FILTER_ME}>Mine ({ownName})</option>
+                  <option value={TIME_MEMBER_FILTER_ALL}>Alle</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.key} value={m.key}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-fg-quiet">
+                  <PulseIconChevronDown size={10} />
+                </span>
+              </label>
+            : null}
 
             {typeof onOpenCreate === "function" ?
               <button
@@ -81,9 +108,9 @@ export function TimePageHeader({
                 onClick={onOpenCreate}
                 aria-haspopup="dialog"
                 aria-expanded={createModalOpen}
-                className="inline-flex h-[26px] items-center rounded-md border border-border bg-surface-muted px-3 font-sans text-[11px] font-semibold text-fg transition-colors hover:border-agency-brand-border hover:bg-agency-brand-soft hover:text-agency-brand"
+                className="inline-flex h-[26px] items-center rounded-md border border-agency-brand-border bg-agency-brand px-3 font-sans text-[11px] font-semibold text-white transition-colors hover:bg-agency-brand/90"
               >
-                Ny registrering
+                Registrér tid
               </button>
             : null}
 

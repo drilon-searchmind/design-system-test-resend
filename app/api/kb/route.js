@@ -43,12 +43,10 @@ export async function POST(req) {
       bodyMd: typeof body?.bodyMd === "string" ? body.bodyMd : "",
       sectionId: typeof body?.sectionId === "string" ? body.sectionId : "",
       published: typeof body?.published === "boolean" ? body.published : true,
-      audience: typeof body?.audience === "string" ? body.audience : "internal",
       featured: typeof body?.featured === "boolean" ? body.featured : false,
       icon: typeof body?.icon === "string" ? body.icon : null,
       headerImageUrl:
         typeof body?.headerImageUrl === "string" ? body.headerImageUrl : body?.headerImageUrl === null ? null : undefined,
-      tags: Array.isArray(body?.tags) ? body.tags.map(String) : undefined,
     });
 
     if (result.error) {

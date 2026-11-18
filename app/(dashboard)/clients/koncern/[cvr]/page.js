@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 /** @param {{ params: Promise<{ cvr: string }> }} props */
 export async function generateMetadata({ params }) {
   const { cvr } = await params;
-  return { title: `Kundegruppe ${cvr} · Kunder · 1337-crm by Searchmind` };
+  return { title: `Kundegruppe ${cvr} · Kunder · Searchmind 1337 OS` };
 }
 
 /** @param {{ params: Promise<{ cvr: string }> }} props */

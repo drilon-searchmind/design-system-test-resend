@@ -38,7 +38,7 @@ export function CrmSidebar({
   const w = collapsed ? 56 : 220;
   const { data: session } = useSession();
   const isAdmin = session?.user?.isAdmin === true;
-  const navItems = CRM_NAV_ITEMS.filter((item) => item.id !== "users" || isAdmin);
+  const navItems = CRM_NAV_ITEMS.filter((item) => !item.hidden && (!item.adminOnly || isAdmin));
 
   return (
     <aside
@@ -73,7 +73,7 @@ export function CrmSidebar({
                 Searchmind
               </span>
               <span className="block truncate text-[10px] uppercase tracking-[0.06em] text-fg-soft">
-                Agency OS
+                1337 OS
               </span>
             </span>
           ) : null}

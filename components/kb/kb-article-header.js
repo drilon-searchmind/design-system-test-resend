@@ -1,21 +1,20 @@
 import Link from "next/link";
 
 import { KbAuthorChip } from "@/components/kb/kb-author-chip";
-import { isSystemKnowledgeTag, kbArticleSummary } from "@/lib/crm/knowledge-utils";
+import { kbArticleSummary } from "@/lib/crm/knowledge-utils";
 import { routes, kbArticleEditHref, kbArticleHref } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { getKnowledgeSectionById } from "@/lib/crm/knowledge-data";
-import { cn } from "@/lib/utils";
 
 /**
  * @param {{
  *   article: import("@/lib/crm/knowledge-utils").KnowledgeArticleView;
  *   childArticles?: { slug: string; title: string }[];
+ *   summaryMissing?: boolean;
  * }} props
  */
-export function KbArticleHeader({ article, childArticles = [] }) {
+export function KbArticleHeader({ article, childArticles = [], summaryMissing = false }) {
   const section = getKnowledgeSectionById(article.sectionId);
-  const displayTags = article.tags.filter((t) => !isSystemKnowledgeTag(t));
   const summary = kbArticleSummary(article, 300);
 
   return (
@@ -53,6 +52,16 @@ export function KbArticleHeader({ article, childArticles = [] }) {
         </p>
       : null}
 
+      {summaryMissing ?
+        <p className="rounded-lg border border-agency-warn-border bg-agency-warn-soft px-3 py-2 font-sans text-[12px] text-agency-warn">
+          <span className="font-semibold">Gemt uden resumé</span> — AI-resuméet kunne ikke laves lige nu. Åbn{" "}
+          <Link href={kbArticleEditHref(article.slug)} className="font-medium underline">
+            Rediger
+          </Link>{" "}
+          og brug <span className="font-medium">Generér med AI</span>, eller skriv det selv.
+        </p>
+      : null}
+
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           {article.icon ?
@@ -84,31 +93,7 @@ export function KbArticleHeader({ article, childArticles = [] }) {
             <span>{section.name}</span>
           </>
         : null}
-        <span className="text-fg-quiet">·</span>
-        <span
-          className={cn(
-            article.audience === "client" && "text-agency-ok",
-            article.audience === "public" && "text-agency-brand",
-          )}
-        >
-          {article.audience === "client" ? "Kunde" : article.audience === "public" ? "Offentlig" : "Intern"}
-        </span>
       </div>
-
-      {displayTags.length > 0 ?
-        <ul className="flex flex-wrap gap-1.5">
-          {displayTags.map((tag) => (
-            <li key={tag}>
-              <Link
-                href={{ pathname: routes.kb, query: { tag } }}
-                className="rounded border border-border-soft px-1.5 py-0.5 font-sans text-[10px] text-fg-quiet transition-colors hover:border-agency-brand-border hover:text-fg"
-              >
-                {tag}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      : null}
 
       {childArticles.length > 0 ?
         <nav className="rounded-xl border border-border-soft bg-surface-muted/40 px-3 py-2">

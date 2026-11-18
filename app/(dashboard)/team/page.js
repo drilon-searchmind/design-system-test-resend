@@ -4,7 +4,7 @@ import { TeamPageClient } from "@/components/team/team-page-client";
 import { shellMainStudio } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Team · 1337-crm by Searchmind" };
+export const metadata = { title: "Team · Searchmind 1337 OS" };
 
 function TeamPageFallback() {
   return (

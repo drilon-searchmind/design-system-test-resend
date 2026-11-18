@@ -9,18 +9,18 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { clientId } = await params;
   const staticClient = CLIENTS.find((c) => c.id === clientId);
-  if (staticClient) return { title: `${staticClient.name} · Kunder · 1337-crm by Searchmind` };
+  if (staticClient) return { title: `${staticClient.name} · Kunder · Searchmind 1337 OS` };
 
   try {
     await connectDb();
     const doc = await Client.findOne({ slug: clientId }).select("name").lean();
     const name = doc?.name ? String(doc.name) : null;
-    if (name) return { title: `${name} · Kunder · 1337-crm by Searchmind` };
+    if (name) return { title: `${name} · Kunder · Searchmind 1337 OS` };
   } catch {
     /* Mongo utilgængelig eller cold start — fald tilbage til generisk titel */
   }
 
-  return { title: "Kunde · Kunder · 1337-crm by Searchmind" };
+  return { title: "Kunde · Kunder · Searchmind 1337 OS" };
 }
 
 /** @param {{ params: Promise<{ clientId: string }> }} props */

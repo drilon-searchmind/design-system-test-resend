@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { TimeEntryCreateForm } from "@/components/time/time-entry-create-form";
-import { OpenTimerButton } from "@/components/time/open-timer-button";
 import { routes } from "@/config/routes";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
@@ -65,23 +64,15 @@ export function TimeQuickLogPanel({
 
   return (
     <section className="tally-panel p-4 md:p-5">
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-            Hurtig log
-          </h2>
-          <p className="mt-1 max-w-prose font-sans text-[11px] leading-snug text-fg-muted">
-            {db ?
-              "Manuel registrering på panellet — også tilgængelig fra knappen Ny registrering i headeren."
-            : "Manuel registrering er ikke tilgængelig i denne visning."}
-          </p>
-        </div>
-        <OpenTimerButton className="inline-flex h-8 items-center gap-2 rounded-md border border-agency-brand-border bg-agency-brand px-3.5 font-sans text-[12px] font-semibold text-white transition-colors hover:bg-agency-brand/90">
-          <span className="relative flex size-2 rounded-full bg-white/90">
-            <span className="absolute inset-0 animate-ping rounded-full bg-white/40" />
-          </span>
-          Start timer
-        </OpenTimerButton>
+      <div>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+          Hurtig log
+        </h2>
+        <p className="mt-1 max-w-prose font-sans text-[11px] leading-snug text-fg-muted">
+          {db ?
+            "Manuel registrering på panellet — også tilgængelig fra knappen Registrér tid i headeren."
+          : "Manuel registrering er ikke tilgængelig i denne visning."}
+        </p>
       </div>
 
       {db ?

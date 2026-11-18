@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { taskId, subTaskId } = await params;
   const demoRow = TASKS.find((t) => t.id === subTaskId);
-  if (demoRow) return { title: `${demoRow.title} · Delopgave · 1337-crm by Searchmind` };
+  if (demoRow) return { title: `${demoRow.title} · Delopgave · Searchmind 1337 OS` };
 
   try {
     await connectDb();
     if (!mongoose.Types.ObjectId.isValid(subTaskId)) {
-      return { title: "Delopgave · 1337-crm by Searchmind" };
+      return { title: "Delopgave · Searchmind 1337 OS" };
     }
     const tdoc = await Task.findById(subTaskId).select("title isSubTask parentTaskId").lean();
     if (
@@ -26,11 +26,11 @@ export async function generateMetadata({ params }) {
       typeof tdoc.title === "string" &&
       tdoc.title.trim()
     ) {
-      return { title: `${tdoc.title} · Delopgave · 1337-crm by Searchmind` };
+      return { title: `${tdoc.title} · Delopgave · Searchmind 1337 OS` };
     }
-    return { title: "Delopgave · 1337-crm by Searchmind" };
+    return { title: "Delopgave · Searchmind 1337 OS" };
   } catch {
-    return { title: "Delopgave · 1337-crm by Searchmind" };
+    return { title: "Delopgave · Searchmind 1337 OS" };
   }
 }
 

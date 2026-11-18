@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { clientEditInputClass } from "@/components/clients/client-detail-edit-actions";
-import { LEAD_SOURCE_LABELS, LEAD_SOURCES } from "@/lib/crm/client-utils";
+import { INDUSTRY_OPTIONS, LEAD_SOURCE_LABELS, LEAD_SOURCES } from "@/lib/crm/client-utils";
 import { slugifyStableKey } from "@/lib/crm/slug-key";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ export function ClientsCreateForm({
   const [currency, setCurrency] = useState("DKK");
   const [hoursBudget, setHoursBudget] = useState("");
   const [startedAt, setStartedAt] = useState("");
-  const [npsInterval, setNpsInterval] = useState("quarterly");
+  const [npsInterval, setNpsInterval] = useState("bimonthly");
   const [leadSource, setLeadSource] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -150,7 +150,14 @@ export function ClientsCreateForm({
             />
           </Field>
           <Field label="Branche">
-            <input value={industry} onChange={(e) => setIndustry(e.target.value)} className={clientEditInputClass} />
+            <select value={industry} onChange={(e) => setIndustry(e.target.value)} className={clientEditInputClass}>
+              <option value="">Vælg branche…</option>
+              {INDUSTRY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="CVR">
             <input value={cvr} onChange={(e) => setCvr(e.target.value)} className={clientEditInputClass} />
@@ -226,6 +233,7 @@ export function ClientsCreateForm({
           <Field label="NPS-cyklus">
             <select value={npsInterval} onChange={(e) => setNpsInterval(e.target.value)} className={clientEditInputClass}>
               <option value="monthly">Månedlig</option>
+              <option value="bimonthly">Hver 2. måned</option>
               <option value="quarterly">Kvartalsvis</option>
               <option value="biannual">Halvårlig</option>
             </select>

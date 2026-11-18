@@ -6,11 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { KbAuthorFilter, defaultKbAuthorSelection } from "@/components/kb/kb-author-filter";
 import { KbAuthorChip } from "@/components/kb/kb-author-chip";
 import { KbGridCard } from "@/components/kb/kb-grid-card";
-import {
-  KbMultiSelectFilter,
-  kbMatchesMultiFilter,
-  kbMatchesTagFilter,
-} from "@/components/kb/kb-multi-select-filter";
+import { KbMultiSelectFilter, kbMatchesMultiFilter } from "@/components/kb/kb-multi-select-filter";
 import {
   PulseIconChevronDown,
   PulseIconChevronRight,
@@ -23,7 +19,6 @@ import { kbArticleHref } from "@/config/routes";
 import { formatIsoDateDa } from "@/lib/crm/format-da";
 import { KNOWLEDGE_SECTIONS } from "@/lib/crm/knowledge-data";
 import { getKnowledgeSectionById } from "@/lib/crm/knowledge-data";
-import { isSystemKnowledgeTag } from "@/lib/crm/knowledge-utils";
 import { cn } from "@/lib/utils";
 
 const GRID_LIST =
@@ -35,7 +30,6 @@ const GRID_LIST =
  *   allArticles?: import("@/lib/crm/knowledge-utils").KnowledgeArticleView[];
  *   initialSectionId?: string;
  *   initialAuthorId?: string;
- *   initialTag?: string;
  *   compact?: boolean;
  *   headingId?: string;
  * }} props
@@ -45,7 +39,6 @@ export function KbDirectory({
   allArticles,
   initialSectionId,
   initialAuthorId,
-  initialTag,
   compact = false,
   headingId = "kb-directory-heading",
 }) {
@@ -56,17 +49,6 @@ export function KbDirectory({
     [],
   );
   const sectionKeys = useMemo(() => new Set(sectionOptions.map((s) => s.id)), [sectionOptions]);
-
-  const tagOptions = useMemo(() => {
-    const tags = new Set();
-    for (const a of pool) {
-      for (const t of a.tags) {
-        if (!isSystemKnowledgeTag(t)) tags.add(t);
-      }
-    }
-    return [...tags].sort((a, b) => a.localeCompare(b, "da")).map((t) => ({ id: t, label: t }));
-  }, [pool]);
-  const tagKeys = useMemo(() => new Set(tagOptions.map((t) => t.id)), [tagOptions]);
 
   const authorOptions = useMemo(() => {
     /** @type {Map<string, { id: string; name: string; avatar: string; hue: number; image?: string }>} */
@@ -106,39 +88,12 @@ export function KbDirectory({
       new Set([initialAuthorId])
     : defaultKbAuthorSelection(authorOptions),
   );
-  const [selectedTags, setSelectedTags] = useState(() =>
-    initialTag && tagKeys.has(initialTag) ? new Set([initialTag]) : new Set(tagKeys),
-  );
 
   useEffect(() => {
-    if (initialSectionId && sectionKeys.has(initialSectionId)) {
-      setSelectedSections(new Set([initialSectionId]));
-    } else if (!initialSectionId) {
-      setSelectedSections(new Set(sectionKeys));
-    }
-  }, [initialSectionId, sectionKeys]);
-
-  useEffect(() => {
-    if (initialAuthorId && authorKeys.has(initialAuthorId)) {
-      setSelectedAuthors(new Set([initialAuthorId]));
-    } else if (!initialAuthorId && authorOptions.length > 0) {
-      setSelectedAuthors(defaultKbAuthorSelection(authorOptions));
-    }
-  }, [initialAuthorId, authorKeys, authorOptions]);
-
-  useEffect(() => {
-    if (initialTag && tagKeys.has(initialTag)) {
-      setSelectedTags(new Set([initialTag]));
-    } else if (!initialTag && tagOptions.length > 0) {
-      setSelectedTags(new Set(tagKeys));
-    }
-  }, [initialTag, tagKeys, tagOptions]);
-
-  useEffect(() => {
-    if (!initialSectionId && !initialAuthorId && !initialTag) return;
+    if (!initialSectionId && !initialAuthorId) return;
     const el = document.getElementById("kb-directory");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [initialSectionId, initialAuthorId, initialTag]);
+  }, [initialSectionId, initialAuthorId]);
 
   const pubCount = useMemo(() => pool.filter((a) => a.published && !a.archived).length, [pool]);
   const draftCount = useMemo(() => pool.filter((a) => !a.published && !a.archived).length, [pool]);
@@ -148,7 +103,7 @@ export function KbDirectory({
     const ql = q.trim().toLowerCase();
     const list = articles.filter((a) => {
       if (ql) {
-        const blob = `${a.title} ${a.summary} ${a.bodyMd} ${a.tags.join(" ")} ${a.slug} ${a.author?.name ?? ""}`.toLowerCase();
+        const blob = `${a.title} ${a.summary} ${a.bodyMd} ${a.slug} ${a.author?.name ?? ""}`.toLowerCase();
         if (!blob.includes(ql)) return false;
       }
 
@@ -165,9 +120,6 @@ export function KbDirectory({
       if (!sectionKey && selectedSections.size < sectionKeys.size) return false;
 
       if (a.authorId && !kbMatchesMultiFilter(a.authorId, selectedAuthors, authorKeys)) return false;
-
-      const userTags = a.tags.filter((t) => !isSystemKnowledgeTag(t));
-      if (!kbMatchesTagFilter(userTags, selectedTags, tagKeys)) return false;
 
       return true;
     });
@@ -188,9 +140,14 @@ export function KbDirectory({
     sectionKeys,
     selectedAuthors,
     authorKeys,
-    selectedTags,
-    tagKeys,
   ]);
+
+  const resetFilters = () => {
+    setQ("");
+    setPublication("all");
+    setSelectedSections(new Set(sectionKeys));
+    setSelectedAuthors(new Set(authorKeys));
+  };
 
   return (
     <section id="kb-directory" className="tally-panel" aria-labelledby={headingId}>
@@ -230,16 +187,6 @@ export function KbDirectory({
             />
             {authorOptions.length > 0 ?
               <KbAuthorFilter authors={authorOptions} selected={selectedAuthors} onChange={setSelectedAuthors} />
-            : null}
-            {tagOptions.length > 0 ?
-              <KbMultiSelectFilter
-                options={tagOptions}
-                selected={selectedTags}
-                onChange={setSelectedTags}
-                allSelectedLabel="Alle tags"
-                countLabel={(n) => `${n} tags`}
-                emptyLabel="Ingen tags"
-              />
             : null}
 
             <PulseSegmentedControl
@@ -350,7 +297,16 @@ export function KbDirectory({
       }
 
       {filtered.length === 0 ?
-        <div className="px-4 py-10 text-center font-sans text-[13px] text-fg-muted">Ingen artikler matcher filtrene.</div>
+        <div className="flex flex-col items-center gap-3 px-4 py-10 text-center font-sans text-[13px] text-fg-muted">
+          <p>Ingen artikler matcher filtrene.</p>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="inline-flex h-8 items-center rounded-md border border-border px-3 text-[12px] text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
+          >
+            Nulstil filtre
+          </button>
+        </div>
       : null}
     </section>
   );

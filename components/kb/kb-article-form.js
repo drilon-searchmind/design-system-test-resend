@@ -6,42 +6,59 @@ import { useCallback, useRef, useState } from "react";
 
 import { KbArticleRichEditor, readKbArticleEditorHtml } from "@/components/kb/kb-article-rich-editor";
 import { KbEmojiPicker } from "@/components/kb/kb-emoji-picker";
-import { KbTagPicker } from "@/components/kb/kb-tag-picker";
-import { isSystemKnowledgeTag } from "@/lib/crm/knowledge-utils";
 import { routes, kbArticleHref } from "@/config/routes";
 import { KNOWLEDGE_SECTIONS } from "@/lib/crm/knowledge-data";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { cn } from "@/lib/utils";
 
+const SUMMARY_MAX_CHARS = 240;
+
 /**
  * @param {{
  *   mode: "create" | "edit";
  *   article?: import("@/lib/crm/knowledge-utils").KnowledgeArticleView;
- *   tagSuggestions: string[];
  *   initialSectionId?: string;
  * }} props
  */
-export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId }) {
+export function KbArticleForm({ mode, article, initialSectionId }) {
   const router = useRouter();
   const bodyRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const isEdit = mode === "edit";
+  const articleSlug = article?.slug ?? "";
 
   const [title, setTitle] = useState(article?.title ?? "");
-  const [summary, setSummary] = useState(article?.summary ?? "");
+  const [summary, setSummary] = useState(article?.hasSummary === false ? "" : (article?.summary ?? ""));
   const [sectionId, setSectionId] = useState(() => {
     if (article?.sectionId && KNOWLEDGE_SECTIONS.some((s) => s.id === article.sectionId)) return article.sectionId;
     if (initialSectionId && KNOWLEDGE_SECTIONS.some((s) => s.id === initialSectionId)) return initialSectionId;
     return KNOWLEDGE_SECTIONS[0]?.id ?? "clickup";
   });
-  const [tags, setTags] = useState(
-    () => (article?.tags ?? []).filter((t) => !isSystemKnowledgeTag(t)),
-  );
-  const [audience, setAudience] = useState(article?.audience ?? "internal");
   const [icon, setIcon] = useState(/** @type {string | null} */ (article?.icon ?? null));
   const [headerImageUrl, setHeaderImageUrl] = useState(article?.headerImageUrl ?? "");
   const [featured, setFeatured] = useState(Boolean(article?.featured));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [summaryError, setSummaryError] = useState(/** @type {string | null} */ (null));
+
+  const generateSummary = useCallback(async () => {
+    setGeneratingSummary(true);
+    setSummaryError(null);
+    try {
+      const res = await fetch("/api/kb/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, bodyMd: readKbArticleEditorHtml(bodyRef.current) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Kunne ikke generere resumé");
+      if (typeof data?.summary === "string") setSummary(data.summary);
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : "Kunne ikke generere resumé");
+    } finally {
+      setGeneratingSummary(false);
+    }
+  }, [title]);
 
   const submit = useCallback(
     async (publish) => {
@@ -55,8 +72,6 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
           summary,
           bodyMd,
           sectionId,
-          tags,
-          audience,
           icon,
           headerImageUrl: headerImageUrl.trim() || null,
           featured,
@@ -65,7 +80,7 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
         };
 
         const res = await fetch(
-          isEdit ? `/api/kb/${encodeURIComponent(article?.slug ?? "")}?${qs}` : `/api/kb?${qs}`,
+          isEdit ? `/api/kb/${encodeURIComponent(articleSlug)}?${qs}` : `/api/kb?${qs}`,
           {
             method: isEdit ? "PATCH" : "POST",
             headers: { "Content-Type": "application/json" },
@@ -74,9 +89,10 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
         );
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Fejl");
-        const slug = typeof data?.article?.slug === "string" ? data.article.slug : article?.slug;
+        const slug = typeof data?.article?.slug === "string" ? data.article.slug : articleSlug;
         if (slug) {
-          router.push(kbArticleHref(slug));
+          const summaryMissing = typeof data?.summaryNotice === "string" && data.summaryNotice;
+          router.push(summaryMissing ? `${kbArticleHref(slug)}?resume=mangler` : kbArticleHref(slug));
           router.refresh();
         }
       } catch (err) {
@@ -84,17 +100,17 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
         setSaving(false);
       }
     },
-    [title, summary, sectionId, tags, audience, icon, headerImageUrl, featured, router, isEdit, article?.slug],
+    [title, summary, sectionId, icon, headerImageUrl, featured, router, isEdit, articleSlug],
   );
 
   const archiveArticle = useCallback(async () => {
-    if (!isEdit || !article?.slug) return;
+    if (!isEdit || !articleSlug) return;
     if (!window.confirm("Arkiver denne artikel? Den skjules fra live-visningen.")) return;
     setSaving(true);
     setError(null);
     try {
       const qs = databaseApiQuery();
-      const res = await fetch(`/api/kb/${encodeURIComponent(article.slug)}?${qs}`, {
+      const res = await fetch(`/api/kb/${encodeURIComponent(articleSlug)}?${qs}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archived: true, published: false }),
@@ -107,16 +123,16 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
       setError(err instanceof Error ? err.message : "Fejl");
       setSaving(false);
     }
-  }, [isEdit, article?.slug, router]);
+  }, [isEdit, articleSlug, router]);
 
   const deleteArticle = useCallback(async () => {
-    if (!isEdit || !article?.slug) return;
+    if (!isEdit || !articleSlug) return;
     if (!window.confirm("Slet artiklen permanent? Dette kan ikke fortrydes.")) return;
     setSaving(true);
     setError(null);
     try {
       const qs = databaseApiQuery();
-      const res = await fetch(`/api/kb/${encodeURIComponent(article.slug)}?${qs}`, { method: "DELETE" });
+      const res = await fetch(`/api/kb/${encodeURIComponent(articleSlug)}?${qs}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Fejl");
       router.push(routes.kb);
@@ -125,9 +141,9 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
       setError(err instanceof Error ? err.message : "Fejl");
       setSaving(false);
     }
-  }, [isEdit, article?.slug, router]);
+  }, [isEdit, articleSlug, router]);
 
-  const backHref = isEdit && article?.slug ? kbArticleHref(article.slug) : routes.kb;
+  const backHref = isEdit && articleSlug ? kbArticleHref(articleSlug) : routes.kb;
 
   return (
     <form
@@ -198,7 +214,9 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
               (saving || !title.trim()) && "opacity-50",
             )}
           >
-            {saving ? "Gemmer…" : isEdit ? "Gem ændringer" : "Publicer"}
+            {saving ?
+              summary.trim() ? "Gemmer…" : "Gemmer og skriver resumé…"
+            : isEdit ? "Gem ændringer" : "Publicer"}
           </button>
         </div>
       </header>
@@ -245,6 +263,40 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
             </select>
           </label>
 
+          <div className="flex flex-col gap-1 font-sans text-[11px] text-fg-muted">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="kb-article-summary">Kort resume</label>
+              <button
+                type="button"
+                disabled={saving || generatingSummary || !title.trim()}
+                onClick={() => void generateSummary()}
+                className={cn(
+                  "inline-flex h-6 items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-2 text-[11px] font-medium text-agency-brand transition-colors hover:bg-agency-brand-soft/70",
+                  (saving || generatingSummary || !title.trim()) && "opacity-50",
+                )}
+              >
+                {generatingSummary ? "Genererer…" : "Generér med AI"}
+              </button>
+            </div>
+            <textarea
+              id="kb-article-summary"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              rows={4}
+              maxLength={500}
+              disabled={generatingSummary}
+              placeholder="Lad stå tomt — så skriver AI et resumé ud fra titel og brødtekst, når du gemmer."
+              className="rounded-md border border-border bg-surface-card px-2 py-2 text-[12px] text-fg placeholder:text-fg-quiet"
+            />
+            {summaryError ?
+              <span className="text-agency-bad">{summaryError}</span>
+            : summary.length > SUMMARY_MAX_CHARS ?
+              <span className="text-agency-warn">
+                {summary.length} tegn — hold resuméet under {SUMMARY_MAX_CHARS} tegn.
+              </span>
+            : null}
+          </div>
+
           <label className="flex flex-col gap-1 font-sans text-[11px] text-fg-muted">
             Ikon
             <KbEmojiPicker value={icon} onChange={setIcon} disabled={saving} />
@@ -265,35 +317,6 @@ export function KbArticleForm({ mode, article, tagSuggestions, initialSectionId 
                 <img src={headerImageUrl.trim()} alt="" className="aspect-[16/9] w-full object-cover" />
               </div>
             : null}
-          </label>
-
-          <label className="flex flex-col gap-1 font-sans text-[11px] text-fg-muted">
-            Målgruppe
-            <select
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
-              className="h-8 rounded-md border border-border bg-surface-card px-2 text-[13px] text-fg"
-            >
-              <option value="internal">Intern</option>
-              <option value="client">Kunde</option>
-              <option value="public">Offentlig</option>
-            </select>
-          </label>
-
-          <div className="flex flex-col gap-1 font-sans text-[11px] text-fg-muted">
-            Tags
-            <KbTagPicker value={tags} onChange={setTags} suggestions={tagSuggestions} disabled={saving} />
-          </div>
-
-          <label className="flex flex-col gap-1 font-sans text-[11px] text-fg-muted">
-            Kort resume
-            <textarea
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              rows={3}
-              placeholder="Valgfrit — udfyldes fra brødtekst hvis tom"
-              className="rounded-md border border-border bg-surface-card px-2 py-2 text-[12px] text-fg"
-            />
           </label>
 
           <label className="inline-flex items-center gap-2 font-sans text-[12px] text-fg-muted">

@@ -2,24 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import {
-  TASK_DETAIL_TAB_IDS,
-  TaskDetailTabbedBody,
-  normalizeTaskDetailTab,
-} from "@/components/tasks/task-detail-tabbed-body";
-import { TaskDetailEditForm } from "@/components/tasks/task-detail-edit-form";
-import { TaskDetailTimerMenu } from "@/components/tasks/task-detail-timer-menu";
 import { TaskDetailCreatedBy } from "@/components/tasks/task-detail-created-by";
 import { TaskDetailHeader } from "@/components/tasks/task-detail-header";
+import { TaskDetailOverview } from "@/components/tasks/task-detail-overview";
 import { TaskDetailStatusBar } from "@/components/tasks/task-detail-status-bar";
-import { ClientDetailEditActions } from "@/components/clients/client-detail-edit-actions";
+import { TaskDetailTimeButton } from "@/components/tasks/task-detail-time-button";
+import { useTaskFieldSave } from "@/components/tasks/use-task-field-save";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { routes, taskHref } from "@/config/routes";
 import {
   CLIENTS,
-  CONTRACTS,
   DEPARTMENTS,
   TASK_ACTIVITY_LOG,
   TASKS,
@@ -27,7 +21,7 @@ import {
   TIME_ENTRIES_TODAY,
 } from "@/lib/crm/static-data";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
-import { editDraftToPatch, taskStatusPatch, taskWireToEditDraft } from "@/lib/crm/task-edit-utils";
+import { taskStatusPatch } from "@/lib/crm/task-edit-utils";
 import {
   sanitizeTaskUiStatus,
   taskDueReferenceTodayIso,
@@ -35,13 +29,51 @@ import {
 } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
+const DEMO_READ_ONLY_HINT = "Demo-tilstand — felterne kan kun redigeres i database-tilstand.";
+
+/** @type {Record<string, import('@/components/tasks/use-task-field-save').TaskFieldStatus>} */
+const NO_FIELD_STATUS = {};
+
+const noopFieldSave = async () => false;
+
 /**
- * @param {{ taskId: string; parentTaskId?: string; initialTab?: string; highlightCommentId?: string; embedded?: boolean; onClose?: () => void; onTaskMutated?: () => void }} props
+ * @param {Record<string, unknown>} row
+ * @param {string} fallbackId
+ */
+function toFieldTask(row, fallbackId) {
+  const assigneeIds =
+    Array.isArray(row.assigneeIds) ? row.assigneeIds.map((k) => String(k).trim()).filter(Boolean)
+    : typeof row.assigneeId === "string" && row.assigneeId.trim() ? [row.assigneeId.trim()]
+    : [];
+  return {
+    id: typeof row.id === "string" ? row.id : fallbackId,
+    title: typeof row.title === "string" ? row.title : "—",
+    status: sanitizeTaskUiStatus(String(row.status ?? "todo")),
+    dueDate: typeof row.dueDate === "string" ? row.dueDate.trim().slice(0, 10) : "",
+    priority:
+      row.priority === "high" || row.priority === "low" ? row.priority : /** @type {'medium'} */ ("medium"),
+    dept: typeof row.dept === "string" ? row.dept : "",
+    clientId: typeof row.clientId === "string" ? row.clientId.trim() : "",
+    clientName: typeof row.clientName === "string" ? row.clientName : "",
+    clientLogo: typeof row.clientLogo === "string" ? row.clientLogo : "?",
+    clientHue: typeof row.clientHue === "number" ? row.clientHue : 220,
+    billable: row.billable !== false,
+    estimateHours:
+      typeof row.estimateHours === "number" && Number.isFinite(row.estimateHours) ? row.estimateHours : null,
+    assigneeIds,
+    isSubTask: row.isSubTask === true,
+    parentTaskId: typeof row.parentTaskId === "string" ? row.parentTaskId.trim() : "",
+    parentTaskTitle: typeof row.parentTaskTitle === "string" ? row.parentTaskTitle : "",
+    description: typeof row.description === "string" ? row.description : "",
+  };
+}
+
+/**
+ * @param {{ taskId: string; parentTaskId?: string; highlightCommentId?: string; embedded?: boolean; onClose?: () => void; onTaskMutated?: () => void }} props
  */
 export function TaskDetailShell({
   taskId,
   parentTaskId = "",
-  initialTab = "",
   highlightCommentId = "",
   embedded = false,
   onClose,
@@ -49,37 +81,35 @@ export function TaskDetailShell({
 }) {
   const router = useRouter();
   const dataSource = useDataSource();
-  const defaultTab = TASK_DETAIL_TAB_IDS[0];
-  const resolvedInitialTab = normalizeTaskDetailTab(initialTab || defaultTab);
-  const [detailTab, setDetailTab] = useState(resolvedInitialTab);
   const [remote, setRemote] = useState(/** @type {Record<string, unknown> | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(/** @type {import('@/lib/crm/task-edit-utils').TaskEditDraft | null} */ (null));
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [statusSaving, setStatusSaving] = useState(false);
-  const [editNotice, setEditNotice] = useState(/** @type {string | null} */ (null));
+  const [deleteNotice, setDeleteNotice] = useState(/** @type {string | null} */ (null));
 
-  const loadRemote = useCallback(async () => {
-    setEditNotice(null);
-    setLoading(true);
-    setError(null);
-    try {
-      const qs = databaseApiQuery();
-      const parentQs =
-        parentTaskId.trim() ? `&parentTaskId=${encodeURIComponent(parentTaskId.trim())}` : "";
-      const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}${parentQs}`, { cache: "no-store" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaven");
-      setRemote(data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Fejl");
-    } finally {
-      setLoading(false);
-    }
-  }, [parentTaskId, taskId]);
+  const loadRemote = useCallback(
+    async (/** @type {{ silent?: boolean } | undefined} */ opts) => {
+      const silent = opts?.silent === true;
+      if (!silent) {
+        setLoading(true);
+        setError(null);
+      }
+      try {
+        const qs = databaseApiQuery();
+        const parentQs =
+          parentTaskId.trim() ? `&parentTaskId=${encodeURIComponent(parentTaskId.trim())}` : "";
+        const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}${parentQs}`, { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente opgaven");
+        setRemote(data);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Fejl");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [parentTaskId, taskId],
+  );
 
   useEffect(() => {
     if (dataSource !== "database") return;
@@ -88,59 +118,22 @@ export function TaskDetailShell({
     });
   }, [dataSource, loadRemote]);
 
-  useEffect(() => {
-    if (initialTab) {
-      setDetailTab(normalizeTaskDetailTab(initialTab));
-    }
-  }, [initialTab]);
+  /** @type {Record<string, unknown> | undefined} */
+  const rTask =
+    remote && typeof remote.task === "object" && remote.task !== null ?
+      /** @type {Record<string, unknown>} */ (remote.task)
+    : undefined;
 
-  const startEdit = useCallback(() => {
-    if (!remote || typeof remote.task !== "object" || remote.task === null) return;
-    setDraft(taskWireToEditDraft(/** @type {Record<string, unknown>} */ (remote.task)));
-    setEditNotice(null);
-    setEditing(true);
-  }, [remote]);
-
-  const cancelEdit = useCallback(() => {
-    setEditing(false);
-    setDraft(null);
-    setEditNotice(null);
-  }, []);
-
-  const saveEdit = useCallback(async () => {
-    if (!draft) return;
-    if (!draft.title.trim()) {
-      setEditNotice("Titel er påkrævet.");
-      return;
-    }
-    const editingSubTask = draft.isSubTask === true;
-    if (!editingSubTask && !draft.clientSlug.trim()) {
-      setEditNotice("Vælg en kunde.");
-      return;
-    }
-
-    setSaving(true);
-    setEditNotice(null);
-    try {
-      const qs = databaseApiQuery();
-      const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editDraftToPatch(draft)),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "Kunne ikke gemme");
-      setEditing(false);
-      setDraft(null);
-      await loadRemote();
+  const { saveField, fieldStatus, saveError } = useTaskFieldSave({
+    taskId,
+    task: rTask,
+    setRemote,
+    onSettled: () => {
+      void loadRemote({ silent: true });
       router.refresh();
       onTaskMutated?.();
-    } catch (e) {
-      setEditNotice(e instanceof Error ? e.message : "Fejl ved gem");
-    } finally {
-      setSaving(false);
-    }
-  }, [draft, embedded, loadRemote, onTaskMutated, router, taskId]);
+    },
+  });
 
   const deleteTask = useCallback(async () => {
     if (
@@ -149,21 +142,15 @@ export function TaskDetailShell({
     ) {
       return;
     }
-    const currentTask =
-      remote && typeof remote.task === "object" && remote.task !== null ?
-        /** @type {Record<string, unknown>} */ (remote.task)
-      : null;
     setDeleting(true);
-    setEditNotice(null);
+    setDeleteNotice(null);
     try {
       const qs = databaseApiQuery();
       const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Kunne ikke slette");
       const parentAfterDelete =
-        currentTask?.isSubTask === true && typeof currentTask.parentTaskId === "string"
-          ? currentTask.parentTaskId.trim()
-          : "";
+        rTask?.isSubTask === true && typeof rTask.parentTaskId === "string" ? rTask.parentTaskId.trim() : "";
       if (embedded) {
         onClose?.();
         onTaskMutated?.();
@@ -171,45 +158,13 @@ export function TaskDetailShell({
         router.push(parentAfterDelete ? taskHref(parentAfterDelete) : routes.tasks);
       }
     } catch (e) {
-      setEditNotice(e instanceof Error ? e.message : "Fejl ved sletning");
+      setDeleteNotice(e instanceof Error ? e.message : "Fejl ved sletning");
     } finally {
       setDeleting(false);
     }
-  }, [embedded, onClose, onTaskMutated, remote, router, taskId]);
+  }, [embedded, onClose, onTaskMutated, rTask, router, taskId]);
 
-  const updateStatus = useCallback(
-    async (nextStatus) => {
-      setStatusSaving(true);
-      setEditNotice(null);
-      try {
-        const qs = databaseApiQuery();
-        const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}?${qs}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(taskStatusPatch(nextStatus)),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error ?? "Kunne ikke opdatere status");
-        await loadRemote();
-        router.refresh();
-        onTaskMutated?.();
-      } catch (e) {
-        setEditNotice(e instanceof Error ? e.message : "Fejl ved status");
-      } finally {
-        setStatusSaving(false);
-      }
-    },
-    [loadRemote, onTaskMutated, router, taskId],
-  );
-
-  /** @type {Record<string, unknown>[]} */
-  const departmentRowsMongo = useMemo(() => {
-    const raw = remote && Array.isArray(remote.departments) ? remote.departments : [];
-    return /** @type {Record<string, unknown>[]} */ (raw);
-  }, [remote]);
-
-  const demoTask = TASKS.find((t) => t.id === taskId);
-  const dueRefDemo = taskDueReferenceTodayIso();
+  const demoTask = dataSource === "demo" ? TASKS.find((t) => t.id === taskId) : undefined;
 
   if (dataSource === "demo" && demoTask && parentTaskId.trim()) {
     if (demoTask.isSubTask !== true || String(demoTask.parentTaskId ?? "") !== parentTaskId.trim()) {
@@ -241,31 +196,22 @@ export function TaskDetailShell({
 
   if (dataSource === "demo" && demoTask) {
     const client = CLIENTS.find((c) => c.id === demoTask.clientId);
-    const ctrId = `ctr-${demoTask.clientId}`;
-    const contract = CONTRACTS.find((c) => c.id === ctrId);
-    const assignee = TEAM.find((m) => m.id === demoTask.assigneeId) ?? null;
-    const demoActivity = TASK_ACTIVITY_LOG[demoTask.id] ?? [];
-    const timeDemo = TIME_ENTRIES_TODAY.filter((e) => e.task === demoTask.id);
-    const dep = DEPARTMENTS.find((d) => d.id === demoTask.dept);
-    const done = taskIsDone(demoTask.status);
-
-    const subtitle =
-      done
-        ? "Afsluttet på board."
-        : demoTask.status === "blocked"
-          ? "Blokket — afvent dokumenteret clearance."
-          : "";
-
-    const demoPriority =
-      demoTask.priority === "high" || demoTask.priority === "low" ? demoTask.priority : "medium";
-
-    if (!client || !contract) {
+    if (!client) {
       return (
         <p className="font-sans text-[13px] text-fg-muted">
-          Mangler tilknyttet kunde eller kontrakt. <Link href={routes.tasks}>Tilbage</Link>
+          Mangler tilknyttet kunde. <Link href={routes.tasks}>Tilbage</Link>
         </p>
       );
     }
+
+    const task = toFieldTask(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (demoTask)), taskId);
+    const creator = TEAM.find((m) => m.id === demoTask.assigneeId) ?? null;
+    const dep = DEPARTMENTS.find((d) => d.id === demoTask.dept);
+    const parentDemo = task.isSubTask && task.parentTaskId ? TASKS.find((t) => t.id === task.parentTaskId) ?? null : null;
+    const subtitle =
+      taskIsDone(task.status) ? "Afsluttet på board."
+      : task.status === "blocked" ? "Blokket — afvent dokumenteret clearance."
+      : "";
 
     /** @type {Record<string, unknown>[]} */
     const departmentRowsDemo = DEPARTMENTS.map((d) =>
@@ -274,36 +220,33 @@ export function TaskDetailShell({
         short: typeof d.short === "string" ? d.short : d.id,
       }),
     );
-
+    const teamDemo = TEAM.map((m) => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar,
+      hue: m.hue,
+      image: typeof m.image === "string" ? m.image : undefined,
+    }));
     const demoSubTasks = TASKS.filter(
       (t) => t.isSubTask === true && String(t.parentTaskId ?? "") === demoTask.id,
     );
-    const parentDemo =
-      demoTask.isSubTask === true && demoTask.parentTaskId ?
-        TASKS.find((t) => t.id === demoTask.parentTaskId) ?? null
-      : null;
 
     return (
       <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
         <TaskDetailHeader
+          trailing={
+            <TaskDetailTimeButton
+              clientSlug={task.clientId}
+              taskKey={task.id}
+              billable={task.billable}
+              disabled
+              disabledHint="Timeregistrering kræver database-tilstand."
+            />
+          }
           task={{
-            id: demoTask.id,
-            title: demoTask.title,
-            status: sanitizeTaskUiStatus(demoTask.status),
-            priority:
-              demoTask.priority === "high" || demoTask.priority === "low"
-                ? demoTask.priority
-                : "medium",
-            dept: demoTask.dept,
-            clientName: demoTask.clientName,
-            clientLogo: demoTask.clientLogo,
-            clientHue: demoTask.clientHue,
-            isSubTask: demoTask.isSubTask === true,
-            parentTaskId: typeof demoTask.parentTaskId === "string" ? demoTask.parentTaskId : "",
-            parentTaskTitle:
-              typeof demoTask.parentTaskTitle === "string" && demoTask.parentTaskTitle.trim()
-                ? demoTask.parentTaskTitle
-                : parentDemo?.title ?? "",
+            ...task,
+            clientName: task.clientName || client.name,
+            parentTaskTitle: task.parentTaskTitle.trim() || parentDemo?.title || "",
           }}
           deptLabel={dep?.name ?? demoTask.dept}
           subtitle={subtitle}
@@ -312,54 +255,43 @@ export function TaskDetailShell({
           onClose={onClose}
         />
 
-        <TaskDetailStatusBar
-          status={sanitizeTaskUiStatus(demoTask.status)}
-          disabled
-          readOnlyHint="Skift til database-tilstand for at opdatere status."
-        />
+        <TaskDetailStatusBar status={task.status} disabled readOnlyHint={DEMO_READ_ONLY_HINT} />
 
         <TaskDetailCreatedBy
           creator={
-            assignee ?
+            creator ?
               {
-                name: assignee.name,
-                avatar: assignee.avatar,
-                hue: assignee.hue,
-                image: typeof assignee.image === "string" ? assignee.image : undefined,
+                name: creator.name,
+                avatar: creator.avatar,
+                hue: creator.hue,
+                image: typeof creator.image === "string" ? creator.image : undefined,
               }
             : null
           }
           createdAt={demoTask.dueDate}
-          priority={demoPriority}
         />
 
-        <TaskDetailTabbedBody
-          tab={detailTab}
-          onTabChange={setDetailTab}
-          taskRow={demoTask}
-          assigneePulse={assignee}
+        <TaskDetailOverview
+          task={{ ...task, clientName: task.clientName || client.name }}
+          mode="demo"
+          readOnly
+          readOnlyHint={DEMO_READ_ONLY_HINT}
+          team={teamDemo}
           departments={departmentRowsDemo}
-          demoActivity={demoActivity}
-          dbActivity={[]}
-          clientRow={{
-            ...client,
-            industry: typeof client.industry === "string" ? client.industry : "",
-          }}
-          contractWire={contract}
-          dueReferenceIso={dueRefDemo}
-          timeEntries={timeDemo.map((e) => ({
+          clientsPicklist={[]}
+          activityEntries={TASK_ACTIVITY_LOG[demoTask.id] ?? []}
+          timeEntries={TIME_ENTRIES_TODAY.filter((e) => e.task === demoTask.id).map((e) => ({
             id: e.id,
             at: e.at,
             dur: e.dur,
             desc: e.desc,
             dept: e.dept,
           }))}
-          mode="demo"
-          activityFootnote={undefined}
+          dueReferenceIso={taskDueReferenceTodayIso()}
           highlightCommentId={highlightCommentId}
           subTasks={demoSubTasks}
           subTaskCreateContext={
-            demoTask.isSubTask !== true ?
+            !task.isSubTask ?
               {
                 parentTaskId: demoTask.id,
                 parentTaskTitle: demoTask.title,
@@ -367,134 +299,82 @@ export function TaskDetailShell({
                   id: String(d.id),
                   name: typeof d.name === "string" ? d.name : String(d.id),
                 })),
-                team: TEAM.map((m) => ({
-                  id: m.id,
-                  name: m.name,
-                  avatar: m.avatar,
-                  hue: m.hue,
-                  image: typeof m.image === "string" ? m.image : undefined,
-                })),
+                team: teamDemo,
                 clientsPicklist: [],
                 readOnly: true,
               }
             : null
           }
+          fieldStatus={NO_FIELD_STATUS}
+          onFieldSave={noopFieldSave}
         />
-
-        <p className="font-sans text-[12px] text-fg-quiet">
-          Redigering er kun tilgængelig i database-tilstand.
-        </p>
       </div>
     );
   }
 
-  /** @type {Record<string, unknown> | undefined} */
-  const rTask = remote && typeof remote.task === "object" && remote.task !== null ?
-    /** @type {Record<string, unknown>} */ (remote.task)
-  : undefined;
-
   if (dataSource === "database" && rTask) {
-    const rClientRaw = remote && remote.client != null ? remote.client : {};
-    /** @type {Record<string, unknown>} */
+    const task = toFieldTask(rTask, taskId);
     const rClient =
-      typeof rClientRaw === "object" && rClientRaw !== null ?
-        /** @type {Record<string, unknown>} */ (rClientRaw)
+      remote && typeof remote.client === "object" && remote.client !== null ?
+        /** @type {Record<string, unknown>} */ (remote.client)
       : {};
-    /** @type {Record<string, unknown> | null} */
-    const rContract =
-      remote && remote.contract && typeof remote.contract === "object" ?
-        /** @type {Record<string, unknown>} */ (remote.contract)
-      : null;
-    /** @type {Record<string, unknown> | null} */
-    const rAssignee =
-      remote && remote.assignee && typeof remote.assignee === "object" ?
-        /** @type {Record<string, unknown>} */ (remote.assignee)
-      : null;
-
     /** @type {Record<string, unknown> | null} */
     const rCreatedBy =
       remote && remote.createdBy && typeof remote.createdBy === "object" ?
         /** @type {Record<string, unknown>} */ (remote.createdBy)
       : null;
 
-    const dueRef = taskDueReferenceTodayIso();
-
-    const done = taskIsDone(String(rTask.status ?? ""));
-    const st = String(rTask.status ?? "todo");
-
-    const subtitle =
-      done
-        ? "Afsluttet i CRM."
-        : st === "blocked"
-          ? "Blokeret — af dokumenteret clearance før genoptag."
-          : "";
-
-    const taskPriority =
-      rTask.priority === "high" || rTask.priority === "low"
-        ? rTask.priority
-        : /** @type {'medium'} */ ("medium");
-
-    const depKey = typeof rTask.dept === "string" ? rTask.dept.trim() || "—" : "—";
-    const depMeta = departmentRowsMongo.find((d) => String(d.id) === depKey);
-    const deptName =
-      depKey !== "—" ?
-        typeof depMeta?.name === "string" && depMeta.name.trim()
-          ? depMeta.name
-          : depKey
-      : "—";
-
+    /** @type {Record<string, unknown>[]} */
+    const departmentRows =
+      remote && Array.isArray(remote.departments) ? /** @type {Record<string, unknown>[]} */ (remote.departments) : [];
+    /** @type {Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>} */
+    const team =
+      remote && Array.isArray(remote.team) ?
+        /** @type {Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>} */ (remote.team)
+      : [];
+    /** @type {Array<{ value: string; label: string }>} */
+    const clientsPick =
+      remote && Array.isArray(remote.clientsPicklist) ?
+        /** @type {Array<{ value: string; label: string }>} */ (remote.clientsPicklist)
+      : [];
+    /** @type {Array<{ id: string; at: string; dur: number; desc: string; dept?: string | null }>} */
     const timeMapped =
       remote && Array.isArray(remote.timeEntriesMapped) ?
         /** @type {Array<{ id: string; at: string; dur: number; desc: string; dept?: string | null }>} */ (
           remote.timeEntriesMapped
         )
       : [];
-
-    const dbActivityRaw =
-      remote && Array.isArray(remote.activityEntries) ? remote.activityEntries : [];
     /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */
     const dbActivity =
-      /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */ (dbActivityRaw);
-
-    const clientsPickRaw =
-      remote && Array.isArray(remote.clientsPicklist) ? remote.clientsPicklist : [];
-    /** @type {Array<{ value: string; label: string }>} */
-    const clientsPick =
-      /** @type {Array<{ value: string; label: string }>} */ (clientsPickRaw);
-
-    /** @type {Array<{ id: string; name: string }>} */
-    const teamWire =
-      remote && Array.isArray(remote.team) ? /** @type {Array<{ id: string; name: string }>} */ (remote.team) : [];
-
-    /** @type {Array<{ id: string; name?: string }>} */
-    const deptWire =
-      remote && Array.isArray(remote.departments) ?
-        /** @type {Array<{ id: string; name?: string }>} */ (remote.departments)
+      remote && Array.isArray(remote.activityEntries) ?
+        /** @type {Array<{ id: string; at: string; kind: string; summary: string }>} */ (remote.activityEntries)
       : [];
-
-    /** @type {Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>} */
-    const teamFull =
-      remote && Array.isArray(remote.team) ?
-        /** @type {Array<{ id: string; name: string; avatar?: string; hue?: number; image?: string }>} */ (
-          remote.team
-        )
-      : [];
-
-    const subTasksRaw = remote && Array.isArray(remote.subTasks) ? remote.subTasks : [];
     /** @type {Array<Record<string, unknown>>} */
-    const subTasks = /** @type {Array<Record<string, unknown>>} */ (subTasksRaw);
+    const subTasks =
+      remote && Array.isArray(remote.subTasks) ? /** @type {Array<Record<string, unknown>>} */ (remote.subTasks) : [];
 
-    const isSubTaskRow = rTask.isSubTask === true;
     const parentTaskTitle =
-      typeof rTask.parentTaskTitle === "string" ? rTask.parentTaskTitle
-      : remote && remote.parentTask && typeof remote.parentTask === "object" && typeof remote.parentTask.title === "string"
-        ? remote.parentTask.title
+      task.parentTaskTitle ||
+      (remote && remote.parentTask && typeof remote.parentTask === "object" && typeof remote.parentTask.title === "string" ?
+        remote.parentTask.title
+      : "");
+    const clientName = task.clientName || (typeof rClient.name === "string" ? String(rClient.name) : "—");
+    const clientSlug =
+      task.clientId || (typeof rClient.id === "string" ? rClient.id.trim() : "");
+
+    const depKey = task.dept.trim() && task.dept !== "—" ? task.dept.trim() : "";
+    const depMeta = departmentRows.find((d) => String(d.id) === depKey);
+    const deptName =
+      !depKey ? "—"
+      : typeof depMeta?.name === "string" && depMeta.name.trim() ? depMeta.name
+      : depKey;
+
+    const subtitle =
+      taskIsDone(task.status) ? "Afsluttet i CRM."
+      : task.status === "blocked" ? "Blokeret — af dokumenteret clearance før genoptag."
       : "";
 
-    const priorityLabel =
-      rTask.priority === "high" ? "Høj"
-      : rTask.priority === "low" ? "Lav"
-      : "Medium";
+    const notice = deleteNotice ?? (saveError ? `${saveError} — ændringen er rullet tilbage.` : null);
 
     return (
       <div
@@ -509,66 +389,23 @@ export function TaskDetailShell({
           </p>
         : null}
 
-        {editNotice ?
-          <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-2 font-sans text-[12px] text-agency-bad">
-            {editNotice}
+        {notice ?
+          <p
+            role="alert"
+            className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-2 font-sans text-[12px] text-agency-bad"
+          >
+            {notice}
           </p>
         : null}
 
         <TaskDetailHeader
           trailing={
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {!editing ?
-                  <TaskDetailTimerMenu
-                    clientSlug={
-                      typeof rClient.id === "string" && rClient.id.trim()
-                        ? rClient.id.trim()
-                        : typeof rTask.clientId === "string"
-                          ? rTask.clientId.trim()
-                          : ""
-                    }
-                    taskKey={typeof rTask.id === "string" ? rTask.id : taskId}
-                    taskTitle={typeof rTask.title === "string" ? rTask.title : ""}
-                    billable={rTask.billable !== false}
-                  />
-                : null}
-                <ClientDetailEditActions
-                  editing={editing}
-                  saving={saving}
-                  onEdit={startEdit}
-                  onSave={() => void saveEdit()}
-                  onCancel={cancelEdit}
-                />
-              </div>
-              {editing ?
-                <span className="text-right font-sans text-[10px] text-fg-quiet">
-                  Redigerer opgave — gem eller annuller
-                </span>
-              : null}
-            </div>
+            <TaskDetailTimeButton clientSlug={clientSlug} taskKey={task.id} billable={task.billable} />
           }
           task={{
-            id: typeof rTask.id === "string" ? rTask.id : taskId,
-            title: typeof rTask.title === "string" ? rTask.title : "—",
-            status: sanitizeTaskUiStatus(st),
-            priority:
-              rTask.priority === "high" || rTask.priority === "low"
-                ? rTask.priority
-                : /** @type {'medium'} */ ("medium"),
-            dept: typeof rTask.dept === "string" ? rTask.dept : "",
-            clientName:
-              typeof rTask.clientName === "string"
-                ? rTask.clientName
-                : typeof rClient.name === "string"
-                  ? String(rClient.name)
-                  : "—",
-            clientLogo: typeof rTask.clientLogo === "string" ? rTask.clientLogo : "?",
-            clientHue: typeof rTask.clientHue === "number" ? rTask.clientHue : 220,
-            isSubTask: isSubTaskRow,
-            parentTaskId:
-              typeof rTask.parentTaskId === "string" ? rTask.parentTaskId
-              : parentTaskId.trim() || "",
+            ...task,
+            clientName,
+            parentTaskId: task.parentTaskId || parentTaskId.trim(),
             parentTaskTitle,
           }}
           deptLabel={deptName}
@@ -576,12 +413,15 @@ export function TaskDetailShell({
           showExport={false}
           embedded={embedded}
           onClose={onClose}
+          onTitleSave={(next) => saveField("title", { title: next }, { title: next })}
+          titleStatus={fieldStatus.title ?? null}
         />
 
         <TaskDetailStatusBar
-          status={sanitizeTaskUiStatus(st)}
-          onStatusChange={(next) => void updateStatus(next)}
-          saving={statusSaving}
+          status={task.status}
+          onStatusChange={(next) => void saveField("status", taskStatusPatch(next), { status: next })}
+          saving={fieldStatus.status === "saving"}
+          saved={fieldStatus.status === "saved"}
         />
 
         <TaskDetailCreatedBy
@@ -600,64 +440,40 @@ export function TaskDetailShell({
             : typeof rTask.createdAtIso === "string" ? rTask.createdAtIso
             : ""
           }
-          priority={taskPriority}
         />
 
-        {editing && draft ?
-          <TaskDetailEditForm
-            draft={draft}
-            onChange={setDraft}
-            departments={deptWire}
-            team={teamWire}
-            clientsPicklist={clientsPick}
-            deleting={deleting}
-            onDelete={() => void deleteTask()}
-            isSubTask={draft.isSubTask === true}
-            inheritedClientName={
-              typeof rTask.clientName === "string" ? rTask.clientName
-              : typeof rClient.name === "string" ? String(rClient.name)
-              : ""
-            }
-            inheritedPriorityLabel={priorityLabel}
-          />
-        : <TaskDetailTabbedBody
-            tab={detailTab}
-            onTabChange={setDetailTab}
-            taskRow={{ ...rTask, id: typeof rTask.id === "string" ? rTask.id : taskId }}
-            assigneePulse={rAssignee}
-            departments={departmentRowsMongo}
-            demoActivity={[]}
-            dbActivity={dbActivity}
-            contractWire={rContract}
-            clientRow={{
-              id: typeof rClient.id === "string" ? rClient.id : "",
-              name: typeof rClient.name === "string" ? String(rClient.name) : "",
-              industry: typeof rClient.industry === "string" ? String(rClient.industry) : undefined,
-            }}
-            dueReferenceIso={dueRef}
-            timeEntries={timeMapped}
-            mode="database"
-            activityFootnote={undefined}
-            team={teamFull}
-            highlightCommentId={highlightCommentId}
-            subTasks={subTasks}
-            subTaskCreateContext={
-              !isSubTaskRow ?
-                {
-                  parentTaskId: typeof rTask.id === "string" ? rTask.id : taskId,
-                  parentTaskTitle: typeof rTask.title === "string" ? rTask.title : "Hovedopgave",
-                  departments: deptWire.map((d) => ({
-                    id: d.id,
-                    name: typeof d.name === "string" ? d.name : d.id,
-                  })),
-                  team: teamFull,
-                  clientsPicklist: clientsPick,
-                  onSubTaskCreated: () => void loadRemote(),
-                }
-              : null
-            }
-          />
-        }
+        <TaskDetailOverview
+          task={{ ...task, clientName }}
+          mode="database"
+          readOnly={false}
+          team={team}
+          departments={departmentRows}
+          clientsPicklist={clientsPick}
+          activityEntries={dbActivity.map((e) => ({ ...e, body: e.summary }))}
+          timeEntries={timeMapped}
+          dueReferenceIso={taskDueReferenceTodayIso()}
+          highlightCommentId={highlightCommentId}
+          subTasks={subTasks}
+          subTaskCreateContext={
+            !task.isSubTask ?
+              {
+                parentTaskId: task.id,
+                parentTaskTitle: task.title || "Hovedopgave",
+                departments: departmentRows.map((d) => ({
+                  id: String(d.id),
+                  name: typeof d.name === "string" ? d.name : String(d.id),
+                })),
+                team,
+                clientsPicklist: clientsPick,
+                onSubTaskCreated: () => void loadRemote({ silent: true }),
+              }
+            : null
+          }
+          fieldStatus={fieldStatus}
+          onFieldSave={saveField}
+          onDelete={() => void deleteTask()}
+          deleting={deleting}
+        />
       </div>
     );
   }

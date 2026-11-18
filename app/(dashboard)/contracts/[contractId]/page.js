@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { contractId } = await params;
   const demoRow = CONTRACTS.find((c) => c.id === contractId);
-  if (demoRow) return { title: `${demoRow.clientName} · Kontrakt · 1337-crm by Searchmind` };
+  if (demoRow) return { title: `${demoRow.clientName} · Kontrakt · Searchmind 1337 OS` };
 
   try {
     await connectDb();
@@ -23,12 +23,12 @@ export async function generateMetadata({ params }) {
     }
     const ctrDoc = await Contract.findOne({ $or: orClause }).select("clientId").lean();
     const clientOid = ctrDoc?.clientId;
-    if (!clientOid) return { title: "Kontrakt · 1337-crm by Searchmind" };
+    if (!clientOid) return { title: "Kontrakt · Searchmind 1337 OS" };
     const clientDoc = await Client.findById(clientOid).select("name").lean();
     const name = clientDoc?.name ? String(clientDoc.name) : "Kontrakt";
-    return { title: `${name} · Kontrakt · 1337-crm by Searchmind` };
+    return { title: `${name} · Kontrakt · Searchmind 1337 OS` };
   } catch {
-    return { title: "Kontrakt · 1337-crm by Searchmind" };
+    return { title: "Kontrakt · Searchmind 1337 OS" };
   }
 }
 

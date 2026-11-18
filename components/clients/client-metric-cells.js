@@ -1,5 +1,30 @@
 import { APEX_INDEKS_STATUS_LABELS, isApexIndeksStale } from "@/lib/crm/apex-indeks";
+import { activityTooltip, formatRelativeDa } from "@/lib/crm/client-activity";
 import { cn } from "@/lib/utils";
+
+/**
+ * "Seneste aktivitet": relativ tid, hover viser hvad aktiviteten var.
+ * Falder tilbage til den gemte `lastActivity`-label når der ikke er beregnet aktivitet.
+ * @param {{
+ *   activity?: import('@/lib/crm/client-activity').ClientActivity | null;
+ *   fallback?: string;
+ *   className?: string;
+ * }} props
+ */
+export function LastActivityValue({ activity, fallback, className }) {
+  if (!activity) {
+    return (
+      <span className={cn("tabular-nums text-fg-quiet", className)} title="Ingen registreret aktivitet">
+        {fallback && fallback !== "—" ? fallback : "—"}
+      </span>
+    );
+  }
+  return (
+    <span className={cn("tabular-nums", className)} title={activityTooltip(activity)} suppressHydrationWarning>
+      {formatRelativeDa(activity.at)}
+    </span>
+  );
+}
 
 /** @param {{ value: number | null | undefined; className?: string }} props */
 export function NpsValue({ value, className }) {

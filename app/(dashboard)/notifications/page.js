@@ -2,7 +2,7 @@ import { NotificationsPageClient } from "@/components/crm/notifications-page-cli
 import { shellMainStudio } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Notifikationer · 1337-crm by Searchmind" };
+export const metadata = { title: "Notifikationer · Searchmind 1337 OS" };
 
 export default function NotificationsPage() {
   return (

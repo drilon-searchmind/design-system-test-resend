@@ -1,65 +1,74 @@
-import { CrmAvatar } from "@/components/crm/crm-avatar";
+"use client";
+
+import Link from "next/link";
+
+import { ClientNoteAddForm, ClientNoteRow } from "@/components/clients/client-notes-list";
+import { routes } from "@/config/routes";
 import { TEAM } from "@/lib/crm/static-data";
-import { cn } from "@/lib/utils";
+
+const PREVIEW_COUNT = 5;
 
 /**
  * @param {{
- *   notes: Array<{ id: string; who: string; at: string; type: string; body: string }>;
+ *   notes: import('@/lib/crm/client-notes').ClientNoteItem[];
  *   teamMembers?: import('@/lib/crm/pulse-types').PulseTeamMember[];
- * }} props
+ *   clientSlug: string;
+ *   canCreate?: boolean;
+ *   disabledHint?: string;
+ *   onCreated?: () => void;
+ *   showAllHref?: string | null;
+ * }} props `showAllHref` = null skjuler "Vis alle" (fx kundegrupper). `canCreate` styrer også
+ *   om rettigheds-tjekkede Redigér/Slet vises (fra i demo og på kundegrupper).
  */
-export function ClientDetailNotesCard({ notes, teamMembers }) {
+export function ClientDetailNotesCard({
+  notes,
+  teamMembers,
+  clientSlug,
+  canCreate = false,
+  disabledHint,
+  onCreated,
+  showAllHref,
+}) {
   const roster = teamMembers?.length ? teamMembers : TEAM;
+  const allHref =
+    showAllHref === null ? null : (showAllHref ?? `${routes.clients}/${encodeURIComponent(clientSlug)}/notes`);
+  const preview = notes.slice(0, PREVIEW_COUNT);
+
   return (
     <div className="tally-panel p-4 md:p-5">
-      <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-        Seneste noter
-      </h2>
-      <ul className="mt-4 flex flex-col gap-3 font-sans text-sm">
-        {notes.length === 0 ? (
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Seneste noter</h2>
+        {allHref ?
+          <Link href={allHref} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
+            Vis alle →
+          </Link>
+        : null}
+      </div>
+      <div className="mt-3">
+        <ClientNoteAddForm
+          clientSlug={clientSlug}
+          canCreate={canCreate}
+          disabledHint={disabledHint}
+          onCreated={onCreated}
+          compact
+        />
+      </div>
+      <ul className="mt-3 flex flex-col gap-3 font-sans text-sm">
+        {preview.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-surface-muted/30 px-3 py-6 text-center text-[13px] text-fg-muted">
-            Ingen noter endnu — tilføj aktivitet i CRM for at se feed her.
+            Ingen noter endnu.
           </li>
         ) : (
-          notes.map((n) => {
-            const author = roster.find((t) => t.id === n.who);
-            return (
-              <li
-                key={n.id}
-                className="rounded-xl border border-border-soft bg-surface-muted/25 p-3 transition-colors hover:border-agency-brand-border/40"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  {author ? (
-                    <div className="flex items-center gap-1.5">
-                      <CrmAvatar label={author.avatar} hue={author.hue} className="size-6 text-[8px]" />
-                      <span className="font-sans text-[12px] font-medium text-fg">{author.name}</span>
-                    </div>
-                  ) : (
-                    <span className="text-[10px] uppercase text-fg-quiet">{n.who}</span>
-                  )}
-                  <span className="text-fg-quiet">·</span>
-                  <span className="text-[10px] tabular-nums text-fg-quiet">{n.at}</span>
-                  <span
-                    className={cn(
-                      "rounded-md border px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide",
-                      n.type === "alert" &&
-                        "border-agency-bad-border bg-agency-bad-soft text-agency-bad",
-                      n.type === "call" && "border-agency-ok-border bg-agency-ok-soft text-agency-ok",
-                      n.type === "meeting" &&
-                        "border-agency-brand-border bg-agency-brand-soft text-agency-brand",
-                      n.type !== "alert" &&
-                        n.type !== "call" &&
-                        n.type !== "meeting" &&
-                        "border-border bg-surface-muted text-fg-muted",
-                    )}
-                  >
-                    {n.type}
-                  </span>
-                </div>
-                <p className="mt-2 leading-relaxed text-[13px] text-fg-muted">{n.body}</p>
-              </li>
-            );
-          })
+          preview.map((n) => (
+            <ClientNoteRow
+              key={n.id}
+              note={n}
+              roster={roster}
+              clientSlug={clientSlug}
+              editable={canCreate}
+              onDeleted={onCreated}
+            />
+          ))
         )}
       </ul>
     </div>

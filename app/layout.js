@@ -58,7 +58,7 @@ const displaySerif = Fraunces({
 });
 
 export const metadata = {
-  title: "1337-crm by Searchmind",
+  title: "Searchmind 1337 OS",
   description: site.description,
   icons: {
     icon: BRAND_LOGO_SRC,

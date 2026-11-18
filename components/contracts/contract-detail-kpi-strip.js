@@ -42,28 +42,34 @@ export function ContractDetailKpiStrip({
             : "ok";
 
   const renewalValue =
-    contract.accountStatus !== "active"
-      ? "Ikke aktiv konto"
-      : days === null
-        ? "—"
-        : days < 0
-          ? `${days} d (overskredet)`
-          : days === 0
-            ? "I dag"
-            : `${days} d`;
+    contract.accountStatus === "pending_signature"
+      ? "Afventer underskrift"
+      : contract.accountStatus !== "active"
+        ? "Ikke aktiv"
+        : days === null || !Number.isFinite(days)
+          ? "—"
+          : days < 0
+            ? `${Math.abs(days)} d over`
+            : days === 0
+              ? "I dag"
+              : `Om ${days} d`;
 
   return (
     <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
       <PulseKpiCard
         label="Aftalt beløb / md"
+        info={{
+          title: "Månedlig værdi",
+          body: "Løbende servicelinjer pr. måned. Årlige linjer tæller som 1/12 pr. måned; engangslinjer indgår ikke.",
+        }}
         value={formatCurrencyCompact(contract.monthlyValue, contract.currency)}
         tone="brand"
       />
-      <PulseKpiCard label="Fornyelse (fra ref.)" value={renewalValue} tone={renewalTone} />
+      <PulseKpiCard label="Fornyelse" value={renewalValue} tone={renewalTone} />
       <PulseKpiCard
-        label="Opsigelsesvarsling"
+        label="Opsigelsesvarsel"
         value={`${contract.noticeDays} d`}
-        tone="warn"
+        tone="brand"
       />
       <PulseKpiCard label={label} value={valueChip} tone="ok" />
     </section>

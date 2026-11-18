@@ -184,7 +184,7 @@ export function SiteNav({ variant = "default" }) {
           <>
             {!tally ? <NavDivider /> : null}
             <div className="flex flex-nowrap items-center gap-1 lg:gap-2">
-              <NavLink href={routes.pulse} label="Agency OS" variant={variant} />
+              <NavLink href={routes.pulse} label="1337 OS" variant={variant} />
               <NavLink href={routes.settings} label="Settings" variant={variant} />
             </div>
             {!tally ? <NavDivider /> : null}
@@ -300,7 +300,7 @@ export function SiteNav({ variant = "default" }) {
                   <>
                     <DrawerNavLink
                       href={routes.pulse}
-                      label="Agency OS"
+                      label="1337 OS"
                       onNavigate={close}
                       variant={variant}
                     />

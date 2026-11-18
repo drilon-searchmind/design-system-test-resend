@@ -145,15 +145,3 @@ export function kbMatchesMultiFilter(value, selected, allKeys) {
   if (selected.size === allKeys.size) return true;
   return selected.has(value);
 }
-
-/**
- * @param {string[]} articleTags
- * @param {Set<string>} selected
- * @param {Set<string>} allTagKeys
- */
-export function kbMatchesTagFilter(articleTags, selected, allTagKeys) {
-  if (allTagKeys.size === 0) return true;
-  if (selected.size === 0) return false;
-  if (selected.size === allTagKeys.size) return true;
-  return articleTags.some((t) => selected.has(t));
-}

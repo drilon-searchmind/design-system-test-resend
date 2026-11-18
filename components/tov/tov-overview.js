@@ -10,7 +10,7 @@ import { TovStatusChip, formatTovDate, tovFetch } from "@/components/tov/tov-ui"
 import { routes } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
-/** Oversigt over alle kunder og deres Tone of Voice. */
+/** Oversigt over alle kunder og deres Brand Core. */
 export function TovOverview() {
   const [rows, setRows] = useState(/** @type {Array<Record<string, any>> | null} */ (null));
   const [error, setError] = useState("");
@@ -50,9 +50,9 @@ export function TovOverview() {
       <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Kunde</p>
-          <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">Tone of Voice</h1>
+          <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">Brand Core</h1>
           <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-            Én standardiseret Tone of Voice pr. kunde — bygget af brandbøger, mails og websites. {counts.ready} af{" "}
+            Én standardiseret Brand Core pr. kunde — bygget af brandbøger, mails og websites. {counts.ready} af{" "}
             {counts.all} kunder har en profil.
           </p>
         </div>

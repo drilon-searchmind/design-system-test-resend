@@ -309,7 +309,8 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
                 </span>
               </div>
               <div className="text-[11px] text-fg-quiet">
-                Gælder {formatUpsellPeriodDa(u)} · solgt af {u.soldBy}
+                Gælder {formatUpsellPeriodDa(u)}
+                {isAdmin && u.soldBy ? ` · solgt af ${u.soldBy}` : ""}
                 {u.soldAt ? ` den ${formatIsoDateDa(u.soldAt)}` : ""}
               </div>
               {u.description ? <p className="text-[12px] text-fg-muted">{u.description}</p> : null}

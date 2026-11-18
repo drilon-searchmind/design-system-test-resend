@@ -11,7 +11,7 @@ import { formatIsoDateDa } from "@/lib/crm/format-da";
  *   priority?: 'high' | 'medium' | 'low';
  * }} props
  */
-export function TaskDetailCreatedBy({ creator, createdAt = "", priority = "medium" }) {
+export function TaskDetailCreatedBy({ creator, createdAt = "", priority }) {
   const label = creator?.name ?? "Ukendt";
   const dateLabel = createdAt ? formatIsoDateDa(createdAt) : "—";
 
@@ -30,8 +30,12 @@ export function TaskDetailCreatedBy({ creator, createdAt = "", priority = "mediu
       <span className="font-medium text-fg">{label}</span>
       <span className="text-fg-quiet">·</span>
       <span className="tabular-nums text-fg-soft">{dateLabel}</span>
-      <span className="text-fg-quiet">·</span>
-      <TaskPriorityChip priority={priority} />
+      {priority ?
+        <>
+          <span className="text-fg-quiet">·</span>
+          <TaskPriorityChip priority={priority} />
+        </>
+      : null}
     </p>
   );
 }

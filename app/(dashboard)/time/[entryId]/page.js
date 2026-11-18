@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { entryId } = await params;
   return {
-    title: `Registrering ${entryId.length > 32 ? `${entryId.slice(0, 32)}…` : entryId} · 1337-crm`,
+    title: `Registrering ${entryId.length > 32 ? `${entryId.slice(0, 32)}…` : entryId} · 1337 OS`,
   };
 }
 

@@ -1,18 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ContractsDirectory } from "@/components/contracts/contracts-directory";
 import { ContractsPageHeader } from "@/components/contracts/contracts-page-header";
 import { ContractsSendModal } from "@/components/contracts/contracts-send-modal";
+import { ContractsServicesPanel } from "@/components/contracts/contracts-services-panel";
 import { ContractsSummaryStrip } from "@/components/contracts/contracts-summary-strip";
 import { ContractsTemplatesPanel } from "@/components/contracts/contracts-templates-panel";
 import { useDataSource } from "@/components/crm/use-data-source";
+import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { buildFallbackContractServices } from "@/lib/contracts/contract-services";
 import { getContractsDemoBundle } from "@/lib/crm/contracts-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { DEPARTMENTS } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
 
-/** @typedef {ReturnType<typeof getContractsDemoBundle> & { clients?: Array<{ id: string; mongoId: string; name: string; status: string }> }} ContractsPortfolioBundle */
+/**
+ * @typedef {ReturnType<typeof getContractsDemoBundle> & {
+ *   clients?: Array<{ id: string; mongoId: string; name: string; status: string }>;
+ *   departments?: Array<{ key: string; name: string }>;
+ *   services?: import('@/lib/contracts/contract-services').ContractServiceOption[];
+ * }} ContractsPortfolioBundle
+ */
 
 export function ContractsPortfolio() {
   const dataSource = useDataSource();
@@ -21,7 +32,24 @@ export function ContractsPortfolio() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const [sendOpen, setSendOpen] = useState(false);
+  const [setupTab, setSetupTab] = useState(/** @type {"templates" | "services"} */ ("templates"));
   const hasLoadedRef = useRef(false);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
+  const closeSend = useCallback(() => setSendOpen(false), []);
+
+  const departments = useMemo(
+    () => (bundle && "departments" in bundle && Array.isArray(bundle.departments) ? bundle.departments : []),
+    [bundle],
+  );
+  /** Servicekatalog til send-dialogen — demo bruger standardlisten ud fra de statiske afdelinger. */
+  const services = useMemo(() => {
+    if (dataSource === "demo") {
+      return buildFallbackContractServices(DEPARTMENTS.map((d) => ({ key: d.id, name: d.name })));
+    }
+    if (bundle && "services" in bundle && Array.isArray(bundle.services)) return bundle.services;
+    return buildFallbackContractServices(departments);
+  }, [bundle, dataSource, departments]);
 
   const load = useCallback(async () => {
     const isInitial = !hasLoadedRef.current;
@@ -120,19 +148,40 @@ export function ContractsPortfolio() {
           team={bundle.team}
           renewalReferenceIso={bundle.renewalReferenceIso}
         />
-        <ContractsTemplatesPanel />
+
+        <section className="flex flex-col gap-3" aria-label="Opsætning">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+              Opsætning
+            </h2>
+            {isAdmin ? (
+              <PulseSegmentedControl
+                size="sm"
+                active={setupTab}
+                onChange={(id) => setSetupTab(/** @type {"templates" | "services"} */ (id))}
+                tabs={[
+                  { id: "templates", label: "Skabeloner" },
+                  { id: "services", label: "Services", count: services.length },
+                ]}
+              />
+            ) : null}
+          </div>
+          {isAdmin && setupTab === "services" ? (
+            <ContractsServicesPanel departments={departments} onMutate={() => void load()} />
+          ) : (
+            <ContractsTemplatesPanel />
+          )}
+        </section>
       </div>
 
       <ContractsSendModal
         open={sendOpen}
-        onClose={() => setSendOpen(false)}
+        onClose={closeSend}
         onSent={() => {
           void load();
         }}
         clients={Array.isArray(bundle.clients) ? bundle.clients : []}
-        departments={
-          "departments" in bundle && Array.isArray(bundle.departments) ? bundle.departments : []
-        }
+        services={services}
         team={Array.isArray(bundle.team) ? bundle.team : []}
       />
     </div>

@@ -23,7 +23,7 @@ export function KbPageHeader({ stats }) {
         </p>
         <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">Knowledge base</h1>
         <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-          Intern wiki med sektioner, underemner og procedurer — indhold oprettes og vedligeholdes her i Agency OS.
+          Intern wiki med sektioner, underemner og procedurer — indhold oprettes og vedligeholdes her i 1337 OS.
         </p>
         <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-sans text-[11px] text-fg-muted">
           <div className="flex gap-1.5">

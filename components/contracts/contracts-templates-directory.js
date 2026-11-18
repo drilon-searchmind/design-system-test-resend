@@ -62,17 +62,21 @@ export function ContractsTemplatesDirectory({
   const documentRef = useRef(/** @type {HTMLTextAreaElement | null} */ (null));
 
   useEffect(() => {
-    if (!templates.length) {
-      setOpenId(null);
-      setEditDraft(null);
-      return;
-    }
-    setOpenId((prev) => (prev && templates.some((t) => t.id === prev) ? prev : templates[0].id));
+    queueMicrotask(() => {
+      if (!templates.length) {
+        setOpenId(null);
+        setEditDraft(null);
+        return;
+      }
+      setOpenId((prev) => (prev && templates.some((t) => t.id === prev) ? prev : templates[0].id));
+    });
   }, [templates]);
 
   useEffect(() => {
-    const tpl = templates.find((t) => t.id === openId);
-    setEditDraft(tpl ? { ...tpl } : null);
+    queueMicrotask(() => {
+      const tpl = templates.find((t) => t.id === openId);
+      setEditDraft(tpl ? { ...tpl } : null);
+    });
   }, [openId, templates]);
 
   const insertVariable = useCallback(
@@ -603,7 +607,7 @@ function TemplateEditorForm({
         type="button"
         disabled={saving || !canSave}
         onClick={onSave}
-        className="rounded-md border border-agency-brand-border bg-agency-brand px-4 py-2 font-sans text-[12px] font-medium text-canvas disabled:opacity-50"
+        className="rounded-md border border-agency-brand-border bg-agency-brand-soft px-4 py-2 font-sans text-[12px] font-semibold text-agency-brand transition-colors hover:bg-agency-brand-soft/80 disabled:opacity-50"
       >
         {saving ? "Gemmer…" : saveLabel}
       </button>

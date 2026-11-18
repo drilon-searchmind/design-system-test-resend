@@ -4,7 +4,7 @@ import { readIncludeTest } from "@/lib/server/include-test";
 import { requireSession } from "@/lib/server/require-session";
 import { listTovOverview } from "@/lib/server/tov-data";
 
-/** Oversigt: alle kunder med Tone of Voice-status. */
+/** Oversigt: alle kunder med Brand Core-status. */
 export async function GET(req) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;

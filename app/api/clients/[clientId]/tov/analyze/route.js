@@ -7,7 +7,8 @@ import { beginAnalysis, cancelAnalysis, runAnalysis } from "@/lib/server/tov-dat
 /**
  * Start analysen. Svarer straks (status "analyzing"); selve modelkaldet kører efter svaret
  * er sendt, og klienten poller GET /tov indtil status er "ready" eller "error".
- * Body: { model?, comment? }
+ * Body: { model?, comment?, contactName?, contactTitle?, accountOwnerKey?, domains? }
+ * Alle felter undtagen accountOwnerKey (kundeansvarlig) er påkrævede; mangler de, bruges de gemte værdier.
  */
 export async function POST(req, ctx) {
   const authResult = await requireSession();
@@ -17,7 +18,12 @@ export async function POST(req, ctx) {
     const body = await req.json().catch(() => ({}));
     const by = authResult.session.user?.name ?? authResult.session.user?.email ?? undefined;
     const job = await beginAnalysis(clientId, readIncludeTest(req), { ...body, by });
-    if ("error" in job) return NextResponse.json({ error: job.error }, { status: job.status ?? 400 });
+    if ("error" in job) {
+      return NextResponse.json(
+        { error: job.error, ...("fields" in job ? { fields: job.fields } : {}) },
+        { status: job.status ?? 400 },
+      );
+    }
     after(() => runAnalysis(job));
     return NextResponse.json({ started: true });
   } catch (err) {

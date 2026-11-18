@@ -1,6 +1,6 @@
 import { AiChatOverview } from "@/components/chat/ai-chat-overview";
 
-export const metadata = { title: "AI Chat · 1337-crm by Searchmind" };
+export const metadata = { title: "AI Chat · Searchmind 1337 OS" };
 
 export default function ChatPage() {
   return (

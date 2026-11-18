@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { templateId } = await params;
   const demoRow = TASK_TEMPLATES.find((t) => t.id === templateId);
-  if (demoRow) return { title: `${demoRow.name} · Skabelon · 1337-crm by Searchmind` };
+  if (demoRow) return { title: `${demoRow.name} · Skabelon · Searchmind 1337 OS` };
 
   try {
     await connectDb();
@@ -22,11 +22,11 @@ export async function generateMetadata({ params }) {
     }
     const doc = await TaskTemplate.findOne({ $or: orClause }).select("title").lean();
     if (doc && typeof doc.title === "string" && doc.title.trim()) {
-      return { title: `${doc.title.trim()} · Skabelon · 1337-crm by Searchmind` };
+      return { title: `${doc.title.trim()} · Skabelon · Searchmind 1337 OS` };
     }
-    return { title: "Skabelon · 1337-crm by Searchmind" };
+    return { title: "Skabelon · Searchmind 1337 OS" };
   } catch {
-    return { title: "Skabelon · 1337-crm by Searchmind" };
+    return { title: "Skabelon · Searchmind 1337 OS" };
   }
 }
 

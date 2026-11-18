@@ -11,20 +11,20 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { taskId } = await params;
   const demoRow = TASKS.find((t) => t.id === taskId);
-  if (demoRow) return { title: `${demoRow.title} · Opgave · 1337-crm by Searchmind` };
+  if (demoRow) return { title: `${demoRow.title} · Opgave · Searchmind 1337 OS` };
 
   try {
     await connectDb();
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
-      return { title: "Opgave · 1337-crm by Searchmind" };
+      return { title: "Opgave · Searchmind 1337 OS" };
     }
     const tdoc = await Task.findById(taskId).select("title").lean();
     if (tdoc && typeof tdoc.title === "string" && tdoc.title.trim()) {
-      return { title: `${tdoc.title} · Opgave · 1337-crm by Searchmind` };
+      return { title: `${tdoc.title} · Opgave · Searchmind 1337 OS` };
     }
-    return { title: "Opgave · 1337-crm by Searchmind" };
+    return { title: "Opgave · Searchmind 1337 OS" };
   } catch {
-    return { title: "Opgave · 1337-crm by Searchmind" };
+    return { title: "Opgave · Searchmind 1337 OS" };
   }
 }
 

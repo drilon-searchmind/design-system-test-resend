@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ClientGridCard } from "@/components/clients/client-grid-card";
+import { ClientLogo } from "@/components/clients/client-logo";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
-import { IndeksValue, NpsValue } from "@/components/clients/client-metric-cells";
+import { IndeksValue, LastActivityValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
 import {
   PulseIconChevronDown,
@@ -28,7 +29,7 @@ import { cn } from "@/lib/utils";
 const GRID_PULSE =
   "grid-cols-[minmax(200px,2.2fr)_minmax(88px,1.1fr)_minmax(72px,1fr)_minmax(120px,1.45fr)_minmax(52px,0.65fr)_minmax(72px,0.8fr)_minmax(56px,0.7fr)_40px]";
 const GRID_FULL =
-  "grid-cols-[minmax(160px,1.85fr)_minmax(68px,0.95fr)_minmax(76px,0.85fr)_minmax(64px,0.95fr)_minmax(108px,1.25fr)_minmax(44px,0.55fr)_minmax(64px,0.7fr)_minmax(52px,0.6fr)_minmax(72px,0.85fr)_36px]";
+  "grid-cols-[minmax(160px,1.85fr)_minmax(68px,0.95fr)_minmax(76px,0.85fr)_minmax(64px,0.95fr)_minmax(44px,0.55fr)_minmax(64px,0.7fr)_minmax(52px,0.6fr)_minmax(72px,0.85fr)_36px]";
 
 /**
  * @param {{
@@ -109,7 +110,7 @@ export function ClientsDirectory({
 
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
-  const minW = variant === "full" ? "min-w-[1040px]" : "min-w-[920px]";
+  const minW = variant === "full" ? "min-w-[920px]" : "min-w-[920px]";
 
   return (
     <section className="tally-panel overflow-hidden" aria-labelledby={resolvedHeadingId}>
@@ -194,18 +195,20 @@ export function ClientsDirectory({
               >
                 Retainer
               </button>
-              <button
-                type="button"
-                className="text-left font-[inherit] text-[inherit] hover:text-fg"
-                onClick={() => setSort("util")}
-              >
-                {hoursLabel}
-              </button>
+              {variant !== "full" ? (
+                <button
+                  type="button"
+                  className="text-left font-[inherit] text-[inherit] hover:text-fg"
+                  onClick={() => setSort("util")}
+                >
+                  {hoursLabel}
+                </button>
+              ) : null}
               <span>Margin</span>
               <span>Seneste NPS</span>
               <span title="Apex YoY, seneste 30 dage">Indeks</span>
               {variant === "full" ? (
-                <span className="hidden sm:inline">Sidst aktiv</span>
+                <span className="hidden sm:inline">Seneste aktivitet</span>
               ) : null}
               <span />
             </div>
@@ -274,12 +277,7 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
       )}
     >
       <div className={cn("flex min-w-0 items-center gap-2.5", nested && "pl-3")}>
-        <span
-          className="flex size-[26px] shrink-0 items-center justify-center rounded-md border border-border text-[10.5px] font-semibold text-white"
-          style={{ background: `oklch(62% 0.14 ${c.hue})` }}
-        >
-          {c.logo}
-        </span>
+        <ClientLogo client={c} variant="solid" className="size-[26px] rounded-md text-[10.5px]" />
         <div className="min-w-0">
           <div className="truncate font-sans text-[13px] font-medium text-fg">{c.name}</div>
           <div className="truncate font-sans text-[11px] text-fg-quiet">
@@ -318,15 +316,17 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         <RetainerWithUpsell client={c} />
       </span>
 
-      <PulseClientHoursMetric
-        hoursThisMonth={c.hoursThisMonth}
-        hoursBudget={c.hoursBudget}
-        estimatedHoursOpen={c.estimatedHoursOpen}
-        periodLabel={periodLabel}
-        clientName={c.name}
-        clientHref={customerHref(c)}
-        utilBarClassName="max-w-[120px]"
-      />
+      {variant !== "full" ?
+        <PulseClientHoursMetric
+          hoursThisMonth={c.hoursThisMonth}
+          hoursBudget={c.hoursBudget}
+          estimatedHoursOpen={c.estimatedHoursOpen}
+          periodLabel={periodLabel}
+          clientName={c.name}
+          clientHref={customerHref(c)}
+          utilBarClassName="max-w-[120px]"
+        />
+      : null}
 
       <span
         className={cn(
@@ -353,9 +353,11 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
       </span>
 
       {variant === "full" ?
-        <span className="hidden truncate text-[11px] tabular-nums text-fg-muted sm:inline">
-          {c.lastActivity}
-        </span>
+        <LastActivityValue
+          activity={c.latestActivity}
+          fallback={c.lastActivity}
+          className="hidden truncate text-[11px] text-fg-muted sm:inline"
+        />
       : null}
 
       <PulseIconChevronRight className="justify-self-end text-fg-quiet" />

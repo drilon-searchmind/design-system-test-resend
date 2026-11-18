@@ -11,10 +11,36 @@ import { ClientsPageHeader } from "@/components/clients/clients-page-header";
 import { ClientsSummaryStrip } from "@/components/clients/clients-summary-strip";
 import { CrmDialog } from "@/components/crm/crm-dialog";
 import { useDataSource } from "@/components/crm/use-data-source";
+import { demoClientActivity } from "@/lib/crm/client-activity";
+import { resolveClientDomain } from "@/lib/crm/client-domain";
 import { getPulseDemoBundle } from "@/lib/crm/pulse-demo-bundle";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import { domainsForClient } from "@/lib/crm/domains-data";
+import { NOTES_BY_CLIENT, TASKS } from "@/lib/crm/static-data";
 import { useReportPeriodState } from "@/lib/crm/use-report-period-state";
 import { cn } from "@/lib/utils";
+
+/**
+ * @param {import('@/lib/crm/pulse-types').PulseClient[]} clients
+ * @param {Record<string, { activity: import('@/lib/crm/client-activity').ClientActivity | null; primaryDomain: string }>} bySlug
+ */
+function withDirectoryMeta(clients, bySlug) {
+  return clients.map((c) => {
+    const meta = bySlug[c.id];
+    if (!meta) return c;
+    return { ...c, latestActivity: meta.activity, primaryDomain: meta.primaryDomain || undefined };
+  });
+}
+
+/** @param {import('@/lib/crm/pulse-types').PulseClient[]} clients */
+function withDemoDirectoryMeta(clients) {
+  const now = new Date();
+  return clients.map((c) => ({
+    ...c,
+    latestActivity: demoClientActivity(c, { tasks: TASKS, notes: NOTES_BY_CLIENT[c.id] ?? [] }, now),
+    primaryDomain: resolveClientDomain(c, domainsForClient(c.id)) || undefined,
+  }));
+}
 
 export function ClientsPortfolio() {
   const { data: session } = useSession();
@@ -58,14 +84,19 @@ export function ClientsPortfolio() {
     setError(null);
     try {
       if (dataSource === "demo") {
-        setBundle(getPulseDemoBundle(primaryPeriod));
+        const demo = getPulseDemoBundle(primaryPeriod);
+        setBundle({ ...demo, clients: withDemoDirectoryMeta(demo.clients) });
         hasLoadedRef.current = true;
       } else {
         const qs = databaseApiQuery(queryParams);
-        const res = await fetch(`/api/pulse?${qs}`, { cache: "no-store" });
+        const [res, metaRes] = await Promise.all([
+          fetch(`/api/pulse?${qs}`, { cache: "no-store" }),
+          fetch(`/api/clients/directory-meta?${databaseApiQuery()}`, { cache: "no-store" }).catch(() => null),
+        ]);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error ?? "Kunne ikke hente data");
-        setBundle(data);
+        const meta = metaRes?.ok ? await metaRes.json().catch(() => null) : null;
+        setBundle(meta?.bySlug ? { ...data, clients: withDirectoryMeta(data.clients, meta.bySlug) } : data);
         hasLoadedRef.current = true;
       }
     } catch (e) {
@@ -271,7 +302,6 @@ export function ClientsPortfolio() {
           variant="full"
           clients={bundle.clients}
           team={bundle.team}
-          hoursColumnLabel="Timer i perioden"
         />
 
       </div>

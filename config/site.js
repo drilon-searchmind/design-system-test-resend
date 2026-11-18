@@ -1,12 +1,12 @@
-/** App metadata helpers — 1337-crm by Searchmind */
+/** App metadata helpers — Searchmind 1337 OS */
 
 export const site = {
   /** Short logo text in nav */
-  name: "1337-crm",
+  name: "1337 OS",
   company: "Searchmind",
   byline: "by Searchmind",
   /** Full branded string for footer & hero */
-  branding: "1337-crm by Searchmind",
+  branding: "Searchmind 1337 OS",
   description:
-    "1337-crm is Searchmind's operational cockpit — SSO, workspaces, settings, and integrations behind one dark interface.",
+    "1337 OS is Searchmind's operating system for the agency — clients, work, time, contracts and knowledge in one place.",
 };

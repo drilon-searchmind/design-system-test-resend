@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { KpiTrendHover } from "@/components/crm/kpi-trend-hover";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
 import { KPI_INFO } from "@/components/pulse/pulse-kpi-info";
@@ -95,6 +96,7 @@ export function PulseDashboard() {
   }
 
   const m = bundle.agencyMetrics;
+  const trends = bundle.kpiTrends;
   const mrrDelta = m.retainerMRRPrev > 0 ? (m.retainerMRR - m.retainerMRRPrev) / m.retainerMRRPrev : 0;
   const utilDelta = m.utilisation - m.utilisationPrev;
   const overheadDelta = m.overheadPct - m.overheadPctPrev;
@@ -115,46 +117,63 @@ export function PulseDashboard() {
           )}
         >
           <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
-            <PulseKpiCard
-              label="Retainer MRR"
-              info={KPI_INFO.mrr}
-              value={
-                m.upsellMrr > 0 ?
-                  `${formatCurrencyCompact(m.retainerMRR)} (+${formatCurrencyCompact(m.upsellMrr)})`
-                : formatCurrencyCompact(m.retainerMRR)
-              }
-              delta={mrrDelta}
-              visual={bundle.mrrBridge ? <MrrBridgeVisual bridge={bundle.mrrBridge} /> : undefined}
-              tone="brand"
-            />
-            <PulseKpiCard
-              label="Udnyttelse"
-              info={KPI_INFO.utilisation}
-              value={formatPercent(m.utilisation)}
-              delta={utilDelta}
-              deltaFormat={(v) => formatPercent(v)}
-              visual={<UtilDailyVisual data={bundle.utilTrend} />}
-              tone="ok"
-            />
-            <PulseKpiCard
-              label="Overhead-tid"
-              info={KPI_INFO.overhead}
-              value={formatPercent(m.overheadPct)}
-              delta={overheadDelta}
-              deltaFormat={(v) => formatPercent(v)}
-              deltaInvert
-              visual={<OverheadSplitVisual billableHours={m.billableHoursMonth} overheadHours={overheadHours} />}
-              tone="warn"
-            />
-            <PulseKpiCard
-              label="Gns. margin"
-              info={KPI_INFO.margin}
-              value={formatPercent(m.avgMargin)}
-              delta={marginDelta}
-              deltaFormat={(v) => formatPercent(v)}
-              visual={<MarginBandsVisual clients={bundle.clients} />}
-              tone="ok"
-            />
+            <KpiTrendHover
+              title="Fast MRR"
+              points={trends?.mrr}
+              format={(v) => formatCurrencyCompact(v)}
+              className="h-full"
+            >
+              <PulseKpiCard
+                label="Retainer MRR"
+                info={KPI_INFO.mrr}
+                value={
+                  m.upsellMrr > 0 ?
+                    `${formatCurrencyCompact(m.retainerMRR)} (+${formatCurrencyCompact(m.upsellMrr)})`
+                  : formatCurrencyCompact(m.retainerMRR)
+                }
+                delta={mrrDelta}
+                visual={bundle.mrrBridge ? <MrrBridgeVisual bridge={bundle.mrrBridge} /> : undefined}
+                tone="brand"
+                className="h-full"
+              />
+            </KpiTrendHover>
+            <KpiTrendHover title="Udnyttelse" points={trends?.utilisation} format={formatPercent} className="h-full">
+              <PulseKpiCard
+                label="Udnyttelse"
+                info={KPI_INFO.utilisation}
+                value={formatPercent(m.utilisation)}
+                delta={utilDelta}
+                deltaFormat={(v) => formatPercent(v)}
+                visual={<UtilDailyVisual data={bundle.utilTrend} />}
+                tone="ok"
+                className="h-full"
+              />
+            </KpiTrendHover>
+            <KpiTrendHover title="Overhead-tid" points={trends?.overhead} format={formatPercent} className="h-full">
+              <PulseKpiCard
+                label="Overhead-tid"
+                info={KPI_INFO.overhead}
+                value={formatPercent(m.overheadPct)}
+                delta={overheadDelta}
+                deltaFormat={(v) => formatPercent(v)}
+                deltaInvert
+                visual={<OverheadSplitVisual billableHours={m.billableHoursMonth} overheadHours={overheadHours} />}
+                tone="warn"
+                className="h-full"
+              />
+            </KpiTrendHover>
+            <KpiTrendHover title="Gns. margin" points={trends?.margin} format={formatPercent} className="h-full">
+              <PulseKpiCard
+                label="Gns. margin"
+                info={KPI_INFO.margin}
+                value={formatPercent(m.avgMargin)}
+                delta={marginDelta}
+                deltaFormat={(v) => formatPercent(v)}
+                visual={<MarginBandsVisual clients={bundle.clients} />}
+                tone="ok"
+                className="h-full"
+              />
+            </KpiTrendHover>
           </section>
 
           <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
@@ -167,9 +186,10 @@ export function PulseDashboard() {
             <PulseClientRanking kind="unhealthy" />
           </div>
 
-          <PulseUpsellLeaderboard />
-
-          <PulseUtilTrendChart />
+          <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2">
+            <PulseUpsellLeaderboard />
+            <PulseUtilTrendChart />
+          </div>
 
           <PulseClientsPanel />
 

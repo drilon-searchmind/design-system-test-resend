@@ -17,24 +17,29 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const article = await fetchKnowledgeArticleBySlug(slug);
-  if (!article) return { title: "Knowledge base · 1337-crm by Searchmind" };
+  if (!article) return { title: "Knowledge base · Searchmind 1337 OS" };
   const draft = article.published ? "" : " (kladde)";
-  return { title: `${article.title}${draft} · Knowledge base · 1337-crm by Searchmind` };
+  return { title: `${article.title}${draft} · Knowledge base · Searchmind 1337 OS` };
 }
 
-/** @param {{ params: Promise<{ slug: string }> }} props */
-export default async function KnowledgeArticlePage({ params }) {
-  const { slug } = await params;
-  const article = await fetchKnowledgeArticleBySlug(slug);
+/**
+ * @param {{
+ *   params: Promise<{ slug: string }>;
+ *   searchParams?: Promise<Record<string, string | string[] | undefined>>;
+ * }} props
+ */
+export default async function KnowledgeArticlePage({ params, searchParams }) {
+  const [{ slug }, sp] = await Promise.all([params, Promise.resolve(searchParams ?? {})]);
+  const [article, allArticles] = await Promise.all([fetchKnowledgeArticleBySlug(slug), fetchKnowledgeArticles()]);
   if (!article) notFound();
 
-  const allArticles = await fetchKnowledgeArticles();
   const related = relatedKnowledgeArticles(article, allArticles, 5);
   const childArticles = allArticles.filter((a) => a.parentSlug === article.slug && a.published);
+  const summaryMissing = sp.resume === "mangler" && !article.hasSummary;
 
   return (
     <main className={cn(shellMainStudio)}>
-      <KbArticleHeader article={article} childArticles={childArticles} />
+      <KbArticleHeader article={article} childArticles={childArticles} summaryMissing={summaryMissing} />
 
       <section className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1.22fr)_minmax(260px,0.72fr)] lg:items-start">
         <article className="tally-panel min-w-0 overflow-hidden">

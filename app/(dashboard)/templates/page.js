@@ -2,7 +2,7 @@ import { TemplatesPageClient } from "@/components/templates/templates-page-clien
 import { shellMainStudio } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Opgaveskabeloner · 1337-crm by Searchmind" };
+export const metadata = { title: "Opgaveskabeloner · Searchmind 1337 OS" };
 
 export default function TemplatesPage() {
   return (

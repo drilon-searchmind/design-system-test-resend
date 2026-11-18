@@ -1,5 +1,8 @@
+"use client";
+
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { ClientDetailDomainsCard } from "@/components/clients/client-detail-domains-card";
+import { patchClient, QuickEditPopover } from "@/components/clients/client-quick-edit";
 import { DEPARTMENTS, TEAM } from "@/lib/crm/static-data";
 import { computeClv, computeLifetimeMonths } from "@/lib/crm/client-utils";
 import { domainsForClient } from "@/lib/crm/domains-data";
@@ -45,9 +48,11 @@ const NPS_INTERVAL_DA = {
  * @param {{
  *   client: import('@/lib/crm/static-data').CLIENTS[number];
  *   team?: import('@/lib/crm/pulse-types').PulseTeamMember[];
+ *   canEdit?: boolean;
+ *   onSaved?: () => void;
  * }} props
  */
-export function ClientDetailMetaCard({ client, team = [] }) {
+export function ClientDetailMetaCard({ client, team = [], canEdit = false, onSaved }) {
   const intervalKey = client.npsInterval;
   const intervalLabel =
     intervalKey && intervalKey in NPS_INTERVAL_DA
@@ -120,7 +125,7 @@ export function ClientDetailMetaCard({ client, team = [] }) {
           </div>
         </div>
 
-        {services.length > 0 && client.deptAssignees ? (
+        {services.length > 0 && (client.deptAssignees || canEdit) ? (
           <div className="mt-4 border-t border-border-soft pt-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Ansvarlige pr. disciplin
@@ -132,25 +137,55 @@ export function ClientDetailMetaCard({ client, team = [] }) {
                 const dep = DEPARTMENTS.find((d) => d.id === deptId);
                 const assigneeLabel = member?.name ?? (assigneeRaw ? String(assigneeRaw) : null);
                 const avatarLabel = member?.avatar ?? member?.name ?? assigneeLabel ?? "?";
+                /** @param {string | null} name */
+                const saveAssignee = async (name) => {
+                  const next = { ...(client.deptAssignees ?? {}) };
+                  if (name) next[deptId] = name;
+                  else delete next[deptId];
+                  await patchClient(client.id, { deptAssignees: next });
+                  onSaved?.();
+                };
                 return (
                   <li key={deptId} className="flex items-center gap-2">
                     <span className="text-[10px] font-medium uppercase tracking-wide text-fg-quiet">
                       {dep?.short ?? deptId}
                     </span>
-                    {assigneeLabel ? (
-                      <span className="inline-flex items-center gap-1.5 font-sans text-[12px] text-fg-muted">
-                        <CrmAvatar
-                          label={avatarLabel}
-                          src={member?.image}
-                          hue={member?.hue ?? 220}
-                          className="size-5 text-[9px]"
-                          alt={assigneeLabel}
-                        />
-                        {assigneeLabel}
-                      </span>
-                    ) : (
-                      <span className="text-[12px] text-fg-quiet">—</span>
-                    )}
+                    <QuickEditPopover
+                      title={`Ansvarlig for ${dep?.name ?? deptId}`}
+                      canEdit={canEdit && team.length > 0}
+                      fields={[
+                        {
+                          name: "member",
+                          label: "Teammedlem",
+                          type: "select",
+                          options: [
+                            { value: "", label: "— Ingen —" },
+                            ...team.map((m) => ({ value: m.id, label: m.name })),
+                          ],
+                        },
+                      ]}
+                      initialValues={{ member: member?.id ?? "" }}
+                      onSubmit={async (v) => {
+                        const picked = team.find((m) => m.id === v.member);
+                        await saveAssignee(picked?.name ?? null);
+                      }}
+                      onRemove={assigneeLabel ? () => saveAssignee(null) : undefined}
+                    >
+                      {assigneeLabel ? (
+                        <span className="inline-flex items-center gap-1.5 px-0.5 font-sans text-[12px] text-fg-muted">
+                          <CrmAvatar
+                            label={avatarLabel}
+                            src={member?.image}
+                            hue={member?.hue ?? 220}
+                            className="size-5 text-[9px]"
+                            alt={assigneeLabel}
+                          />
+                          {assigneeLabel}
+                        </span>
+                      ) : (
+                        <span className="px-1 text-[12px] text-fg-quiet">{canEdit ? "+ Tildel" : "—"}</span>
+                      )}
+                    </QuickEditPopover>
                   </li>
                 );
               })}

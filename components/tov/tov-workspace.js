@@ -13,17 +13,23 @@ import { TovAnalysisProgress } from "@/components/tov/tov-progress";
 import { TovProfileView } from "@/components/tov/tov-profile-view";
 import {
   TovCard,
+  TovField,
   TovStatusChip,
   formatTovDate,
   tovBtn,
   tovBtnPrimary,
   tovFetch,
   tovInput,
+  tovInvalid,
   tovTextarea,
 } from "@/components/tov/tov-ui";
+import { TOV_CONTACT_TITLES, tovHostKey, validateTovBriefing } from "@/lib/tov/briefing";
 import { cn } from "@/lib/utils";
 
 const KIND_LABEL = { pdf: "PDF", image: "Billede", text: "Tekst", html: "Web" };
+
+/** @param {string | undefined} error @param {string} id */
+const invalidProps = (error, id) => (error ? { "aria-invalid": true, "aria-describedby": `${id}-error` } : {});
 
 /** @param {number} bytes */
 function formatSize(bytes) {
@@ -51,9 +57,24 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
   const [stage, setStage] = useState(hasProfile ? "resultat" : "materiale");
   const [tab, setTab] = useState("profil");
   const [comment, setComment] = useState(tov?.comment ?? "");
-  const [model, setModel] = useState(tov?.model ?? state.models[0].id);
+  const [model, setModel] = useState(tov?.model ?? state.defaultModel ?? state.models[0].id);
+  const [contactName, setContactName] = useState(state.briefing?.contactName ?? "");
+  const [contactTitle, setContactTitle] = useState(state.briefing?.contactTitle ?? "");
+  const [accountOwnerKey, setAccountOwnerKey] = useState(state.briefing?.accountOwnerKey ?? "");
+  const [fieldErrors, setFieldErrors] = useState(/** @type {Record<string, string>} */ ({}));
   const [url, setUrl] = useState("");
   const [note, setNote] = useState({ name: "", text: "", open: false });
+  const [noteErrors, setNoteErrors] = useState(/** @type {Record<string, string>} */ ({}));
+
+  // Client domains not yet added as a link source; the primary one is ticked by default.
+  const sourceHosts = new Set(sources.filter((s) => s.kind === "url").map((s) => tovHostKey(s.url)));
+  const clientDomains = state.domains ?? [];
+  const pendingDomains = clientDomains.filter((d) => !sourceHosts.has(tovHostKey(d.domain)));
+  const addedDomains = clientDomains.filter((d) => sourceHosts.has(tovHostKey(d.domain)));
+  const [domainPicks, setDomainPicks] = useState(
+    () => /** @type {Record<string, boolean>} */ (pendingDomains[0] ? { [tovHostKey(pendingDomains[0].domain)]: true } : {}),
+  );
+  const selectedDomains = pendingDomains.filter((d) => domainPicks[tovHostKey(d.domain)]).map((d) => d.domain);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState(/** @type {{ kind: "ok" | "bad"; text: string } | null} */ (null));
   const [dragging, setDragging] = useState(false);
@@ -134,11 +155,49 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
     void run("cancel", () => tovFetch(`${base}/analyze`, { method: "DELETE" }));
   }
 
+  /** @param {string} key */
+  const clearFieldError = (key) => setFieldErrors((f) => (f[key] ? { ...f, [key]: "" } : f));
+
+  function startAnalysis() {
+    const errors = Object.fromEntries(
+      Object.entries(validateTovBriefing({ contactName, contactTitle, comment, model })).filter(([, v]) => v),
+    );
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setMessage({ kind: "bad", text: "Udfyld de påkrævede felter før analysen (kun Kundeansvarlig er valgfri)." });
+      return;
+    }
+    void run("analyze", async () => {
+      try {
+        await tovFetch(`${base}/analyze`, {
+          method: "POST",
+          json: { model, comment, contactName, contactTitle, accountOwnerKey, domains: selectedDomains },
+        });
+      } catch (e) {
+        if (e && typeof e === "object" && "fields" in e) setFieldErrors(/** @type {any} */ (e).fields);
+        throw e;
+      }
+    });
+  }
+
+  function addNote() {
+    /** @type {Record<string, string>} */
+    const errors = {};
+    if (!note.name.trim()) errors.name = "Giv teksten et navn.";
+    if (note.text.trim().length < 20) errors.text = "Indsæt mindst 20 tegn tekst.";
+    setNoteErrors(errors);
+    if (Object.keys(errors).length) return;
+    void run("note", async () => {
+      await tovFetch(`${base}/sources`, { method: "POST", json: { name: note.name, text: note.text } });
+      setNote({ name: "", text: "", open: false });
+    });
+  }
+
   const locked = analyzing || busy === "cancel";
 
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
-      <nav aria-label="Tone of Voice-trin" className="border-b border-border/60 pb-3">
+      <nav aria-label="Brand Core-trin" className="border-b border-border/60 pb-3">
         <PulseSegmentedControl
           size="sm"
           active={stage}
@@ -195,8 +254,51 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
 
           <TovCard
             title={`Materiale · ${sources.length}`}
-            hint="Upload alt der kan sige noget om kundens tone: brandbøger (PDF), mails (.eml/.txt/indsat tekst), .md/.txt, billeder og links til deres website."
+            hint="Upload alt der kan sige noget om kundens brand: brandbøger (PDF), mails (.eml/.txt/indsat tekst), .md/.txt, billeder og links til deres website."
           >
+            {clientDomains.length ?
+              <fieldset className="mb-3 rounded-lg border border-border-soft bg-surface-muted/30 px-3 py-2.5" disabled={locked}>
+                <legend className="px-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+                  Kundens domæne
+                </legend>
+                <p className="font-sans text-[11px] leading-snug text-fg-muted">
+                  Analyseres automatisk sammen med materialet. Fjern fluebenet for at springe et domæne over.
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {pendingDomains.map((d) => {
+                    const key = tovHostKey(d.domain);
+                    return (
+                      <li key={key}>
+                        <label className="flex items-center gap-2 font-sans text-[13px] text-fg">
+                          <input
+                            type="checkbox"
+                            className="size-3.5 accent-agency-brand"
+                            checked={Boolean(domainPicks[key])}
+                            onChange={(e) => setDomainPicks((p) => ({ ...p, [key]: e.target.checked }))}
+                          />
+                          <span className="truncate">{d.domain}</span>
+                          {d.isPrimary ?
+                            <span className="rounded-full border border-border px-1.5 font-sans text-[10px] text-fg-quiet">
+                              Primær
+                            </span>
+                          : null}
+                        </label>
+                      </li>
+                    );
+                  })}
+                  {addedDomains.map((d) => (
+                    <li key={d.domain} className="flex items-center gap-2 font-sans text-[12px] text-fg-muted">
+                      <span className="text-agency-ok" aria-hidden>
+                        ✓
+                      </span>
+                      <span className="truncate">{d.domain}</span>
+                      <span className="text-fg-quiet">· tilføjet som kilde</span>
+                    </li>
+                  ))}
+                </ul>
+              </fieldset>
+            : null}
+
             <div
               onDragOver={(e) => {
                 if (locked) return;
@@ -268,37 +370,45 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
 
             {note.open && !locked ?
               <div className="mt-3 space-y-2 rounded-lg border border-border-soft p-3">
-                <input
-                  value={note.name}
-                  onChange={(e) => setNote((n) => ({ ...n, name: e.target.value }))}
-                  placeholder="Titel (fx 'Mail fra marketingchef')"
-                  className={tovInput}
-                />
-                <textarea
-                  value={note.text}
-                  onChange={(e) => setNote((n) => ({ ...n, text: e.target.value }))}
-                  rows={6}
-                  placeholder="Indsæt mail eller tekst…"
-                  className={tovTextarea}
-                />
+                <TovField id="tov-note-name" label="Navn på tekst" error={noteErrors.name}>
+                  <input
+                    id="tov-note-name"
+                    value={note.name}
+                    onChange={(e) => {
+                      setNote((n) => ({ ...n, name: e.target.value }));
+                      setNoteErrors((f) => ({ ...f, name: "" }));
+                    }}
+                    placeholder="Fx 'Mail fra marketingchef'"
+                    className={cn(tovInput, noteErrors.name && tovInvalid)}
+                    {...invalidProps(noteErrors.name, "tov-note-name")}
+                  />
+                </TovField>
+                <TovField id="tov-note-text" label="Tekst" error={noteErrors.text}>
+                  <textarea
+                    id="tov-note-text"
+                    value={note.text}
+                    onChange={(e) => {
+                      setNote((n) => ({ ...n, text: e.target.value }));
+                      setNoteErrors((f) => ({ ...f, text: "" }));
+                    }}
+                    rows={6}
+                    placeholder="Indsæt mail eller tekst…"
+                    className={cn(tovTextarea, noteErrors.text && tovInvalid)}
+                    {...invalidProps(noteErrors.text, "tov-note-text")}
+                  />
+                </TovField>
                 <div className="flex justify-end gap-2">
-                  <button type="button" className={tovBtn} onClick={() => setNote({ name: "", text: "", open: false })}>
-                    Annullér
-                  </button>
                   <button
                     type="button"
-                    className={tovBtnPrimary}
-                    disabled={busy === "note" || note.text.trim().length < 20}
-                    onClick={() =>
-                      run("note", async () => {
-                        await tovFetch(`${base}/sources`, {
-                          method: "POST",
-                          json: { name: note.name, text: note.text },
-                        });
-                        setNote({ name: "", text: "", open: false });
-                      })
-                    }
+                    className={tovBtn}
+                    onClick={() => {
+                      setNote({ name: "", text: "", open: false });
+                      setNoteErrors({});
+                    }}
                   >
+                    Annullér
+                  </button>
+                  <button type="button" className={tovBtnPrimary} disabled={busy === "note"} onClick={addNote}>
                     Tilføj tekst
                   </button>
                 </div>
@@ -340,56 +450,139 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
           </TovCard>
 
           <TovCard
-            title="Analyse"
-            hint="Modellen læser alt materialet og opdaterer kundens standardiserede Tone of Voice-profil."
+            title="Brief & analyse"
+            hint="Modellen læser alt materialet og opdaterer kundens standardiserede Brand Core-profil. Alle felter er påkrævede undtagen Kundeansvarlig."
             actions={<TovStatusChip status={status} />}
           >
-            <label className="block font-sans text-[11px] font-medium text-fg-soft" htmlFor="tov-comment">
-              Kommentar / ekstra information
-            </label>
-            <textarea
-              id="tov-comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              onBlur={() => !locked && void saveSettings({ comment })}
-              rows={5}
-              disabled={locked}
-              placeholder="Fx: 'Målgruppen er ældre mænd, de vil ikke lyde som en startup. Brug De-form i mails.'"
-              className={cn(tovTextarea, "mt-1")}
-            />
-
-            <label className="mt-3 block font-sans text-[11px] font-medium text-fg-soft" htmlFor="tov-model">
-              AI-model
-            </label>
-            <select
-              id="tov-model"
-              value={model}
-              disabled={locked}
-              onChange={(e) => {
-                setModel(e.target.value);
-                void saveSettings({ model: e.target.value });
+            <form
+              noValidate
+              className="flex flex-col gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!locked && busy !== "analyze") startAnalysis();
               }}
-              className={cn(tovInput, "mt-1")}
             >
-              {state.models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <TovField id="tov-contactName" label="Kontaktperson hos kunden" error={fieldErrors.contactName}>
+                  <input
+                    id="tov-contactName"
+                    value={contactName}
+                    required
+                    disabled={locked}
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setContactName(e.target.value);
+                      clearFieldError("contactName");
+                    }}
+                    onBlur={() => !locked && void saveSettings({ contactName })}
+                    placeholder="Fx Mette Jensen"
+                    className={cn(tovInput, fieldErrors.contactName && tovInvalid)}
+                    {...invalidProps(fieldErrors.contactName, "tov-contactName")}
+                  />
+                </TovField>
+                <TovField id="tov-contactTitle" label="Titel" error={fieldErrors.contactTitle}>
+                  <select
+                    id="tov-contactTitle"
+                    value={contactTitle}
+                    required
+                    disabled={locked}
+                    onChange={(e) => {
+                      setContactTitle(e.target.value);
+                      clearFieldError("contactTitle");
+                      void saveSettings({ contactTitle: e.target.value });
+                    }}
+                    className={cn(tovInput, fieldErrors.contactTitle && tovInvalid)}
+                    {...invalidProps(fieldErrors.contactTitle, "tov-contactTitle")}
+                  >
+                    <option value="">Vælg titel…</option>
+                    {contactTitle && !TOV_CONTACT_TITLES.includes(contactTitle) ?
+                      <option value={contactTitle}>{contactTitle} (gemt værdi)</option>
+                    : null}
+                    {TOV_CONTACT_TITLES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </TovField>
+              </div>
 
-            {!analyzing ?
-              <button
-                type="button"
-                className={cn(tovBtnPrimary, "mt-4 w-full")}
-                disabled={busy === "analyze" || (sources.length === 0 && !comment.trim())}
-                onClick={() =>
-                  run("analyze", () => tovFetch(`${base}/analyze`, { method: "POST", json: { model, comment } }))
-                }
-              >
-                {busy === "analyze" ? "Starter…" : hasProfile ? "Analysér igen" : "Analysér materiale"}
-              </button>
-            : null}
+              <TovField id="tov-accountOwner" label="Kundeansvarlig" optional>
+                <select
+                  id="tov-accountOwner"
+                  value={accountOwnerKey}
+                  disabled={locked}
+                  onChange={(e) => {
+                    setAccountOwnerKey(e.target.value);
+                    void saveSettings({ accountOwnerKey: e.target.value });
+                  }}
+                  className={tovInput}
+                >
+                  <option value="">Ingen valgt</option>
+                  {accountOwnerKey && !(state.team ?? []).some((m) => m.key === accountOwnerKey) ?
+                    <option value={accountOwnerKey}>{accountOwnerKey} (ikke i teamet)</option>
+                  : null}
+                  {(state.team ?? []).map((m) => (
+                    <option key={m.key} value={m.key}>
+                      {m.name}
+                      {m.role ? ` · ${m.role}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </TovField>
+
+              <TovField id="tov-comment" label="Kommentar / ekstra information" error={fieldErrors.comment}>
+                <textarea
+                  id="tov-comment"
+                  value={comment}
+                  required
+                  onChange={(e) => {
+                    setComment(e.target.value);
+                    clearFieldError("comment");
+                  }}
+                  onBlur={() => !locked && void saveSettings({ comment })}
+                  rows={5}
+                  disabled={locked}
+                  placeholder="Fx: 'Målgruppen er ældre mænd, de vil ikke lyde som en startup. Brug De-form i mails.'"
+                  className={cn(tovTextarea, fieldErrors.comment && tovInvalid)}
+                  {...invalidProps(fieldErrors.comment, "tov-comment")}
+                />
+              </TovField>
+
+              <TovField id="tov-model" label="AI-model" error={fieldErrors.model}>
+                <select
+                  id="tov-model"
+                  value={model}
+                  required
+                  disabled={locked}
+                  onChange={(e) => {
+                    setModel(e.target.value);
+                    clearFieldError("model");
+                    void saveSettings({ model: e.target.value });
+                  }}
+                  className={cn(tovInput, fieldErrors.model && tovInvalid)}
+                  {...invalidProps(fieldErrors.model, "tov-model")}
+                >
+                  {state.models.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </TovField>
+
+              {selectedDomains.length ?
+                <p className="font-sans text-[11px] text-fg-quiet">
+                  Domæne der hentes og analyseres med: {selectedDomains.join(", ")}
+                </p>
+              : null}
+
+              {!analyzing ?
+                <button type="submit" className={cn(tovBtnPrimary, "mt-1 w-full")} disabled={busy === "analyze"}>
+                  {busy === "analyze" ? "Starter…" : hasProfile ? "Analysér igen" : "Analysér materiale"}
+                </button>
+              : null}
+            </form>
 
             {hasProfile && !analyzing ?
               <p className="mt-2 font-sans text-[11px] leading-snug text-fg-quiet">
@@ -431,14 +624,14 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
             <div className="rounded-2xl border border-agency-ok-border bg-agency-ok-soft px-4 py-3">
               <p className="font-sans text-[13px] font-semibold text-agency-ok">Profilen er klar</p>
               <p className="mt-0.5 font-sans text-[12px] text-fg-muted">
-                Gennemgå profilen herunder — eller generér et HTML-eksempel under fanen Eksempel.
+                Gennemgå profilen herunder — eller generér brand guidelines-dokumentet under fanen Eksempel.
               </p>
             </div>
           : null}
 
           {!hasProfile ?
             <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-center">
-              <p className="font-sans text-[14px] font-medium text-fg">Ingen profil endnu</p>
+              <p className="font-sans text-[14px] font-medium text-fg">Ingen Brand Core-profil endnu</p>
               <p className="mt-1 font-sans text-[12px] text-fg-muted">
                 Upload materiale og kør analysen under trin 1 først.
               </p>
@@ -450,7 +643,7 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="font-sans text-[15px] font-semibold tracking-tight text-fg">
-                    {state.client.name} · Tone of Voice
+                    {state.client.name} · Brand Core
                   </h2>
                   <p className="mt-0.5 font-sans text-[12px] text-fg-muted">
                     Sidst analyseret {formatTovDate(tov.analyzedAt)}
@@ -515,7 +708,7 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
 }
 
 /**
- * Tone of Voice-arbejdsrum for én kunde (bruges både på /tov/[kunde] og som fane på kundekortet).
+ * Brand Core-arbejdsrum for én kunde (bruges både på /tov/[kunde] og som fane på kundekortet).
  * @param {{ clientKey: string }} props
  */
 export function TovWorkspace({ clientKey }) {
@@ -542,7 +735,7 @@ export function TovWorkspace({ clientKey }) {
       applyState(await tovFetch(`/api/clients/${encodeURIComponent(clientKey)}/tov`));
       setError("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kunne ikke hente Tone of Voice");
+      setError(e instanceof Error ? e.message : "Kunne ikke hente Brand Core");
     }
   }, [clientKey, applyState]);
 
@@ -554,7 +747,7 @@ export function TovWorkspace({ clientKey }) {
         if (!cancelled) applyState(d);
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Kunne ikke hente Tone of Voice");
+        if (!cancelled) setError(e instanceof Error ? e.message : "Kunne ikke hente Brand Core");
       });
     return () => {
       cancelled = true;

@@ -41,6 +41,7 @@ const IDLE_STYLES = {
  *   onStatusChange?: (status: TaskUiStatus) => void;
  *   disabled?: boolean;
  *   saving?: boolean;
+ *   saved?: boolean;
  *   readOnlyHint?: string;
  * }} props
  */
@@ -49,6 +50,7 @@ export function TaskDetailStatusBar({
   onStatusChange,
   disabled = false,
   saving = false,
+  saved = false,
   readOnlyHint,
 }) {
   const interactive = !disabled && typeof onStatusChange === "function";
@@ -136,6 +138,10 @@ export function TaskDetailStatusBar({
 
       {saving ?
         <span className="ml-auto shrink-0 font-sans text-[10px] text-fg-quiet">Gemmer…</span>
+      : saved ?
+        <span role="status" className="ml-auto shrink-0 font-sans text-[10px] font-medium text-agency-ok">
+          Gemt ✓
+        </span>
       : !interactive && readOnlyHint ?
         <span className="sr-only">{readOnlyHint}</span>
       : null}

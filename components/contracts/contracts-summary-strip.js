@@ -9,12 +9,14 @@ import { formatCurrencyCompact } from "@/lib/crm/format-da";
  *     renewalAt: string;
  *     monthlyValue: number;
  *     currency: string;
+ *     signingState?: string;
  *   }>;
  *   summary?: {
  *     total: number;
  *     activeCount: number;
  *     mrrOverlapActiveDkk: number;
  *     renewalSoonCount: number;
+ *     pendingSignatureCount?: number;
  *   } | null;
  *   renewalReferenceIso: string;
  * }} props
@@ -27,6 +29,11 @@ export function ContractsSummaryStrip({ contracts = [], summary = null, renewalR
   const total = summary?.total ?? contracts.length;
   const activeCount =
     summary?.activeCount ?? contracts.filter((c) => c.accountStatus === "active").length;
+  const pendingCount =
+    summary?.pendingSignatureCount ??
+    contracts.filter(
+      (c) => c.accountStatus === "pending_signature" || c.signingState === "pending",
+    ).length;
 
   const mrrOverlap =
     summary?.mrrOverlapActiveDkk ??
@@ -36,11 +43,26 @@ export function ContractsSummaryStrip({ contracts = [], summary = null, renewalR
     }, 0);
 
   return (
-    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
-      <PulseKpiCard label="Kontrakter i alt" value={String(total)} tone="brand" />
-      <PulseKpiCard label="Aktive aftaler" value={String(activeCount)} tone="ok" />
+    <section
+      aria-label="Nøgletal for kontrakter"
+      className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4"
+    >
       <PulseKpiCard
-        label="MRR — valgt md. (aktive)"
+        label={`Aktive aftaler · ${total} i alt`}
+        value={String(activeCount)}
+        tone="ok"
+      />
+      <PulseKpiCard
+        label="Afventer underskrift"
+        value={String(pendingCount)}
+        tone={pendingCount > 0 ? "warn" : "brand"}
+      />
+      <PulseKpiCard
+        label="MRR (aktive, valgt md.)"
+        info={{
+          title: "MRR fra kontrakter",
+          body: "Summen af den månedlige værdi på aktive DKK-aftaler, der løber i den valgte måned. Årlige linjer tæller som 1/12 pr. måned; engangslinjer indgår ikke.",
+        }}
         value={formatCurrencyCompact(mrrOverlap)}
         tone="brand"
       />

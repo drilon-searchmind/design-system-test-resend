@@ -22,28 +22,35 @@ import { ClientDetailTasksCard } from "@/components/clients/client-detail-tasks-
 import { TovWorkspace } from "@/components/tov/tov-workspace";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 
-export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ ([
-  "opgaver",
-  "overblik",
-  "brands",
-  "kundeinfo",
-  "okonomi",
-  "kvalitet",
-  "tov",
-]);
+export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ (["opgaver", "overblik", "brands", "tov"]);
 
 /** Danish labels aligned with SETTINGS stamdata tab pattern (`PulseSegmentedControl`). */
 export const CLIENT_DETAIL_TAB_DEFS = [
   { id: "opgaver", label: "Opgaver" },
   { id: "overblik", label: "Overblik" },
-  { id: "kundeinfo", label: "Kundeinfo" },
-  { id: "okonomi", label: "Økonomi & aftale" },
-  { id: "kvalitet", label: "NPS & kvalitet" },
-  { id: "tov", label: "Tone of Voice" },
+  { id: "tov", label: "Brand Core" },
 ];
 
 /** Kun for kundegrupper — indsættes efter "Overblik". */
 const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
+
+/**
+ * Overskrift for en sektion i Overblik (tidligere egne faner).
+ * @param {{ id: string; title: string; children: import('react').ReactNode }} props
+ */
+function OverviewSection({ id, title, children }) {
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-[length:var(--ds-studio-stack)]">
+      <h2
+        id={id}
+        className="border-b border-border/60 pb-2 pt-2 font-sans text-[13px] font-semibold tracking-[-0.01em] text-fg"
+      >
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
 
 /**
  * @param {{
@@ -73,7 +80,7 @@ const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
  *     age: string;
  *     client?: string | null;
  *   }>;
- *   notes: Array<{ id: string; who: string; at: string; type: string; body: string }>;
+ *   notes: import('@/lib/crm/client-notes').ClientNoteItem[];
  *   notesTeamMembers?: import('@/lib/crm/pulse-types').PulseTeamMember[];
  *   team?: import('@/lib/crm/pulse-types').PulseTeamMember[];
  *   tasks: Array<{
@@ -82,7 +89,12 @@ const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
  *     status: 'todo' | 'doing' | 'review' | 'done' | 'blocked';
  *     priority: 'low' | 'medium' | 'high';
  *     dueDate: string;
+ *     dept?: string;
+ *     estimateHours?: number | null;
  *   }>;
+ *   departments?: Array<{ id: string; name: string; short?: string }>;
+ *   trends?: import('@/components/clients/client-detail-kpi-strip').ClientKpiTrends | null;
+ *   periodLabel?: string;
  *   kpiTimerLabel?: string;
  *   infoMd?: string;
  *   canEditKundeinfo?: boolean;
@@ -91,7 +103,7 @@ const BRANDS_TAB_DEF = { id: "brands", label: "Brands" };
  *   onUngroupBrand?: (brandSlug: string) => Promise<void>;
  *   commercialLog?: Array<{ at: string; by: string; note: string; changes: Record<string, { from: number | null; to: number | null }> }>;
  *   onClientChanged?: () => void;
- * }} props
+ * }} props `canEditKundeinfo` = database-tilstand (demo er skrivebeskyttet).
  */
 export function ClientDetailTabbedBody({
   tab,
@@ -105,6 +117,9 @@ export function ClientDetailTabbedBody({
   notesTeamMembers,
   team,
   tasks,
+  departments,
+  trends,
+  periodLabel,
   kpiTimerLabel = "Tid brugt",
   infoMd = "",
   canEditKundeinfo = false,
@@ -117,6 +132,7 @@ export function ClientDetailTabbedBody({
   const { data: session } = useSession();
   const isAdmin = session?.user?.isAdmin === true;
   const isGroup = Boolean(client.isGroup);
+  const canEditClient = canEditKundeinfo && !isGroup;
   const tabDefs = isGroup ?
       [CLIENT_DETAIL_TAB_DEFS[0], CLIENT_DETAIL_TAB_DEFS[1], BRANDS_TAB_DEF, ...CLIENT_DETAIL_TAB_DEFS.slice(2)]
     : CLIENT_DETAIL_TAB_DEFS;
@@ -131,6 +147,7 @@ export function ClientDetailTabbedBody({
       })()
     : alerts;
   const stack = "flex flex-col gap-[length:var(--ds-studio-stack)]";
+  const roster = team ?? notesTeamMembers;
   const openTaskCount = tasks.filter((t) => t.status !== "done").length;
   /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */
   const resolvedTab =
@@ -138,6 +155,10 @@ export function ClientDetailTabbedBody({
     (tab !== "brands" || isGroup) ?
       /** @type {(typeof CLIENT_DETAIL_TAB_IDS)[number]} */ (tab)
     : "opgaver";
+  const notesDisabledHint =
+    isGroup ? "Tilføj noter på det enkelte brand."
+    : canEditKundeinfo ? undefined
+    : "Noter kan kun tilføjes, når datakilden er database.";
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,26 +179,96 @@ export function ClientDetailTabbedBody({
 
       <div role="tabpanel" className="min-w-0">
         {resolvedTab === "overblik" ? (
-          <section aria-labelledby="client-tab-overblik" className={stack}>
-            <h2 id="client-tab-overblik" className="sr-only">
-              Overblik
-            </h2>
-            <ClientDetailKpiStrip
-              client={client}
-              timerLabel={kpiTimerLabel}
-              openTaskCount={openTaskCount}
-            />
-            <ClientDetailMetaCard client={client} team={team ?? notesTeamMembers} />
-            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
-              <ClientDetailDeliveryCard client={client} />
-              <ClientDetailNotesCard notes={notes} teamMembers={notesTeamMembers} />
-            </div>
-            <ClientDetailServiceMixCard
-              client={client}
-              canEdit={canEditKundeinfo && !isGroup}
-              onSaved={onClientChanged}
-            />
-          </section>
+          <div className="flex flex-col gap-8">
+            <section aria-labelledby="client-tab-overblik" className={stack}>
+              <h2 id="client-tab-overblik" className="sr-only">
+                Overblik
+              </h2>
+              <ClientDetailKpiStrip
+                client={client}
+                timerLabel={kpiTimerLabel}
+                openTaskCount={openTaskCount}
+                trends={trends}
+                canEditRetainer={canEditClient && isAdmin}
+                onClientChanged={onClientChanged}
+              />
+              <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
+                <ClientDetailDeliveryCard
+                  client={client}
+                  tasks={tasks}
+                  periodLabel={periodLabel}
+                  canEdit={canEditClient}
+                  onSaved={onClientChanged}
+                />
+                <ClientDetailNotesCard
+                  notes={notes}
+                  teamMembers={notesTeamMembers}
+                  clientSlug={client.id}
+                  canCreate={canEditClient}
+                  disabledHint={notesDisabledHint}
+                  onCreated={onClientChanged}
+                  showAllHref={isGroup ? null : undefined}
+                />
+              </div>
+            </section>
+
+            <OverviewSection id="client-section-kundeinfo" title="Kundeinfo">
+              <ClientDetailMetaCard
+                client={client}
+                team={roster}
+                canEdit={canEditClient}
+                onSaved={onClientChanged}
+              />
+              <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-2 lg:items-start">
+                <ClientDetailContactsCard
+                  primaryContact={client.primaryContact}
+                  secondaryContact={client.secondaryContact}
+                  clientSlug={client.id}
+                  canEdit={canEditClient}
+                  onSaved={onClientChanged}
+                />
+                <ClientDetailContractCard contract={contract} isGroup={isGroup} />
+              </div>
+              <ClientDetailKundeinfoPanel
+                clientSlug={client.id}
+                clientName={client.name}
+                infoMd={infoMd}
+                canEdit={canEditKundeinfo}
+                onSaved={onKundeinfoSaved}
+                saveUrl={kundeinfoSaveUrl}
+              />
+            </OverviewSection>
+
+            <OverviewSection id="client-section-okonomi" title="Økonomi & aftale">
+              <ClientDetailCommercialEditor
+                client={client}
+                commercialLog={commercialLog}
+                canEdit={canEditClient && isAdmin}
+                onSaved={onClientChanged}
+              />
+              <ClientDetailUpsellsCard
+                client={client}
+                team={roster}
+                canEdit={canEditClient}
+                onSaved={onClientChanged}
+              />
+              <ClientDetailCommercialCard
+                client={client}
+                contract={contract}
+                contractDetailHref={contractDetailHref}
+              />
+              <ClientDetailRetainerTrendCard clientId={client.id} currency={client.currency} history={retainerHistory} />
+              <ClientDetailServiceMixCard client={client} canEdit={canEditClient} onSaved={onClientChanged} />
+            </OverviewSection>
+
+            <OverviewSection id="client-section-kvalitet" title="NPS & kvalitet">
+              <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <ClientDetailNpsCard client={client} />
+                <ClientDetailInsightsCard client={client} />
+              </div>
+              <ClientDetailAlertsCard clientId={client.id} alerts={visibleAlerts} />
+            </OverviewSection>
+          </div>
         ) : null}
 
         {resolvedTab === "opgaver" ? (
@@ -185,7 +276,12 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-opgaver" className="sr-only">
               Opgaver
             </h2>
-            <ClientDetailTasksCard tasks={tasks} clientLabel={client.name} team={team ?? notesTeamMembers ?? []} />
+            <ClientDetailTasksCard
+              tasks={tasks}
+              clientLabel={client.name}
+              team={roster ?? []}
+              departments={departments}
+            />
           </section>
         ) : null}
 
@@ -204,70 +300,10 @@ export function ClientDetailTabbedBody({
           </section>
         ) : null}
 
-        {resolvedTab === "kundeinfo" ? (
-          <section aria-labelledby="client-tab-kundeinfo" className={stack}>
-            <h2 id="client-tab-kundeinfo" className="sr-only">
-              Kundeinfo
-            </h2>
-            <ClientDetailContactsCard
-              primaryContact={client.primaryContact}
-              secondaryContact={client.secondaryContact}
-            />
-            <ClientDetailContractCard contract={contract} isGroup={isGroup} />
-            <ClientDetailKundeinfoPanel
-              clientSlug={client.id}
-              clientName={client.name}
-              infoMd={infoMd}
-              canEdit={canEditKundeinfo}
-              onSaved={onKundeinfoSaved}
-              saveUrl={kundeinfoSaveUrl}
-            />
-          </section>
-        ) : null}
-
-        {resolvedTab === "okonomi" ? (
-          <section aria-labelledby="client-tab-okonomi" className={stack}>
-            <h2 id="client-tab-okonomi" className="sr-only">
-              Økonomi og aftale
-            </h2>
-            <ClientDetailCommercialEditor
-              client={client}
-              commercialLog={commercialLog}
-              canEdit={canEditKundeinfo && !isGroup && isAdmin}
-              onSaved={onClientChanged}
-            />
-            <ClientDetailUpsellsCard
-              client={client}
-              team={team ?? notesTeamMembers}
-              canEdit={canEditKundeinfo && !isGroup}
-              onSaved={onClientChanged}
-            />
-            <ClientDetailCommercialCard
-              client={client}
-              contract={contract}
-              contractDetailHref={contractDetailHref}
-            />
-            <ClientDetailRetainerTrendCard clientId={client.id} currency={client.currency} history={retainerHistory} />
-          </section>
-        ) : null}
-
-        {resolvedTab === "kvalitet" ? (
-          <section aria-labelledby="client-tab-kvalitet" className={stack}>
-            <h2 id="client-tab-kvalitet" className="sr-only">
-              NPS og kvalitet
-            </h2>
-            <div className="grid gap-[length:var(--ds-studio-stack)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              <ClientDetailNpsCard client={client} />
-              <ClientDetailInsightsCard client={client} />
-            </div>
-            <ClientDetailAlertsCard clientId={client.id} alerts={visibleAlerts} />
-          </section>
-        ) : null}
-
         {resolvedTab === "tov" ? (
           <section aria-labelledby="client-tab-tov" className={stack}>
             <h2 id="client-tab-tov" className="sr-only">
-              Tone of Voice
+              Brand Core
             </h2>
             <TovWorkspace clientKey={client.id} />
           </section>

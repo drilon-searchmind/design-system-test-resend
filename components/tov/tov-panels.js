@@ -34,10 +34,20 @@ export function TovPreviewPanel({ clientKey, preview, model, onChanged }) {
     }
   }
 
+  function downloadHtml() {
+    if (!preview) return;
+    const blob = new Blob([preview.html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${(preview.title || "brand-core").toLowerCase().replace(/[^a-z0-9æøå]+/g, "-")}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   return (
     <TovCard
-      title="Eksempel (HTML-preview)"
-      hint="Genereres med modellen ud fra profilen og gemmes i databasen. Den genereres kun når du beder om det."
+      title="Brand guidelines (Brand Core-dokument)"
+      hint="Et brand guidelines-dokument med forside, brand essens, tone of voice, farver, typografi og budskaber. Teksterne skrives af modellen ud fra profilen; dokumentet gemmes i databasen og genereres kun når du beder om det. Download som HTML og udskriv som PDF fra browseren."
       actions={
         busy ? null : (
           <>
@@ -61,8 +71,13 @@ export function TovPreviewPanel({ clientKey, preview, model, onChanged }) {
                 ))}
               </div>
             : null}
+            {preview ?
+              <button type="button" onClick={downloadHtml} className={tovBtn}>
+                Download HTML
+              </button>
+            : null}
             <button type="button" onClick={generate} className={preview ? tovBtn : tovBtnPrimary}>
-              {preview ? "Generér nyt eksempel" : "Generér eksempel"}
+              {preview ? "Generér nyt dokument" : "Generér dokument"}
             </button>
           </>
         )
@@ -83,15 +98,15 @@ export function TovPreviewPanel({ clientKey, preview, model, onChanged }) {
           <div className="overflow-auto rounded-lg border border-border bg-white">
             {/* sandbox without allow-scripts: generated markup can never run code */}
             <iframe
-              title="Tone of Voice preview"
+              title="Brand Core – brand guidelines"
               sandbox=""
               srcDoc={preview.html}
-              style={{ width, maxWidth: "100%", height: 760, margin: "0 auto", display: "block", border: 0 }}
+              style={{ width, maxWidth: "100%", height: 880, margin: "0 auto", display: "block", border: 0 }}
             />
           </div>
         </>
       : <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center font-sans text-[13px] text-fg-muted">
-          Intet eksempel endnu.
+          Intet brand guidelines-dokument endnu.
         </p>}
     </TovCard>
   );
@@ -120,7 +135,7 @@ export function TovJsonPanel({ clientKey, profile, clientName, onChanged }) {
     const blob = new Blob([json], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `tov-${clientName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`;
+    a.download = `brand-core-${clientName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -214,7 +229,7 @@ export function TovPlaygroundPanel({ clientKey, model }) {
   return (
     <TovCard
       title="Omskriv i kundens tone"
-      hint="Indsæt en vilkårlig tekst (udkast, mail, annonce) og få den omskrevet i kundens Tone of Voice. Resultatet gemmes ikke."
+      hint="Indsæt en vilkårlig tekst (udkast, mail, annonce) og få den omskrevet i kundens tone of voice. Resultatet gemmes ikke."
       actions={
         busy ? null : (
           <button type="button" className={tovBtnPrimary} onClick={run} disabled={!text.trim()}>

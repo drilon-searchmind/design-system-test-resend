@@ -1,6 +1,6 @@
 import { ChatPanel } from "@/components/chat/chat-panel";
 
-export const metadata = { title: "AI Chat · Demo · 1337-crm by Searchmind" };
+export const metadata = { title: "AI Chat · Demo · Searchmind 1337 OS" };
 
 export default function ChatDemoPage() {
   return (

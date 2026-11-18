@@ -5,7 +5,7 @@ import { shellMainStudio } from "@/config/shell";
 import { requireAdminPage } from "@/lib/server/require-admin";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Brugerstyring · 1337-crm by Searchmind" };
+export const metadata = { title: "Brugerstyring · Searchmind 1337 OS" };
 
 function Fallback() {
   return (

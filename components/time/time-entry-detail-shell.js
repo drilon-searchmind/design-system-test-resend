@@ -20,6 +20,11 @@ function workedParts(iso) {
   return { d: s.slice(0, 10), t: `${s.slice(11, 13)}:${s.slice(14, 16)}` };
 }
 
+/** @param {string} name */
+function danishPossessive(name) {
+  return /[sxz]$/i.test(name) ? `${name}'` : `${name}s`;
+}
+
 /**
  * @param {{ entryId: string; dataSource: string }} p
  */
@@ -134,6 +139,10 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
       String(entryWire.mongoId).trim()
     : "";
   const fallbackIdTxt = typeof entryWire.id === "string" ? String(entryWire.id) : "";
+  const editingColleague = Boolean(bundle && typeof bundle === "object" && bundle.ownedByViewer === false);
+  const editable = db;
+  const ownerName =
+    typeof entryWire.memberName === "string" && entryWire.memberName.trim() ? entryWire.memberName.trim() : "";
 
   const save = useCallback(async () => {
     if (!db) return;
@@ -264,10 +273,16 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
             {`${dur || "—"} min`} kl. <span className="tabular-nums text-fg">{headerAt}</span>
             {" · "}
             {db ? "Live data" : "Eksempelvisning"}
+            {ownerName ?
+              <>
+                {" · "}
+                Registreret af <span className="font-semibold text-fg">{ownerName}</span>
+              </>
+            : null}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {db ?
+          {editable ?
             <>
               <button
                 type="button"
@@ -292,6 +307,12 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           : null}
         </div>
       </div>
+
+      {editingColleague ?
+        <p className="rounded-lg border border-agency-warn-border bg-agency-warn-soft px-3 py-2 font-sans text-[12px] text-fg">
+          Du redigerer <span className="font-semibold">{ownerName ? danishPossessive(ownerName) : "en kollegas"}</span> registrering.
+        </p>
+      : null}
 
       {typeof banner === "string" && banner.trim().length ?
         <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-3 py-2 font-sans text-[12px] text-agency-bad">
@@ -328,7 +349,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-1">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Minutter</span>
             <input
-              disabled={!db}
+              disabled={!editable}
               type="number"
               min={1}
               step={1}
@@ -337,7 +358,7 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
               className={cn(
                 "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px] tabular-nums",
                 "outline-none focus-visible:ring-2 focus-visible:ring-agency-brand",
-                !db && "opacity-65",
+                !editable && "opacity-65",
               )}
             />
           </label>
@@ -345,13 +366,13 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-1">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Dato arbejde</span>
             <input
-              disabled={!db}
+              disabled={!editable}
               type="date"
               value={workedDate}
               onChange={(ev) => setWorkedDate(ev.target.value.slice(0, 10))}
               className={cn(
                 "h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]",
-                !db && "opacity-65",
+                !editable && "opacity-65",
               )}
             />
           </label>
@@ -359,13 +380,13 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-1">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kl.</span>
             <input
-              disabled={!db}
+              disabled={!editable}
               type="time"
               value={workedTime}
               onChange={(ev) => setWorkedTime(ev.target.value.slice(0, 5))}
               className={cn(
                 "h-9 rounded-md border border-border bg-surface-muted px-2 text-[13px]",
-                !db && "opacity-65",
+                !editable && "opacity-65",
               )}
             />
           </label>
@@ -373,20 +394,20 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-2 md:col-span-2">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Note</span>
             <textarea
-              disabled={!db}
+              disabled={!editable}
               value={desc}
               onChange={(ev) => setDesc(ev.target.value)}
               rows={3}
               className={cn(
                 "rounded-md border border-border bg-surface-muted p-2 font-sans text-[13px]",
-                !db && "opacity-65",
+                !editable && "opacity-65",
               )}
             />
           </label>
 
           <label className="flex items-center gap-2 font-sans text-[13px] md:col-span-2">
             <input
-              disabled={!db}
+              disabled={!editable}
               type="checkbox"
               checked={billable}
               onChange={(ev) => {
@@ -402,13 +423,13 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-1">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Kunde</span>
             <select
-              disabled={!db || !billable}
+              disabled={!editable || !billable}
               value={billable ? clientSlug : ""}
               onChange={(ev) => {
                 setClientSlug(ev.target.value);
                 setTaskKey("");
               }}
-              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !db && "opacity-65")}
+              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !editable && "opacity-65")}
             >
               <option value="">—</option>
               <ClientPicklistOptions items={clientsPick} />
@@ -418,10 +439,10 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-1">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Afdeling</span>
             <select
-              disabled={!db}
+              disabled={!editable}
               value={departmentKey}
               onChange={(ev) => setDepartmentKey(ev.target.value)}
-              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !db && "opacity-65")}
+              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !editable && "opacity-65")}
             >
               <option value="">—</option>
               {departments.map((row) =>
@@ -437,10 +458,10 @@ export function TimeEntryDetailShell({ entryId, dataSource }) {
           <label className="flex flex-col gap-1 md:col-span-2">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-soft">Opgave</span>
             <select
-              disabled={!db || !billable}
+              disabled={!editable || !billable}
               value={taskKey}
               onChange={(ev) => setTaskKey(ev.target.value)}
-              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !db && "opacity-65")}
+              className={cn("h-9 rounded-md border border-border bg-surface-muted px-2 font-sans text-[13px]", !editable && "opacity-65")}
             >
               <option value="">—</option>
               {filteredTasks.map((t) => (

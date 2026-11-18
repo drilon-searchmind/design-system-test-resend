@@ -13,7 +13,7 @@ export function DensityPreference() {
     <div className="max-w-lg tally-panel p-6">
       <h2 className="font-sans text-base font-semibold text-fg">Layout density</h2>
       <p className="mt-2 font-sans text-sm text-fg-muted">
-        Searchmind Agency OS uses compact spacing by default. Spacious increases padding on
+        Searchmind 1337 OS uses compact spacing by default. Spacious increases padding on
         dashboard routes (DESIGN.md §10).
       </p>
       <div className="mt-4 inline-flex rounded-full border border-border p-0.5">

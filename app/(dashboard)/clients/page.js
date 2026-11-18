@@ -2,7 +2,7 @@ import { ClientsPortfolio } from "@/components/clients/clients-portfolio";
 import { shellMainStudio } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Kunder · 1337-crm by Searchmind" };
+export const metadata = { title: "Kunder · Searchmind 1337 OS" };
 
 export default function ClientsPage() {
   return (

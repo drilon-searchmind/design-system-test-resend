@@ -3,6 +3,7 @@
 import { StickyPageHeader } from "@/components/crm/sticky-page-header";
 import Link from "next/link";
 
+import { TaskDetailInlineTitle } from "@/components/tasks/task-detail-inline-fields";
 import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
 import { PulseIconDownload } from "@/components/pulse/pulse-icons";
 import { routes } from "@/config/routes";
@@ -29,6 +30,8 @@ import { cn } from "@/lib/utils";
  *   showExport?: boolean;
  *   embedded?: boolean;
  *   onClose?: () => void;
+ *   onTitleSave?: (next: string) => Promise<boolean>;
+ *   titleStatus?: import('@/components/tasks/use-task-field-save').TaskFieldStatus | null;
  * }} props
  */
 export function TaskDetailHeader({
@@ -39,6 +42,8 @@ export function TaskDetailHeader({
   showExport = true,
   embedded = false,
   onClose,
+  onTitleSave,
+  titleStatus = null,
 }) {
   const isSubTask = task.isSubTask === true && Boolean(String(task.parentTaskId ?? "").trim());
   const subtitleTrimmed = subtitle.trim();
@@ -85,7 +90,12 @@ export function TaskDetailHeader({
               </p>
               {isSubTask ? <TaskSubtaskBadge compact /> : null}
             </div>
-            <h1 className="mt-2 font-sans text-[22px] font-semibold tracking-tight text-fg md:mt-3">{task.title}</h1>
+            <TaskDetailInlineTitle
+              title={task.title}
+              readOnly={!onTitleSave}
+              status={titleStatus}
+              onSave={onTitleSave}
+            />
             <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
               {task.clientName}
               {subtitleTrimmed ?

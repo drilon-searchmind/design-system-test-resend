@@ -222,6 +222,20 @@ export function IconBell({ className, size = 16 }) {
   );
 }
 
+export function IconToolbox({ className, size = 16 }) {
+  return (
+    <svg {...svgProps(size)} className={cn("shrink-0", className)}>
+      <path
+        d="M4 9.5h16v8.5a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 18V9.5zM9 9.5V7a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 7v2.5M4 13.5h16M10.5 13.5v1.5h3v-1.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ICONS = {
   pulse: IconChart,
   clients: IconUsers,
@@ -235,6 +249,7 @@ const ICONS = {
   nps: IconSparkle,
   tov: IconVoice,
   kb: IconDoc,
+  toolbox: IconToolbox,
   team: IconUser,
   users: IconShield,
   reports: IconDoc,

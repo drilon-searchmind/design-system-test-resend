@@ -5,7 +5,7 @@ export function NpsPlaybookCard() {
         Playbook (&quot;hvad nu?&quot;)
       </h2>
       <p className="mt-2 font-sans text-[11px] leading-snug text-fg-muted">
-        Standardiserede flows i Agency OS når målinger falder eller promotorer skal aktiveres — fuld automations-UI kommer senere.
+        Standardiserede flows i 1337 OS når målinger falder eller promotorer skal aktiveres — fuld automations-UI kommer senere.
       </p>
       <ul className="mt-4 space-y-2.5 font-sans text-[12px] text-fg-muted">
         <li className="flex gap-2">

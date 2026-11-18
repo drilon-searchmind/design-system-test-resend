@@ -25,6 +25,7 @@ export const routes = {
   users: "/users",
   notifications: "/notifications",
   reports: "/reports",
+  toolbox: "/toolbox",
   chat: "/chat",
   /** Scripted AI Chat demo (Slack-like) reached from the AI Chat one-pager */
   chatDemo: "/chat/demo",

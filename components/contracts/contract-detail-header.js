@@ -35,14 +35,15 @@ export function ContractDetailHeader({
   renewalReferenceIso = CONTRACT_DEMO_REF_DATE,
   trailing,
 }) {
+  const hasRenewal = Number.isFinite(daysUntilRenewal);
   const countdown =
-    contract.accountStatus !== "active"
-      ? `Status ${contract.accountStatus}. Kalenderafstand til fornyelsesdato: ${daysUntilRenewal} d (${daysUntilRenewal < 0 ? "papir er overskredet" : " stadig aktiv dato på kontrakten"}).`
-      : daysUntilRenewal < 0
-        ? `Fornyelse overskredet med ${Math.abs(daysUntilRenewal)} d vs. reference ${renewalReferenceIso}`
-        : daysUntilRenewal === 0
-          ? "Fornyelse i dag "
-          : `Ca. ${daysUntilRenewal} d til fornyelse (reference ${renewalReferenceIso})`;
+    contract.accountStatus === "pending_signature" ? "Afventer kundens underskrift"
+    : contract.accountStatus === "paused" ? "Aftalen er sat på pause"
+    : contract.accountStatus === "inactive" ? "Aftalen er afsluttet"
+    : !hasRenewal ? "Ingen fornyelsesdato"
+    : daysUntilRenewal < 0 ? `Fornyelse overskredet med ${Math.abs(daysUntilRenewal)} d (pr. ${renewalReferenceIso})`
+    : daysUntilRenewal === 0 ? "Fornyelse i dag"
+    : `Fornyelse om ${daysUntilRenewal} d (pr. ${renewalReferenceIso})`;
 
   return (
     <>
@@ -56,7 +57,7 @@ export function ContractDetailHeader({
         <span className="mx-2 text-fg-quiet">/</span>
         <span className="text-fg">{contract.clientName}</span>
         <span className="mx-2 text-fg-quiet">/</span>
-        <span className="text-[11px] text-fg-muted">{contract.id}</span>
+        <span className="font-mono text-[11px] text-fg-quiet">{contract.id}</span>
       </nav>
 
       <StickyPageHeader className="flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-start md:justify-between">
@@ -77,15 +78,32 @@ export function ContractDetailHeader({
               Aftale · {contract.kind}
             </p>
             <h1 className="font-sans text-[22px] font-semibold tracking-tight text-fg">{contract.clientName}</h1>
-            <p className="mt-1 max-w-prose font-sans text-[13px] leading-snug text-fg-muted">
-              {industry ? <span>{industry} · </span> : null}
-              <span>{countdown}</span>
+            <p className="mt-1 flex max-w-prose flex-wrap gap-x-2 gap-y-0.5 font-sans text-[13px] leading-snug text-fg-muted">
+              {industry ? (
+                <>
+                  <span>{industry}</span>
+                  <span aria-hidden className="text-fg-quiet">·</span>
+                </>
+              ) : null}
+              <span
+                className={cn(
+                  contract.accountStatus === "active" && hasRenewal && daysUntilRenewal < 0 && "text-agency-bad",
+                  contract.accountStatus === "active" &&
+                    hasRenewal &&
+                    daysUntilRenewal >= 0 &&
+                    daysUntilRenewal <= 30 &&
+                    "text-agency-warn",
+                )}
+              >
+                {countdown}
+              </span>
               {owner ? (
                 <>
-                  {" "}
-                  · Ansvarlig:{" "}
-                  <span className="text-fg">{owner.name}</span>
-                  <span className="text-fg-muted"> ({owner.role})</span>
+                  <span aria-hidden className="text-fg-quiet">·</span>
+                  <span>
+                    Ansvarlig <span className="text-fg">{owner.name}</span>
+                    {owner.role ? <span className="text-fg-quiet"> ({owner.role})</span> : null}
+                  </span>
                 </>
               ) : null}
             </p>

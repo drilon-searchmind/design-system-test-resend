@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
  *   responses: number;
  *   medianHoursToRespond: number;
  *   invitationsLabel?: string;
+ *   windowLabel?: string;
  * }} props
  */
 export function NpsSecondaryMetrics({
@@ -21,8 +22,9 @@ export function NpsSecondaryMetrics({
   responses,
   medianHoursToRespond,
   invitationsLabel = "Invitationer",
+  windowLabel = "",
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const upliftTone = improving >= 4 ? "ok" : improving > 0 ? "brand" : "warn";
 
   return (
@@ -35,7 +37,7 @@ export function NpsSecondaryMetrics({
         <div>
           <h2 className="font-sans text-sm font-semibold text-fg">Detaljerede målinger</h2>
           <p className="mt-0.5 font-sans text-[11px] text-fg-muted">
-            Invitationer, svartid og forbedrede konti.
+            Invitationer, svartid og forbedrede konti{windowLabel ? ` · ${windowLabel}` : ""}.
           </p>
         </div>
         <span className="text-[11px] font-medium text-agency-brand">{open ? "Skjul" : "Vis"}</span>
@@ -47,7 +49,7 @@ export function NpsSecondaryMetrics({
           open ? "grid" : "hidden",
         )}
       >
-        <PulseKpiCard label="Opad (+2 eller mere)" value={String(improving)} tone={upliftTone} />
+        <PulseKpiCard label="Opad (+2 vs. forrige 2 mdr.)" value={String(improving)} tone={upliftTone} />
         <PulseKpiCard label={invitationsLabel} value={String(invitations)} tone="brand" />
         <PulseKpiCard label="Svar modtaget" value={String(responses)} tone="ok" />
         <PulseKpiCard

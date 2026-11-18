@@ -1,3 +1,4 @@
+import { sessionUserIsAdmin } from "@/lib/auth/session-admin";
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
@@ -16,7 +17,8 @@ export async function GET(req) {
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
 
   try {
-    const bundle = await fetchPulseBundle(withReportPeriodRequest({ includeTest }, resolved));
+    const isAdmin = await sessionUserIsAdmin(authResult.session);
+    const bundle = await fetchPulseBundle(withReportPeriodRequest({ includeTest, isAdmin }, resolved));
     return NextResponse.json(bundle);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Kunne ikke hente Pulse-data";

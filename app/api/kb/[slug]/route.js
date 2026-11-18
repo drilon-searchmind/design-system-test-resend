@@ -46,12 +46,10 @@ export async function PATCH(req, ctx) {
       bodyMd: typeof body?.bodyMd === "string" ? body.bodyMd : undefined,
       sectionId: typeof body?.sectionId === "string" ? body.sectionId : undefined,
       published: typeof body?.published === "boolean" ? body.published : undefined,
-      audience: typeof body?.audience === "string" ? body.audience : undefined,
       featured: typeof body?.featured === "boolean" ? body.featured : undefined,
       icon: body?.icon === null || typeof body?.icon === "string" ? body.icon : undefined,
       headerImageUrl:
         body?.headerImageUrl === null || typeof body?.headerImageUrl === "string" ? body.headerImageUrl : undefined,
-      tags: Array.isArray(body?.tags) ? body.tags.map(String) : undefined,
       archived: typeof body?.archived === "boolean" ? body.archived : undefined,
     });
 

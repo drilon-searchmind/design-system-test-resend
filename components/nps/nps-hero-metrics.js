@@ -44,6 +44,7 @@ function NpsHintKpiCard({ hintLabel, hintTitle, hintBody, value, tone = "brand" 
  *   atRisk: number;
  *   responseRate: number;
  *   responseRateLabel?: string;
+ *   windowLabel?: string;
  * }} props
  */
 export function NpsHeroMetrics({
@@ -54,6 +55,7 @@ export function NpsHeroMetrics({
   atRisk,
   responseRate,
   responseRateLabel = "Svarfrekvens",
+  windowLabel = "Seneste 2 måneder",
 }) {
   const delta = avgLatest != null && avgPrev != null ? avgLatest - avgPrev : null;
   const deltaTone =
@@ -64,36 +66,39 @@ export function NpsHeroMetrics({
   const riskTone = atRisk > 2 ? "bad" : atRisk > 0 ? "warn" : "ok";
 
   return (
-    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-5">
-      <NpsHintKpiCard
-        hintLabel="Bureau NPS"
-        hintTitle="Bureau NPS"
-        hintBody="Gennemsnit af hver kontos seneste score (0–100). ≥50 sund, 40–49 observation, under 40 kritisk."
-        value={avgLatest != null ? avgLatest.toFixed(1) : "—"}
-        tone={latestTone}
-      />
-      <NpsHintKpiCard
-        hintLabel="Δ vs. forrige"
-        hintTitle="Delta vs. forrige bølge"
-        hintBody="Forskel mellem seneste og forrige måling pr. konto — gennemsnit på tværs af konti med to eller flere målinger."
-        value={delta != null ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}` : "—"}
-        tone={deltaTone}
-      />
-      <NpsHintKpiCard
-        hintLabel="Konti målt"
-        hintTitle="Konti målt i rollup"
-        hintBody="Antal konti med mindst én NPS-måling ud af alle aktive og pauserede kunder."
-        value={`${measured} / ${rollupTotal}`}
-        tone={covTone}
-      />
-      <PulseKpiCard label={responseRateLabel} value={formatPercent(responseRate)} tone="brand" />
-      <NpsHintKpiCard
-        hintLabel="< 40 (kritisk)"
-        hintTitle="Kritiske konti"
-        hintBody="Konti hvor seneste NPS-score er under 40."
-        value={String(atRisk)}
-        tone={riskTone}
-      />
+    <section className="flex flex-col gap-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">{windowLabel}</p>
+      <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-5">
+        <NpsHintKpiCard
+          hintLabel="Bureau NPS"
+          hintTitle="Bureau NPS · seneste 2 måneder"
+          hintBody="Gennemsnit af hver kontos seneste score (0–100) blandt svar modtaget de seneste 2 måneder. ≥50 sund, 40–49 observation, under 40 kritisk."
+          value={avgLatest != null ? avgLatest.toFixed(1) : "—"}
+          tone={latestTone}
+        />
+        <NpsHintKpiCard
+          hintLabel="Δ vs. forrige 2 mdr."
+          hintTitle="Delta vs. forrige 2-måneders periode"
+          hintBody="Bureau NPS for de seneste 2 måneder minus Bureau NPS for de 2 måneder før."
+          value={delta != null ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}` : "—"}
+          tone={deltaTone}
+        />
+        <NpsHintKpiCard
+          hintLabel="Konti målt"
+          hintTitle="Konti målt · seneste 2 måneder"
+          hintBody="Antal konti med mindst ét NPS-svar de seneste 2 måneder ud af alle aktive og pauserede kunder."
+          value={`${measured} / ${rollupTotal}`}
+          tone={covTone}
+        />
+        <PulseKpiCard label={responseRateLabel} value={formatPercent(responseRate)} tone="brand" />
+        <NpsHintKpiCard
+          hintLabel="< 40 (kritisk)"
+          hintTitle="Kritiske konti"
+          hintBody="Konti hvor seneste NPS-score inden for de seneste 2 måneder er under 40."
+          value={String(atRisk)}
+          tone={riskTone}
+        />
+      </div>
     </section>
   );
 }

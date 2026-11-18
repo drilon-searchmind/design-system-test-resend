@@ -214,7 +214,7 @@ const FLOWS = [
 ];
 
 const STEPS = [
-  { n: "1", t: "CRM-data", d: "Kunder, kontrakter, tid, opgaver, NPS, økonomi og viden — alt samlet i ét CRM (Searchmind Agency OS)." },
+  { n: "1", t: "CRM-data", d: "Kunder, kontrakter, tid, opgaver, NPS, økonomi og viden — alt samlet i ét CRM (Searchmind 1337 OS)." },
   { n: "2", t: "Apex MCP", d: "Al performance-data flyder fra Apex MCP direkte ind i Searchmind MCP." },
   { n: "3", t: "Searchmind MCP", d: "Eksponerer CRM + performance som MCP-tools. Read (GET) på alle endpoints; mutating kald kun på whitelist med RBAC. Under opbygning." },
   { n: "4", t: "2-vejs i chat", d: "Slack og Claude kan læse alt i CRM. Opret/opdater/slet er begrænset til whitelistede endpoints — pt. opgaver og tidsregistrering." },
@@ -394,7 +394,7 @@ export function AiChatOverview() {
           <BrandLogo size={BRAND_LOGO_SIZE.sidebarExpanded} className="mt-0.5" />
           <div className="min-w-0">
           <p className="mb-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-fg-quiet">
-            AI Chat · Searchmind Agency OS
+            AI Chat · Searchmind 1337 OS
           </p>
           <h1
             style={{
@@ -409,7 +409,7 @@ export function AiChatOverview() {
             Datastrøm → MCP → Slack &amp; Claude
           </h1>
           <p className="mt-1 max-w-[80ch] font-sans text-[12.5px] leading-snug text-fg-muted">
-            Alt CRM-data fra Searchmind Agency OS — plus performance-data fra Apex MCP — samles i én
+            Alt CRM-data fra Searchmind 1337 OS — plus performance-data fra Apex MCP — samles i én
             Searchmind MCP-server. Fra Slack og Claude kan medarbejderne{" "}
             <b className="font-semibold text-fg">læse alle CRM-endpoints</b> (GET/read).{" "}
             <b className="font-semibold text-fg">Opret, opdater og slet</b> (CREATE/UPDATE/DELETE) er kun
@@ -475,7 +475,7 @@ export function AiChatOverview() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 13.5, fontWeight: 700, letterSpacing: "-0.01em" }} className="text-fg">CRM</div>
-              <div style={{ fontSize: 10 }} className="text-fg-quiet">Searchmind Agency OS</div>
+              <div style={{ fontSize: 10 }} className="text-fg-quiet">Searchmind 1337 OS</div>
             </div>
             <span
               className="font-mono"

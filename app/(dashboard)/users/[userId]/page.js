@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata({ params }) {
   const { userId } = await params;
   const demo = getAgencyUserById(userId);
-  if (demo) return { title: `${demo.name} · Brugerstyring · 1337-crm by Searchmind` };
+  if (demo) return { title: `${demo.name} · Brugerstyring · Searchmind 1337 OS` };
 
   const oid = parseUserAccountId(userId);
   if (oid) {
@@ -21,13 +21,13 @@ export async function generateMetadata({ params }) {
       await connectDb();
       const doc = await User.findById(oid).select("name email").lean();
       const name = doc?.name ? String(doc.name) : doc?.email ? String(doc.email) : null;
-      if (name) return { title: `${name} · Brugerstyring · 1337-crm by Searchmind` };
+      if (name) return { title: `${name} · Brugerstyring · Searchmind 1337 OS` };
     } catch {
       /* Mongo utilgængelig */
     }
   }
 
-  return { title: "Bruger · Brugerstyring · 1337-crm by Searchmind" };
+  return { title: "Bruger · Brugerstyring · Searchmind 1337 OS" };
 }
 
 /** @param {{ params: Promise<{ userId: string }> }} props */

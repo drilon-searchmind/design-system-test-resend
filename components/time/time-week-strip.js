@@ -27,7 +27,7 @@ export function TimeWeekStrip({ days, dailyTargetMinutes, weekCaption }) {
           </h2>
           <p className="mt-1 font-sans text-[11px] leading-snug text-fg-muted">
             Registreret tid pr. dag mod mål {formatHoursDecimalDa(dailyTargetMinutes)} (7,5 t). Weekend vises for
-            kontekst — typisk 0 i Agency OS.
+            kontekst — typisk 0 i 1337 OS.
           </p>
         </div>
         <p className="text-[10px] font-semibold uppercase tracking-wide text-fg-quiet">{weekCaption}</p>

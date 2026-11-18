@@ -1,13 +1,19 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+
 import { CrmHoverPopover } from "@/components/crm/crm-hover-popover";
 import { formatCurrency, formatCurrencyCompact, formatIsoDateDa } from "@/lib/crm/format-da";
 import { UPSELL_TYPES, formatUpsellPeriodDa } from "@/lib/crm/upsell-utils";
 import { cn } from "@/lib/utils";
 
 /**
- * Detaljer om opsalg (til hover) — hvem, hvornår, hvilken periode, beløb og beskrivelse.
+ * Detaljer om opsalg (til hover) — hvornår, hvilken periode, beløb og beskrivelse. Sælger vises kun for admins.
  * @param {{ items: import("@/lib/crm/upsell-utils").UpsellItem[]; currency?: string; showClient?: boolean }} props
  */
 export function UpsellDetails({ items, currency = "DKK", showClient = false }) {
+  const { data: session } = useSession();
+  const showSeller = session?.user?.isAdmin === true;
   return (
     <ul className="max-w-xs space-y-2.5 text-[12px] leading-snug text-fg-muted">
       {items.map((u) => (
@@ -21,7 +27,8 @@ export function UpsellDetails({ items, currency = "DKK", showClient = false }) {
           </div>
           <div className="mt-0.5 text-fg-quiet">
             {showClient && u.clientName ? `${u.clientName} · ` : ""}
-            {formatUpsellPeriodDa(u)} · solgt af {u.soldBy}
+            {formatUpsellPeriodDa(u)}
+            {showSeller && u.soldBy ? ` · solgt af ${u.soldBy}` : ""}
             {u.soldAt ? ` · ${formatIsoDateDa(u.soldAt)}` : ""}
           </div>
           {u.description ? <p className="mt-1">{u.description}</p> : null}

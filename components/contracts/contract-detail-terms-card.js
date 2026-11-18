@@ -1,5 +1,6 @@
 import { StatusChip } from "@/components/crm/status-chip";
-import { formatCurrency } from "@/lib/crm/format-da";
+import { isRecurringContractType, serviceLineUnitDa } from "@/lib/contracts/contract-services";
+import { formatCurrency, formatIsoDateDa } from "@/lib/crm/format-da";
 
 function billingCadence(kind) {
   if (kind === "Projekt") return "Miljøbaseret · afstemmes pr. sprint";
@@ -28,6 +29,12 @@ export function ContractDetailTermsCard({ contract }) {
   const signingState = typeof contract.signingState === "string" ? contract.signingState : "";
   const isSigned = signingState === "signed" || Boolean(contract.signedAt);
   const isPending = signingState === "pending" || contract.accountStatus === "pending_signature";
+  const contractType = typeof contract.type === "string" ? contract.type : undefined;
+  const recurring = isRecurringContractType(contractType);
+  /** @type {Array<{ key: string; name: string; amount: number; billing?: string }>} */
+  const serviceLines = Array.isArray(contract.serviceLines) ? contract.serviceLines : [];
+  /** @param {{ key: string; billing?: string }} l */
+  const lineUnit = (l) => serviceLineUnitDa(l, contractType);
 
   return (
     <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
@@ -60,21 +67,25 @@ export function ContractDetailTermsCard({ contract }) {
             </div>
             <div>
               <dt className="text-fg-soft">Gyldighed — start</dt>
-              <dd className="mt-1 tabular-nums text-fg">{contract.startedAt || "—"}</dd>
+              <dd className="mt-1 tabular-nums text-[13px] text-fg">
+                {contract.startedAt ? formatIsoDateDa(contract.startedAt) : "—"}
+              </dd>
             </div>
             <div>
               <dt className="text-fg-soft">Gyldighed — fornyelse</dt>
-              <dd className="mt-1 tabular-nums text-fg">{contract.renewalAt || "—"}</dd>
+              <dd className="mt-1 tabular-nums text-[13px] text-fg">
+                {contract.renewalAt ? formatIsoDateDa(contract.renewalAt) : "—"}
+              </dd>
             </div>
             <div>
-              <dt className="text-fg-soft">Kontraktøkonomi (md)</dt>
-              <dd className="mt-1 tabular-nums text-fg">
+              <dt className="text-fg-soft">{recurring ? "Kontraktværdi (md)" : "Kontraktværdi"}</dt>
+              <dd className="mt-1 tabular-nums text-[13px] font-semibold text-fg">
                 {formatCurrency(contract.monthlyValue, contract.currency)}
               </dd>
             </div>
             <div>
               <dt className="text-fg-soft">Varsel opsigelse</dt>
-              <dd className="mt-1 tabular-nums text-fg">{contract.noticeDays} kalenderdage</dd>
+              <dd className="mt-1 tabular-nums text-[13px] text-fg">{contract.noticeDays} kalenderdage</dd>
             </div>
             <div className="sm:col-span-2">
               <dt className="text-fg-soft">Faktureringsrytme</dt>
@@ -112,6 +123,25 @@ export function ContractDetailTermsCard({ contract }) {
             : null}
           </dl>
 
+          <div className="flex flex-col gap-4">
+          {serviceLines.length ?
+            <div className="overflow-hidden rounded-xl border border-border-soft">
+              <h3 className="border-b border-border-soft bg-surface-muted px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
+                Servicelinjer
+              </h3>
+              <ul className="divide-y divide-border-soft">
+                {serviceLines.map((l) => (
+                  <li key={l.key} className="flex items-center justify-between gap-3 px-4 py-2">
+                    <span className="min-w-0 truncate font-sans text-[13px] text-fg">{l.name}</span>
+                    <span className="shrink-0 font-sans text-[12px] tabular-nums text-fg-muted">
+                      {l.amount > 0 ? formatCurrency(l.amount, contract.currency) : "—"}{" "}
+                      <span className="text-fg-quiet">{lineUnit(l)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          : null}
           <div className="rounded-xl border border-border-soft bg-surface-muted/35 p-4">
             <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
               Dækningsnote
@@ -121,6 +151,7 @@ export function ContractDetailTermsCard({ contract }) {
               <li>Ikke inkluderet: medie-forbrug uden for godkendte caps, tredjepartslicenser, rejser.</li>
               <li>Overtid faktureres efter gældende bureau-sats når kunden godkender på forhånd.</li>
             </ul>
+          </div>
           </div>
         </div>
 

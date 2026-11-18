@@ -1,7 +1,7 @@
 import { shellPaddingX } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Terms · 1337-crm by Searchmind" };
+export const metadata = { title: "Terms · Searchmind 1337 OS" };
 
 export default function TermsPage() {
   return (

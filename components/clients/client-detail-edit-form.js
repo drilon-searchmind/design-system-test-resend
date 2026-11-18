@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import {
   CHURN_REASON_LABELS,
   CHURN_REASONS,
+  industryOptionsWith,
   LEAD_SOURCE_LABELS,
   LEAD_SOURCES,
 } from "@/lib/crm/client-utils";
@@ -76,11 +77,18 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
             />
           </Field>
           <Field label="Branche">
-            <input
-              value={draft.industry}
+            <select
+              value={draft.industry ?? ""}
               onChange={(e) => setField("industry", e.target.value)}
               className={clientEditInputClass}
-            />
+            >
+              <option value="">Vælg branche…</option>
+              {industryOptionsWith(draft.industry).map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="CVR">
             <input
@@ -357,6 +365,7 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
               className={clientEditInputClass}
             >
               <option value="monthly">Månedlig</option>
+              <option value="bimonthly">Hver 2. måned</option>
               <option value="quarterly">Kvartalsvis</option>
               <option value="biannual">Halvårlig</option>
             </select>

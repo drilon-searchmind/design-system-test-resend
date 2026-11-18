@@ -75,7 +75,10 @@ export function ContractDetailShell({ contractId }) {
     if (!client) {
       return (
         <p className="font-sans text-[13px] text-fg-muted">
-          Mangler tilknyttet kunde. <Link href={routes.contracts}>Tilbage</Link>
+          Mangler tilknyttet kunde.{" "}
+          <Link href={routes.contracts} className="text-agency-brand hover:underline">
+            Tilbage til Kontrakter
+          </Link>
         </p>
       );
     }
@@ -214,10 +217,22 @@ export function ContractDetailShell({ contractId }) {
 
   if (dataSource === "database") {
     return (
-      <div className="space-y-3">
-        <div className="h-8 animate-pulse rounded-lg bg-skeleton" />
-        <div className="h-24 animate-pulse rounded-2xl bg-skeleton" />
-        <div className="h-40 animate-pulse rounded-2xl bg-skeleton" />
+      <div className="flex flex-col gap-[length:var(--ds-studio-stack)]" aria-busy="true">
+        <div className="h-4 w-56 animate-pulse rounded bg-skeleton" />
+        <div className="flex items-start gap-4">
+          <div className="size-14 shrink-0 animate-pulse rounded-xl bg-skeleton md:size-[60px]" />
+          <div className="flex flex-1 flex-col gap-2">
+            <div className="h-3 w-28 animate-pulse rounded bg-skeleton" />
+            <div className="h-6 w-64 animate-pulse rounded bg-skeleton" />
+            <div className="h-4 w-80 max-w-full animate-pulse rounded bg-skeleton" />
+          </div>
+        </div>
+        <div className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-[88px] animate-pulse rounded-2xl bg-skeleton md:h-[100px]" />
+          ))}
+        </div>
+        <div className="h-48 animate-pulse rounded-2xl bg-skeleton" />
       </div>
     );
   }

@@ -15,6 +15,7 @@ export async function GET(req, ctx) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;
 
+  const isAdminPromise = sessionUserIsAdmin(authResult.session);
   const { clientId } = await ctx.params;
   const includeTest = readIncludeTest(req);
   const resolved = resolveReportPeriodRequest(req.nextUrl.searchParams);
@@ -25,6 +26,7 @@ export async function GET(req, ctx) {
         {
           clientKey: clientId,
           includeTest,
+          isAdmin: await isAdminPromise,
         },
         resolved,
       ),

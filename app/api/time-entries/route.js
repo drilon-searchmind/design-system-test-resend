@@ -1,7 +1,11 @@
 import { readIncludeTest } from "@/lib/server/include-test";
 import { NextResponse } from "next/server";
 
-import { createTimeEntryMongo, fetchTimeEntriesPortfolio } from "@/lib/server/time-entries-data";
+import {
+  createTimeEntryMongo,
+  fetchTimeEntriesPortfolio,
+  fetchTimeEntryRegisterPicklists,
+} from "@/lib/server/time-entries-data";
 import { requireSession } from "@/lib/server/require-session";
 import {
   buildReportMonthCalendarCells,
@@ -21,6 +25,9 @@ import {
  *
  * Mangler måned OG datointerval: default er **aktuelt rapportår/måned** (samme som Opgaver).
  *
+ * Admins: `memberKey=<teammedlem>` / `userId=<User._id>` / `memberKey=all` for andres poster.
+ * `picklists=1` returnerer kun kunde-/opgavelister til «Registrér tid».
+ *
  * @param {import('next/server').NextRequest} req
  */
 export async function GET(req) {
@@ -28,6 +35,19 @@ export async function GET(req) {
   if ("response" in authResult) return authResult.response;
 
   const includeTest = readIncludeTest(req);
+
+  if (req.nextUrl.searchParams.get("picklists") === "1") {
+    try {
+      return NextResponse.json(await fetchTimeEntryRegisterPicklists(authResult.session, includeTest));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Kunne ikke hente lister";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
+  /** Kun admins: håndhæves i `fetchTimeEntriesPortfolio` — ikke-admins får altid egne poster. */
+  const memberKey = req.nextUrl.searchParams.get("memberKey");
+  const userId = req.nextUrl.searchParams.get("userId");
 
   /** @typedef {{ year: number; month: number }} RP */
   /** @type {RP | null} */
@@ -73,6 +93,8 @@ export async function GET(req) {
         includeTest,
         fromIso,
         toIso,
+        memberKey,
+        userId,
       })
     );
 

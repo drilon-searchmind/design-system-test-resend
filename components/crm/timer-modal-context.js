@@ -2,7 +2,10 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-/** @typedef {{ clientSlug?: string; taskKey?: string; trackMode?: "timer" | "manual"; billable?: boolean }} TimerLaunchOptions */
+/**
+ * `trackMode` bevares for bagudkompatibilitet, men ignoreres — modalen er altid manuel registrering.
+ * @typedef {{ clientSlug?: string; taskKey?: string; trackMode?: "timer" | "manual"; billable?: boolean }} TimerLaunchOptions
+ */
 
 /** @typedef {{
  *   open: boolean;
@@ -15,7 +18,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 const TimerModalContext = createContext(null);
 
 /**
- * Holds timer modal open state for the authenticated CRM shell.
+ * Holds «Registrér tid»-modal open state for the authenticated CRM shell.
  * @param {{ children: import("react").ReactNode }} props
  */
 export function TimerModalProvider({ children }) {

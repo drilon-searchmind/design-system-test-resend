@@ -2,7 +2,7 @@ import { TovClientPage } from "@/components/tov/tov-client-page";
 import { shellMainStudio } from "@/config/shell";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Tone of Voice · 1337-crm by Searchmind" };
+export const metadata = { title: "Brand Core · Searchmind 1337 OS" };
 
 export default async function TovClientRoute({ params }) {
   const { clientId } = await params;

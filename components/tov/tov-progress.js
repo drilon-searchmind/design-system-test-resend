@@ -125,17 +125,17 @@ const ANALYZE_STAGES = [
 ];
 
 const PREVIEW_STAGES = [
-  { from: 0, label: "Læser Tone of Voice-profilen", detail: "Typografi, farver og stemme hentes ind." },
-  { from: 10, label: "Planlægger layoutet", detail: "Sektioner, hierarki og eksempeltekst." },
-  { from: 30, label: "Skriver eksempelindhold", detail: "Tekst i kundens tone og sprog." },
-  { from: 55, label: "Anvender typografi og farver", detail: "Fonte, størrelser og palette sættes på markup." },
-  { from: 80, label: "Bygger HTML-eksemplet", detail: "Næsten færdig — siden samles og gemmes." },
+  { from: 0, label: "Læser Brand Core-profilen", detail: "Typografi, farver og stemme hentes ind." },
+  { from: 10, label: "Skriver brand essens", detail: "Essens, historie og kerneværdier." },
+  { from: 30, label: "Formulerer tone of voice-principper", detail: "Principper med gør/undgå-eksempler." },
+  { from: 55, label: "Skriver budskaber", detail: "Eksempler i kundens tone og sprog." },
+  { from: 80, label: "Opsætter dokumentet", detail: "Næsten færdig — forside, farver og typografi sættes op og gemmes." },
 ];
 
 const REWRITE_STAGES = [
   { from: 0, label: "Læser din tekst", detail: "Indholdet forberedes til omskrivning." },
   { from: 8, label: "Matcher kundens tone", detail: "Personlighed, tiltaleform og ordvalg." },
-  { from: 35, label: "Omskriver", detail: "Teksten tilpasses Tone of Voice-profilen." },
+  { from: 35, label: "Omskriver", detail: "Teksten tilpasses kundens tone of voice." },
   { from: 70, label: "Finpudser", detail: "Tjekker længde, klarhed og stil." },
 ];
 
@@ -156,7 +156,7 @@ export function TovAnalysisProgress({ startedAt, modelLabel = "", sourceCount = 
   ].filter(Boolean);
   return (
     <TovProgressCard
-      title="Analyserer Tone of Voice"
+      title="Analyserer Brand Core"
       stages={ANALYZE_STAGES}
       startedAt={startedAt}
       cancelLabel="Afbryd analyse"
@@ -171,7 +171,7 @@ export function TovAnalysisProgress({ startedAt, modelLabel = "", sourceCount = 
 export function TovPreviewProgress({ modelLabel = "" }) {
   return (
     <TovProgressCard
-      title="Genererer HTML-eksempel"
+      title="Genererer brand guidelines"
       stages={PREVIEW_STAGES}
       footer={`${modelLabel ? `${modelLabel} · ` : ""}typisk 30–90 sek. Eksemplet gemmes i databasen når det er klar.`}
     />

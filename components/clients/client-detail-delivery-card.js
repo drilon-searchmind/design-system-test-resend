@@ -1,51 +1,95 @@
-import { PulseSparkline } from "@/components/pulse/pulse-sparkline";
+"use client";
+
+import { parseQuickNumber, patchClient, QuickEditPopover, QUICK_EDIT_DEMO_HINT } from "@/components/clients/client-quick-edit";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
 import { formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
+import { taskIsDone } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 /**
- * @param {{ client: import('@/lib/crm/static-data').CLIENTS[number] }} props
+ * Budget (timebudget), estimeret (åbne opgaver), faktisk brugt i perioden og % af budget.
+ * @param {{
+ *   client: import('@/lib/crm/static-data').CLIENTS[number];
+ *   tasks?: Array<{ status: string; estimateHours?: number | null }>;
+ *   periodLabel?: string;
+ *   canEdit?: boolean;
+ *   onSaved?: () => void;
+ * }} props
  */
-export function ClientDetailDeliveryCard({ client }) {
-  const util =
-    client.hoursBudget > 0 ? client.hoursThisMonth / client.hoursBudget : 0;
+export function ClientDetailDeliveryCard({ client, tasks = [], periodLabel, canEdit = false, onSaved }) {
+  const budget = client.hoursBudget ?? 0;
+  const spent = client.hoursThisMonth ?? 0;
+  const estimated = tasks.reduce(
+    (sum, t) =>
+      !taskIsDone(t.status) && typeof t.estimateHours === "number" && Number.isFinite(t.estimateHours) ?
+        sum + t.estimateHours
+      : sum,
+    0,
+  );
+  const util = budget > 0 ? spent / budget : 0;
+  const utilTone = util > 1 ? "text-agency-bad" : util > 0.9 ? "text-agency-warn" : "text-agency-ok";
+
   return (
     <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-        Leverance & tid brugt
+        Budget & tidsforbrug{periodLabel ? ` · ${periodLabel}` : ""}
       </h2>
 
-      <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">
-                Udnyttelse denne måned
-              </p>
-              <p
-                className={cn(
-                  "mt-1 text-xl font-semibold tabular-nums tracking-tight text-fg",
-                  util > 1 && "text-agency-bad",
-                  util <= 1 && util > 0.9 && "text-agency-warn",
-                  util <= 0.9 && "text-agency-ok",
-                )}
-              >
-                {formatPercent(util)}
-              </p>
-            </div>
-            <p className="text-[11px] tabular-nums text-fg-muted">
-              {formatHoursCompactDa(client.hoursThisMonth)} / {formatHoursCompactDa(client.hoursBudget)} t
-            </p>
-          </div>
-          <PulseUtilBar hours={client.hoursThisMonth} budget={client.hoursBudget} className="mt-2" />
-          {client.utilisationHistory?.length ? (
-            <div className="mt-3 text-agency-brand">
-              <p className="mb-1 font-sans text-[11px] text-fg-muted">12 md trend</p>
-              <PulseSparkline data={client.utilisationHistory} height={36} />
-            </div>
-          ) : null}
+      <dl className="mt-4 grid grid-cols-3 gap-3">
+        <div>
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">Budget</dt>
+          <dd className="mt-1">
+            <QuickEditPopover
+              title="Timebudget pr. måned"
+              canEdit={canEdit}
+              disabledHint={client.isGroup ? "Redigeres pr. brand" : QUICK_EDIT_DEMO_HINT}
+              fields={[{ name: "hoursBudget", label: "Timer pr. måned", type: "number" }]}
+              initialValues={{ hoursBudget: budget ? String(budget) : "" }}
+              onSubmit={async (v) => {
+                const n = parseQuickNumber(v.hoursBudget);
+                if (Number.isNaN(n) || (n != null && n < 0)) throw new Error("Ugyldigt antal timer");
+                await patchClient(client.id, { hoursBudget: n });
+                onSaved?.();
+              }}
+            >
+              <span className="text-xl font-semibold tabular-nums tracking-tight text-fg">
+                {budget > 0 ? `${formatHoursCompactDa(budget)} t` : "—"}
+              </span>
+            </QuickEditPopover>
+          </dd>
         </div>
+        <div>
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">Estimeret</dt>
+          <dd className="mt-1 text-xl font-semibold tabular-nums tracking-tight text-fg">
+            {formatHoursCompactDa(estimated)} t
+          </dd>
+          <dd className="text-[10.5px] text-fg-quiet">på åbne opgaver</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">Brugt</dt>
+          <dd className="mt-1 text-xl font-semibold tabular-nums tracking-tight text-fg">
+            {formatHoursCompactDa(spent)} t
+          </dd>
+          <dd className="text-[10.5px] text-fg-quiet">registreret tid</dd>
+        </div>
+      </dl>
 
+      <div className="mt-5">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-[11px] text-fg-muted">Budget brugt</p>
+          <p className={cn("text-[15px] font-semibold tabular-nums", budget > 0 ? utilTone : "text-fg-quiet")}>
+            {budget > 0 ? formatPercent(util) : "Intet budget"}
+          </p>
+        </div>
+        <PulseUtilBar hours={spent} budget={budget} className="mt-1.5" />
+        {budget > 0 ?
+          <p className="mt-1.5 text-[11px] tabular-nums text-fg-quiet">
+            {spent <= budget ?
+              `${formatHoursCompactDa(budget - spent)} t tilbage af budgettet`
+            : `${formatHoursCompactDa(spent - budget)} t over budget`}
+            {estimated > 0 ? ` · åbne estimater svarer til ${formatPercent(estimated / budget)} af budgettet` : ""}
+          </p>
+        : null}
       </div>
     </div>
   );

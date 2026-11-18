@@ -62,7 +62,7 @@ export function formatTovDate(iso) {
 }
 
 /**
- * Small JSON fetch helper that surfaces `{error}` messages.
+ * Small JSON fetch helper that surfaces `{error}` messages (and per-field `{fields}` as `err.fields`).
  * @param {string} url
  * @param {RequestInit & { json?: unknown }} [init]
  */
@@ -74,6 +74,38 @@ export async function tovFetch(url, init = {}) {
     body: json !== undefined ? JSON.stringify(json) : rest.body,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error ?? `Fejl (${res.status})`);
+  if (!res.ok) {
+    const err = new Error(data?.error ?? `Fejl (${res.status})`);
+    if (data?.fields && typeof data.fields === "object") Object.assign(err, { fields: data.fields });
+    throw err;
+  }
   return data;
 }
+
+/**
+ * Label + control + inline error for the Brand Core brief.
+ * @param {{ id: string; label: string; optional?: boolean; error?: string; className?: string; children: import('react').ReactNode }} props
+ */
+export function TovField({ id, label, optional, error, className, children }) {
+  return (
+    <div className={className}>
+      <label className="block font-sans text-[11px] font-medium text-fg-soft" htmlFor={id}>
+        {label}
+        {optional ?
+          <span className="ml-1 font-normal text-fg-quiet">(valgfri)</span>
+        : <span className="ml-0.5 text-agency-bad" aria-hidden>
+            *
+          </span>
+        }
+      </label>
+      <div className="mt-1">{children}</div>
+      {error ?
+        <p id={`${id}-error`} className="mt-1 font-sans text-[11px] text-agency-bad">
+          {error}
+        </p>
+      : null}
+    </div>
+  );
+}
+
+export const tovInvalid = "border-agency-bad-border focus-visible:ring-agency-bad";
