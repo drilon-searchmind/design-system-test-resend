@@ -5,6 +5,7 @@ import { signOut, useSession } from "next-auth/react";
 
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { CrmNotificationBell } from "@/components/crm/crm-notification-bell";
+import { CrmTimerChip } from "@/components/crm/crm-timer-chip";
 import { routes } from "@/config/routes";
 import { shellPaddingX } from "@/config/shell";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ export function CrmTopbar({ title, onOpenNav, className }) {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
+          <CrmTimerChip />
           {email ? <CrmNotificationBell /> : null}
           {status === "loading" ? (
             <span className="h-8 w-8 animate-pulse rounded-md bg-skeleton" aria-hidden />
