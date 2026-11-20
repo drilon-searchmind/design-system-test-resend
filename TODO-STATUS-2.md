@@ -158,6 +158,11 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Files:** `components/tov/tov-workspace.js`, `lib/tov/briefing.js` (kun `tovHostKey` er tilbage), `lib/server/tov-data.js`, `lib/tov/prompts.js`, `lib/db/models/tov-profile.js`, `app/api/clients/[clientId]/tov/**`, `lib/mcp/tools.js`
 - Gamle værdier i databasen (`contactName`, `contactTitle`, `accountOwnerKey`) ignoreres og påvirker ikke analysen.
 
+### ✅ Fast skabelon for analysen (indholdsstandard)
+- Formen (sektioner, felter, antal) var allerede låst af `TOV_PROFILE_SCHEMA`. Nyt: en indholdsstandard pr. sektion (længde, antal, hvor konkret, hvad der skal stå i Datagrundlag), udledt af Testkunde-analysen. Den sendes med i analyse-prompten.
+- **Files:** `lib/tov/template.js` (reglerne), `lib/tov/prompts.js`, `docs/BRAND-CORE-TEMPLATE.md` (genereres med `node scripts/generate-brand-core-template-doc.mjs`)
+- Gælder fra næste analyse; eksisterende profiler ændres ikke. Skemaet er uændret, så ingen ny schema-version.
+
 ### ✅ Brand guidelines som inspiration (Dilling & Maileg)
 - **Where:** Brand Core → kunde → generér brand guidelines (existing profiles: click generate again to get the new sections)
 - **Files:** `lib/tov/preview-html.js`, `lib/tov/prompts.js`, `lib/tov/schema.js` (`TOV_PREVIEW_SCHEMA`); reference PDFs in `docs/`
