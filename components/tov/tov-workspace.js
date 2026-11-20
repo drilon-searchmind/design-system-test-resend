@@ -23,7 +23,7 @@ import {
   tovInvalid,
   tovTextarea,
 } from "@/components/tov/tov-ui";
-import { TOV_CONTACT_TITLES, tovHostKey, validateTovBriefing } from "@/lib/tov/briefing";
+import { tovHostKey } from "@/lib/tov/briefing";
 import { cn } from "@/lib/utils";
 
 const KIND_LABEL = { pdf: "PDF", image: "Billede", text: "Tekst", html: "Web" };
@@ -58,10 +58,6 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
   const [tab, setTab] = useState("profil");
   const [comment, setComment] = useState(tov?.comment ?? "");
   const [model, setModel] = useState(tov?.model ?? state.defaultModel ?? state.models[0].id);
-  const [contactName, setContactName] = useState(state.briefing?.contactName ?? "");
-  const [contactTitle, setContactTitle] = useState(state.briefing?.contactTitle ?? "");
-  const [accountOwnerKey, setAccountOwnerKey] = useState(state.briefing?.accountOwnerKey ?? "");
-  const [fieldErrors, setFieldErrors] = useState(/** @type {Record<string, string>} */ ({}));
   const [url, setUrl] = useState("");
   const [note, setNote] = useState({ name: "", text: "", open: false });
   const [noteErrors, setNoteErrors] = useState(/** @type {Record<string, string>} */ ({}));
@@ -155,28 +151,12 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
     void run("cancel", () => tovFetch(`${base}/analyze`, { method: "DELETE" }));
   }
 
-  /** @param {string} key */
-  const clearFieldError = (key) => setFieldErrors((f) => (f[key] ? { ...f, [key]: "" } : f));
-
   function startAnalysis() {
-    const errors = Object.fromEntries(
-      Object.entries(validateTovBriefing({ contactName, contactTitle, comment, model })).filter(([, v]) => v),
-    );
-    setFieldErrors(errors);
-    if (Object.keys(errors).length) {
-      setMessage({ kind: "bad", text: "Udfyld de påkrævede felter før analysen (kun Kundeansvarlig er valgfri)." });
-      return;
-    }
     void run("analyze", async () => {
-      try {
-        await tovFetch(`${base}/analyze`, {
-          method: "POST",
-          json: { model, comment, contactName, contactTitle, accountOwnerKey, domains: selectedDomains },
-        });
-      } catch (e) {
-        if (e && typeof e === "object" && "fields" in e) setFieldErrors(/** @type {any} */ (e).fields);
-        throw e;
-      }
+      await tovFetch(`${base}/analyze`, {
+        method: "POST",
+        json: { model, comment, domains: selectedDomains },
+      });
     });
   }
 
@@ -451,7 +431,7 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
 
           <TovCard
             title="Brief & analyse"
-            hint="Modellen læser alt materialet og opdaterer kundens standardiserede Brand Core-profil. Alle felter er påkrævede undtagen Kundeansvarlig."
+            hint="Modellen læser alt materialet og opdaterer kundens standardiserede Brand Core-profil."
             actions={<TovStatusChip status={status} />}
           >
             <form
@@ -462,106 +442,31 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
                 if (!locked && busy !== "analyze") startAnalysis();
               }}
             >
-              <div className="grid gap-3 sm:grid-cols-2">
-                <TovField id="tov-contactName" label="Kontaktperson hos kunden" error={fieldErrors.contactName}>
-                  <input
-                    id="tov-contactName"
-                    value={contactName}
-                    required
-                    disabled={locked}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      setContactName(e.target.value);
-                      clearFieldError("contactName");
-                    }}
-                    onBlur={() => !locked && void saveSettings({ contactName })}
-                    placeholder="Fx Mette Jensen"
-                    className={cn(tovInput, fieldErrors.contactName && tovInvalid)}
-                    {...invalidProps(fieldErrors.contactName, "tov-contactName")}
-                  />
-                </TovField>
-                <TovField id="tov-contactTitle" label="Titel" error={fieldErrors.contactTitle}>
-                  <select
-                    id="tov-contactTitle"
-                    value={contactTitle}
-                    required
-                    disabled={locked}
-                    onChange={(e) => {
-                      setContactTitle(e.target.value);
-                      clearFieldError("contactTitle");
-                      void saveSettings({ contactTitle: e.target.value });
-                    }}
-                    className={cn(tovInput, fieldErrors.contactTitle && tovInvalid)}
-                    {...invalidProps(fieldErrors.contactTitle, "tov-contactTitle")}
-                  >
-                    <option value="">Vælg titel…</option>
-                    {contactTitle && !TOV_CONTACT_TITLES.includes(contactTitle) ?
-                      <option value={contactTitle}>{contactTitle} (gemt værdi)</option>
-                    : null}
-                    {TOV_CONTACT_TITLES.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </TovField>
-              </div>
-
-              <TovField id="tov-accountOwner" label="Kundeansvarlig" optional>
-                <select
-                  id="tov-accountOwner"
-                  value={accountOwnerKey}
-                  disabled={locked}
-                  onChange={(e) => {
-                    setAccountOwnerKey(e.target.value);
-                    void saveSettings({ accountOwnerKey: e.target.value });
-                  }}
-                  className={tovInput}
-                >
-                  <option value="">Ingen valgt</option>
-                  {accountOwnerKey && !(state.team ?? []).some((m) => m.key === accountOwnerKey) ?
-                    <option value={accountOwnerKey}>{accountOwnerKey} (ikke i teamet)</option>
-                  : null}
-                  {(state.team ?? []).map((m) => (
-                    <option key={m.key} value={m.key}>
-                      {m.name}
-                      {m.role ? ` · ${m.role}` : ""}
-                    </option>
-                  ))}
-                </select>
-              </TovField>
-
-              <TovField id="tov-comment" label="Kommentar / ekstra information" error={fieldErrors.comment}>
+              <TovField id="tov-comment" label="Kommentar / ekstra information" optional>
                 <textarea
                   id="tov-comment"
                   value={comment}
-                  required
                   onChange={(e) => {
                     setComment(e.target.value);
-                    clearFieldError("comment");
                   }}
                   onBlur={() => !locked && void saveSettings({ comment })}
                   rows={5}
                   disabled={locked}
                   placeholder="Fx: 'Målgruppen er ældre mænd, de vil ikke lyde som en startup. Brug De-form i mails.'"
-                  className={cn(tovTextarea, fieldErrors.comment && tovInvalid)}
-                  {...invalidProps(fieldErrors.comment, "tov-comment")}
+                  className={tovTextarea}
                 />
               </TovField>
 
-              <TovField id="tov-model" label="AI-model" error={fieldErrors.model}>
+              <TovField id="tov-model" label="AI-model">
                 <select
                   id="tov-model"
                   value={model}
-                  required
                   disabled={locked}
                   onChange={(e) => {
                     setModel(e.target.value);
-                    clearFieldError("model");
                     void saveSettings({ model: e.target.value });
                   }}
-                  className={cn(tovInput, fieldErrors.model && tovInvalid)}
-                  {...invalidProps(fieldErrors.model, "tov-model")}
+                  className={tovInput}
                 >
                   {state.models.map((m) => (
                     <option key={m.id} value={m.id}>

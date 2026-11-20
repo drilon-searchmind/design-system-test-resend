@@ -11,6 +11,10 @@ import {
   LEAD_SOURCES,
 } from "@/lib/crm/client-utils";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
+import {
+  CONTRACT_SIGNER_TITLE_OTHER,
+  CONTRACT_SIGNER_TITLES,
+} from "@/lib/contracts/contract-roles";
 import { renderContractDocumentHtml } from "@/lib/contracts/contract-document-html";
 import {
   SERVICE_BILLING_OPTIONS,
@@ -175,8 +179,14 @@ export function ContractsSendModal({
   const [leadSource, setLeadSource] = useState("");
   const [ownerMemberKey, setOwnerMemberKey] = useState("");
   const [contactName, setContactName] = useState("");
-  const [contactTitle, setContactTitle] = useState("");
+  const [contactTitleChoice, setContactTitleChoice] = useState("");
+  const [contactTitleOther, setContactTitleOther] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+
+  const contactTitle =
+    contactTitleChoice === CONTRACT_SIGNER_TITLE_OTHER ?
+      contactTitleOther.trim() || CONTRACT_SIGNER_TITLE_OTHER
+    : contactTitleChoice;
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
@@ -360,10 +370,20 @@ export function ContractsSendModal({
       return;
     }
     if (mode === "new") {
+      // Alle felter er påkrævede undtagen Kundeansvarlig
       if (name.trim().length < 2) return setError("Angiv kundens firmanavn");
+      if (!domain.trim()) return setError("Angiv kundens domæne / website");
+      if (!cvr.trim()) return setError("Angiv kundens CVR");
+      if (!industry.trim()) return setError("Vælg kundens branche");
+      if (!leadSource.trim()) return setError("Vælg lead-kilde");
       if (contactName.trim().length < 2)
         return setError("Angiv navnet på underskriveren");
+      if (!contactTitleChoice) return setError("Vælg underskriverens titel");
+      if (contactTitleChoice === CONTRACT_SIGNER_TITLE_OTHER && !contactTitleOther.trim())
+        return setError("Skriv underskriverens titel");
       if (!contactEmail.trim()) return setError("Angiv underskriverens e-mail");
+      if (!contactPhone.trim())
+        return setError("Angiv underskriverens telefonnummer");
     }
 
     setBusy(true);
@@ -432,7 +452,8 @@ export function ContractsSendModal({
     contactEmail,
     contactName,
     contactPhone,
-    contactTitle,
+    contactTitleChoice,
+    contactTitleOther,
     currency,
     cvr,
     dataSource,
@@ -573,7 +594,7 @@ export function ContractsSendModal({
                 <Section
                   step={1}
                   title="Virksomhed"
-                  description="Kunden oprettes i CRM'et først, når aftalen er underskrevet — med oplysningerne herunder. Alle brugere får en besked."
+                  description="Kunden oprettes i CRM'et først, når aftalen er underskrevet, med oplysningerne herunder. Alle felter er påkrævede undtagen Kundeansvarlig. Alle brugere får en besked."
                 >
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Firmanavn" required>
@@ -584,7 +605,7 @@ export function ContractsSendModal({
                         placeholder="Fx Eksempel ApS"
                       />
                     </Field>
-                    <Field label="Domæne / website">
+                    <Field label="Domæne / website" required>
                       <input
                         value={domain}
                         onChange={(e) => setDomain(e.target.value)}
@@ -592,7 +613,7 @@ export function ContractsSendModal({
                         placeholder="eksempel.dk"
                       />
                     </Field>
-                    <Field label="CVR" hint="8 cifre">
+                    <Field label="CVR" required hint="8 cifre">
                       <input
                         value={cvr}
                         onChange={(e) => setCvr(e.target.value)}
@@ -601,7 +622,7 @@ export function ContractsSendModal({
                         placeholder="12345678"
                       />
                     </Field>
-                    <Field label="Branche">
+                    <Field label="Branche" required>
                       <select
                         value={industry}
                         onChange={(e) => setIndustry(e.target.value)}
@@ -615,7 +636,7 @@ export function ContractsSendModal({
                         ))}
                       </select>
                     </Field>
-                    <Field label="Kundeansvarlig">
+                    <Field label="Kundeansvarlig" hint="Valgfri">
                       <select
                         value={ownerMemberKey}
                         onChange={(e) => setOwnerMemberKey(e.target.value)}
@@ -629,7 +650,7 @@ export function ContractsSendModal({
                         ))}
                       </select>
                     </Field>
-                    <Field label="Lead-kilde">
+                    <Field label="Lead-kilde" required>
                       <select
                         value={leadSource}
                         onChange={(e) => setLeadSource(e.target.value)}
@@ -658,13 +679,28 @@ export function ContractsSendModal({
                         className={INPUT_CLASS}
                       />
                     </Field>
-                    <Field label="Titel">
-                      <input
-                        value={contactTitle}
-                        onChange={(e) => setContactTitle(e.target.value)}
+                    <Field label="Titel" required>
+                      <select
+                        value={contactTitleChoice}
+                        onChange={(e) => setContactTitleChoice(e.target.value)}
                         className={INPUT_CLASS}
-                        placeholder="Fx Direktør"
-                      />
+                      >
+                        <option value="">Vælg titel…</option>
+                        {CONTRACT_SIGNER_TITLES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                      {contactTitleChoice === CONTRACT_SIGNER_TITLE_OTHER ? (
+                        <input
+                          value={contactTitleOther}
+                          onChange={(e) => setContactTitleOther(e.target.value)}
+                          className={cn(INPUT_CLASS, "mt-2")}
+                          placeholder="Skriv titel"
+                          aria-label="Titel (andet)"
+                        />
+                      ) : null}
                     </Field>
                     <Field label="E-mail" required>
                       <input
@@ -675,7 +711,7 @@ export function ContractsSendModal({
                         placeholder="navn@kunde.dk"
                       />
                     </Field>
-                    <Field label="Telefon">
+                    <Field label="Telefon" required>
                       <input
                         value={contactPhone}
                         onChange={(e) => setContactPhone(e.target.value)}

@@ -23,7 +23,7 @@ export async function GET(req, ctx) {
 
 /**
  * Body (ét af):
- *  - { comment?, model?, contactName?, contactTitle?, accountOwnerKey? }   gem brief/indstillinger
+ *  - { comment?, model? }   gem indstillinger
  *  - { profile }            gem manuelt redigeret profil
  *  - { restoreIndex }       gendan tidligere version
  */

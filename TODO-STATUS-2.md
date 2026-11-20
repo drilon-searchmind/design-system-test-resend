@@ -152,14 +152,11 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Files:** `lib/tov/anthropic.js`, `lib/server/tov-data.js`, `lib/db/models/tov-profile.js`
 - Default in UI, server and MCP. Profiles on the old default switch too.
 
-### ✅ Kundeansvarlig er det eneste valgfrie felt
-- **Where:** "Brief & analyse" card
-- **Files:** `lib/tov/briefing.js`, `components/tov/tov-panels.js`, `app/api/clients/[clientId]/tov/analyze/route.js`
-- Required: kontaktperson, Titel, kommentar, model. Checked in the browser and on the server. ❓ Q12
-
-### ✅ Titel er en dropdown
-- **Files:** `lib/tov/briefing.js` (`TOV_CONTACT_TITLES`)
-- Direktør / CEO, Marketingchef, Brand manager, E-commerce manager, Content manager, Marketingkoordinator, Andet. ❓ Q13
+### ✅ Brief-felter fjernet igen (var lagt her ved en fejl)
+- "Kundeansvarlig valgfri" og "Titel som dropdown" hørte til **kontrakter**, ikke Brand Core. Kontaktperson, Titel, Kundeansvarlig og kommentar-som-krav er fjernet fra "Brief & analyse"; kommentaren er valgfri igen.
+- **Where:** Brand Core → kunde → "Brief & analyse" (nu kun kommentar og AI-model)
+- **Files:** `components/tov/tov-workspace.js`, `lib/tov/briefing.js` (kun `tovHostKey` er tilbage), `lib/server/tov-data.js`, `lib/tov/prompts.js`, `lib/db/models/tov-profile.js`, `app/api/clients/[clientId]/tov/**`, `lib/mcp/tools.js`
+- Gamle værdier i databasen (`contactName`, `contactTitle`, `accountOwnerKey`) ignoreres og påvirker ikke analysen.
 
 ### ✅ Brand guidelines som inspiration (Dilling & Maileg)
 - **Where:** Brand Core → kunde → generér brand guidelines (existing profiles: click generate again to get the new sections)
@@ -168,7 +165,7 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - Added from the reference books:
   - **DILLING:** "Hvem vi er" pairs ("Vi er ydmyge. / Aldrig kæphøje."), a short reason per typeface, keywords on each example ("Nøgleord: Sæt scenen, Ærlighed"), and "Opdateret <dato>" in the page footer.
   - **Maileg:** "Tonen til hvem" (e.g. storyteller to consumers vs. business partner to retailers), "Ordvalg i praksis" (be concrete, describe instead of praising yourself, familiar metaphors), a "Fra udkast til brand" page with a before/after text and "Rettelser forklaret", and "Tegnsætning & emojis".
-- Logo rules, stationery and packaging from DILLING are left out: there's no logo or print material on the client to build them from. ❓ Q14
+- Logo rules, stationery and packaging from DILLING are left out: there's no logo or print material on the client to build them from. ❓ Q12
 
 ---
 
@@ -177,12 +174,27 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 ### ✅ Admins kan tilføje services
 - **Where:** `/contracts` → Opsætning → Services (admins only)
 - **Files:** `lib/db/models/contract-service.js`, `lib/server/contract-services-data.js`, `app/api/contract-services/**`, `components/contracts/contracts-services-panel.js`, `lib/server/contract-apply-commercial.js`
-- Each service: name, department, billing (monthly / one-off / annual), default amount, active, order. Until an admin saves, the old list is used. Sent contracts keep their own copy of each line. ❓ Q15, Q16
+- Each service: name, department, billing (monthly / one-off / annual), default amount, active, order. Until an admin saves, the old list is used. Sent contracts keep their own copy of each line. ❓ Q13, Q14
 
 ### ✅ Branche: dropdown med B2B / E-commerce
 - **Where:** send-contract dialog, create client, edit client
 - **Files:** `lib/crm/client-utils.js` (`INDUSTRY_OPTIONS`), `components/contracts/contracts-send-modal.js`, `components/clients/clients-create-form.js`, `components/clients/client-detail-edit-form.js`
 - Old values are kept as an extra option.
+
+### ✅ Kundeansvarlig er det eneste valgfrie felt (ny kunde)
+- **Where:** send-contract dialog → "Ny kunde": Firmanavn, Domæne, CVR, Branche, Lead-kilde, Navn, Titel, E-mail og Telefon er påkrævede; Kundeansvarlig er valgfri (markeret "Valgfri"). Tjekkes i dialogen og på serveren.
+- **Files:** `components/contracts/contracts-send-modal.js`, `lib/server/contract-new-client.js`
+- Gælder blokken "Ny kunde". Ved en eksisterende kunde er der ingen af felterne; e-mail er stadig valgfri der (primær kontakt bruges). ❓ Q15
+
+### ✅ Titel er en dropdown
+- **Where:** send-contract dialog → Underskriver → Titel. Direktør / CEO, Ejer / Indehaver, Økonomichef / CFO, Marketingchef, E-commerce manager, Brand manager, Andet. Vælges "Andet", kan titlen skrives frit.
+- **Files:** `lib/contracts/contract-roles.js` (`CONTRACT_SIGNER_TITLES`), `components/contracts/contracts-send-modal.js` ❓ Q16
+
+### ✅ Kontraktdokument og PDF i Searchmind-design
+- **Where:** kontrakt-preview i send-dialogen, "Gem som PDF" (HTML) og PDF-download på kontraktsiden
+- **Files:** `lib/contracts/contract-document-html.js`, `lib/contracts/contract-document-pdf.js`
+- Brandbar med lagdelt mærke, "Aftale"-overskrift, kundekort, statuschip (Underskrevet / Afventer underskrift), violette punkttegn, underskriftskort i to kolonner og sidefod med sidetal. Farverne er hentet fra designsystemets tokens; HTML bruger Geist, PDF'en Helvetica (Geist er ikke indlejret i PDF'en).
+- HTML-versionen er tjekket i en browser. PDF-filen er genereret og talt, men ikke set visuelt (ingen PDF-visning i værktøjerne her); kig den gerne igennem.
 
 ### ✅ Optimér designet
 - **Files:** `components/contracts/*`
@@ -319,18 +331,18 @@ Each question has the solution that was picked and implemented. ✅ = changed in
 **Brand Core**
 11. Only the primary domain is pre-ticked. Should all the client's domains be?
     - ➖ **Solution:** primary only. Country domains are usually copies and would make the analysis slower; they can be ticked by hand.
-12. The comment is now required (only Kundeansvarlig is optional). Is that what was meant? And is "Titel" the job title of the client's contact person?
-    - ➖ **Solution:** kept as built: comment required, Titel = the contact person's job title. This follows "Kundeansvarlig er det eneste valgfrie felt" literally.
-13. Are the 7 Titel roles right?
-    - ➖ **Solution:** kept: Direktør / CEO, Marketingchef, Brand manager, E-commerce manager, Content manager, Marketingkoordinator, Andet. Change the list in `lib/tov/briefing.js` (`TOV_CONTACT_TITLES`).
-14. Please add the Dilling & Maileg PDFs so the brand book can be matched to them.
+12. Please add the Dilling & Maileg PDFs so the brand book can be matched to them.
     - ✅ **Solution:** PDFs added in `docs/`. The brand book now follows their structure: DILLING's identity pairs, typeface reasons and annotated examples, and Maileg's audience-specific tone, word-choice techniques, before/after rewrite with explained edits and punctuation/emoji rules. Logo, stationery and packaging pages are skipped (no logo or print data on clients). Existing profiles get the new sections when the guidelines are generated again.
 
 **Kontrakter**
-15. Annual service lines don't count toward MRR. Should they count as amount ÷ 12?
+13. Annual service lines don't count toward MRR. Should they count as amount ÷ 12?
     - ✅ **Solution:** yes, annual lines count as 1/12 per month in the contract figures (summary MRR, list, cards, detail KPIs; info popovers explain it). It's added when contracts are read, so the signed document text and the stored contract value are unchanged. Note: Pulse client MRR doesn't include annual lines, so it can differ from the contracts MRR. (`lib/contracts/contract-services.js` `annualLinesMonthlyShare`, `lib/server/contracts-data.js`)
-16. Non-web one-off services (e.g. SEO audit) become one-time upsells but not "one-off web" revenue. Right?
+14. Non-web one-off services (e.g. SEO audit) become one-time upsells but not "one-off web" revenue. Right?
     - ➖ **Solution:** kept. "One-off web" only means web projects.
+15. "Kundeansvarlig er det eneste valgfrie felt": skal det kun gælde "Ny kunde"-blokken i send-dialogen, eller også de andre felter (fx underskriver-e-mail ved eksisterende kunde, skabelon, datoer)?
+    - ➖ **Solution:** kun "Ny kunde": der ligger Kundeansvarlig, og kunden oprettes ud fra de felter. Resten af dialogen er uændret.
+16. Er de 7 titler rigtige til en underskriver?
+    - ➖ **Solution:** Direktør / CEO, Ejer / Indehaver, Økonomichef / CFO, Marketingchef, E-commerce manager, Brand manager, Andet (fri tekst). Listen ligger i `lib/contracts/contract-roles.js` (`CONTRACT_SIGNER_TITLES`).
 
 **Opgaver**
 17. Should "Timer" work in demo mode?
