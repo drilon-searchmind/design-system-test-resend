@@ -233,6 +233,10 @@ const teamId = String(process.env.CLICKUP_TEAM_ID?.trim() || teams[0].id);
 const team = teams.find((t) => String(t.id) === teamId) ?? teams[0];
 log(`Workspace: ${team.name} (${team.id}) | ${RUN ? `KØRSEL, snapshot ${snapshotId} (gem det til --resume)` : "TØR KØRSEL (skriver intet)"}`);
 
+/** @type {Map<string, any>} */
+const attachmentsFound = new Map();
+if (RUN && args.resume) for (const [k, v] of loadCache("attachments") ?? []) attachmentsFound.set(k, v);
+
 if (RUN) {
   await saveState(); // fejler tidligt, hvis STATE_DIR ikke kan skrives (fx volume mangler)
   log(MAX_HOURS ? `Tidsgrænse: ${MAX_HOURS} timer fra ${firstStartedAt} (stopper senest ${new Date(deadline).toISOString()})` : "Ingen tidsgrænse (sæt MAX_RUNTIME_HOURS)");
@@ -249,10 +253,6 @@ if (RUN) {
 const lists = [];
 /** @type {Map<string, any>} */
 const taskMeta = new Map();
-/** @type {Map<string, any>} */
-const attachmentsFound = new Map();
-if (RUN && args.resume) for (const [k, v] of loadCache("attachments") ?? []) attachmentsFound.set(k, v);
-
 /* ---------------------------------------------------------------- faser */
 await phase("workspace", async () => {
   await emit("workspaces", baseRow(team.id, null, team.name, { ...team, members: undefined }));
