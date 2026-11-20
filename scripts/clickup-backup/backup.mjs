@@ -392,20 +392,35 @@ async function fetchComments(taskId) {
 
 await phase("tasks", async () => {
   // 1) Alle tasks. Standard: workspace-endpointet (100 pr. kald, ikke ét kald pr. liste).
+  // Kun slanke felter gemmes i hukommelsen: ellers går Node tør for RAM (~4 GB) ved 30k+ fulde task-objekter.
   const byList = args["tasks-by-list"] === true || typeof args["limit-lists"] === "string" || typeof args["limit-folders"] === "string";
   const cachedTasks = RUN && args.resume ? loadCache("tasks") : null;
+  const slim = (t, archived) => ({
+    id: String(t.id),
+    name: t.name ?? null,
+    list: t.list?.id ? { id: String(t.list.id) } : null,
+    status: t.status?.status ? { status: String(t.status.status) } : null,
+    archived: Boolean(t.archived) || archived,
+    parent: t.parent ?? null,
+    date_created: t.date_created ?? null,
+    date_updated: t.date_updated ?? null,
+    date_closed: t.date_closed ?? null,
+  });
   const take = (t, archived) => {
-    if (!taskMeta.has(t.id)) taskMeta.set(t.id, { ...t, archived: Boolean(t.archived) || archived });
+    if (!taskMeta.has(t.id)) taskMeta.set(t.id, slim(t, archived));
+    else if (archived) taskMeta.get(t.id).archived = true;
   };
-  // Delvis fremdrift gemmes undervejs (hver 250. liste og ved stop), så en afbrydelse ikke koster timers kald
-  const partial = (RUN && args.resume ? loadCache("tasks-partial") : null) ?? { mainDone: false, doneLists: [], tasks: [] };
+  // Delvis fremdrift gemmes undervejs, så en afbrydelse/OOM ikke koster timers kald
+  const partial = (RUN && args.resume ? loadCache("tasks-partial") : null) ?? { mainDone: false, mainPage: 0, doneLists: [], tasks: [] };
   const doneLists = new Set(partial.doneLists);
   if (!cachedTasks && partial.tasks.length) {
     for (const t of partial.tasks) taskMeta.set(t.id, t);
-    log(`Delvis task-liste genindlæst: ${taskMeta.size} tasks, ${doneLists.size} lister allerede læst`);
+    log(`Delvis task-liste genindlæst: ${taskMeta.size} tasks, side ${partial.mainPage}, ${doneLists.size} lister allerede læst`);
   }
   const saveProgress = () =>
-    saveCache("tasks-partial", { mainDone: partial.mainDone, doneLists: [...doneLists], tasks: [...taskMeta.values()] });
+    saveCache("tasks-partial", { mainDone: partial.mainDone, mainPage: partial.mainPage, doneLists: [...doneLists], tasks: [...taskMeta.values()] });
+  // Ingen markdown i liste-pass: den hentes først i detalje-kaldet (sparere RAM)
+  const listTaskQuery = (archived, page) => ({ page, include_closed: true, subtasks: true, archived });
   const listPass = async (ls, archived) => {
     let done = 0;
     const key = (l) => `${archived ? "a" : "l"}:${l.id}`;
@@ -413,7 +428,7 @@ await phase("tasks", async () => {
     if (pending.length < ls.length) log(`${ls.length - pending.length} lister er allerede læst, fortsætter med ${pending.length}`);
     await pool(pending, 2, async (l) => {
       for (let page = 0; page < 1000; page += 1) {
-        const res = await get(`/list/${l.id}/task`, { query: { page, include_closed: true, subtasks: true, archived, include_markdown_description: true } });
+        const res = await get(`/list/${l.id}/task`, { query: listTaskQuery(archived, page) });
         for (const t of res.tasks ?? []) take(t, archived);
         if (res.last_page || (res.tasks ?? []).length === 0) break;
       }
@@ -436,11 +451,15 @@ await phase("tasks", async () => {
     } else if (partial.mainDone) {
       log("Workspace-tasks er allerede hentet (delvis cache), går videre til arkiverede");
     } else {
-      for (let page = 0; page < 100000; page += 1) {
+      for (let page = partial.mainPage || 0; page < 100000; page += 1) {
         checkStop();
-        const res = await get(`/team/${team.id}/task`, { query: { page, include_closed: true, subtasks: true, include_markdown_description: true } });
+        const res = await get(`/team/${team.id}/task`, { query: { page, include_closed: true, subtasks: true } });
         for (const t of res.tasks ?? []) take(t, false);
-        if (page % 50 === 0) log(`Workspace-tasks: side ${page}, tasks hidtil: ${taskMeta.size}`);
+        partial.mainPage = page + 1;
+        if (page % 50 === 0) {
+          log(`Workspace-tasks: side ${page}, tasks hidtil: ${taskMeta.size}`);
+          saveProgress();
+        }
         if (res.last_page || (res.tasks ?? []).length === 0) break;
       }
       // Kontrol: stikprøve af lister mod workspace-resultatet, så et hul opdages
