@@ -397,18 +397,35 @@ await phase("tasks", async () => {
   const take = (t, archived) => {
     if (!taskMeta.has(t.id)) taskMeta.set(t.id, { ...t, archived: Boolean(t.archived) || archived });
   };
+  // Delvis fremdrift gemmes undervejs (hver 250. liste og ved stop), så en afbrydelse ikke koster timers kald
+  const partial = (RUN && args.resume ? loadCache("tasks-partial") : null) ?? { mainDone: false, doneLists: [], tasks: [] };
+  const doneLists = new Set(partial.doneLists);
+  if (!cachedTasks && partial.tasks.length) {
+    for (const t of partial.tasks) taskMeta.set(t.id, t);
+    log(`Delvis task-liste genindlæst: ${taskMeta.size} tasks, ${doneLists.size} lister allerede læst`);
+  }
+  const saveProgress = () =>
+    saveCache("tasks-partial", { mainDone: partial.mainDone, doneLists: [...doneLists], tasks: [...taskMeta.values()] });
   const listPass = async (ls, archived) => {
     let done = 0;
-    await pool(ls, 2, async (l) => {
+    const key = (l) => `${archived ? "a" : "l"}:${l.id}`;
+    const pending = ls.filter((l) => !doneLists.has(key(l)));
+    if (pending.length < ls.length) log(`${ls.length - pending.length} lister er allerede læst, fortsætter med ${pending.length}`);
+    await pool(pending, 2, async (l) => {
       for (let page = 0; page < 1000; page += 1) {
         const res = await get(`/list/${l.id}/task`, { query: { page, include_closed: true, subtasks: true, archived, include_markdown_description: true } });
         for (const t of res.tasks ?? []) take(t, archived);
         if (res.last_page || (res.tasks ?? []).length === 0) break;
       }
+      doneLists.add(key(l));
       done += 1;
-      if (done % 250 === 0) log(`Lister læst (${archived ? "arkiverede" : "aktive"}): ${done}/${ls.length}, tasks hidtil: ${taskMeta.size}`);
+      if (done % 250 === 0) {
+        log(`Lister læst (${archived ? "arkiverede" : "aktive"}): ${done}/${pending.length}, tasks hidtil: ${taskMeta.size}`);
+        saveProgress();
+      }
     }, shouldStop);
-    checkStop(); // ufuldstændig task-liste må ikke caches
+    saveProgress();
+    checkStop(); // ufuldstændig task-liste må ikke caches som færdig
   };
   if (cachedTasks) {
     for (const t of cachedTasks) taskMeta.set(t.id, t);
@@ -416,6 +433,8 @@ await phase("tasks", async () => {
   } else {
     if (byList) {
       await listPass(lists, false);
+    } else if (partial.mainDone) {
+      log("Workspace-tasks er allerede hentet (delvis cache), går videre til arkiverede");
     } else {
       for (let page = 0; page < 100000; page += 1) {
         checkStop();
@@ -435,6 +454,8 @@ await phase("tasks", async () => {
         errors.push(`tasks: workspace-endpointet manglede ${missing} tasks i stikprøven. Kør igen med --tasks-by-list for fuld nøjagtighed.`);
         log(`ADVARSEL: ${missing} tasks manglede i stikprøven. Overvej --tasks-by-list.`);
       } else log(`Kontrol OK: stikprøve af ${sample.length} lister matcher`);
+      partial.mainDone = true;
+      saveProgress();
     }
     if (!args["no-archived-tasks"]) {
       log("Arkiverede tasks (ét kald pr. liste)");
