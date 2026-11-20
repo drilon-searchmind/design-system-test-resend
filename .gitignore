@@ -42,3 +42,7 @@ next-env.d.ts
 
 # claude
 /claude
+
+# clickup backup (state/rapporter indeholder id'er og tal)
+scripts/clickup-backup/.state/
+scripts/clickup-backup/.out/

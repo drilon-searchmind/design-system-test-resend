@@ -1,0 +1,14 @@
+{
+  "name": "clickup-backup",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ClickUp til BigQuery backup (selvstændig pakke til Railway)",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node backup.mjs --run --auto-resume"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^9.6.1"
+  }
+}

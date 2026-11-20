@@ -23,10 +23,13 @@
     "sync-member-disciplines-dry-run": "node --env-file=.env scripts/run-sync-member-disciplines.mjs -- --dry-run",
     "backfill-user-is-admin": "node --env-file=.env scripts/run-backfill-user-is-admin.mjs",
     "seed-contract-templates": "node --env-file=.env scripts/run-seed-contract-templates.mjs",
-    "reset-demo": "node --env-file=.env scripts/run-reset-demo.mjs"
+    "reset-demo": "node --env-file=.env scripts/run-reset-demo.mjs",
+    "backup:clickup": "node --env-file=.env scripts/clickup-backup/backup.mjs --run",
+    "backup:clickup:dry": "node --env-file=.env scripts/clickup-backup/backup.mjs"
   },
   "dependencies": {
     "@fullcalendar/react": "^7.0.1",
+    "@google-cloud/bigquery": "^9.6.1",
     "clsx": "^2.1.1",
     "mongoose": "^9.6.1",
     "next": "16.2.4",
