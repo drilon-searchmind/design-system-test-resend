@@ -24,7 +24,8 @@ export async function GET(req, ctx) {
 /**
  * Body (ét af):
  *  - { comment?, model? }   gem indstillinger
- *  - { profile }            gem manuelt redigeret profil
+ *  - { profile }            gem hele profilen (erstatter; manglende felter tømmes). Opretter profilen hvis den ikke findes
+ *  - { profilePatch }       flet en delvis profil ind i den gemte (objekter flettes, lister erstattes)
  *  - { restoreIndex }       gendan tidligere version
  */
 export async function PATCH(req, ctx) {
@@ -37,7 +38,8 @@ export async function PATCH(req, ctx) {
     const body = await req.json();
     const result =
       body && typeof body.restoreIndex === "number" ? await restoreHistory(clientId, includeTest, body.restoreIndex)
-      : body?.profile ? await saveProfileEdit(clientId, includeTest, body.profile, { by })
+      : body?.profile ? await saveProfileEdit(clientId, includeTest, body.profile, { by, mode: "replace" })
+      : body?.profilePatch ? await saveProfileEdit(clientId, includeTest, body.profilePatch, { by, mode: "merge" })
       : await updateTovSettings(clientId, includeTest, body ?? {});
     if ("error" in result) return fail(result);
     return NextResponse.json(result);

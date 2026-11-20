@@ -48,6 +48,8 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - Replaces the first version (shortcut cards to the app's own pages). ✅ Q3
 
 ### ✅ MCP opdateret med de nye endpoints
+- Brand Core can now be written through MCP without an analysis: new `tov_schema` (shape, enums, content standard, empty profile); `tov_update` takes `{ profilePatch }` (deep-merge a partial profile) or `{ profile }` (replace; creates the profile if the client has none) and returns `ignoredPaths`. **Files:** `lib/mcp/tools.js`, `lib/server/tov-data.js` (`saveProfileEdit`), `lib/tov/schema.js` (`mergeTovProfile`, `unknownTovPaths`), `app/api/tov/schema/route.js`, `app/api/clients/[clientId]/tov/route.js`
+- Descriptions updated for this round: `tov_analyze` (template), `contracts_send` (required new-customer fields, title list), Brand Core briefing fields removed.
 - New tools: `clients_directory_meta`, `client_notes_list/create/update/delete`, `contract_services_list/create/update/delete`, `kb_summary`, `toolbox_list/create/update/delete`
 - Updated descriptions: `kb_create`/`kb_update` (fields + AI summary), `time_entries_list/update/delete` (admins see and edit everyone's entries)
 - **Files:** `lib/mcp/tools.js`
