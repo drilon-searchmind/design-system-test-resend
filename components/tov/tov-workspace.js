@@ -182,14 +182,19 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
           size="sm"
           active={stage}
           onChange={(id) => {
-            if (analyzing && id === "resultat" && !hasProfile) return;
+            if (id === "resultat" && !hasProfile) return;
             setStage(id);
             setJustFinished(false);
           }}
           className="max-w-full"
           tabs={[
-            { id: "materiale", label: "1. Materiale & analyse" },
-            { id: "resultat", label: "2. Resultat" },
+            { id: "materiale", label: "1. Generér / materiale" },
+            {
+              id: "resultat",
+              label: "2. Resultat",
+              disabled: !hasProfile,
+              title: hasProfile ? undefined : "Kør en analyse først for at se resultatet",
+            },
           ]}
         />
       </nav>
@@ -234,15 +239,19 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
 
           <TovCard
             title={`Materiale · ${sources.length}`}
-            hint="Upload alt der kan sige noget om kundens brand: brandbøger (PDF), mails (.eml/.txt/indsat tekst), .md/.txt, billeder og links til deres website."
+            hint="Start med kundens website, og tilføj gerne brandbog, mails eller andet materiale bagefter."
           >
             {clientDomains.length ?
-              <fieldset className="mb-3 rounded-lg border border-border-soft bg-surface-muted/30 px-3 py-2.5" disabled={locked}>
-                <legend className="px-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">
-                  Kundens domæne
+              <fieldset
+                className="mb-4 rounded-xl border border-agency-brand-border bg-agency-brand-soft/40 px-3 py-3"
+                disabled={locked}
+              >
+                <legend className="px-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-agency-brand">
+                  Anbefalet: generér fra website
                 </legend>
-                <p className="font-sans text-[11px] leading-snug text-fg-muted">
-                  Analyseres automatisk sammen med materialet. Fjern fluebenet for at springe et domæne over.
+                <p className="font-sans text-[12px] leading-snug text-fg-muted">
+                  Vi henter og analyserer det valgte domæne som udgangspunkt for Brand Core (og Tone of Voice). Fjern
+                  fluebenet kun hvis du vil springe et domæne over.
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   {pendingDomains.map((d) => {
@@ -316,7 +325,7 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
                 {busy === "upload" ? "Uploader…" : "Vælg filer"}
               </button>
               <p className="font-sans text-[11px] text-fg-quiet">
-                PDF, billeder, .txt, .md, .eml, .csv, .json, .html · max 8 MB pr. fil
+                PDF, billeder, .txt, .md, .eml, .csv, .json, .html · max 40 MB pr. fil
               </p>
             </div>
 
@@ -430,8 +439,15 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
           </TovCard>
 
           <TovCard
-            title="Brief & analyse"
-            hint="Modellen læser alt materialet og opdaterer kundens standardiserede Brand Core-profil."
+            title="Generér Brand Core"
+            hint={
+              selectedDomains.length ?
+                `Klik for at analysere ${selectedDomains.join(", ")}` +
+                (sources.length ? ` plus ${sources.length} uploadede kilder.` : ".")
+              : sources.length ?
+                "Analysér det uploadede materiale. Tip: tilføj kundens website for et stærkere resultat."
+              : "Vælg kundens website ovenfor — eller upload materiale — og start analysen."
+            }
             actions={<TovStatusChip status={status} />}
           >
             <form
@@ -483,8 +499,23 @@ function TovWorkspaceBody({ clientKey, state, reload, completion }) {
               : null}
 
               {!analyzing ?
-                <button type="submit" className={cn(tovBtnPrimary, "mt-1 w-full")} disabled={busy === "analyze"}>
-                  {busy === "analyze" ? "Starter…" : hasProfile ? "Analysér igen" : "Analysér materiale"}
+                <button
+                  type="submit"
+                  className={cn(tovBtnPrimary, "mt-1 w-full")}
+                  disabled={busy === "analyze" || (!selectedDomains.length && !sources.length)}
+                  title={
+                    !selectedDomains.length && !sources.length ?
+                      "Vælg et domæne eller upload materiale først"
+                    : undefined
+                  }
+                >
+                  {busy === "analyze" ?
+                    "Starter…"
+                  : hasProfile ?
+                    "Generér igen"
+                  : selectedDomains.length ?
+                    "Generér fra website"
+                  : "Generér fra materiale"}
                 </button>
               : null}
             </form>
@@ -668,9 +699,20 @@ export function TovWorkspace({ clientKey }) {
 
   if (error && !state) {
     return (
-      <p className="rounded-lg border border-agency-bad-border bg-agency-bad-soft px-4 py-3 font-sans text-[13px] text-agency-bad">
-        {error}
-      </p>
+      <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-center">
+        <p className="font-sans text-[14px] font-medium text-fg">Brand Core kunne ikke hentes</p>
+        <p className="mt-1 font-sans text-[12px] text-fg-muted">{error}</p>
+        <button
+          type="button"
+          className={cn(tovBtnPrimary, "mt-4")}
+          onClick={() => {
+            setError("");
+            void reload();
+          }}
+        >
+          Prøv igen
+        </button>
+      </div>
     );
   }
   if (!state) return <div className="h-[320px] animate-pulse rounded-2xl bg-skeleton" />;

@@ -2,10 +2,13 @@
 
 import { RetainerWithUpsell } from "@/components/clients/retainer-with-upsell";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ClientGridCard } from "@/components/clients/client-grid-card";
 import { ClientLogo } from "@/components/clients/client-logo";
+import { DIRECTORY_COLUMN_HINTS, DirectoryColumnLabel } from "@/components/clients/directory-column-hint";
+import { MetricHistoryHover } from "@/components/clients/metric-history-hover";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { IndeksValue, LastActivityValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
@@ -19,7 +22,7 @@ import {
 import { PulseClientHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
-import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
+import { formatPercent } from "@/lib/crm/format-da";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { useDensity } from "@/components/theme/use-density";
@@ -50,6 +53,8 @@ export function ClientsDirectory({
   hoursColumnLabel,
 }) {
   const dataSource = useDataSource();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   const pulseCtx = usePulseDataOptional();
   const staticClients = dataSource === "demo" ? STATIC_CLIENTS : [];
   const staticTeam = dataSource === "demo" ? STATIC_TEAM : [];
@@ -65,6 +70,10 @@ export function ClientsDirectory({
   const [density, setDensity] = useState("list");
   const layoutDensity = useDensity();
   const showCvr = layoutDensity === "spacious";
+
+  useEffect(() => {
+    if (!isAdmin && filter === "unhealthy") setFilter("all");
+  }, [isAdmin, filter]);
 
   // Kundegrupper (brands med samme CVR) vises som én kunde-række med udfoldelige brands.
   const customers = useMemo(() => buildCustomerEntities(CLIENTS), [CLIENTS]);
@@ -89,7 +98,7 @@ export function ClientsDirectory({
       if (ql && !c.name.toLowerCase().includes(ql) && !industry.includes(ql) && !brandMatch) {
         return false;
       }
-      if (filter === "unhealthy" && c.health === "ok") return false;
+      if (isAdmin && filter === "unhealthy" && c.health === "ok") return false;
       if (filter === "over" && c.hoursThisMonth <= c.hoursBudget) return false;
       return true;
     });
@@ -106,7 +115,7 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, sort, customers]);
+  }, [q, filter, sort, customers, isAdmin]);
 
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
@@ -146,7 +155,7 @@ export function ClientsDirectory({
             onChange={setFilter}
             tabs={[
               { id: "all", label: "Alle" },
-              { id: "unhealthy", label: "Usunde", count: unhealthyCount },
+              ...(isAdmin ? [{ id: "unhealthy", label: "Usunde", count: unhealthyCount }] : []),
               { id: "over", label: "Over budget" },
             ]}
           />
@@ -179,36 +188,44 @@ export function ClientsDirectory({
                 gridCols,
               )}
             >
-              <button
-                type="button"
+              <DirectoryColumnLabel
+                as="button"
+                label="Kunde"
+                hint={DIRECTORY_COLUMN_HINTS.kunde}
                 className="flex items-center gap-1 text-left font-[inherit] text-[inherit] hover:text-fg"
                 onClick={() => setSort("name")}
               >
                 Kunde {sort === "name" ? <PulseIconChevronDown className="opacity-70" /> : null}
-              </button>
-              <span>Ejer</span>
-              {variant === "full" ? <span>Status</span> : null}
-              <button
-                type="button"
+              </DirectoryColumnLabel>
+              <DirectoryColumnLabel label="Ejer" hint={DIRECTORY_COLUMN_HINTS.ejer} />
+              {variant === "full" ?
+                <DirectoryColumnLabel label="Status" hint={DIRECTORY_COLUMN_HINTS.status} />
+              : null}
+              <DirectoryColumnLabel
+                as="button"
+                label="Retainer"
+                hint={DIRECTORY_COLUMN_HINTS.retainer}
                 className="text-left font-[inherit] text-[inherit] hover:text-fg"
                 onClick={() => setSort("retainer")}
-              >
-                Retainer
-              </button>
+              />
               {variant !== "full" ? (
-                <button
-                  type="button"
+                <DirectoryColumnLabel
+                  as="button"
+                  label={hoursLabel}
+                  hint={DIRECTORY_COLUMN_HINTS.timer}
                   className="text-left font-[inherit] text-[inherit] hover:text-fg"
                   onClick={() => setSort("util")}
-                >
-                  {hoursLabel}
-                </button>
+                />
               ) : null}
-              <span>Margin</span>
-              <span>Seneste NPS</span>
-              <span title="Apex YoY, seneste 30 dage">Indeks</span>
+              <DirectoryColumnLabel label="Margin" hint={DIRECTORY_COLUMN_HINTS.margin} />
+              <DirectoryColumnLabel label="Seneste NPS" hint={DIRECTORY_COLUMN_HINTS.nps} />
+              <DirectoryColumnLabel label="Indeks" hint={DIRECTORY_COLUMN_HINTS.indeks} />
               {variant === "full" ? (
-                <span className="hidden sm:inline">Seneste aktivitet</span>
+                <DirectoryColumnLabel
+                  label="Seneste aktivitet"
+                  hint={DIRECTORY_COLUMN_HINTS.aktivitet}
+                  className="hidden sm:inline"
+                />
               ) : null}
               <span />
             </div>
@@ -312,9 +329,9 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         </div>
       : null}
 
-      <span className="text-[12.5px] tabular-nums text-fg">
+      <MetricHistoryHover clientId={c.id} metric="retainer" currency={c.currency} className="text-[12.5px] tabular-nums text-fg">
         <RetainerWithUpsell client={c} />
-      </span>
+      </MetricHistoryHover>
 
       {variant !== "full" ?
         <PulseClientHoursMetric
@@ -328,7 +345,9 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         />
       : null}
 
-      <span
+      <MetricHistoryHover
+        clientId={c.id}
+        metric="margin"
         className={cn(
           "text-[12.5px] tabular-nums",
           c.monthlyProfitMargin < 0 && "text-agency-bad",
@@ -337,20 +356,20 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         )}
       >
         {formatPercent(c.monthlyProfitMargin)}
-      </span>
+      </MetricHistoryHover>
 
-      <span className="text-[12.5px]">
+      <MetricHistoryHover clientId={c.id} metric="nps" className="text-[12.5px]">
         <NpsValue value={c.latestNps} />
-      </span>
+      </MetricHistoryHover>
 
-      <span className="text-[12.5px]">
+      <MetricHistoryHover clientId={c.id} metric="indeks" className="text-[12.5px]">
         <IndeksValue
           value={c.indeks}
           status={c.indeksStatus}
           computedAt={c.indeksComputedAt}
           partial={c.indeksPartial}
         />
-      </span>
+      </MetricHistoryHover>
 
       {variant === "full" ?
         <LastActivityValue

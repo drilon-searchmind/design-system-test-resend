@@ -91,6 +91,13 @@ export function ClientDetailCommercialEditor({ client, commercialLog = [], canEd
           >
             Ændr beløb / opsalg
           </button>
+        : !canEdit ?
+          <span
+            className="font-sans text-[11px] text-fg-quiet"
+            title="Kun administratorer kan ændre fast retainer. Beløb fra signerede kontrakter styres via kontrakter."
+          >
+            Kun admin kan ændre fast retainer
+          </span>
         : null}
       </div>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { StickyPageHeader } from "@/components/crm/sticky-page-header";
-import { useTimerModal } from "@/components/crm/timer-modal-context";
 import { ReportPeriodPicker } from "@/components/crm/report-period-picker";
 import { IconClock } from "@/components/crm/icons";
 import { PulseIconChevronDown } from "@/components/pulse/pulse-icons";
@@ -45,7 +44,6 @@ export function TimePageHeader({
   onMemberFilterChange,
   teamMembers = null,
 }) {
-  const { openTimer, open: timerModalOpen } = useTimerModal();
   const demoFallbackName = TEAM.find((m) => m.id === TASK_DEMO_USER_ID)?.name ?? "Medarbejder";
   const ownName =
     typeof mineLabel === "string" && mineLabel.trim() ? mineLabel.trim()
@@ -82,16 +80,6 @@ export function TimePageHeader({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={openTimer}
-              aria-haspopup="dialog"
-              aria-expanded={timerModalOpen}
-              className="inline-flex h-[26px] items-center rounded-md border border-agency-brand-border bg-agency-brand px-3 font-sans text-[11px] font-semibold text-white transition-colors hover:bg-agency-brand/90"
-            >
-              Timer
-            </button>
-
             {showMemberFilter ?
               <label className="relative inline-flex items-center">
                 <span className="sr-only">Vis registreringer for</span>

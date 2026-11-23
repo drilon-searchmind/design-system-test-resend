@@ -2,12 +2,12 @@
 
 import { parseQuickNumber, patchClient, QuickEditPopover, QUICK_EDIT_DEMO_HINT } from "@/components/clients/client-quick-edit";
 import { PulseUtilBar } from "@/components/pulse/pulse-util-bar";
-import { formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatPercent, formatHoursCompactDa } from "@/lib/crm/format-da";
 import { taskIsDone } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
 
 /**
- * Budget (timebudget), estimeret (åbne opgaver), faktisk brugt i perioden og % af budget.
+ * Budget (beløb/MRR), estimeret + brugt tid, og timebudget-udnyttelse.
  * @param {{
  *   client: import('@/lib/crm/static-data').CLIENTS[number];
  *   tasks?: Array<{ status: string; estimateHours?: number | null }>;
@@ -17,7 +17,9 @@ import { cn } from "@/lib/utils";
  * }} props
  */
 export function ClientDetailDeliveryCard({ client, tasks = [], periodLabel, canEdit = false, onSaved }) {
-  const budget = client.hoursBudget ?? 0;
+  const hoursBudget = client.hoursBudget ?? 0;
+  const retainer = client.retainer ?? 0;
+  const currency = client.currency ?? "DKK";
   const spent = client.hoursThisMonth ?? 0;
   const estimated = tasks.reduce(
     (sum, t) =>
@@ -26,7 +28,7 @@ export function ClientDetailDeliveryCard({ client, tasks = [], periodLabel, canE
       : sum,
     0,
   );
-  const util = budget > 0 ? spent / budget : 0;
+  const util = hoursBudget > 0 ? spent / hoursBudget : 0;
   const utilTone = util > 1 ? "text-agency-bad" : util > 0.9 ? "text-agency-warn" : "text-agency-ok";
 
   return (
@@ -38,25 +40,10 @@ export function ClientDetailDeliveryCard({ client, tasks = [], periodLabel, canE
       <dl className="mt-4 grid grid-cols-3 gap-3">
         <div>
           <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">Budget</dt>
-          <dd className="mt-1">
-            <QuickEditPopover
-              title="Timebudget pr. måned"
-              canEdit={canEdit}
-              disabledHint={client.isGroup ? "Redigeres pr. brand" : QUICK_EDIT_DEMO_HINT}
-              fields={[{ name: "hoursBudget", label: "Timer pr. måned", type: "number" }]}
-              initialValues={{ hoursBudget: budget ? String(budget) : "" }}
-              onSubmit={async (v) => {
-                const n = parseQuickNumber(v.hoursBudget);
-                if (Number.isNaN(n) || (n != null && n < 0)) throw new Error("Ugyldigt antal timer");
-                await patchClient(client.id, { hoursBudget: n });
-                onSaved?.();
-              }}
-            >
-              <span className="text-xl font-semibold tabular-nums tracking-tight text-fg">
-                {budget > 0 ? `${formatHoursCompactDa(budget)} t` : "—"}
-              </span>
-            </QuickEditPopover>
+          <dd className="mt-1 text-xl font-semibold tabular-nums tracking-tight text-fg">
+            {retainer > 0 ? formatCurrencyCompact(retainer, currency) : "—"}
           </dd>
+          <dd className="text-[10.5px] text-fg-quiet">retainer / md</dd>
         </div>
         <div>
           <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-soft">Estimeret</dt>
@@ -76,19 +63,44 @@ export function ClientDetailDeliveryCard({ client, tasks = [], periodLabel, canE
 
       <div className="mt-5">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="text-[11px] text-fg-muted">Budget brugt</p>
-          <p className={cn("text-[15px] font-semibold tabular-nums", budget > 0 ? utilTone : "text-fg-quiet")}>
-            {budget > 0 ? formatPercent(util) : "Intet budget"}
+          <p className="text-[11px] text-fg-muted">
+            Timebudget brugt
+            {hoursBudget > 0 ? ` (${formatHoursCompactDa(hoursBudget)} t)` : ""}
+          </p>
+          <p className={cn("text-[15px] font-semibold tabular-nums", hoursBudget > 0 ? utilTone : "text-fg-quiet")}>
+            {hoursBudget > 0 ? formatPercent(util) : "Intet timebudget"}
           </p>
         </div>
-        <PulseUtilBar hours={spent} budget={budget} className="mt-1.5" />
-        {budget > 0 ?
+        <PulseUtilBar hours={spent} budget={hoursBudget} className="mt-1.5" />
+        {hoursBudget > 0 ?
           <p className="mt-1.5 text-[11px] tabular-nums text-fg-quiet">
-            {spent <= budget ?
-              `${formatHoursCompactDa(budget - spent)} t tilbage af budgettet`
-            : `${formatHoursCompactDa(spent - budget)} t over budget`}
-            {estimated > 0 ? ` · åbne estimater svarer til ${formatPercent(estimated / budget)} af budgettet` : ""}
+            {spent <= hoursBudget ?
+              `${formatHoursCompactDa(hoursBudget - spent)} t tilbage af timebudgettet`
+            : `${formatHoursCompactDa(spent - hoursBudget)} t over timebudget`}
+            {estimated > 0 ?
+              ` · åbne estimater svarer til ${formatPercent(estimated / hoursBudget)} af timebudgettet`
+            : ""}
           </p>
+        : canEdit && !client.isGroup ?
+          <div className="mt-2">
+            <QuickEditPopover
+              title="Timebudget pr. måned"
+              canEdit={canEdit}
+              disabledHint={QUICK_EDIT_DEMO_HINT}
+              fields={[{ name: "hoursBudget", label: "Timer pr. måned", type: "number" }]}
+              initialValues={{ hoursBudget: "" }}
+              onSubmit={async (v) => {
+                const n = parseQuickNumber(v.hoursBudget);
+                if (Number.isNaN(n) || (n != null && n < 0)) throw new Error("Ugyldigt antal timer");
+                await patchClient(client.id, { hoursBudget: n });
+                onSaved?.();
+              }}
+            >
+              <button type="button" className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
+                Sæt timebudget…
+              </button>
+            </QuickEditPopover>
+          </div>
         : null}
       </div>
     </div>

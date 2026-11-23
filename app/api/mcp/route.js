@@ -5,6 +5,7 @@ import { runWithMcpAuth } from "@/lib/mcp/auth-context";
 import { dispatchTool } from "@/lib/mcp/dispatch";
 import { CORS_HEADERS, optionsCors } from "@/lib/mcp/http";
 import { MCP_TOOLS, TOOLS_BY_NAME, toolDescriptor } from "@/lib/mcp/tools";
+import { verifyServiceToken } from "@/lib/mcp/service-tokens";
 import { publicBaseUrl, verifyToken } from "@/lib/mcp/tokens";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,8 @@ async function handleMessage(msg, ctx) {
 export async function POST(req) {
   const header = req.headers.get("authorization") ?? "";
   const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
-  const claims = verifyToken(token, "access");
+  // OAuth access token (Claude) or long-lived service token (Cursor / scripts).
+  const claims = verifyToken(token, "access") ?? (await verifyServiceToken(token));
   if (!claims) return unauthorized(req, "Missing, invalid or expired access token");
   if (!(await canUseMcp(claims.sub))) return unauthorized(req, "User is not allowed to use the MCP server");
 

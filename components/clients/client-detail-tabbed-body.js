@@ -21,6 +21,7 @@ import { ClientDetailServiceMixCard } from "@/components/clients/client-detail-s
 import { ClientDetailTasksCard } from "@/components/clients/client-detail-tasks-card";
 import { TovWorkspace } from "@/components/tov/tov-workspace";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import { routes } from "@/config/routes";
 
 export const CLIENT_DETAIL_TAB_IDS = /** @type {const} */ (["opgaver", "overblik", "brands", "tov"]);
 
@@ -305,7 +306,30 @@ export function ClientDetailTabbedBody({
             <h2 id="client-tab-tov" className="sr-only">
               Brand Core
             </h2>
-            <TovWorkspace clientKey={client.id} />
+            {isGroup ? (
+              <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-center">
+                <p className="font-sans text-[14px] font-medium text-fg">Brand Core laves pr. brand</p>
+                <p className="mt-1 font-sans text-[12px] text-fg-muted">
+                  Åbn et brand under fanen Brands, og generér Brand Core dér — eller gå direkte til et brand.
+                </p>
+                {(client.brands ?? []).length ?
+                  <ul className="mt-4 flex flex-wrap justify-center gap-2">
+                    {(client.brands ?? []).slice(0, 8).map((b) => (
+                      <li key={b.id}>
+                        <a
+                          href={`${routes.clients}/${encodeURIComponent(b.id)}?tab=tov`}
+                          className="inline-flex h-8 items-center rounded-md border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[12px] font-semibold text-agency-brand"
+                        >
+                          {b.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                : null}
+              </div>
+            ) : (
+              <TovWorkspace clientKey={client.id} />
+            )}
           </section>
         ) : null}
       </div>

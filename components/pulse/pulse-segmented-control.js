@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 /**
  * Segmented control — DESIGN-SEARCHMINDOS `<TabGroup>`.
  * @param {{
- *   tabs: { id: string; label: string; count?: number; icon?: () => import('react').ReactNode }[];
+ *   tabs: { id: string; label: string; count?: number; icon?: () => import('react').ReactNode; disabled?: boolean; title?: string }[];
  *   active: string;
  *   onChange: (id: string) => void;
  *   size?: 'sm' | 'md';
@@ -23,19 +23,27 @@ export function PulseSegmentedControl({ tabs, active, onChange, size = "md", cla
     >
       {tabs.map((t) => {
         const isActive = active === t.id;
+        const disabled = Boolean(t.disabled);
         return (
           <button
             key={t.id}
             type="button"
             role="tab"
             aria-selected={isActive}
-            onClick={() => onChange(t.id)}
+            aria-disabled={disabled || undefined}
+            disabled={disabled}
+            title={t.title}
+            onClick={() => {
+              if (!disabled) onChange(t.id);
+            }}
             className={cn(
               "flex shrink-0 items-center gap-1 rounded-full font-medium transition-colors",
               size === "sm" ? "h-7 px-2.5 text-[11px]" : "h-8 px-3 text-[12px]",
+              disabled && "cursor-not-allowed opacity-45",
               isActive
                 ? "bg-canvas text-fg"
-                : "text-fg-muted hover:bg-surface-active hover:text-fg",
+                : !disabled && "text-fg-muted hover:bg-surface-active hover:text-fg",
+              !isActive && disabled && "text-fg-quiet",
             )}
           >
             {t.icon ? <span className="inline-flex opacity-90">{t.icon()}</span> : null}

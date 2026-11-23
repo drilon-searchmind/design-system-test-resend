@@ -1,3 +1,7 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
 import { buildCustomerEntities } from "@/lib/crm/client-groups";
 import { formatCurrencyCompact } from "@/lib/crm/format-da";
@@ -6,6 +10,8 @@ import { formatCurrencyCompact } from "@/lib/crm/format-da";
  * @param {{ clients: import('@/lib/crm/pulse-types').PulseClient[] }} props
  */
 export function ClientsSummaryStrip({ clients: brands }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.isAdmin === true;
   // Kundegrupper (brands med samme CVR) tæller som én kunde.
   const clients = buildCustomerEntities(brands);
   const activeClients = clients.filter((c) => c.status === "active");
@@ -23,11 +29,13 @@ export function ClientsSummaryStrip({ clients: brands }) {
         value={formatCurrencyCompact(activeRetainerDkk)}
         tone="brand"
       />
-      <PulseKpiCard
-        label="Kræver handling"
-        value={String(needsAttention)}
-        tone={needsAttention > 0 ? "warn" : "ok"}
-      />
+      {isAdmin ?
+        <PulseKpiCard
+          label="Kræver handling"
+          value={String(needsAttention)}
+          tone={needsAttention > 0 ? "warn" : "ok"}
+        />
+      : null}
     </section>
   );
 }

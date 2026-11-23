@@ -6,8 +6,10 @@ import { addFileSources, addTextSource, addUrlSource } from "@/lib/server/tov-da
 
 /**
  * Tilføj materiale. Enten multipart (`files`) eller JSON: { url } | { text, name? }.
- * Filer sendes én ad gangen fra klienten (body-grænse ~10 MB).
+ * Filer sendes én ad gangen fra klienten (op til ~40 MB; gemmes i GridFS).
  */
+export const maxDuration = 60;
+
 export async function POST(req, ctx) {
   const authResult = await requireSession();
   if ("response" in authResult) return authResult.response;

@@ -102,8 +102,11 @@ export function ClientDetailServiceMixCard({ client, canEdit = false, onSaved })
             >
               Tilføj / redigér services
             </button>
-          : null}
-          <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
+          : !canEdit ?
+            <span className="font-sans text-[11px] text-fg-quiet" title="Kræver database-tilstand og rettighed til at redigere kunden">
+              Kun visning
+            </span>
+          : null}          <Link href={routes.tasks} className="font-sans text-[11px] font-medium text-agency-brand hover:underline">
             Opgaver — hel workspace →
           </Link>
         </div>
