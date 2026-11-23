@@ -63,19 +63,39 @@ const str = (v) => (v === undefined || v === null ? null : String(v));
 
 const MAX_HOURS = Number(args["max-hours"] ?? process.env.MAX_RUNTIME_HOURS) || 0;
 const AUTO = args["auto-resume"] === true;
-const stateDir = process.env.STATE_DIR?.trim() || join(here, ".state");
-const outDir = process.env.OUT_DIR?.trim() || join(here, ".out");
+// Foretræk volume (/data/state). Lokal .state bruges kun hvis volumen ikke er monteret.
+const stateDir =
+  process.env.STATE_DIR?.trim() ||
+  (existsSync("/data") ? "/data/state" : join(here, ".state"));
+const outDir =
+  process.env.OUT_DIR?.trim() ||
+  (existsSync("/data") ? "/data/out" : join(here, ".out"));
 
-/** Auto-resume: tag det nyeste snapshot, hvis det ikke er færdigt og er højst 7 dage gammelt. */
-if (RUN && AUTO && typeof args.resume !== "string" && existsSync(stateDir)) {
-  const newest = readdirSync(stateDir).filter((f) => /^\d{8}T\d{6}Z\.json$/.test(f)).sort().reverse()[0];
-  if (newest) {
-    try {
-      const s = JSON.parse(readFileSync(join(stateDir, newest), "utf8"));
-      const age = Date.now() - Date.parse(s.firstStartedAt);
-      if (!s.finished && age < 7 * 86400000) args.resume = s.snapshotId;
-    } catch {
-      /* ulæselig state: start nyt snapshot */
+/** Auto-resume: ufærdigt snapshot med flest færdige tasks (højst 14 dage). Env RESUME_SNAPSHOT_ID tvinger et bestemt id. */
+if (RUN && typeof args.resume !== "string") {
+  const forced = process.env.RESUME_SNAPSHOT_ID?.trim();
+  if (forced) {
+    args.resume = forced;
+    console.log(`[${new Date().toISOString().slice(11, 19)}] Genoptager via RESUME_SNAPSHOT_ID=${forced}`);
+  } else if (AUTO && existsSync(stateDir)) {
+    let best = null;
+    for (const f of readdirSync(stateDir).filter((n) => /^\d{8}T\d{6}Z\.json$/.test(n))) {
+      try {
+        const s = JSON.parse(readFileSync(join(stateDir, f), "utf8"));
+        if (s.finished) continue;
+        const age = Date.now() - Date.parse(s.firstStartedAt ?? 0);
+        if (!Number.isFinite(age) || age >= 14 * 86400000) continue;
+        const n = Array.isArray(s.doneTasks) ? s.doneTasks.length : 0;
+        if (!best || n > best.n || (n === best.n && s.snapshotId > best.id)) best = { id: s.snapshotId, n };
+      } catch {
+        /* spring ulæselig state over */
+      }
+    }
+    if (best) {
+      args.resume = best.id;
+      console.log(`[${new Date().toISOString().slice(11, 19)}] Auto-resume: ${best.id} (${best.n} tasks færdige i state)`);
+    } else {
+      console.log(`[${new Date().toISOString().slice(11, 19)}] Auto-resume: ingen ufærdig state i ${stateDir} — starter nyt snapshot`);
     }
   }
 }
@@ -237,8 +257,28 @@ log(`Workspace: ${team.name} (${team.id}) | ${RUN ? `KØRSEL, snapshot ${snapsho
 const attachmentsFound = new Map();
 if (RUN && args.resume) for (const [k, v] of loadCache("attachments") ?? []) attachmentsFound.set(k, v);
 
+// Hvis lokal state er væk (volumen/STATE_DIR var forkert), hent færdige task-id'er fra BigQuery
+if (RUN && args.resume && sink) {
+  try {
+    const fromBq = await sink.doneTaskIdsFromSnapshot(snapshotId);
+    if (fromBq.size > doneTasks.size) {
+      for (const id of fromBq) doneTasks.add(id);
+      log(`Genoprettet fremdrift fra BigQuery: ${fromBq.size} tasks allerede skrevet for ${snapshotId}`);
+      if (fromBq.size > 0) {
+        donePhases.add("workspace");
+        donePhases.add("hierarchy");
+      }
+    } else if (fromBq.size) {
+      log(`BigQuery har ${fromBq.size} tasks for ${snapshotId} (matcher lokal state)`);
+    }
+  } catch (e) {
+    log(`Kunne ikke hente færdige tasks fra BigQuery: ${e.message}`);
+  }
+}
+
 if (RUN) {
   await saveState(); // fejler tidligt, hvis STATE_DIR ikke kan skrives (fx volume mangler)
+  log(`State-mappe: ${stateDir}`);
   log(MAX_HOURS ? `Tidsgrænse: ${MAX_HOURS} timer fra ${firstStartedAt} (stopper senest ${new Date(deadline).toISOString()})` : "Ingen tidsgrænse (sæt MAX_RUNTIME_HOURS)");
   log(args.resume ? `Genoptager snapshot ${snapshotId}: ${doneTasks.size} tasks allerede færdige, faser færdige: ${[...donePhases].join(", ") || "ingen"}` : `Nyt snapshot ${snapshotId}`);
   await notify(`ClickUp-backup ${args.resume ? "genoptaget" : "startet"}: snapshot ${snapshotId}${MAX_HOURS ? `, max ${MAX_HOURS} t` : ""}`);

@@ -166,6 +166,21 @@ export function createSink({ projectId, credentials, datasetId, location, prefix
     return new Set(rows.map((r) => String(r.id)));
   }
 
+  /**
+   * Task-id'er allerede skrevet for et snapshot (til genoptagelse når lokal state er væk).
+   * @param {string} [id]
+   */
+  async function doneTaskIdsFromSnapshot(id = snapshotId) {
+    const [exists] = await dataset.table(tn("tasks")).exists();
+    if (!exists) return new Set();
+    const [rows] = await bq.query({
+      query: `SELECT DISTINCT id FROM \`${projectId}.${datasetId}.${tn("tasks")}\` WHERE snapshot_id = @s`,
+      params: { s: id },
+      location,
+    });
+    return new Set(rows.map((r) => String(r.id)));
+  }
+
   /** Kontrol: antal rækker i BigQuery for dette snapshot pr. entitet (til sammenligning med det vi skrev). */
   async function verifyCounts() {
     /** @type {Record<string, { skrevet: number; ibigquery: number; ok: boolean }>} */
@@ -183,5 +198,5 @@ export function createSink({ projectId, credentials, datasetId, location, prefix
     return result;
   }
 
-  return { add, flush, flushAll, createViews, storedAttachmentIds, verifyCounts, counts, snapshotId, snapshotAt, tableName: tn };
+  return { add, flush, flushAll, createViews, storedAttachmentIds, doneTaskIdsFromSnapshot, verifyCounts, counts, snapshotId, snapshotAt, tableName: tn };
 }

@@ -6,6 +6,9 @@ COPY backup.mjs clickup-api.mjs bq-sink.mjs test-connection.mjs cleanup-test.mjs
 
 # 8 GB heap: workspaceet har 30k+ tasks; uden det falder Node ved ~4 GB
 ENV NODE_OPTIONS=--max-old-space-size=8192
+# State på volumen (mount /data). Uden dette mistes genoptagelse ved hver deploy.
+ENV STATE_DIR=/data/state
+ENV OUT_DIR=/data/out
 
 # Railway-variabler injiceres som miljø (ingen --env-file). BACKUP_ARGS styrer tilstanden:
 #   ikke sat    -> "--run" (rigtig backup)
