@@ -49,8 +49,8 @@ export function SettingsApexIndeksPanel() {
     <section className="tally-panel p-5 md:p-6">
       <h3 className="font-sans text-[14px] font-semibold text-fg">Indeks fra Apex</h3>
       <p className="mt-1 font-sans text-[12px] text-fg-muted">
-        Apex YoY (seneste 30 dage) hentes i ét kald og matches på kundens ClickUp-id. Kører også
-        automatisk via cron.
+        Apex YoY (seneste 30 dage). Kunder/Pulse henter Indeks live fra Apex ved hvert load (kort
+        cache). Knappen og cron gemmer stadig en kopi i CRM som fallback.
       </p>
       <dl className="mt-3 grid gap-1 font-sans text-[12px] text-fg-muted">
         <div>
