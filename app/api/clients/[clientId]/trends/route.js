@@ -33,10 +33,7 @@ export async function GET(req, ctx) {
     return NextResponse.json({
       mrr: t.mrr ?? [],
       nps: t.nps ?? [],
-      hours: t.hours ?? [],
-      // Margin og Indeks har endnu ikke månedlig historik i CRM — feltet findes til fremtidig udvidelse.
       margin: t.margin ?? [],
-      indeks: t.indeks ?? [],
     });
   } catch (err) {
     return NextResponse.json(

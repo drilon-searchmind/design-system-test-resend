@@ -29,13 +29,11 @@ Hover/title på overskrifterne i **Alle kunder** (Ejer, Status, Retainer, Margin
 - Filterfanen **Usunde** er kun synlig for admins
 - Filer: `clients-summary-strip.js`, `clients-directory.js`
 
-## 3. Hover med 12 måneders historik (Retainer / Margin / NPS / Indeks) — DELVIS
+## 3. Hover med 12 måneders historik — DONE
 
-- Lazy hover via `MetricHistoryHover` + nyt endpoint `GET /api/clients/[clientId]/trends`
-- **Retainer** og **NPS** har rigtig historik (samme kilde som kundekortets KPI-trends)
-- **Margin** og **Indeks** har endnu ikke månedlig historik i CRM → hover viser ikke graf før data findes
-
-Se spørgsmål nederst.
+- **Retainer**, **Margin** og **NPS** (ikke Indeks)
+- Lazy hover via `MetricHistoryHover` + `GET /api/clients/[clientId]/trends`
+- Margin: estimeret pr. måned ud fra MRR vs. timer (kalibreret til nuværende margin)
 
 ## 4. Budget skal være beløb, ikke timer — DONE
 
@@ -74,15 +72,15 @@ Fjernet den blå **Timer**-knap fra tidsregistreringens sideheader (den findes a
 
 - Fil: `time-page-header.js`
 
-## 8. Mere fokus på «Generér fra website» (Brand Core / ToV) — DONE (første iteration)
+## 8. Mere fokus på «Generér fra website» (Brand Core / ToV) — DONE
 
-Én samlet trin-1-oplevelse (ikke to separate produkter endnu):
+Én samlet trin-1-oplevelse (bekræftet god nok — ikke to separate steps):
 
 1. Anbefalet: vælg kundens domæne («Generér fra website»)
 2. Valgfrit: upload ekstra materiale
 3. Primær CTA: **Generér fra website** / **Generér fra materiale**
 
-Se spørgsmål om 1 vs 2 steps.
+**ToV:** dækkes af samme Brand Core-flow (ingen separat «generér ToV»-side).
 
 ## 9. Resultat non-clickable indtil kørt; default når kørt — DONE
 
@@ -94,14 +92,17 @@ Se spørgsmål om 1 vs 2 steps.
 
 ---
 
-## Spørgsmål / usikkerheder (brug for din guide)
+## Besvarede spørgsmål
 
-1. **#2:** Er det kun «Kræver handling» + «Usunde», eller skulle flere KPI’er/filtre også være admin-only?
-2. **#3 historik:**
-   - Skal Margin have 12 mdr. historik? Vi gemmer i dag kun aktuelle margin — kræver snapshots eller genberegning.
-   - Indeks: Apex giver kun aktuelt tal. Skal vi logge Indeks dagligt i CRM, eller er hover kun meningsfuldt for Retainer/NPS?
-3. **#4:** Er det OK at progressbaren stadig er **timer** (timebudget), mens «Budget»-tallet er retainer-beløb? Ellers: hvordan skal «% budget brugt» beregnes i kroner?
-4. **#5 Bryggeriet Sort:** Var det en **kundegruppe**-side der viste «Kunden findes ikke»? Bekræft gerne efter deploy. Hvis det var et enkelt brand, send slug/URL så vi kan debugge `findClient`.
-5. **#6:** Skal **ikke-admins** kunne ændre servicefordeling (ja i dag hvis de må redigere kunden), eller skal det også være admin-only som retainer?
-6. **#8:** Vil I have **to tydelige steps** (A: kun website-generering → B: tilføj eget materiale → samlet resultat), eller er den nuværende «anbefalet website + valgfrit materiale → én Generér-knap» god nok?
-7. **ToV vs Brand Core:** Skal Tone of Voice have samme «generér fra site»-fokus et andet sted, eller dækker Brand Core-flowet begge?
+| # | Svar | Handling |
+| --- | --- | --- |
+| **#2** | Kun «Kræver handling» + «Usunde» admin-only | Allerede sådan — ingen ændring |
+| **#6** | Ikke-admins må ændre servicefordeling | Allerede sådan (`canEditClient`, ikke admin-låst) |
+| **#8** | Nuværende én Generér-flow er fint | Ingen ændring |
+| **ToV** | Brand Core dækker begge | Ingen separat ToV-generering |
+| **#3** | Historik-hover Retainer + Margin + NPS | Indeks uden hover |
+
+## Åbne spørgsmål (stadig)
+
+1. **#4:** Er det OK at progressbaren er **timer** mens «Budget» er retainer-beløb?
+2. **#5 Bryggeriet Sort:** Var «Kunden findes ikke» på en **kundegruppe**-side? Bekræft gerne efter deploy.

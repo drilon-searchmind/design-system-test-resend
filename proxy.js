@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-export default function middleware() {
+/**
+ * Next.js 16: `middleware` → `proxy` (nodejs runtime).
+ * Pass-through for now; keep matcher narrow so API routes are untouched.
+ */
+export function proxy() {
   return NextResponse.next();
 }
 

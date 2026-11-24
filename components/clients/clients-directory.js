@@ -362,14 +362,14 @@ function DirectoryRow({ client: c, nested = false, gridCols, variant, periodLabe
         <NpsValue value={c.latestNps} />
       </MetricHistoryHover>
 
-      <MetricHistoryHover clientId={c.id} metric="indeks" className="text-[12.5px]">
+      <span className="text-[12.5px]">
         <IndeksValue
           value={c.indeks}
           status={c.indeksStatus}
           computedAt={c.indeksComputedAt}
           partial={c.indeksPartial}
         />
-      </MetricHistoryHover>
+      </span>
 
       {variant === "full" ?
         <LastActivityValue
