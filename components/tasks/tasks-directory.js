@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { AdvancedFilterBar } from "@/components/crm/advanced-filter-bar";
 import { usePersistedState } from "@/lib/use-persisted-state";
 import { TasksKanban } from "@/components/tasks/tasks-kanban";
 import {
@@ -22,6 +23,13 @@ import {
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { routes, taskHref } from "@/config/routes";
 import { TaskSubtaskBadge } from "@/components/tasks/task-subtask-badge";
+import {
+  TASK_DIRECTORY_BUILTIN_PRESETS,
+  applyFilterRules,
+  taskDirectoryAccessors,
+  taskDirectoryFilterFields,
+} from "@/lib/crm/advanced-filter";
+import { loadLastFilterState, saveLastFilterState } from "@/lib/crm/filter-presets";
 import { taskIsSubTaskRow } from "@/lib/crm/task-utils";
 import { formatHoursCompactDa, formatIsoDateDa } from "@/lib/crm/format-da";
 import {
@@ -33,6 +41,8 @@ import {
   taskPriorityRank,
 } from "@/lib/crm/task-utils";
 import { cn } from "@/lib/utils";
+
+const TASKS_FILTER_SCOPE = "tasks-directory";
 
 /** @param {unknown} v */
 const validateScope = (v) => (v === "all" || v === "open" || v === "overdue" ? v : null);
@@ -250,6 +260,28 @@ export function TasksDirectory({
   );
   const [sort, setSort] = usePersistedState("crm:tasks:sort:v1", "due", { validate: validateSort });
   const [density, setDensity] = usePersistedState("crm:tasks:density:v1", "list", { validate: validateDensity });
+  const [filterRules, setFilterRules] = useState(
+    /** @type {import('@/lib/crm/advanced-filter').FilterRule[]} */ ([]),
+  );
+  const [filtersHydrated, setFiltersHydrated] = useState(false);
+
+  useEffect(() => {
+    const last = loadLastFilterState(TASKS_FILTER_SCOPE);
+    if (last) {
+      setFilterRules(Array.isArray(last.rules) ? last.rules : []);
+      if (typeof last.q === "string") setQ(last.q);
+    }
+    setFiltersHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersHydrated) return;
+    saveLastFilterState(TASKS_FILTER_SCOPE, {
+      rules: filterRules,
+      quickFilter: scopeFilter,
+      q,
+    });
+  }, [filtersHydrated, filterRules, scopeFilter, q]);
 
   const deptById = useMemo(() => {
     /** @type {Record<string, (typeof departments)[number]>} */
@@ -297,8 +329,27 @@ export function TasksDirectory({
     [assigneeScopedTasks, taskDueReferenceIso],
   );
 
+  const clientOptions = useMemo(() => {
+    /** @type {Map<string, string>} */
+    const m = new Map();
+    for (const t of tasks) {
+      const id = t.clientId || t.clientName;
+      if (id && !m.has(String(id))) m.set(String(id), t.clientName || String(id));
+    }
+    return [...m.entries()].map(([id, name]) => ({ id, name }));
+  }, [tasks]);
+
+  const filterFields = useMemo(
+    () => taskDirectoryFilterFields(clientOptions, team),
+    [clientOptions, team],
+  );
+  const taskAccessors = useMemo(
+    () => taskDirectoryAccessors(taskDueReferenceIso),
+    [taskDueReferenceIso],
+  );
+
   const filtered = useMemo(() => {
-    const list = tasks.filter((t) => {
+    let list = tasks.filter((t) => {
       const ql = q.trim().toLowerCase();
       if (
         ql &&
@@ -313,6 +364,8 @@ export function TasksDirectory({
       if (scopeFilter === "overdue" && !taskIsOverdue(t, taskDueReferenceIso)) return false;
       return true;
     });
+
+    list = applyFilterRules(list, filterRules, taskAccessors, filterFields);
 
     list.sort((a, b) => {
       if (sort === "due") {
@@ -330,7 +383,7 @@ export function TasksDirectory({
     });
 
     return list;
-  }, [q, selectedAssignees, scopeFilter, sort, tasks, taskDueReferenceIso]);
+  }, [q, selectedAssignees, scopeFilter, sort, tasks, taskDueReferenceIso, filterRules, taskAccessors, filterFields]);
 
   const groupedByStatus = useMemo(() => {
     /** @type {Map<string, typeof filtered>} */
@@ -414,6 +467,16 @@ export function TasksDirectory({
               { id: "list", label: "", icon: () => <PulseIconList size={12} /> },
               { id: "cards", label: "", icon: () => <PulseIconGrid size={12} /> },
             ]}
+          />
+        </div>
+
+        <div className="w-full basis-full">
+          <AdvancedFilterBar
+            scope={TASKS_FILTER_SCOPE}
+            fields={filterFields}
+            rules={filterRules}
+            onRulesChange={setFilterRules}
+            builtinPresets={TASK_DIRECTORY_BUILTIN_PRESETS}
           />
         </div>
       </div>

@@ -92,6 +92,49 @@ Fjernet den blå **Timer**-knap fra tidsregistreringens sideheader (den findes a
 
 ---
 
+## 10. Avanceret filtrering (ClickUp-stil) — DONE (v1)
+
+Genbrugelig filter-motor + UI med AND-regler, presets og persistens.
+
+### Hvad er tilføjet
+
+| Del | Hvor |
+| --- | --- |
+| Filter-motor (felt / op / værdi) | `lib/crm/advanced-filter.js` |
+| Presets + last-used i **localStorage** | `lib/crm/filter-presets.js` (`crm-filter-presets:v1:*`, `crm-filter-last:v1:*`) |
+| Filter-UI (Filter / Presets / Gem som preset) | `components/crm/advanced-filter-bar.js` |
+| **Alle kunder** | `components/clients/clients-directory.js` |
+| **Alle opgaver** | `components/tasks/tasks-directory.js` |
+
+### Kundelisten — felter
+
+Status, Ejer, Sundhed, Branche, Retainer, Margin (%), Seneste NPS, Indeks, Over timebudget.
+
+Hurtige faner (Alle / Usunde / Over budget) er **beholdt** og kombineres med avancerede regler.
+
+### Standard-presets (built-in)
+
+- Skjul stoppede (`status` er ikke Inaktiv)
+- Aktive + pause
+- Kræver handling
+- Over timebudget
+
+### Demo-seed (localStorage)
+
+Ved første besøg på kundelisten seeds:
+
+1. Bruger-presets: Skjul stoppede, Kræver handling, Over timebudget, Margin ≥ 25 %
+2. **Aktiv filter** = «Skjul stoppede» (gemt i `crm-filter-last:v1:clients-directory`)
+
+Flag: `crm-filter-demo-seeded:v1`. Ryd det (+ evt. last/presets-nøgler) for at reseede.
+
+### Opgaver — felter / presets
+
+Status, Prioritet, Ansvarlig, Kunde, Titel, Overskredet, Fakturerbar.  
+Built-in: Åbne opgaver, Høj prioritet, Overskredet.
+
+---
+
 ## Besvarede spørgsmål
 
 | # | Svar | Handling |
@@ -102,7 +145,13 @@ Fjernet den blå **Timer**-knap fra tidsregistreringens sideheader (den findes a
 | **ToV** | Brand Core dækker begge | Ingen separat ToV-generering |
 | **#3** | Historik-hover Retainer + Margin + NPS | Indeks uden hover |
 
-## Åbne spørgsmål (stadig)
+---
 
-1. **#4:** Er det OK at progressbaren er **timer** mens «Budget» er retainer-beløb?
-2. **#5 Bryggeriet Sort:** Var «Kunden findes ikke» på en **kundegruppe**-side? Bekræft gerne efter deploy.
+## Åbne spørgsmål (filtrering)
+
+1. **Flere lister:** Skal samme Filter/Presets rulles ud til Kontrakter, NPS, KB, Team, Time entries næste?
+2. **OR-grupper:** ClickUp har OR mellem regelgrupper. Er AND-only (nu) nok til v1, eller skal OR med snart?
+3. **Delt / server-presets:** Skal presets kun være pr. browser (nu), eller gemmes pr. bruger i Mongo og synces på tværs af enheder?
+4. **Kolonne-header-filtre:** Skal «klik på kolonne → filter» (som Excel/CU) tilføjes oveni Filter-baren?
+5. **Default for alle:** Skal «Skjul stoppede» være hard default for alle (også efter Ryd), eller kun demo-seed som nu?
+

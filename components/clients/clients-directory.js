@@ -9,6 +9,7 @@ import { ClientGridCard } from "@/components/clients/client-grid-card";
 import { ClientLogo } from "@/components/clients/client-logo";
 import { DIRECTORY_COLUMN_HINTS, DirectoryColumnLabel } from "@/components/clients/directory-column-hint";
 import { MetricHistoryHover } from "@/components/clients/metric-history-hover";
+import { AdvancedFilterBar } from "@/components/crm/advanced-filter-bar";
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { IndeksValue, LastActivityValue, NpsValue } from "@/components/clients/client-metric-cells";
 import { StatusChip } from "@/components/crm/status-chip";
@@ -21,13 +22,26 @@ import {
 } from "@/components/pulse/pulse-icons";
 import { PulseClientHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
+import {
+  CLIENT_DIRECTORY_ACCESSORS,
+  CLIENT_DIRECTORY_BUILTIN_PRESETS,
+  applyFilterRules,
+  clientDirectoryFilterFields,
+} from "@/lib/crm/advanced-filter";
 import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
 import { formatPercent } from "@/lib/crm/format-da";
+import {
+  ensureDemoClientFilterSeed,
+  loadLastFilterState,
+  saveLastFilterState,
+} from "@/lib/crm/filter-presets";
 import { usePulseDataOptional } from "@/components/pulse/pulse-data-context";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { useDensity } from "@/components/theme/use-density";
 import { CLIENTS as STATIC_CLIENTS, TEAM as STATIC_TEAM } from "@/lib/crm/static-data";
 import { cn } from "@/lib/utils";
+
+const CLIENTS_FILTER_SCOPE = "clients-directory";
 
 const GRID_PULSE =
   "grid-cols-[minmax(200px,2.2fr)_minmax(88px,1.1fr)_minmax(72px,1fr)_minmax(120px,1.45fr)_minmax(52px,0.65fr)_minmax(72px,0.8fr)_minmax(56px,0.7fr)_40px]";
@@ -68,12 +82,36 @@ export function ClientsDirectory({
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("name");
   const [density, setDensity] = useState("list");
+  const [filterRules, setFilterRules] = useState(
+    /** @type {import('@/lib/crm/advanced-filter').FilterRule[]} */ ([]),
+  );
+  const [filtersHydrated, setFiltersHydrated] = useState(false);
   const layoutDensity = useDensity();
   const showCvr = layoutDensity === "spacious";
 
   useEffect(() => {
     if (!isAdmin && filter === "unhealthy") setFilter("all");
   }, [isAdmin, filter]);
+
+  useEffect(() => {
+    ensureDemoClientFilterSeed();
+    const last = loadLastFilterState(CLIENTS_FILTER_SCOPE);
+    if (last) {
+      setFilterRules(Array.isArray(last.rules) ? last.rules : []);
+      if (typeof last.q === "string") setQ(last.q);
+      if (typeof last.quickFilter === "string") setFilter(last.quickFilter);
+    }
+    setFiltersHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersHydrated) return;
+    saveLastFilterState(CLIENTS_FILTER_SCOPE, {
+      rules: filterRules,
+      quickFilter: filter,
+      q,
+    });
+  }, [filtersHydrated, filterRules, filter, q]);
 
   // Kundegrupper (brands med samme CVR) vises som én kunde-række med udfoldelige brands.
   const customers = useMemo(() => buildCustomerEntities(CLIENTS), [CLIENTS]);
@@ -86,11 +124,12 @@ export function ClientsDirectory({
       return next;
     });
 
+  const filterFields = useMemo(() => clientDirectoryFilterFields(TEAM), [TEAM]);
   const unhealthyCount = useMemo(() => customers.filter((c) => c.health !== "ok").length, [customers]);
 
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    const list = customers.filter((c) => {
+    let list = customers.filter((c) => {
       const industry = (c.industry ?? "").toLowerCase();
       const brandMatch = (c.brands ?? []).some(
         (b) => b.name.toLowerCase().includes(ql) || (b.industry ?? "").toLowerCase().includes(ql),
@@ -102,6 +141,8 @@ export function ClientsDirectory({
       if (filter === "over" && c.hoursThisMonth <= c.hoursBudget) return false;
       return true;
     });
+
+    list = applyFilterRules(list, filterRules, CLIENT_DIRECTORY_ACCESSORS, filterFields);
 
     list.sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name, "da");
@@ -115,8 +156,7 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, sort, customers, isAdmin]);
-
+  }, [q, filter, sort, customers, isAdmin, filterRules, filterFields]);
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
   const minW = variant === "full" ? "min-w-[920px]" : "min-w-[920px]";
@@ -168,6 +208,16 @@ export function ClientsDirectory({
               { id: "list", label: "", icon: () => <PulseIconList size={12} /> },
               { id: "cards", label: "", icon: () => <PulseIconGrid size={12} /> },
             ]}
+          />
+        </div>
+
+        <div className="w-full basis-full">
+          <AdvancedFilterBar
+            scope={CLIENTS_FILTER_SCOPE}
+            fields={filterFields}
+            rules={filterRules}
+            onRulesChange={setFilterRules}
+            builtinPresets={CLIENT_DIRECTORY_BUILTIN_PRESETS}
           />
         </div>
       </div>
