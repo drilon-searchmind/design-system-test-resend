@@ -11,7 +11,13 @@ import { usePulseData } from "@/components/pulse/pulse-data-context";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
 import { formatCurrency, formatCurrencyCompact, formatIsoDateDa, formatPercent } from "@/lib/crm/format-da";
-import { UPSELL_TYPES, formatUpsellPeriodDa, monthKey } from "@/lib/crm/upsell-utils";
+import {
+  UPSELL_TYPES,
+  formatUpsellPeriodDa,
+  isTemporaryUpsellType,
+  monthKey,
+  upsellSignedAmount,
+} from "@/lib/crm/upsell-utils";
 import { cn } from "@/lib/utils";
 
 /** Rækkefølge og farver for søjle-segmenter (fast MRR er mest værd → mørkest). */
@@ -19,6 +25,9 @@ const TYPE_SEGMENTS = /** @type {const} */ ([
   { type: "mrr_increase", className: "bg-agency-brand" },
   { type: "temporary_mrr", className: "bg-agency-brand/60" },
   { type: "one_time", className: "bg-agency-brand/30" },
+  { type: "mrr_decrease", className: "bg-agency-bad" },
+  { type: "temporary_mrr_downsell", className: "bg-agency-bad/60" },
+  { type: "one_time_downsell", className: "bg-agency-bad/30" },
 ]);
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -45,8 +54,8 @@ function UpsellItemList({ items, showClient = false, showSeller = false }) {
           <div className="flex items-baseline justify-between gap-3">
             <span className="font-semibold text-fg">{UPSELL_TYPES[u.type]?.label ?? u.type}</span>
             <span className="tabular-nums font-semibold text-fg">
-              {formatCurrency(u.amount, u.currency || "DKK")}
-              {u.type === "temporary_mrr" ? " / md" : ""}
+              {formatCurrency(upsellSignedAmount(u), u.currency || "DKK")}
+              {isTemporaryUpsellType(u.type) ? " / md" : ""}
             </span>
           </div>
           <div className="mt-0.5 text-fg-quiet">
@@ -70,8 +79,9 @@ function UpsellItemList({ items, showClient = false, showSeller = false }) {
  */
 function addToRow(map, key, init, u) {
   const row = map.get(key) ?? { ...init, total: 0, byType: {}, items: [] };
-  row.total += u.amount;
-  row.byType[u.type] = (row.byType[u.type] ?? 0) + u.amount;
+  const signed = upsellSignedAmount(u);
+  row.total += signed;
+  row.byType[u.type] = (row.byType[u.type] ?? 0) + signed;
   row.items.push(u);
   map.set(key, row);
 }

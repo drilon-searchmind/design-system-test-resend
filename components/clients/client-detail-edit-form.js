@@ -9,14 +9,14 @@ import {
   LEAD_SOURCE_LABELS,
   LEAD_SOURCES,
 } from "@/lib/crm/client-utils";
-import { DEPARTMENTS } from "@/lib/crm/static-data";
+import { ALL_KNOWN_DEPARTMENTS } from "@/lib/crm/dept-keys";
 import { cn } from "@/lib/utils";
 
 import { clientEditInputClass, clientEditTextareaClass } from "./client-detail-edit-actions";
 
 /** @typedef {import('@/lib/crm/client-edit-utils').ClientEditDraft} ClientEditDraft */
 
-const ALLOCATION_KEYS = [...DEPARTMENTS.map((d) => d.id), "clientMgmt"];
+const ALLOCATION_KEYS = ALL_KNOWN_DEPARTMENTS.map((d) => d.id);
 
 /**
  * @param {{
@@ -374,7 +374,7 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
 
         <p className="mt-4 text-[11px] font-medium text-fg-muted">Aktive services</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {DEPARTMENTS.map((d) => (
+          {ALL_KNOWN_DEPARTMENTS.map((d) => (
             <label
               key={d.id}
               className={cn(
@@ -420,7 +420,7 @@ export function ClientDetailEditForm({ draft, onChange, team }) {
             <p className="mt-4 text-[11px] font-medium text-fg-muted">Ansvarlige pr. disciplin</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {draft.servicesActive.map((deptId) => {
-                const dep = DEPARTMENTS.find((d) => d.id === deptId);
+                const dep = ALL_KNOWN_DEPARTMENTS.find((d) => d.id === deptId);
                 const deptLabel = dep ? `${dep.short} · ${dep.name}` : deptId;
                 return (
                   <Field key={deptId} label={deptLabel}>

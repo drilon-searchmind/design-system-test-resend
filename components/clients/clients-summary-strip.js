@@ -3,27 +3,43 @@
 import { useSession } from "next-auth/react";
 
 import { PulseKpiCard } from "@/components/pulse/pulse-kpi-card";
-import { buildCustomerEntities } from "@/lib/crm/client-groups";
 import { formatCurrencyCompact } from "@/lib/crm/format-da";
+import { cn } from "@/lib/utils";
 
 /**
- * @param {{ clients: import('@/lib/crm/pulse-types').PulseClient[] }} props
+ * Hovedtal for den aktuelle filter-visning på kundelisten.
+ * @param {{
+ *   customers: Array<{
+ *     status?: string;
+ *     currency?: string;
+ *     retainer?: number;
+ *     health?: string;
+ *     hoursThisMonth?: number;
+ *     hoursBudget?: number;
+ *   }>;
+ * }} props
  */
-export function ClientsSummaryStrip({ clients: brands }) {
+export function ClientsSummaryStrip({ customers }) {
   const { data: session } = useSession();
   const isAdmin = session?.user?.isAdmin === true;
-  // Kundegrupper (brands med samme CVR) tæller som én kunde.
-  const clients = buildCustomerEntities(brands);
-  const activeClients = clients.filter((c) => c.status === "active");
-  const activeRetainerDkk = activeClients.reduce((sum, c) => sum + (c.currency === "DKK" ? c.retainer : 0), 0);
-  const needsAttention = clients.filter(
-    (c) => c.health !== "ok" || (c.hoursBudget > 0 && c.hoursThisMonth > c.hoursBudget),
+  const activeClients = customers.filter((c) => c.status === "active");
+  const activeRetainerDkk = activeClients.reduce(
+    (sum, c) => sum + (c.currency === "DKK" || !c.currency ? Number(c.retainer) || 0 : 0),
+    0,
+  );
+  const needsAttention = customers.filter(
+    (c) => c.health !== "ok" || ((c.hoursBudget ?? 0) > 0 && (c.hoursThisMonth ?? 0) > (c.hoursBudget ?? 0)),
   ).length;
 
   return (
-    <section className="grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2 xl:grid-cols-4">
-      <PulseKpiCard label="Kunder i alt" value={String(clients.length)} tone="brand" />
-      <PulseKpiCard label="Aktive konti" value={String(activeClients.length)} tone="ok" />
+    <section
+      className={cn(
+        "grid gap-[length:var(--ds-studio-stack)] sm:grid-cols-2",
+        isAdmin ? "xl:grid-cols-4" : "xl:grid-cols-3",
+      )}
+    >
+      <PulseKpiCard label="Kunder i filter" value={String(customers.length)} tone="brand" />
+      <PulseKpiCard label="Aktive i filter" value={String(activeClients.length)} tone="ok" />
       <PulseKpiCard
         label="Retainer (aktive, DKK)"
         value={formatCurrencyCompact(activeRetainerDkk)}

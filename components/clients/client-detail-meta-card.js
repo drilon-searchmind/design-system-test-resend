@@ -3,7 +3,8 @@
 import { CrmAvatar } from "@/components/crm/crm-avatar";
 import { ClientDetailDomainsCard } from "@/components/clients/client-detail-domains-card";
 import { patchClient, QuickEditPopover } from "@/components/clients/client-quick-edit";
-import { DEPARTMENTS, TEAM } from "@/lib/crm/static-data";
+import { ALL_KNOWN_DEPARTMENTS } from "@/lib/crm/dept-keys";
+import { TEAM } from "@/lib/crm/static-data";
 import { computeClv, computeLifetimeMonths } from "@/lib/crm/client-utils";
 import { domainsForClient } from "@/lib/crm/domains-data";
 import { formatCurrency } from "@/lib/crm/format-da";
@@ -106,7 +107,7 @@ export function ClientDetailMetaCard({ client, team = [], canEdit = false, onSav
             </div>
             <div className="flex flex-wrap gap-1.5">
               {services.map((id) => {
-                const dep = DEPARTMENTS.find((d) => d.id === id);
+                const dep = ALL_KNOWN_DEPARTMENTS.find((d) => d.id === id);
                 const label = dep?.short ?? id.toUpperCase();
                 return (
                   <span
@@ -134,7 +135,7 @@ export function ClientDetailMetaCard({ client, team = [], canEdit = false, onSav
               {services.map((deptId) => {
                 const assigneeRaw = client.deptAssignees?.[deptId];
                 const member = resolveDeptAssigneeMember(assigneeRaw, team);
-                const dep = DEPARTMENTS.find((d) => d.id === deptId);
+                const dep = ALL_KNOWN_DEPARTMENTS.find((d) => d.id === deptId);
                 const assigneeLabel = member?.name ?? (assigneeRaw ? String(assigneeRaw) : null);
                 const avatarLabel = member?.avatar ?? member?.name ?? assigneeLabel ?? "?";
                 /** @param {string | null} name */

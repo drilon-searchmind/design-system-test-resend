@@ -7,7 +7,7 @@ import { routes } from "@/config/routes";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { agencyDeptColor } from "@/lib/crm/dept-tokens";
 import { formatCurrency, formatPercent } from "@/lib/crm/format-da";
-import { DEPARTMENTS } from "@/lib/crm/static-data";
+import { ALL_KNOWN_DEPARTMENTS } from "@/lib/crm/dept-keys";
 import { cn } from "@/lib/utils";
 
 /** @param {unknown} v */
@@ -85,7 +85,7 @@ export function ClientDetailServiceMixCard({ client, canEdit = false, onSaved })
     }
   };
 
-  const addable = DEPARTMENTS.filter((d) => !services.includes(d.id));
+  const addable = ALL_KNOWN_DEPARTMENTS.filter((d) => !services.includes(d.id));
 
   return (
     <div className="tally-panel p-4 md:p-5">
@@ -139,7 +139,7 @@ export function ClientDetailServiceMixCard({ client, canEdit = false, onSaved })
             </tr>
           </thead>
           <tbody>
-            {DEPARTMENTS.filter((d) => !editing || services.includes(d.id) || active.includes(d.id)).map((d) => {
+            {ALL_KNOWN_DEPARTMENTS.filter((d) => !editing || services.includes(d.id) || active.includes(d.id)).map((d) => {
               const pct = alloc[d.id];
               const isActive = shownActive.includes(d.id);
               const budget = editing ? toNum(amounts[d.id]) : Number(budgets[d.id] ?? 0);

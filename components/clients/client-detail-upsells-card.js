@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-import { DEPARTMENTS } from "@/lib/crm/static-data";
+import { ALL_KNOWN_DEPARTMENTS } from "@/lib/crm/dept-keys";
 import { databaseApiQuery } from "@/lib/crm/database-api-query";
 import { formatCurrency, formatIsoDateDa } from "@/lib/crm/format-da";
 import {
@@ -11,14 +11,19 @@ import {
   UPSELL_TYPES,
   countWords,
   formatUpsellPeriodDa,
+  isBaseMrrUpsellType,
+  isDownsellType,
+  isTemporaryUpsellType,
+  upsellSignedAmount,
 } from "@/lib/crm/upsell-utils";
+import { cn } from "@/lib/utils";
 
 const inputCls =
   "h-9 w-full rounded-lg border border-border bg-surface-muted px-3 text-[13px] text-fg outline-none focus-visible:ring-2 focus-visible:ring-agency-brand";
 
 /** @param {string} id */
 function deptName(id) {
-  return DEPARTMENTS.find((d) => d.id === id)?.name ?? id;
+  return ALL_KNOWN_DEPARTMENTS.find((d) => d.id === id)?.name ?? id;
 }
 
 function todayIso() {
@@ -30,9 +35,11 @@ function currentMonth() {
   return todayIso().slice(0, 7);
 }
 
+const UPSELL_OPTIONS = Object.entries(UPSELL_TYPES).filter(([, v]) => v.direction === "up");
+const DOWNSELL_OPTIONS = Object.entries(UPSELL_TYPES).filter(([, v]) => v.direction === "down");
+
 /**
- * Opsalg på kunden: historik + oprettelse. Opsalg lægges oven i MRR (tillæg/engangs) — undtagen
- * "Fast MRR-stigning", som lægges direkte på MRR og logges.
+ * Opsalg og nedsalg på kunden: historik + oprettelse.
  *
  * @param {{
  *   client: Record<string, any>;
@@ -65,6 +72,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
   const [error, setError] = useState(/** @type {string | null} */ (null));
 
   const words = countWords(draft.description);
+  const draftingDownsell = isDownsellType(draft.type);
 
   /** @param {string} key */
   const pickSeller = (key) => {
@@ -98,7 +106,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
 
   /** @param {string} id */
   const remove = async (id) => {
-    if (!window.confirm("Slet dette opsalg? (En fast MRR-stigning rulles ikke tilbage på MRR.)")) return;
+    if (!window.confirm("Slet denne registrering? (En fast MRR-ændring rulles ikke tilbage på MRR.)")) return;
     setBusy(true);
     try {
       const res = await fetch(
@@ -119,26 +127,41 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
     <div className="tally-panel p-4 md:p-[var(--ds-studio-pad-main)]">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Opsalg</h2>
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-soft">Opsalg & nedsalg</h2>
           <p className="mt-1 max-w-prose text-[11px] leading-snug text-fg-quiet">
-            Opsalg lægges oven i MRR og vises som (+beløb (i)) hvor kunden vises. Engangs og tillæg
-            gælder kun i deres måned(er). En fast MRR-stigning lægges direkte på MRR.
+            Opsalg lægges oven i MRR og vises som (+beløb). Nedsalg trækkes fra i perioden (−beløb). Engangs og
+            periode-aftaler gælder kun i deres måned(er). En fast MRR-ændring lægges direkte på MRR.
           </p>
         </div>
         {canEdit && !open ?
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="inline-flex h-8 items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[12px] font-semibold text-agency-brand"
-          >
-            Tilføj opsalg
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDraft({ ...blank(), type: "one_time" });
+                setOpen(true);
+              }}
+              className="inline-flex h-8 items-center rounded-lg border border-agency-brand-border bg-agency-brand-soft px-3 font-sans text-[12px] font-semibold text-agency-brand"
+            >
+              Tilføj opsalg
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDraft({ ...blank(), type: "one_time_downsell" });
+                setOpen(true);
+              }}
+              className="inline-flex h-8 items-center rounded-lg border border-border bg-surface-muted px-3 font-sans text-[12px] font-semibold text-fg-muted hover:border-agency-bad-border hover:bg-agency-bad-soft hover:text-agency-bad"
+            >
+              Tilføj nedsalg
+            </button>
+          </div>
         : null}
       </div>
 
       {!canEdit ?
         <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-2 text-[11px] text-fg-quiet">
-          Opsalg kan kun oprettes når datakilden er sat til database (eksempeldata er skrivebeskyttet).
+          Opsalg og nedsalg kan kun oprettes når datakilden er sat til database (eksempeldata er skrivebeskyttet).
         </p>
       : null}
 
@@ -152,11 +175,20 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
                 value={draft.type}
                 onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
               >
-                {Object.entries(UPSELL_TYPES).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v.label}
-                  </option>
-                ))}
+                <optgroup label="Opsalg">
+                  {UPSELL_OPTIONS.map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v.label}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Nedsalg">
+                  {DOWNSELL_OPTIONS.map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v.label}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
               <span className="text-[10px] text-fg-quiet">
                 {UPSELL_TYPES[/** @type {keyof typeof UPSELL_TYPES} */ (draft.type)]?.hint}
@@ -164,7 +196,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
             </label>
             <label className="flex flex-col gap-1 text-[11px] text-fg-soft">
               Beløb ({currency}
-              {draft.type === "temporary_mrr" ? " pr. md." : ""})
+              {isTemporaryUpsellType(draft.type) ? " pr. md." : ""})
               <input
                 className={`${inputCls} tabular-nums`}
                 inputMode="decimal"
@@ -180,7 +212,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
                 onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
               >
                 <option value="">— ingen —</option>
-                {DEPARTMENTS.map((d) => (
+                {ALL_KNOWN_DEPARTMENTS.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>
@@ -188,7 +220,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
               </select>
             </label>
             <label className="flex flex-col gap-1 text-[11px] text-fg-soft">
-              {draft.type === "temporary_mrr" ? "Fra måned" : "Måned aftalen gælder for"}
+              {isTemporaryUpsellType(draft.type) ? "Fra måned" : "Måned aftalen gælder for"}
               <input
                 type="month"
                 className={inputCls}
@@ -196,7 +228,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
                 onChange={(e) => setDraft((d) => ({ ...d, periodFrom: e.target.value }))}
               />
             </label>
-            {draft.type === "temporary_mrr" ?
+            {isTemporaryUpsellType(draft.type) ?
               <label className="flex flex-col gap-1 text-[11px] text-fg-soft">
                 Til og med måned
                 <input
@@ -210,7 +242,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
               </label>
             : null}
             <label className="flex flex-col gap-1 text-[11px] text-fg-soft">
-              Solgt af
+              {draftingDownsell ? "Registreret af" : "Solgt af"}
               {team.length ?
                 <select className={inputCls} value={draft.soldByKey} onChange={(e) => pickSeller(e.target.value)}>
                   <option value="">Vælg…</option>
@@ -228,7 +260,7 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
               }
             </label>
             <label className="flex flex-col gap-1 text-[11px] text-fg-soft">
-              Solgt dato
+              Dato
               <input
                 type="date"
                 className={inputCls}
@@ -274,60 +306,71 @@ export function ClientDetailUpsellsCard({ client, team = [], canEdit = false, on
               onClick={() => void save()}
               className="inline-flex h-9 items-center rounded-lg border border-agency-brand-border bg-agency-brand px-3 text-[12px] font-semibold text-canvas disabled:opacity-50"
             >
-              {busy ? "Gemmer…" : "Gem opsalg"}
+              {busy ? "Gemmer…" : draftingDownsell ? "Gem nedsalg" : "Gem opsalg"}
             </button>
           </div>
         </div>
       : null}
 
       {upsells.length === 0 ?
-        <p className="mt-4 text-[12px] text-fg-quiet">Ingen opsalg registreret endnu.</p>
+        <p className="mt-4 text-[12px] text-fg-quiet">Ingen opsalg eller nedsalg registreret endnu.</p>
       : <ul className="mt-4 divide-y divide-border-muted">
-          {upsells.map((u) => (
-            <li key={u.id} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[13px] font-semibold text-fg">
-                    {UPSELL_TYPES[u.type]?.label ?? u.type}
-                  </span>
-                  {activeIds.has(u.id) ?
-                    <span className="rounded-full border border-agency-ok-border bg-agency-ok-soft px-2 py-0.5 text-[10px] font-semibold text-agency-ok">
-                      Aktiv i perioden
+          {upsells.map((u) => {
+            const signed = upsellSignedAmount(u);
+            return (
+              <li key={u.id} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[13px] font-semibold text-fg">
+                      {UPSELL_TYPES[u.type]?.label ?? u.type}
                     </span>
-                  : u.type === "mrr_increase" ?
-                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-fg-quiet">
-                      Indgår i MRR
-                    </span>
-                  : null}
-                  {u.department ?
-                    <span className="text-[11px] text-fg-quiet">{deptName(u.department)}</span>
-                  : null}
-                </div>
-                <span className="text-[13px] font-semibold tabular-nums text-fg">
-                  {formatCurrency(u.amount, u.currency || currency)}
-                  {u.type === "temporary_mrr" ? " / md" : ""}
-                </span>
-              </div>
-              <div className="text-[11px] text-fg-quiet">
-                Gælder {formatUpsellPeriodDa(u)}
-                {isAdmin && u.soldBy ? ` · solgt af ${u.soldBy}` : ""}
-                {u.soldAt ? ` den ${formatIsoDateDa(u.soldAt)}` : ""}
-              </div>
-              {u.description ? <p className="text-[12px] text-fg-muted">{u.description}</p> : null}
-              {canEdit && isAdmin ?
-                <div>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void remove(u.id)}
-                    className="text-[11px] font-medium text-agency-bad hover:underline disabled:opacity-50"
+                    {activeIds.has(u.id) ?
+                      <span className="rounded-full border border-agency-ok-border bg-agency-ok-soft px-2 py-0.5 text-[10px] font-semibold text-agency-ok">
+                        Aktiv i perioden
+                      </span>
+                    : isBaseMrrUpsellType(u.type) ?
+                      <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-fg-quiet">
+                        Indgår i MRR
+                      </span>
+                    : null}
+                    {u.department ?
+                      <span className="text-[11px] text-fg-quiet">{deptName(u.department)}</span>
+                    : null}
+                  </div>
+                  <span
+                    className={cn(
+                      "text-[13px] font-semibold tabular-nums",
+                      signed < 0 ? "text-agency-bad" : "text-fg",
+                    )}
                   >
-                    Slet
-                  </button>
+                    {signed < 0 ? "−" : ""}
+                    {formatCurrency(Math.abs(signed), u.currency || currency)}
+                    {isTemporaryUpsellType(u.type) ? " / md" : ""}
+                  </span>
                 </div>
-              : null}
-            </li>
-          ))}
+                <div className="text-[11px] text-fg-quiet">
+                  Gælder {formatUpsellPeriodDa(u)}
+                  {isAdmin && u.soldBy ?
+                    ` · ${isDownsellType(u.type) ? "registreret af" : "solgt af"} ${u.soldBy}`
+                  : ""}
+                  {u.soldAt ? ` den ${formatIsoDateDa(u.soldAt)}` : ""}
+                </div>
+                {u.description ? <p className="text-[12px] text-fg-muted">{u.description}</p> : null}
+                {canEdit && isAdmin ?
+                  <div>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void remove(u.id)}
+                      className="text-[11px] font-medium text-agency-bad hover:underline disabled:opacity-50"
+                    >
+                      Slet
+                    </button>
+                  </div>
+                : null}
+              </li>
+            );
+          })}
         </ul>
       }
     </div>

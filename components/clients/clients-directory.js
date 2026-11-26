@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ClientGridCard } from "@/components/clients/client-grid-card";
 import { ClientLogo } from "@/components/clients/client-logo";
+import { ClientsSummaryStrip } from "@/components/clients/clients-summary-strip";
 import { DIRECTORY_COLUMN_HINTS, DirectoryColumnLabel } from "@/components/clients/directory-column-hint";
 import { MetricHistoryHover } from "@/components/clients/metric-history-hover";
 import { AdvancedFilterBar } from "@/components/crm/advanced-filter-bar";
@@ -23,13 +24,14 @@ import {
 import { PulseClientHoursMetric } from "@/components/pulse/pulse-hours-metric";
 import { PulseSegmentedControl } from "@/components/pulse/pulse-segmented-control";
 import {
-  CLIENT_DIRECTORY_ACCESSORS,
   CLIENT_DIRECTORY_BUILTIN_PRESETS,
+  PRESET_ACTIVE_ONLY,
   applyFilterRules,
+  clientDirectoryAccessors,
   clientDirectoryFilterFields,
 } from "@/lib/crm/advanced-filter";
 import { buildCustomerEntities, customerHref } from "@/lib/crm/client-groups";
-import { formatPercent } from "@/lib/crm/format-da";
+import { formatCurrencyCompact, formatPercent } from "@/lib/crm/format-da";
 import {
   ensureDemoClientFilterSeed,
   loadLastFilterState,
@@ -56,6 +58,7 @@ const GRID_FULL =
  *   clients?: import('@/lib/crm/pulse-types').PulseClient[];
  *   team?: import('@/lib/crm/pulse-types').PulseTeamMember[];
  *   hoursColumnLabel?: string;
+ *   showSummary?: boolean;
  * }} props
  */
 export function ClientsDirectory({
@@ -65,6 +68,7 @@ export function ClientsDirectory({
   clients: clientsProp,
   team: teamProp,
   hoursColumnLabel,
+  showSummary = false,
 }) {
   const dataSource = useDataSource();
   const { data: session } = useSession();
@@ -94,12 +98,22 @@ export function ClientsDirectory({
   }, [isAdmin, filter]);
 
   useEffect(() => {
-    ensureDemoClientFilterSeed();
+    const seeded = ensureDemoClientFilterSeed();
     const last = loadLastFilterState(CLIENTS_FILTER_SCOPE);
     if (last) {
-      setFilterRules(Array.isArray(last.rules) ? last.rules : []);
+      setFilterRules(Array.isArray(last.rules) ? last.rules : [...PRESET_ACTIVE_ONLY.rules]);
       if (typeof last.q === "string") setQ(last.q);
       if (typeof last.quickFilter === "string") setFilter(last.quickFilter);
+    } else if (seeded.activeRules?.length) {
+      setFilterRules(seeded.activeRules);
+    } else {
+      // Default: skjul tabte/stoppede kunder (kan hentes via filter-preset "Tabte / stoppede").
+      setFilterRules(
+        PRESET_ACTIVE_ONLY.rules.map((r) => ({
+          ...r,
+          id: `r_${Math.random().toString(36).slice(2, 10)}`,
+        })),
+      );
     }
     setFiltersHydrated(true);
   }, []);
@@ -125,6 +139,7 @@ export function ClientsDirectory({
     });
 
   const filterFields = useMemo(() => clientDirectoryFilterFields(TEAM), [TEAM]);
+  const filterAccessors = useMemo(() => clientDirectoryAccessors(TEAM), [TEAM]);
   const unhealthyCount = useMemo(() => customers.filter((c) => c.health !== "ok").length, [customers]);
 
   const filtered = useMemo(() => {
@@ -142,7 +157,7 @@ export function ClientsDirectory({
       return true;
     });
 
-    list = applyFilterRules(list, filterRules, CLIENT_DIRECTORY_ACCESSORS, filterFields);
+    list = applyFilterRules(list, filterRules, filterAccessors, filterFields);
 
     list.sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name, "da");
@@ -156,12 +171,23 @@ export function ClientsDirectory({
     });
 
     return list;
-  }, [q, filter, sort, customers, isAdmin, filterRules, filterFields]);
+  }, [q, filter, sort, customers, isAdmin, filterRules, filterFields, filterAccessors]);
+
+  const totals = useMemo(() => {
+    const retainer = filtered.reduce((s, c) => s + (Number(c.retainer) || 0), 0);
+    const hours = filtered.reduce((s, c) => s + (Number(c.hoursThisMonth) || 0), 0);
+    const budget = filtered.reduce((s, c) => s + (Number(c.hoursBudget) || 0), 0);
+    const upsell = filtered.reduce((s, c) => s + (Number(c.upsellMonth?.amount) || 0), 0);
+    return { retainer, hours, budget, upsell, count: filtered.length };
+  }, [filtered]);
+
   const gridCols = variant === "full" ? GRID_FULL : GRID_PULSE;
   const hoursLabel = hoursColumnLabel ?? "Timer denne md";
   const minW = variant === "full" ? "min-w-[920px]" : "min-w-[920px]";
 
   return (
+    <div className="flex flex-col gap-[length:var(--ds-studio-stack)]">
+      {showSummary ? <ClientsSummaryStrip customers={filtered} /> : null}
     <section className="tally-panel overflow-hidden" aria-labelledby={resolvedHeadingId}>
       <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:flex-wrap md:items-center md:gap-2 md:px-4">
         <h3 id={resolvedHeadingId} className="text-sm font-semibold tracking-[-0.02em] text-fg">
@@ -314,10 +340,49 @@ export function ClientsDirectory({
                 </div>
               );
             })}
+
+            {filtered.length > 0 ?
+              <div
+                className={cn(
+                  "sticky bottom-0 z-10 grid gap-3 border-t border-border bg-surface-muted/95 py-2.5 pl-7 pr-3 backdrop-blur-sm md:pl-8 md:pr-4",
+                  gridCols,
+                )}
+              >
+                <div className="font-sans text-[12px] font-semibold text-fg">
+                  Sum / total
+                  <span className="ml-1.5 font-normal text-fg-quiet">({totals.count} kunder)</span>
+                </div>
+                <span />
+                {variant === "full" ? <span /> : null}
+                <span className="text-[12.5px] font-semibold tabular-nums text-fg">
+                  {formatCurrencyCompact(totals.retainer)}
+                  {totals.upsell !== 0 ?
+                    <span className={cn("ml-1 font-normal", totals.upsell < 0 ? "text-agency-bad" : "text-fg-muted")}>
+                      ({totals.upsell < 0 ? "−" : "+"}
+                      {formatCurrencyCompact(Math.abs(totals.upsell))})
+                    </span>
+                  : null}
+                </span>
+                {variant !== "full" ?
+                  <span className="text-[12px] font-semibold tabular-nums text-fg">
+                    {totals.hours.toLocaleString("da-DK", { maximumFractionDigits: 1 })} t
+                    <span className="ml-1 font-normal text-fg-quiet">
+                      / {totals.budget.toLocaleString("da-DK", { maximumFractionDigits: 0 })}
+                    </span>
+                  </span>
+                : null}
+                <span />
+                <span />
+                <span />
+                {variant === "full" ? <span className="hidden sm:inline" /> : null}
+                <span />
+              </div>
+            : null}
           </div>
         </div>
       )}
     </section>
+    </div>
   );
 }
 

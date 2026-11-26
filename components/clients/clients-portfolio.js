@@ -8,7 +8,6 @@ import { ClientsCreateForm } from "@/components/clients/clients-create-form";
 import { ClientsDirectory } from "@/components/clients/clients-directory";
 import { ClientsGroupForm } from "@/components/clients/clients-group-form";
 import { ClientsPageHeader } from "@/components/clients/clients-page-header";
-import { ClientsSummaryStrip } from "@/components/clients/clients-summary-strip";
 import { CrmDialog } from "@/components/crm/crm-dialog";
 import { useDataSource } from "@/components/crm/use-data-source";
 import { demoClientActivity } from "@/lib/crm/client-activity";
@@ -296,14 +295,12 @@ export function ClientsPortfolio() {
       </CrmDialog>
 
       <div className={cn("flex flex-col gap-[length:var(--ds-studio-stack)] transition-opacity", refreshing && "opacity-65")}>
-        <ClientsSummaryStrip clients={bundle.clients} />
-
         <ClientsDirectory
           variant="full"
+          showSummary
           clients={bundle.clients}
           team={bundle.team}
         />
-
       </div>
     </div>
   );

@@ -90,6 +90,19 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 - **Files:** `components/clients/client-logo.js`, `lib/crm/client-domain.js`
 - Uses the primary domain's favicon; falls back to initials if there is none or it is tiny.
 
+### ✅ Filtre påvirker hovedtal + Sum/Total-linje
+- KPI-strip ("Kunder i filter", aktive, retainer, kræver handling) følger det aktuelle filter.
+- Listevisning har en sticky **Sum / total**-række (retainer + periode-opsalg/nedsalg; på Pulse også timer).
+- **Files:** `components/clients/clients-directory.js`, `components/clients/clients-summary-strip.js`, `components/clients/clients-portfolio.js`
+
+### ✅ Nye filtre: Service, Medarbejder/serviceansvarlig, Tabte skjult som default
+- I advanced filter: **Service** og **Medarbejder / serviceansvarlig** (ejer + `deptAssignees`).
+- Default preset «Skjul stoppede»; preset «Tabte / stoppede» for inaktive. Tabte lever ikke i listen før man filtrerer dem frem.
+- **Files:** `lib/crm/advanced-filter.js`, `components/clients/clients-directory.js`, `lib/crm/map-pulse-client.js`
+
+### ⬜ Salgsområde (ikke launch-kritisk)
+- Der skal senere være et dedikeret område til salg (pipeline / tilbud / won-lost). Ikke bygget endnu; tænkt ind som næste skridt efter opsalg/nedsalg på kunden.
+
 ---
 
 ## Kunde view
@@ -121,6 +134,14 @@ Second feedback round, item by item. The first round is in `TODO-STATUS.md`.
 ### ✅ "Vis alle" noter → egen side
 - **Where:** `/clients/[kunde]/notes`
 - **Files:** `app/(dashboard)/clients/[clientId]/notes/page.js`, `components/clients/client-notes-page-client.js`
+
+### ✅ Opsalg og nedsalg på kunden
+- Card hedder "Opsalg & nedsalg" med knapper til begge. Nye typer: `one_time_downsell`, `temporary_mrr_downsell`, `mrr_decrease`.
+- **Files:** `lib/crm/upsell-utils.js`, `lib/db/models/upsell.js`, `lib/server/upsell-data.js`, `components/clients/client-detail-upsells-card.js`
+
+### ✅ Client Strategy under services
+- Disciplinen `clientMgmt` vises nu som **Client Strategy** i service-mix, redigering og filtre (før: manglede i DEPARTMENTS-listen).
+- **Files:** `lib/crm/dept-keys.js`, `components/clients/client-detail-service-mix-card.js`, `client-detail-edit-form.js`, `client-detail-meta-card.js`
 
 ### ✅ Tilføj egne noter direkte
 - **Where:** notes card in Overblik and the notes page
